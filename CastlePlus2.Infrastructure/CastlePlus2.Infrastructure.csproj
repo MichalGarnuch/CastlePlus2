@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CastlePlus2.Application\CastlePlus2.Application.csproj" />
+    <ProjectReference Include="..\CastlePlus2.Domain\CastlePlus2.Domain.csproj" />
+    <ProjectReference Include="..\CastlePlus2.Shared\CastlePlus2.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
