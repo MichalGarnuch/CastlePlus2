@@ -1,0 +1,1134 @@
+USE [master]
+GO
+/****** Object:  Database [CastlePlus2]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE DATABASE [CastlePlus2]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'CastlePlus2', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.SQL2022DEV\MSSQL\DATA\CastlePlus2.mdf' , SIZE = 8192KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
+ LOG ON 
+( NAME = N'CastlePlus2_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.SQL2022DEV\MSSQL\DATA\CastlePlus2_log.ldf' , SIZE = 8192KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
+ WITH CATALOG_COLLATION = DATABASE_DEFAULT, LEDGER = OFF
+GO
+ALTER DATABASE [CastlePlus2] SET COMPATIBILITY_LEVEL = 160
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [CastlePlus2].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [CastlePlus2] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET AUTO_CLOSE OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [CastlePlus2] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [CastlePlus2] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET  ENABLE_BROKER 
+GO
+ALTER DATABASE [CastlePlus2] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [CastlePlus2] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET RECOVERY SIMPLE 
+GO
+ALTER DATABASE [CastlePlus2] SET  MULTI_USER 
+GO
+ALTER DATABASE [CastlePlus2] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [CastlePlus2] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [CastlePlus2] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [CastlePlus2] SET TARGET_RECOVERY_TIME = 60 SECONDS 
+GO
+ALTER DATABASE [CastlePlus2] SET DELAYED_DURABILITY = DISABLED 
+GO
+ALTER DATABASE [CastlePlus2] SET ACCELERATED_DATABASE_RECOVERY = OFF  
+GO
+EXEC sys.sp_db_vardecimal_storage_format N'CastlePlus2', N'ON'
+GO
+ALTER DATABASE [CastlePlus2] SET QUERY_STORE = ON
+GO
+ALTER DATABASE [CastlePlus2] SET QUERY_STORE (OPERATION_MODE = READ_WRITE, CLEANUP_POLICY = (STALE_QUERY_THRESHOLD_DAYS = 30), DATA_FLUSH_INTERVAL_SECONDS = 900, INTERVAL_LENGTH_MINUTES = 60, MAX_STORAGE_SIZE_MB = 1000, QUERY_CAPTURE_MODE = AUTO, SIZE_BASED_CLEANUP_MODE = AUTO, MAX_PLANS_PER_QUERY = 200, WAIT_STATS_CAPTURE_MODE = ON)
+GO
+USE [CastlePlus2]
+GO
+/****** Object:  Schema [dokumenty]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE SCHEMA [dokumenty]
+GO
+/****** Object:  Schema [finanse]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE SCHEMA [finanse]
+GO
+/****** Object:  Schema [media]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE SCHEMA [media]
+GO
+/****** Object:  Schema [najem]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE SCHEMA [najem]
+GO
+/****** Object:  Schema [podmioty]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE SCHEMA [podmioty]
+GO
+/****** Object:  Schema [rdzen]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE SCHEMA [rdzen]
+GO
+/****** Object:  Schema [slowniki]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE SCHEMA [slowniki]
+GO
+/****** Object:  Schema [utrzymanie]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE SCHEMA [utrzymanie]
+GO
+/****** Object:  Table [dokumenty].[Dokument]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dokumenty].[Dokument](
+	[IdDokumentu] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdEncjiOwner] [uniqueidentifier] NULL,
+	[Nazwa] [nvarchar](200) NOT NULL,
+	[Opis] [nvarchar](500) NULL,
+	[SciezkaPliku] [nvarchar](400) NOT NULL,
+	[DataUtworzenia] [datetime2](0) NOT NULL,
+ CONSTRAINT [PK_dok_Dokument] PRIMARY KEY CLUSTERED 
+(
+	[IdDokumentu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dokumenty].[PowiazanieDokumentu]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dokumenty].[PowiazanieDokumentu](
+	[IdPowiazania] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdDokumentu] [bigint] NOT NULL,
+	[IdEncji] [uniqueidentifier] NOT NULL,
+ CONSTRAINT [PK_dok_Powiazanie] PRIMARY KEY CLUSTERED 
+(
+	[IdPowiazania] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [finanse].[AlokacjaKosztu]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [finanse].[AlokacjaKosztu](
+	[IdAlokacji] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdPozycjiKosztu] [bigint] NOT NULL,
+	[IdEncji] [uniqueidentifier] NOT NULL,
+	[KwotaNetto] [decimal](18, 2) NOT NULL,
+	[KwotaBrutto] [decimal](18, 2) NOT NULL,
+ CONSTRAINT [PK_fi_AlokacjaKosztu] PRIMARY KEY CLUSTERED 
+(
+	[IdAlokacji] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [finanse].[Faktura]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [finanse].[Faktura](
+	[IdFaktury] [bigint] IDENTITY(1,1) NOT NULL,
+	[NumerFaktury] [nvarchar](60) NOT NULL,
+	[IdPodmiotu] [bigint] NOT NULL,
+	[DataWystawienia] [date] NOT NULL,
+	[DataSprzedazy] [date] NULL,
+	[KodWaluty] [char](3) NOT NULL,
+	[KwotaNetto] [decimal](18, 2) NULL,
+	[KwotaBrutto] [decimal](18, 2) NULL,
+ CONSTRAINT [PK_fi_Faktura] PRIMARY KEY CLUSTERED 
+(
+	[IdFaktury] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [finanse].[KategoriaKosztu]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [finanse].[KategoriaKosztu](
+	[IdKategoriiKosztu] [bigint] IDENTITY(1,1) NOT NULL,
+	[Kod] [nvarchar](20) NOT NULL,
+	[Nazwa] [nvarchar](100) NOT NULL,
+ CONSTRAINT [PK_fi_KategoriaKosztu] PRIMARY KEY CLUSTERED 
+(
+	[IdKategoriiKosztu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [finanse].[Platnosc]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [finanse].[Platnosc](
+	[IdPlatnosci] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdPodmiotu] [bigint] NOT NULL,
+	[DataPlatnosci] [date] NOT NULL,
+	[KodWaluty] [char](3) NOT NULL,
+	[Kwota] [decimal](18, 2) NOT NULL,
+ CONSTRAINT [PK_fi_Platnosc] PRIMARY KEY CLUSTERED 
+(
+	[IdPlatnosci] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [finanse].[PozycjaKosztu]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [finanse].[PozycjaKosztu](
+	[IdPozycjiKosztu] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdFaktury] [bigint] NOT NULL,
+	[IdKategoriiKosztu] [bigint] NOT NULL,
+	[Opis] [nvarchar](200) NULL,
+	[KwotaNetto] [decimal](18, 2) NOT NULL,
+	[KwotaBrutto] [decimal](18, 2) NOT NULL,
+ CONSTRAINT [PK_fi_PozycjaKosztu] PRIMARY KEY CLUSTERED 
+(
+	[IdPozycjiKosztu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [finanse].[RozliczeniePlatnosci]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [finanse].[RozliczeniePlatnosci](
+	[IdRozliczenia] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdPlatnosci] [bigint] NOT NULL,
+	[IdFaktury] [bigint] NOT NULL,
+	[Kwota] [decimal](18, 2) NOT NULL,
+ CONSTRAINT [PK_fi_RozliczeniePlatnosci] PRIMARY KEY CLUSTERED 
+(
+	[IdRozliczenia] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [media].[Licznik]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [media].[Licznik](
+	[IdLicznika] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdPrzylacza] [bigint] NOT NULL,
+	[IdLicznikaNadrzednego] [bigint] NULL,
+	[NumerNV] [nvarchar](60) NOT NULL,
+	[KodJednostki] [nvarchar](20) NOT NULL,
+	[WspolczynnikPrzeliczeniowy] [decimal](12, 6) NULL,
+	[Aktywny] [bit] NOT NULL,
+ CONSTRAINT [PK_me_Licznik] PRIMARY KEY CLUSTERED 
+(
+	[IdLicznika] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [media].[Odczyt]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [media].[Odczyt](
+	[IdOdczytu] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdLicznika] [bigint] NOT NULL,
+	[DataOdczytu] [date] NOT NULL,
+	[Wskazanie] [decimal](18, 6) NOT NULL,
+	[Zrodlo] [nvarchar](20) NULL,
+ CONSTRAINT [PK_me_Odczyt] PRIMARY KEY CLUSTERED 
+(
+	[IdOdczytu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [media].[Przylacze]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [media].[Przylacze](
+	[IdPrzylacza] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdEncjiGospodarza] [uniqueidentifier] NOT NULL,
+	[KodRodzaju] [nvarchar](20) NOT NULL,
+	[Opis] [nvarchar](200) NULL,
+ CONSTRAINT [PK_me_Przylacze] PRIMARY KEY CLUSTERED 
+(
+	[IdPrzylacza] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [media].[RodzajMedium]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [media].[RodzajMedium](
+	[KodRodzaju] [nvarchar](20) NOT NULL,
+	[Nazwa] [nvarchar](100) NOT NULL,
+ CONSTRAINT [PK_me_Rodzaj] PRIMARY KEY CLUSTERED 
+(
+	[KodRodzaju] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [najem].[Kaucja]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [najem].[Kaucja](
+	[IdOperacjiKaucji] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdUmowyNajmu] [uniqueidentifier] NOT NULL,
+	[RodzajOperacji] [nvarchar](20) NOT NULL,
+	[Kwota] [decimal](12, 2) NOT NULL,
+	[KodWaluty] [char](3) NOT NULL,
+	[DataOperacji] [date] NOT NULL,
+ CONSTRAINT [PK_nj_Kaucja] PRIMARY KEY CLUSTERED 
+(
+	[IdOperacjiKaucji] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [najem].[PrzedmiotNajmu]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [najem].[PrzedmiotNajmu](
+	[IdPrzedmiotuNajmu] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdUmowyNajmu] [uniqueidentifier] NOT NULL,
+	[IdEncji] [uniqueidentifier] NOT NULL,
+	[UdzialProcent] [decimal](7, 4) NULL,
+	[OdDnia] [date] NOT NULL,
+	[DoDnia] [date] NULL,
+ CONSTRAINT [PK_nj_Przedmiot] PRIMARY KEY CLUSTERED 
+(
+	[IdPrzedmiotuNajmu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [najem].[SkladnikCzynszu]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [najem].[SkladnikCzynszu](
+	[IdSkladnikaCzynszu] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdUmowyNajmu] [uniqueidentifier] NOT NULL,
+	[Nazwa] [nvarchar](100) NOT NULL,
+	[KodJednostki] [nvarchar](20) NOT NULL,
+	[Stawka] [decimal](12, 4) NOT NULL,
+	[IloscBazowa] [decimal](12, 4) NULL,
+	[KodIndeksacji] [nvarchar](20) NULL,
+	[OdDnia] [date] NOT NULL,
+	[DoDnia] [date] NULL,
+ CONSTRAINT [PK_nj_Skladnik] PRIMARY KEY CLUSTERED 
+(
+	[IdSkladnikaCzynszu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [najem].[UmowaNajmu]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [najem].[UmowaNajmu](
+	[IdEncji] [uniqueidentifier] NOT NULL,
+	[IdWynajmujacego] [bigint] NOT NULL,
+	[IdNajemcy] [bigint] NOT NULL,
+	[DataZawarcia] [date] NOT NULL,
+	[DataPoczatku] [date] NOT NULL,
+	[DataZakonczenia] [date] NULL,
+	[KodWaluty] [char](3) NOT NULL,
+	[KodIndeksacji] [nvarchar](20) NULL,
+	[RowVersion] [timestamp] NOT NULL,
+ CONSTRAINT [PK_nj_Umowa] PRIMARY KEY CLUSTERED 
+(
+	[IdEncji] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [podmioty].[Kontakt]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [podmioty].[Kontakt](
+	[IdKontaktu] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdPodmiotu] [bigint] NOT NULL,
+	[Rodzaj] [nvarchar](30) NOT NULL,
+	[Wartosc] [nvarchar](200) NOT NULL,
+ CONSTRAINT [PK_po_Kontakt] PRIMARY KEY CLUSTERED 
+(
+	[IdKontaktu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [podmioty].[Podmiot]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [podmioty].[Podmiot](
+	[IdPodmiotu] [bigint] IDENTITY(1,1) NOT NULL,
+	[Nazwa] [nvarchar](200) NOT NULL,
+	[NIP] [nvarchar](20) NULL,
+	[REGON] [nvarchar](20) NULL,
+	[PESEL] [nvarchar](11) NULL,
+	[TypPodmiotu] [nvarchar](30) NOT NULL,
+ CONSTRAINT [PK_po_Podmiot] PRIMARY KEY CLUSTERED 
+(
+	[IdPodmiotu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [podmioty].[Wlasnosc]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [podmioty].[Wlasnosc](
+	[IdWlasnosci] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdEncji] [uniqueidentifier] NOT NULL,
+	[IdPodmiotu] [bigint] NOT NULL,
+	[UdzialProcent] [decimal](7, 4) NOT NULL,
+	[OdDnia] [date] NOT NULL,
+	[DoDnia] [date] NULL,
+	[RowVersion] [timestamp] NOT NULL,
+ CONSTRAINT [PK_po_Wlasnosc] PRIMARY KEY CLUSTERED 
+(
+	[IdWlasnosci] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [rdzen].[Adres]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [rdzen].[Adres](
+	[IdAdresu] [bigint] IDENTITY(1,1) NOT NULL,
+	[Kraj] [nvarchar](60) NOT NULL,
+	[Wojewodztwo] [nvarchar](60) NULL,
+	[Powiat] [nvarchar](60) NULL,
+	[Gmina] [nvarchar](60) NULL,
+	[Miejscowosc] [nvarchar](100) NOT NULL,
+	[Ulica] [nvarchar](100) NULL,
+	[Numer] [nvarchar](20) NULL,
+	[KodPocztowy] [nvarchar](12) NULL,
+	[AdresPelny] [nvarchar](300) NULL,
+ CONSTRAINT [PK_rd_Adres] PRIMARY KEY CLUSTERED 
+(
+	[IdAdresu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [rdzen].[Budynek]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [rdzen].[Budynek](
+	[IdEncji] [uniqueidentifier] NOT NULL,
+	[IdNieruchomosci] [uniqueidentifier] NOT NULL,
+	[KodBudynku] [nvarchar](50) NOT NULL,
+	[IdAdresu] [bigint] NULL,
+	[Kondygnacje] [smallint] NULL,
+	[PowierzchniaUzytkowa] [decimal](12, 2) NULL,
+	[RowVersion] [timestamp] NOT NULL,
+ CONSTRAINT [PK_rd_Budynek] PRIMARY KEY CLUSTERED 
+(
+	[IdEncji] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [rdzen].[Encja]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [rdzen].[Encja](
+	[IdEncji] [uniqueidentifier] NOT NULL,
+	[TypEncji] [nvarchar](40) NOT NULL,
+	[KodEncji] [nvarchar](40) NULL,
+	[UtworzonoUTC] [datetime2](0) NOT NULL,
+	[ZmienionoUTC] [datetime2](0) NOT NULL,
+	[RowVersion] [timestamp] NOT NULL,
+ CONSTRAINT [PK_rd_Encja] PRIMARY KEY CLUSTERED 
+(
+	[IdEncji] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [rdzen].[Lokal]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [rdzen].[Lokal](
+	[IdEncji] [uniqueidentifier] NOT NULL,
+	[IdBudynku] [uniqueidentifier] NOT NULL,
+	[KodLokalu] [nvarchar](50) NOT NULL,
+	[Powierzchnia] [decimal](12, 2) NULL,
+	[Przeznaczenie] [nvarchar](60) NULL,
+	[RowVersion] [timestamp] NOT NULL,
+ CONSTRAINT [PK_rd_Lokal] PRIMARY KEY CLUSTERED 
+(
+	[IdEncji] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [rdzen].[Nieruchomosc]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [rdzen].[Nieruchomosc](
+	[IdEncji] [uniqueidentifier] NOT NULL,
+	[Nazwa] [nvarchar](200) NOT NULL,
+	[IdAdresuGlownego] [bigint] NULL,
+	[IdPodmiotuWlasciciela] [bigint] NULL,
+	[Geometria] [geography] NULL,
+	[RowVersion] [timestamp] NOT NULL,
+ CONSTRAINT [PK_rd_Nieruchomosc] PRIMARY KEY CLUSTERED 
+(
+	[IdEncji] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [rdzen].[Pomieszczenie]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [rdzen].[Pomieszczenie](
+	[IdEncji] [uniqueidentifier] NOT NULL,
+	[IdEncjiNadrzednej] [uniqueidentifier] NOT NULL,
+	[KodPomieszczenia] [nvarchar](50) NOT NULL,
+	[Powierzchnia] [decimal](12, 2) NULL,
+	[RowVersion] [timestamp] NOT NULL,
+ CONSTRAINT [PK_rd_Pomieszczenie] PRIMARY KEY CLUSTERED 
+(
+	[IdEncji] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [rdzen].[PrzypisanieAdresu]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [rdzen].[PrzypisanieAdresu](
+	[IdPrzypisaniaAdresu] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdAdresu] [bigint] NOT NULL,
+	[IdEncji] [uniqueidentifier] NOT NULL,
+	[OdDnia] [date] NOT NULL,
+	[DoDnia] [date] NULL,
+ CONSTRAINT [PK_rd_PrzyAdres] PRIMARY KEY CLUSTERED 
+(
+	[IdPrzypisaniaAdresu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [slowniki].[Indeksacja]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [slowniki].[Indeksacja](
+	[KodIndeksacji] [nvarchar](20) NOT NULL,
+	[Nazwa] [nvarchar](100) NOT NULL,
+	[AdresZrodlaURL] [nvarchar](400) NULL,
+ CONSTRAINT [PK_sl_Indeksacja] PRIMARY KEY CLUSTERED 
+(
+	[KodIndeksacji] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [slowniki].[JednostkaMiary]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [slowniki].[JednostkaMiary](
+	[KodJednostki] [nvarchar](20) NOT NULL,
+	[Nazwa] [nvarchar](100) NOT NULL,
+ CONSTRAINT [PK_sl_JednostkaMiary] PRIMARY KEY CLUSTERED 
+(
+	[KodJednostki] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [slowniki].[Waluta]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [slowniki].[Waluta](
+	[KodWaluty] [char](3) NOT NULL,
+	[Nazwa] [nvarchar](50) NOT NULL,
+ CONSTRAINT [PK_sl_Waluta] PRIMARY KEY CLUSTERED 
+(
+	[KodWaluty] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [utrzymanie].[PowiazanieZlecenia]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [utrzymanie].[PowiazanieZlecenia](
+	[IdPowiazania] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdZlecenia] [bigint] NOT NULL,
+	[IdEncji] [uniqueidentifier] NOT NULL,
+ CONSTRAINT [PK_ut_PowiazanieZlecenia] PRIMARY KEY CLUSTERED 
+(
+	[IdPowiazania] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [utrzymanie].[ZleceniePracy]    Script Date: 29.11.2025 21:25:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [utrzymanie].[ZleceniePracy](
+	[IdZlecenia] [bigint] IDENTITY(1,1) NOT NULL,
+	[IdEncjiGospodarza] [uniqueidentifier] NOT NULL,
+	[Tytul] [nvarchar](200) NOT NULL,
+	[Opis] [nvarchar](1000) NULL,
+	[Status] [nvarchar](20) NOT NULL,
+	[DataUtworzenia] [datetime2](0) NOT NULL,
+	[DataZamkniecia] [datetime2](0) NULL,
+ CONSTRAINT [PK_ut_ZleceniePracy] PRIMARY KEY CLUSTERED 
+(
+	[IdZlecenia] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_dok_Dokument_EncjaOwner]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_dok_Dokument_EncjaOwner] ON [dokumenty].[Dokument]
+(
+	[IdEncjiOwner] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_dok_Powiazanie_Dokument]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_dok_Powiazanie_Dokument] ON [dokumenty].[PowiazanieDokumentu]
+(
+	[IdDokumentu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_dok_Powiazanie_Encja]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_dok_Powiazanie_Encja] ON [dokumenty].[PowiazanieDokumentu]
+(
+	[IdEncji] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_fi_Alokacja_IdEncji]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_fi_Alokacja_IdEncji] ON [finanse].[AlokacjaKosztu]
+(
+	[IdEncji] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_fi_Alokacja_IdPozycji]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_fi_Alokacja_IdPozycji] ON [finanse].[AlokacjaKosztu]
+(
+	[IdPozycjiKosztu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_fi_Faktura_Podmiot]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_fi_Faktura_Podmiot] ON [finanse].[Faktura]
+(
+	[IdPodmiotu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UX_fi_Faktura_Numer]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE UNIQUE NONCLUSTERED INDEX [UX_fi_Faktura_Numer] ON [finanse].[Faktura]
+(
+	[NumerFaktury] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UX_fi_KategoriaKod]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE UNIQUE NONCLUSTERED INDEX [UX_fi_KategoriaKod] ON [finanse].[KategoriaKosztu]
+(
+	[Kod] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_fi_Platnosc_Podmiot]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_fi_Platnosc_Podmiot] ON [finanse].[Platnosc]
+(
+	[IdPodmiotu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_fi_Pozycja_IdFaktury]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_fi_Pozycja_IdFaktury] ON [finanse].[PozycjaKosztu]
+(
+	[IdFaktury] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_fi_Pozycja_IdKategorii]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_fi_Pozycja_IdKategorii] ON [finanse].[PozycjaKosztu]
+(
+	[IdKategoriiKosztu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_fi_Rozliczenie_Faktura]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_fi_Rozliczenie_Faktura] ON [finanse].[RozliczeniePlatnosci]
+(
+	[IdFaktury] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_fi_Rozliczenie_Platnosc]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_fi_Rozliczenie_Platnosc] ON [finanse].[RozliczeniePlatnosci]
+(
+	[IdPlatnosci] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_me_Licznik_Przylacze]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_me_Licznik_Przylacze] ON [media].[Licznik]
+(
+	[IdPrzylacza] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UX_me_Licznik_Numer]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE UNIQUE NONCLUSTERED INDEX [UX_me_Licznik_Numer] ON [media].[Licznik]
+(
+	[NumerNV] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [UX_me_Odczyt_LicznikData]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE UNIQUE NONCLUSTERED INDEX [UX_me_Odczyt_LicznikData] ON [media].[Odczyt]
+(
+	[IdLicznika] ASC,
+	[DataOdczytu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_me_Przylacze_Encja]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_me_Przylacze_Encja] ON [media].[Przylacze]
+(
+	[IdEncjiGospodarza] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_nj_Przedmiot_IdEncji]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_nj_Przedmiot_IdEncji] ON [najem].[PrzedmiotNajmu]
+(
+	[IdEncji] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_nj_Przedmiot_IdUmowy]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_nj_Przedmiot_IdUmowy] ON [najem].[PrzedmiotNajmu]
+(
+	[IdUmowyNajmu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_nj_Umowa_Najemca]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_nj_Umowa_Najemca] ON [najem].[UmowaNajmu]
+(
+	[IdNajemcy] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_nj_Umowa_Wynaj]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_nj_Umowa_Wynaj] ON [najem].[UmowaNajmu]
+(
+	[IdWynajmujacego] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_po_Wlasnosc_IdEncji]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_po_Wlasnosc_IdEncji] ON [podmioty].[Wlasnosc]
+(
+	[IdEncji] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_po_Wlasnosc_IdPodmiotu]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_po_Wlasnosc_IdPodmiotu] ON [podmioty].[Wlasnosc]
+(
+	[IdPodmiotu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UX_rd_Budynek_Kod_Nier]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE UNIQUE NONCLUSTERED INDEX [UX_rd_Budynek_Kod_Nier] ON [rdzen].[Budynek]
+(
+	[IdNieruchomosci] ASC,
+	[KodBudynku] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UX_rd_Encja_KodEncji]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE UNIQUE NONCLUSTERED INDEX [UX_rd_Encja_KodEncji] ON [rdzen].[Encja]
+(
+	[KodEncji] ASC
+)
+WHERE ([KodEncji] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UX_rd_Lokal_Kod_Bud]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE UNIQUE NONCLUSTERED INDEX [UX_rd_Lokal_Kod_Bud] ON [rdzen].[Lokal]
+(
+	[IdBudynku] ASC,
+	[KodLokalu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_rd_Nieruch_Adres]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_rd_Nieruch_Adres] ON [rdzen].[Nieruchomosc]
+(
+	[IdAdresuGlownego] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_rd_Nieruch_Wlasc]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_rd_Nieruch_Wlasc] ON [rdzen].[Nieruchomosc]
+(
+	[IdPodmiotuWlasciciela] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UX_rd_Pomieszczenie_Kod_Lokal]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE UNIQUE NONCLUSTERED INDEX [UX_rd_Pomieszczenie_Kod_Lokal] ON [rdzen].[Pomieszczenie]
+(
+	[IdEncjiNadrzednej] ASC,
+	[KodPomieszczenia] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_rd_PrzyAdres_IdAdresu]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_rd_PrzyAdres_IdAdresu] ON [rdzen].[PrzypisanieAdresu]
+(
+	[IdAdresu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_rd_PrzyAdres_IdEncji]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_rd_PrzyAdres_IdEncji] ON [rdzen].[PrzypisanieAdresu]
+(
+	[IdEncji] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_ut_Powiazanie_Encja]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_ut_Powiazanie_Encja] ON [utrzymanie].[PowiazanieZlecenia]
+(
+	[IdEncji] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_ut_Powiazanie_Zlecenie]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_ut_Powiazanie_Zlecenie] ON [utrzymanie].[PowiazanieZlecenia]
+(
+	[IdZlecenia] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_ut_Zlecenie_EncjaGospodarz]    Script Date: 29.11.2025 21:25:13 ******/
+CREATE NONCLUSTERED INDEX [IX_ut_Zlecenie_EncjaGospodarz] ON [utrzymanie].[ZleceniePracy]
+(
+	[IdEncjiGospodarza] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+ALTER TABLE [dokumenty].[Dokument] ADD  CONSTRAINT [DF_dok_Dokument_Data]  DEFAULT (sysutcdatetime()) FOR [DataUtworzenia]
+GO
+ALTER TABLE [media].[Licznik] ADD  CONSTRAINT [DF_me_Licznik_Aktywny]  DEFAULT ((1)) FOR [Aktywny]
+GO
+ALTER TABLE [rdzen].[Encja] ADD  CONSTRAINT [DF_rd_Encja_Id]  DEFAULT (newsequentialid()) FOR [IdEncji]
+GO
+ALTER TABLE [rdzen].[Encja] ADD  CONSTRAINT [DF_rd_Encja_Utw]  DEFAULT (sysutcdatetime()) FOR [UtworzonoUTC]
+GO
+ALTER TABLE [rdzen].[Encja] ADD  CONSTRAINT [DF_rd_Encja_Zm]  DEFAULT (sysutcdatetime()) FOR [ZmienionoUTC]
+GO
+ALTER TABLE [utrzymanie].[ZleceniePracy] ADD  CONSTRAINT [DF_ut_Zlecenie_Data]  DEFAULT (sysutcdatetime()) FOR [DataUtworzenia]
+GO
+ALTER TABLE [dokumenty].[Dokument]  WITH CHECK ADD  CONSTRAINT [FK_dok_Dokument_EncjaOwner] FOREIGN KEY([IdEncjiOwner])
+REFERENCES [rdzen].[Encja] ([IdEncji])
+GO
+ALTER TABLE [dokumenty].[Dokument] CHECK CONSTRAINT [FK_dok_Dokument_EncjaOwner]
+GO
+ALTER TABLE [dokumenty].[PowiazanieDokumentu]  WITH CHECK ADD  CONSTRAINT [FK_dok_Powiazanie_Dokument] FOREIGN KEY([IdDokumentu])
+REFERENCES [dokumenty].[Dokument] ([IdDokumentu])
+GO
+ALTER TABLE [dokumenty].[PowiazanieDokumentu] CHECK CONSTRAINT [FK_dok_Powiazanie_Dokument]
+GO
+ALTER TABLE [dokumenty].[PowiazanieDokumentu]  WITH CHECK ADD  CONSTRAINT [FK_dok_Powiazanie_Encja] FOREIGN KEY([IdEncji])
+REFERENCES [rdzen].[Encja] ([IdEncji])
+GO
+ALTER TABLE [dokumenty].[PowiazanieDokumentu] CHECK CONSTRAINT [FK_dok_Powiazanie_Encja]
+GO
+ALTER TABLE [finanse].[AlokacjaKosztu]  WITH CHECK ADD  CONSTRAINT [FK_fi_Alokacja_Encja] FOREIGN KEY([IdEncji])
+REFERENCES [rdzen].[Encja] ([IdEncji])
+GO
+ALTER TABLE [finanse].[AlokacjaKosztu] CHECK CONSTRAINT [FK_fi_Alokacja_Encja]
+GO
+ALTER TABLE [finanse].[AlokacjaKosztu]  WITH CHECK ADD  CONSTRAINT [FK_fi_Alokacja_Pozycja] FOREIGN KEY([IdPozycjiKosztu])
+REFERENCES [finanse].[PozycjaKosztu] ([IdPozycjiKosztu])
+GO
+ALTER TABLE [finanse].[AlokacjaKosztu] CHECK CONSTRAINT [FK_fi_Alokacja_Pozycja]
+GO
+ALTER TABLE [finanse].[Faktura]  WITH CHECK ADD  CONSTRAINT [FK_fi_Faktura_Podmiot] FOREIGN KEY([IdPodmiotu])
+REFERENCES [podmioty].[Podmiot] ([IdPodmiotu])
+GO
+ALTER TABLE [finanse].[Faktura] CHECK CONSTRAINT [FK_fi_Faktura_Podmiot]
+GO
+ALTER TABLE [finanse].[Faktura]  WITH CHECK ADD  CONSTRAINT [FK_fi_Faktura_Waluta] FOREIGN KEY([KodWaluty])
+REFERENCES [slowniki].[Waluta] ([KodWaluty])
+GO
+ALTER TABLE [finanse].[Faktura] CHECK CONSTRAINT [FK_fi_Faktura_Waluta]
+GO
+ALTER TABLE [finanse].[Platnosc]  WITH CHECK ADD  CONSTRAINT [FK_fi_Platnosc_Podmiot] FOREIGN KEY([IdPodmiotu])
+REFERENCES [podmioty].[Podmiot] ([IdPodmiotu])
+GO
+ALTER TABLE [finanse].[Platnosc] CHECK CONSTRAINT [FK_fi_Platnosc_Podmiot]
+GO
+ALTER TABLE [finanse].[Platnosc]  WITH CHECK ADD  CONSTRAINT [FK_fi_Platnosc_Waluta] FOREIGN KEY([KodWaluty])
+REFERENCES [slowniki].[Waluta] ([KodWaluty])
+GO
+ALTER TABLE [finanse].[Platnosc] CHECK CONSTRAINT [FK_fi_Platnosc_Waluta]
+GO
+ALTER TABLE [finanse].[PozycjaKosztu]  WITH CHECK ADD  CONSTRAINT [FK_fi_Pozycja_Faktura] FOREIGN KEY([IdFaktury])
+REFERENCES [finanse].[Faktura] ([IdFaktury])
+GO
+ALTER TABLE [finanse].[PozycjaKosztu] CHECK CONSTRAINT [FK_fi_Pozycja_Faktura]
+GO
+ALTER TABLE [finanse].[PozycjaKosztu]  WITH CHECK ADD  CONSTRAINT [FK_fi_Pozycja_Kategoria] FOREIGN KEY([IdKategoriiKosztu])
+REFERENCES [finanse].[KategoriaKosztu] ([IdKategoriiKosztu])
+GO
+ALTER TABLE [finanse].[PozycjaKosztu] CHECK CONSTRAINT [FK_fi_Pozycja_Kategoria]
+GO
+ALTER TABLE [finanse].[RozliczeniePlatnosci]  WITH CHECK ADD  CONSTRAINT [FK_fi_Rozliczenie_Faktura] FOREIGN KEY([IdFaktury])
+REFERENCES [finanse].[Faktura] ([IdFaktury])
+GO
+ALTER TABLE [finanse].[RozliczeniePlatnosci] CHECK CONSTRAINT [FK_fi_Rozliczenie_Faktura]
+GO
+ALTER TABLE [finanse].[RozliczeniePlatnosci]  WITH CHECK ADD  CONSTRAINT [FK_fi_Rozliczenie_Platnosc] FOREIGN KEY([IdPlatnosci])
+REFERENCES [finanse].[Platnosc] ([IdPlatnosci])
+GO
+ALTER TABLE [finanse].[RozliczeniePlatnosci] CHECK CONSTRAINT [FK_fi_Rozliczenie_Platnosc]
+GO
+ALTER TABLE [media].[Licznik]  WITH CHECK ADD  CONSTRAINT [FK_me_Licznik_Jednostka] FOREIGN KEY([KodJednostki])
+REFERENCES [slowniki].[JednostkaMiary] ([KodJednostki])
+GO
+ALTER TABLE [media].[Licznik] CHECK CONSTRAINT [FK_me_Licznik_Jednostka]
+GO
+ALTER TABLE [media].[Licznik]  WITH CHECK ADD  CONSTRAINT [FK_me_Licznik_Nadrzedny] FOREIGN KEY([IdLicznikaNadrzednego])
+REFERENCES [media].[Licznik] ([IdLicznika])
+GO
+ALTER TABLE [media].[Licznik] CHECK CONSTRAINT [FK_me_Licznik_Nadrzedny]
+GO
+ALTER TABLE [media].[Licznik]  WITH CHECK ADD  CONSTRAINT [FK_me_Licznik_Przylacze] FOREIGN KEY([IdPrzylacza])
+REFERENCES [media].[Przylacze] ([IdPrzylacza])
+GO
+ALTER TABLE [media].[Licznik] CHECK CONSTRAINT [FK_me_Licznik_Przylacze]
+GO
+ALTER TABLE [media].[Odczyt]  WITH CHECK ADD  CONSTRAINT [FK_me_Odczyt_Licznik] FOREIGN KEY([IdLicznika])
+REFERENCES [media].[Licznik] ([IdLicznika])
+GO
+ALTER TABLE [media].[Odczyt] CHECK CONSTRAINT [FK_me_Odczyt_Licznik]
+GO
+ALTER TABLE [media].[Przylacze]  WITH CHECK ADD  CONSTRAINT [FK_me_Przylacze_Encja] FOREIGN KEY([IdEncjiGospodarza])
+REFERENCES [rdzen].[Encja] ([IdEncji])
+GO
+ALTER TABLE [media].[Przylacze] CHECK CONSTRAINT [FK_me_Przylacze_Encja]
+GO
+ALTER TABLE [media].[Przylacze]  WITH CHECK ADD  CONSTRAINT [FK_me_Przylacze_Rodzaj] FOREIGN KEY([KodRodzaju])
+REFERENCES [media].[RodzajMedium] ([KodRodzaju])
+GO
+ALTER TABLE [media].[Przylacze] CHECK CONSTRAINT [FK_me_Przylacze_Rodzaj]
+GO
+ALTER TABLE [najem].[Kaucja]  WITH CHECK ADD  CONSTRAINT [FK_nj_Kaucja_Umowa] FOREIGN KEY([IdUmowyNajmu])
+REFERENCES [najem].[UmowaNajmu] ([IdEncji])
+GO
+ALTER TABLE [najem].[Kaucja] CHECK CONSTRAINT [FK_nj_Kaucja_Umowa]
+GO
+ALTER TABLE [najem].[Kaucja]  WITH CHECK ADD  CONSTRAINT [FK_nj_Kaucja_Waluta] FOREIGN KEY([KodWaluty])
+REFERENCES [slowniki].[Waluta] ([KodWaluty])
+GO
+ALTER TABLE [najem].[Kaucja] CHECK CONSTRAINT [FK_nj_Kaucja_Waluta]
+GO
+ALTER TABLE [najem].[PrzedmiotNajmu]  WITH CHECK ADD  CONSTRAINT [FK_nj_Przedmiot_Encja] FOREIGN KEY([IdEncji])
+REFERENCES [rdzen].[Encja] ([IdEncji])
+GO
+ALTER TABLE [najem].[PrzedmiotNajmu] CHECK CONSTRAINT [FK_nj_Przedmiot_Encja]
+GO
+ALTER TABLE [najem].[PrzedmiotNajmu]  WITH CHECK ADD  CONSTRAINT [FK_nj_Przedmiot_Umowa] FOREIGN KEY([IdUmowyNajmu])
+REFERENCES [najem].[UmowaNajmu] ([IdEncji])
+GO
+ALTER TABLE [najem].[PrzedmiotNajmu] CHECK CONSTRAINT [FK_nj_Przedmiot_Umowa]
+GO
+ALTER TABLE [najem].[SkladnikCzynszu]  WITH CHECK ADD  CONSTRAINT [FK_nj_Skladnik_Indeks] FOREIGN KEY([KodIndeksacji])
+REFERENCES [slowniki].[Indeksacja] ([KodIndeksacji])
+GO
+ALTER TABLE [najem].[SkladnikCzynszu] CHECK CONSTRAINT [FK_nj_Skladnik_Indeks]
+GO
+ALTER TABLE [najem].[SkladnikCzynszu]  WITH CHECK ADD  CONSTRAINT [FK_nj_Skladnik_Jednostka] FOREIGN KEY([KodJednostki])
+REFERENCES [slowniki].[JednostkaMiary] ([KodJednostki])
+GO
+ALTER TABLE [najem].[SkladnikCzynszu] CHECK CONSTRAINT [FK_nj_Skladnik_Jednostka]
+GO
+ALTER TABLE [najem].[SkladnikCzynszu]  WITH CHECK ADD  CONSTRAINT [FK_nj_Skladnik_Umowa] FOREIGN KEY([IdUmowyNajmu])
+REFERENCES [najem].[UmowaNajmu] ([IdEncji])
+GO
+ALTER TABLE [najem].[SkladnikCzynszu] CHECK CONSTRAINT [FK_nj_Skladnik_Umowa]
+GO
+ALTER TABLE [najem].[UmowaNajmu]  WITH CHECK ADD  CONSTRAINT [FK_nj_Umowa_Encja] FOREIGN KEY([IdEncji])
+REFERENCES [rdzen].[Encja] ([IdEncji])
+GO
+ALTER TABLE [najem].[UmowaNajmu] CHECK CONSTRAINT [FK_nj_Umowa_Encja]
+GO
+ALTER TABLE [najem].[UmowaNajmu]  WITH CHECK ADD  CONSTRAINT [FK_nj_Umowa_Indeks] FOREIGN KEY([KodIndeksacji])
+REFERENCES [slowniki].[Indeksacja] ([KodIndeksacji])
+GO
+ALTER TABLE [najem].[UmowaNajmu] CHECK CONSTRAINT [FK_nj_Umowa_Indeks]
+GO
+ALTER TABLE [najem].[UmowaNajmu]  WITH CHECK ADD  CONSTRAINT [FK_nj_Umowa_Najemca] FOREIGN KEY([IdNajemcy])
+REFERENCES [podmioty].[Podmiot] ([IdPodmiotu])
+GO
+ALTER TABLE [najem].[UmowaNajmu] CHECK CONSTRAINT [FK_nj_Umowa_Najemca]
+GO
+ALTER TABLE [najem].[UmowaNajmu]  WITH CHECK ADD  CONSTRAINT [FK_nj_Umowa_Waluta] FOREIGN KEY([KodWaluty])
+REFERENCES [slowniki].[Waluta] ([KodWaluty])
+GO
+ALTER TABLE [najem].[UmowaNajmu] CHECK CONSTRAINT [FK_nj_Umowa_Waluta]
+GO
+ALTER TABLE [najem].[UmowaNajmu]  WITH CHECK ADD  CONSTRAINT [FK_nj_Umowa_Wynaj] FOREIGN KEY([IdWynajmujacego])
+REFERENCES [podmioty].[Podmiot] ([IdPodmiotu])
+GO
+ALTER TABLE [najem].[UmowaNajmu] CHECK CONSTRAINT [FK_nj_Umowa_Wynaj]
+GO
+ALTER TABLE [podmioty].[Kontakt]  WITH CHECK ADD  CONSTRAINT [FK_po_Kontakt_Podmiot] FOREIGN KEY([IdPodmiotu])
+REFERENCES [podmioty].[Podmiot] ([IdPodmiotu])
+GO
+ALTER TABLE [podmioty].[Kontakt] CHECK CONSTRAINT [FK_po_Kontakt_Podmiot]
+GO
+ALTER TABLE [podmioty].[Wlasnosc]  WITH CHECK ADD  CONSTRAINT [FK_po_Wlasnosc_Encja] FOREIGN KEY([IdEncji])
+REFERENCES [rdzen].[Encja] ([IdEncji])
+GO
+ALTER TABLE [podmioty].[Wlasnosc] CHECK CONSTRAINT [FK_po_Wlasnosc_Encja]
+GO
+ALTER TABLE [podmioty].[Wlasnosc]  WITH CHECK ADD  CONSTRAINT [FK_po_Wlasnosc_Podmiot] FOREIGN KEY([IdPodmiotu])
+REFERENCES [podmioty].[Podmiot] ([IdPodmiotu])
+GO
+ALTER TABLE [podmioty].[Wlasnosc] CHECK CONSTRAINT [FK_po_Wlasnosc_Podmiot]
+GO
+ALTER TABLE [rdzen].[Budynek]  WITH CHECK ADD  CONSTRAINT [FK_rd_Budynek_Adres] FOREIGN KEY([IdAdresu])
+REFERENCES [rdzen].[Adres] ([IdAdresu])
+GO
+ALTER TABLE [rdzen].[Budynek] CHECK CONSTRAINT [FK_rd_Budynek_Adres]
+GO
+ALTER TABLE [rdzen].[Budynek]  WITH CHECK ADD  CONSTRAINT [FK_rd_Budynek_Encja] FOREIGN KEY([IdEncji])
+REFERENCES [rdzen].[Encja] ([IdEncji])
+GO
+ALTER TABLE [rdzen].[Budynek] CHECK CONSTRAINT [FK_rd_Budynek_Encja]
+GO
+ALTER TABLE [rdzen].[Budynek]  WITH CHECK ADD  CONSTRAINT [FK_rd_Budynek_Nieruchomosc] FOREIGN KEY([IdNieruchomosci])
+REFERENCES [rdzen].[Nieruchomosc] ([IdEncji])
+GO
+ALTER TABLE [rdzen].[Budynek] CHECK CONSTRAINT [FK_rd_Budynek_Nieruchomosc]
+GO
+ALTER TABLE [rdzen].[Lokal]  WITH CHECK ADD  CONSTRAINT [FK_rd_Lokal_Budynek] FOREIGN KEY([IdBudynku])
+REFERENCES [rdzen].[Budynek] ([IdEncji])
+GO
+ALTER TABLE [rdzen].[Lokal] CHECK CONSTRAINT [FK_rd_Lokal_Budynek]
+GO
+ALTER TABLE [rdzen].[Lokal]  WITH CHECK ADD  CONSTRAINT [FK_rd_Lokal_Encja] FOREIGN KEY([IdEncji])
+REFERENCES [rdzen].[Encja] ([IdEncji])
+GO
+ALTER TABLE [rdzen].[Lokal] CHECK CONSTRAINT [FK_rd_Lokal_Encja]
+GO
+ALTER TABLE [rdzen].[Nieruchomosc]  WITH CHECK ADD  CONSTRAINT [FK_rd_Nieruchomosc_Adres] FOREIGN KEY([IdAdresuGlownego])
+REFERENCES [rdzen].[Adres] ([IdAdresu])
+GO
+ALTER TABLE [rdzen].[Nieruchomosc] CHECK CONSTRAINT [FK_rd_Nieruchomosc_Adres]
+GO
+ALTER TABLE [rdzen].[Nieruchomosc]  WITH CHECK ADD  CONSTRAINT [FK_rd_Nieruchomosc_Encja] FOREIGN KEY([IdEncji])
+REFERENCES [rdzen].[Encja] ([IdEncji])
+GO
+ALTER TABLE [rdzen].[Nieruchomosc] CHECK CONSTRAINT [FK_rd_Nieruchomosc_Encja]
+GO
+ALTER TABLE [rdzen].[Nieruchomosc]  WITH CHECK ADD  CONSTRAINT [FK_rd_Nieruchomosc_Wlasciciel] FOREIGN KEY([IdPodmiotuWlasciciela])
+REFERENCES [podmioty].[Podmiot] ([IdPodmiotu])
+GO
+ALTER TABLE [rdzen].[Nieruchomosc] CHECK CONSTRAINT [FK_rd_Nieruchomosc_Wlasciciel]
+GO
+ALTER TABLE [rdzen].[Pomieszczenie]  WITH CHECK ADD  CONSTRAINT [FK_rd_Pomieszczenie_Encja] FOREIGN KEY([IdEncji])
+REFERENCES [rdzen].[Encja] ([IdEncji])
+GO
+ALTER TABLE [rdzen].[Pomieszczenie] CHECK CONSTRAINT [FK_rd_Pomieszczenie_Encja]
+GO
+ALTER TABLE [rdzen].[Pomieszczenie]  WITH CHECK ADD  CONSTRAINT [FK_rd_Pomieszczenie_Lokal] FOREIGN KEY([IdEncjiNadrzednej])
+REFERENCES [rdzen].[Lokal] ([IdEncji])
+GO
+ALTER TABLE [rdzen].[Pomieszczenie] CHECK CONSTRAINT [FK_rd_Pomieszczenie_Lokal]
+GO
+ALTER TABLE [rdzen].[PrzypisanieAdresu]  WITH CHECK ADD  CONSTRAINT [FK_rd_PrzyAdres_Adres] FOREIGN KEY([IdAdresu])
+REFERENCES [rdzen].[Adres] ([IdAdresu])
+GO
+ALTER TABLE [rdzen].[PrzypisanieAdresu] CHECK CONSTRAINT [FK_rd_PrzyAdres_Adres]
+GO
+ALTER TABLE [rdzen].[PrzypisanieAdresu]  WITH CHECK ADD  CONSTRAINT [FK_rd_PrzyAdres_Encja] FOREIGN KEY([IdEncji])
+REFERENCES [rdzen].[Encja] ([IdEncji])
+GO
+ALTER TABLE [rdzen].[PrzypisanieAdresu] CHECK CONSTRAINT [FK_rd_PrzyAdres_Encja]
+GO
+ALTER TABLE [utrzymanie].[PowiazanieZlecenia]  WITH CHECK ADD  CONSTRAINT [FK_ut_Powiazanie_Encja] FOREIGN KEY([IdEncji])
+REFERENCES [rdzen].[Encja] ([IdEncji])
+GO
+ALTER TABLE [utrzymanie].[PowiazanieZlecenia] CHECK CONSTRAINT [FK_ut_Powiazanie_Encja]
+GO
+ALTER TABLE [utrzymanie].[PowiazanieZlecenia]  WITH CHECK ADD  CONSTRAINT [FK_ut_Powiazanie_Zlecenie] FOREIGN KEY([IdZlecenia])
+REFERENCES [utrzymanie].[ZleceniePracy] ([IdZlecenia])
+GO
+ALTER TABLE [utrzymanie].[PowiazanieZlecenia] CHECK CONSTRAINT [FK_ut_Powiazanie_Zlecenie]
+GO
+ALTER TABLE [utrzymanie].[ZleceniePracy]  WITH CHECK ADD  CONSTRAINT [FK_ut_Zlecenie_EncjaGospodarz] FOREIGN KEY([IdEncjiGospodarza])
+REFERENCES [rdzen].[Encja] ([IdEncji])
+GO
+ALTER TABLE [utrzymanie].[ZleceniePracy] CHECK CONSTRAINT [FK_ut_Zlecenie_EncjaGospodarz]
+GO
+USE [master]
+GO
+ALTER DATABASE [CastlePlus2] SET  READ_WRITE 
+GO
