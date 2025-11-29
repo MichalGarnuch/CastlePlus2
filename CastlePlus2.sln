@@ -31,6 +31,25 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CastlePlus2.Tests", "Castle
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CastlePlus2.Mobile", "CastlePlus2.Mobile\CastlePlus2.Mobile.csproj", "{70DEF404-A596-43F6-9D5B-BDAE68721D37}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "database", "database", "{6AC00F83-0432-4F60-B203-7C0132F2B672}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\DB_Schema_SQL.txt = ..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\DB_Schema_SQL.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "requirements", "requirements", "{6F0F0F49-5444-401B-81E1-7C4DB2179BE8}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\Project_Manifest_CastlePlus2.pdf = ..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\Project_Manifest_CastlePlus2.pdf
+		..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\Requirements_Technical_KPIs.pdf = ..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\Requirements_Technical_KPIs.pdf
+		..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\Requirements_University_General.pdf = ..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\Requirements_University_General.pdf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "reference", "reference", "{F012465D-4334-477E-B1ED-E31DD2DD7C79}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\Reference_Patterns_Desktop.pdf = ..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\Reference_Patterns_Desktop.pdf
+		..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\Reference_Patterns_Mobile.pdf = ..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\Reference_Patterns_Mobile.pdf
+		..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\Reference_Patterns_Web.pdf = ..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\Reference_Patterns_Web.pdf
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -94,6 +113,9 @@ Global
 		{63C7FFC5-22DC-4014-AAFF-6D0495BA6A0F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{9FB7EF5B-7475-4F62-A300-ABB7D38D6330} = {EBAAFFD3-5976-4FA8-A535-6097C9DF78C3}
 		{70DEF404-A596-43F6-9D5B-BDAE68721D37} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{6AC00F83-0432-4F60-B203-7C0132F2B672} = {40D73BFA-2BC0-426E-9857-E433FBEAFF41}
+		{6F0F0F49-5444-401B-81E1-7C4DB2179BE8} = {40D73BFA-2BC0-426E-9857-E433FBEAFF41}
+		{F012465D-4334-477E-B1ED-E31DD2DD7C79} = {40D73BFA-2BC0-426E-9857-E433FBEAFF41}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1F0AE135-BEAE-42BD-975C-43697AA31E69}
