@@ -62,4 +62,10 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\CastlePlus2.Client\CastlePlus2.Client.csproj" />
+	  <ProjectReference Include="..\CastlePlus2.Contracts\CastlePlus2.Contracts.csproj" />
+	  <ProjectReference Include="..\CastlePlus2.Shared\CastlePlus2.Shared.csproj" />
+	</ItemGroup>
+
 </Project>
