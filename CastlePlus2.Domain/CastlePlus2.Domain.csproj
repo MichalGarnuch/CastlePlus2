@@ -10,4 +10,21 @@
     <ProjectReference Include="..\CastlePlus2.Shared\CastlePlus2.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Common\" />
+    <Folder Include="Entities\Finanse\" />
+    <Folder Include="Entities\Najem\" />
+    <Folder Include="Entities\Media\" />
+    <Folder Include="Entities\Dokumenty\" />
+    <Folder Include="Entities\Slowniki\" />
+    <Folder Include="Entities\Utrzymanie\" />
+    <Folder Include="Entities\Podmioty\" />
+    <Folder Include="Entities\Rdzen\" />
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NetTopologySuite" Version="2.6.0" />
+  </ItemGroup>
+
 </Project>

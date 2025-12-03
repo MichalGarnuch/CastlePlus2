@@ -12,4 +12,25 @@
     <ProjectReference Include="..\CastlePlus2.Shared\CastlePlus2.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Persistence\Configurations\Finanse\" />
+    <Folder Include="Persistence\Configurations\Dokumenty\" />
+    <Folder Include="Persistence\Configurations\Media\" />
+    <Folder Include="Persistence\Configurations\Najem\" />
+    <Folder Include="Persistence\Configurations\Utrzymanie\" />
+    <Folder Include="Persistence\Configurations\Slowniki\" />
+    <Folder Include="Persistence\Configurations\Podmioty\" />
+    <Folder Include="Persistence\Configurations\Rdzen\" />
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.22" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.22">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="NetTopologySuite.IO.SqlServerBytes" Version="2.1.0" />
+  </ItemGroup>
+
 </Project>

@@ -12,4 +12,18 @@
     <ProjectReference Include="..\CastlePlus2.Shared\CastlePlus2.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Components\Forms\" />
+    <Folder Include="Components\Grids\" />
+    <Folder Include="Pages\Dokumenty\" />
+    <Folder Include="Pages\Finanse\" />
+    <Folder Include="Pages\Media\" />
+    <Folder Include="Pages\Najem\" />
+    <Folder Include="Pages\Utrzymanie\" />
+    <Folder Include="Pages\Slownik\" />
+    <Folder Include="Pages\Rdzen\" />
+    <Folder Include="Pages\Podmioty\" />
+    <Folder Include="Services\Client\" />
+  </ItemGroup>
+
 </Project>

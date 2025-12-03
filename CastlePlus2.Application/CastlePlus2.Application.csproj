@@ -12,4 +12,23 @@
     <ProjectReference Include="..\CastlePlus2.Shared\CastlePlus2.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+    <Folder Include="Mappings\" />
+    <Folder Include="Services\Finanse\" />
+    <Folder Include="Services\Media\" />
+    <Folder Include="Services\Dokumenty\" />
+    <Folder Include="Services\Najem\" />
+    <Folder Include="Services\Utrzymanie\" />
+    <Folder Include="Services\Slowniki\" />
+    <Folder Include="Services\Podmioty\" />
+    <Folder Include="Services\Rdzen\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.0.0" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="MediatR" Version="14.0.0" />
+  </ItemGroup>
+
 </Project>

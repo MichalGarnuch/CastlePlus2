@@ -6,4 +6,16 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="DTOs\Finanse\" />
+    <Folder Include="DTOs\Najem\" />
+    <Folder Include="DTOs\Media\" />
+    <Folder Include="DTOs\Dokumenty\" />
+    <Folder Include="DTOs\Utrzymanie\" />
+    <Folder Include="DTOs\Slownik\" />
+    <Folder Include="DTOs\Podmioty\" />
+    <Folder Include="DTOs\Rdzen\" />
+    <Folder Include="Enums\" />
+  </ItemGroup>
+
 </Project>
