@@ -10,4 +10,14 @@
     <ProjectReference Include="..\CastlePlus2.Shared\CastlePlus2.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DTOs\Dokumenty\" />
+    <Folder Include="DTOs\Finanse\" />
+    <Folder Include="DTOs\Media\" />
+    <Folder Include="DTOs\Najem\" />
+    <Folder Include="DTOs\Podmioty\" />
+    <Folder Include="DTOs\Slownik\" />
+    <Folder Include="DTOs\Utrzymanie\" />
+  </ItemGroup>
+
 </Project>

@@ -13,8 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\" />
-    <Folder Include="Mappings\" />
     <Folder Include="Services\Finanse\" />
     <Folder Include="Services\Media\" />
     <Folder Include="Services\Dokumenty\" />

@@ -1,36 +1,77 @@
+using CastlePlus2.Application.Interfaces.Rdzen;
+using CastlePlus2.Application.Mappings.Rdzen;
+using CastlePlus2.Application.Nieruchomosci.Commands.CreateNieruchomosc;
+using CastlePlus2.Infrastructure.Persistence;
+using CastlePlus2.Infrastructure.Repositories.Rdzen;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models; // <--- WA¯NE: Ten using jest potrzebny do konfiguracji
 
-namespace CastlePlus2.Api
-{
-    public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+// -------------------------------------------------------------------------
+// 1. Konfiguracja Bazy Danych (EF Core)
+// -------------------------------------------------------------------------
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<CastlePlus2DbContext>(options =>
+    options.UseSqlServer(connectionString, sqlOptions =>
     {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+        // To jest wymagane dla typów geograficznych (np. lokalizacja nieruchomoœci)
+        //sqlOptions.UseNetTopologySuite();
 
-            // Add services to the container.
+        // Odpornoœæ na chwilowe b³êdy sieci
+        sqlOptions.EnableRetryOnFailure(maxRetryCount: 5);
 
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+        // !!! KLUCZOWA POPRAWKA !!!
+        // Informujemy EF Core, ¿e pliki migracji maj¹ trafiæ do projektu Infrastructure
+        sqlOptions.MigrationsAssembly("CastlePlus2.Infrastructure");
+    }));
 
-            var app = builder.Build();
+// -------------------------------------------------------------------------
+// 2. Rejestracja Warstwy Application (CQRS, Mapper)
+// -------------------------------------------------------------------------
+builder.Services.AddMediatR(cfg => {
+    cfg.RegisterServicesFromAssembly(typeof(CreateNieruchomoscCommand).Assembly);
+});
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+builder.Services.AddAutoMapper(typeof(NieruchomoscProfile));
 
-            app.UseHttpsRedirection();
+// -------------------------------------------------------------------------
+// 3. Rejestracja Warstwy Infrastructure (Repozytoria)
+// -------------------------------------------------------------------------
+builder.Services.AddScoped<INieruchomoscRepository, NieruchomoscRepository>();
 
-            app.UseAuthorization();
+// -------------------------------------------------------------------------
+// 4. Konfiguracja API i Swaggera (TU BY£ PROBLEM)
+// -------------------------------------------------------------------------
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 
+// POPRAWKA: Jawna konfiguracja dokumentu Swaggera
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "CastlePlus2 API", Version = "v1" });
+});
 
-            app.MapControllers();
+var app = builder.Build();
 
-            app.Run();
-        }
-    }
+// -------------------------------------------------------------------------
+// 5. Pipeline HTTP
+// -------------------------------------------------------------------------
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    // POPRAWKA: Wskazanie konkretnego pliku JSON
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "CastlePlus2 API V1");
+    });
 }
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
