@@ -18,7 +18,7 @@ builder.Services.AddDbContext<CastlePlus2DbContext>(options =>
     options.UseSqlServer(connectionString, sqlOptions =>
     {
         // To jest wymagane dla typów geograficznych (np. lokalizacja nieruchomości)
-        //sqlOptions.UseNetTopologySuite();
+        sqlOptions.UseNetTopologySuite();
 
         // Odporność na chwilowe błędy sieci
         sqlOptions.EnableRetryOnFailure(maxRetryCount: 5);
