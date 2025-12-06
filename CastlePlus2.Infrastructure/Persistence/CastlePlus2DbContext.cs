@@ -37,6 +37,7 @@ namespace CastlePlus2.Infrastructure.Persistence
         /// - Pozwala wykonywać zapytania LINQ oraz operacje CRUD na nieruchomościach.
         /// </summary>
         public DbSet<Nieruchomosc> Nieruchomosci { get; set; } = null!;
+        public DbSet<Encja> Encje { get; set; } = null!;
 
         /// <summary>
         /// Metoda wywoływana przy tworzeniu modelu EF Core.
