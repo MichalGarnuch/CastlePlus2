@@ -5,7 +5,7 @@ using CastlePlus2.Infrastructure.Persistence;
 using CastlePlus2.Infrastructure.Repositories.Rdzen;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Models; // <--- WAØNE: Ten using jest potrzebny do konfiguracji
+using Microsoft.OpenApi.Models; // <--- WA≈ªNE: Ten using jest potrzebny do konfiguracji
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,14 +17,14 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<CastlePlus2DbContext>(options =>
     options.UseSqlServer(connectionString, sqlOptions =>
     {
-        // To jest wymagane dla typÛw geograficznych (np. lokalizacja nieruchomoúci)
+        // To jest wymagane dla typ√≥w geograficznych (np. lokalizacja nieruchomo≈õci)
         //sqlOptions.UseNetTopologySuite();
 
-        // OdpornoúÊ na chwilowe b≥Ídy sieci
+        // Odporno≈õƒá na chwilowe b≈Çƒôdy sieci
         sqlOptions.EnableRetryOnFailure(maxRetryCount: 5);
 
         // !!! KLUCZOWA POPRAWKA !!!
-        // Informujemy EF Core, øe pliki migracji majπ trafiÊ do projektu Infrastructure
+        // Informujemy EF Core, ≈ºe pliki migracji majƒÖ trafiƒá do projektu Infrastructure
         sqlOptions.MigrationsAssembly("CastlePlus2.Infrastructure");
     }));
 
@@ -43,7 +43,7 @@ builder.Services.AddAutoMapper(typeof(NieruchomoscProfile));
 builder.Services.AddScoped<INieruchomoscRepository, NieruchomoscRepository>();
 
 // -------------------------------------------------------------------------
-// 4. Konfiguracja API i Swaggera (TU BY£ PROBLEM)
+// 4. Konfiguracja API i Swaggera (TU BY≈Å PROBLEM)
 // -------------------------------------------------------------------------
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
