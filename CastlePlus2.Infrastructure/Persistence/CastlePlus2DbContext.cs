@@ -29,15 +29,22 @@ namespace CastlePlus2.Infrastructure.Persistence
 
         // -------------------------------------------------------------
         // DbSet'y – tutaj dodajemy zbiory encji odwzorowujące tabele.
-        // Na tym etapie dodajemy tylko Nieruchomosc, resztę dołożysz później.
         // -------------------------------------------------------------
 
         /// <summary>
         /// DbSet odpowiadający tabeli [rdzen].[Nieruchomosc] w bazie danych.
-        /// - Pozwala wykonywać zapytania LINQ oraz operacje CRUD na nieruchomościach.
         /// </summary>
         public DbSet<Nieruchomosc> Nieruchomosci { get; set; } = null!;
+
+        /// <summary>
+        /// DbSet dla tabeli [rdzen].[Encja] (tabela bazowa TPT).
+        /// </summary>
         public DbSet<Encja> Encje { get; set; } = null!;
+
+        /// <summary>
+        /// DbSet odpowiadający tabeli [rdzen].[Adres].
+        /// </summary>
+        public DbSet<Adres> Adresy { get; set; } = null!;
 
         /// <summary>
         /// Metoda wywoływana przy tworzeniu modelu EF Core.
@@ -49,12 +56,7 @@ namespace CastlePlus2.Infrastructure.Persistence
         {
             base.OnModelCreating(modelBuilder);
 
-            // Ta linia skanuje assembly CastlePlus2.Infrastructure i wyszukuje
-            // wszystkie klasy implementujące IEntityTypeConfiguration<T>,
-            // a następnie automatycznie stosuje ich konfiguracje.
-            //
-            // Dzięki temu nie musimy ręcznie wywoływać:
-            // modelBuilder.ApplyConfiguration(new NieruchomoscConfiguration());
+            // Automatyczne zastosowanie wszystkich konfiguracji z tego assembly.
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(CastlePlus2DbContext).Assembly);
         }
     }

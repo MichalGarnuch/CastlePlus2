@@ -9,6 +9,7 @@ namespace CastlePlus2.Domain.Entities.Rdzen
     {
         public Nieruchomosc()
         {
+            // Stały typ encji zgodny z Twoim schematem rdzenia.
             TypEncji = "NIERUCHOMOSC";
         }
 
@@ -18,6 +19,12 @@ namespace CastlePlus2.Domain.Entities.Rdzen
 
         [Column("IdAdresuGlownego")]
         public long? IdAdresuGlownego { get; set; }
+
+        /// <summary>
+        /// Nawigacja do głównego adresu nieruchomości.
+        /// </summary>
+        [ForeignKey(nameof(IdAdresuGlownego))]
+        public Adres? AdresGlowny { get; set; }
 
         [Column("IdPodmiotuWlasciciela")]
         public long? IdPodmiotuWlasciciela { get; set; }

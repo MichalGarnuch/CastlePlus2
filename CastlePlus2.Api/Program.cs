@@ -41,7 +41,7 @@ builder.Services.AddAutoMapper(typeof(NieruchomoscProfile));
 // 3. Rejestracja Warstwy Infrastructure (Repozytoria)
 // -------------------------------------------------------------------------
 builder.Services.AddScoped<INieruchomoscRepository, NieruchomoscRepository>();
-
+builder.Services.AddScoped<IAdresRepository, AdresRepository>();
 // -------------------------------------------------------------------------
 // 4. Konfiguracja API i Swaggera (TU BYŁ PROBLEM)
 // -------------------------------------------------------------------------

@@ -15,12 +15,14 @@ namespace CastlePlus2.Contracts.DTOs.Rdzen
         public Guid Id { get; set; }
         public string Nazwa { get; set; } = string.Empty;
 
-        // Na potrzeby listy (Grid) często potrzebujemy od razu nazwy adresu/właściciela, 
-        // a nie tylko ich ID. To uzupełnimy później w logice AutoMappera.
+        // Id FK do adresu w bazie
         public long? IdAdresuGlownego { get; set; }
+
+        // Zagnieżdżony DTO z pełnymi danymi adresu (opcjonalny).
+        public AdresDto? AdresGlowny { get; set; }
+
         public long? IdPodmiotuWlasciciela { get; set; }
 
-        // Geometrii na razie nie wystawiamy do DTO prostego, 
-        // chyba że będzie potrzebna na mapie.
+        // Geometrii na razie nie wystawiamy do tego DTO.
     }
 }

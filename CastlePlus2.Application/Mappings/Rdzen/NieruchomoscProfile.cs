@@ -13,24 +13,20 @@ namespace CastlePlus2.Application.Mappings.Rdzen
     /// Profil AutoMappera definiujący mapowania między:
     /// - encją domenową Nieruchomosc
     /// - DTO NieruchomoscDto
-    /// 
-    /// AutoMapper automatycznie dopasowuje właściwości po nazwie i typie.
-    /// Tutaj dodajemy reguły mapowania oraz ewentualne konwersje.
+    /// oraz encją Adres -> AdresDto.
     /// </summary>
     public class NieruchomoscProfile : Profile
     {
         public NieruchomoscProfile()
         {
-            // Mapowanie jednostronne: encja -> DTO
-            // Używane np. w zapytaniach GET.
-            CreateMap<Nieruchomosc, NieruchomoscDto>();
+            // Mapowanie encji Adres -> AdresDto
+            CreateMap<Adres, AdresDto>();
 
-            // Opcjonalnie można dodać mapowanie DTO -> encja,
-            // jeśli będziemy używać AutoMapper w komendach update.
-            //
-            // CreateMap<NieruchomoscDto, Nieruchomosc>()
-            //     .ForMember(dest => dest.Id, opt => opt.Ignore()); // Id nie zmieniamy przy update
+            // Mapowanie jednostronne: encja -> DTO (Nieruchomosc -> NieruchomoscDto)
+            CreateMap<Nieruchomosc, NieruchomoscDto>()
+                // Jawnie wskazujemy, że AdresGlowny w DTO ma pochodzić z nawigacji
+                .ForMember(dest => dest.AdresGlowny,
+                           opt => opt.MapFrom(src => src.AdresGlowny));
         }
     }
 }
-
