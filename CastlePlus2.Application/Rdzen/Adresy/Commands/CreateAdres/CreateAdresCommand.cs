@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 
-namespace CastlePlus2.Application.Adresy.Commands.CreateAdres
+namespace CastlePlus2.Application.Rdzen.Adresy.Commands.CreateAdres
 {
     /// <summary>
     /// Komenda tworząca nowy adres.

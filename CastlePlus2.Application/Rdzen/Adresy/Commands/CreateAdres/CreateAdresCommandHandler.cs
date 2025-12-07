@@ -7,7 +7,7 @@ using CastlePlus2.Application.Interfaces.Rdzen;
 using CastlePlus2.Domain.Entities.Rdzen;
 using MediatR;
 
-namespace CastlePlus2.Application.Adresy.Commands.CreateAdres
+namespace CastlePlus2.Application.Rdzen.Adresy.Commands.CreateAdres
 {
     public class CreateAdresCommandHandler : IRequestHandler<CreateAdresCommand, long>
     {

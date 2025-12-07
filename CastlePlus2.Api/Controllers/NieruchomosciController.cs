@@ -1,5 +1,5 @@
-﻿using CastlePlus2.Application.Nieruchomosci.Commands.CreateNieruchomosc;
-using CastlePlus2.Application.Nieruchomosci.Queries.GetNieruchomoscById;
+﻿using CastlePlus2.Application.Rdzen.Nieruchomosci.Queries.GetNieruchomoscById;
+using CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomosc;
 using CastlePlus2.Contracts.DTOs.Rdzen;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

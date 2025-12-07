@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 
-namespace CastlePlus2.Application.Nieruchomosci.Commands.CreateNieruchomosc
+namespace CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomosc
 {
     /// <summary>
     /// Komenda CQRS odpowiedzialna za utworzenie nowej nieruchomości.

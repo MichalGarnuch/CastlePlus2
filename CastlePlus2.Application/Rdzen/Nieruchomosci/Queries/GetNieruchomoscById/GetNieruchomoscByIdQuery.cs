@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using CastlePlus2.Contracts.DTOs.Rdzen;
 using MediatR;
 
-namespace CastlePlus2.Application.Nieruchomosci.Queries.GetNieruchomoscById
+namespace CastlePlus2.Application.Rdzen.Nieruchomosci.Queries.GetNieruchomoscById
 {
     /// <summary>
     /// Zapytanie CQRS o pojedynczą nieruchomość po Id.

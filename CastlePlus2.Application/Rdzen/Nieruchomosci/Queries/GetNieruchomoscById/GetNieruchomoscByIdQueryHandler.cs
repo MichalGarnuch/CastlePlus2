@@ -8,7 +8,7 @@ using CastlePlus2.Application.Interfaces.Rdzen;
 using CastlePlus2.Contracts.DTOs.Rdzen;
 using MediatR;
 
-namespace CastlePlus2.Application.Nieruchomosci.Queries.GetNieruchomoscById
+namespace CastlePlus2.Application.Rdzen.Nieruchomosci.Queries.GetNieruchomoscById
 {
     /// <summary>
     /// Handler obsługujący zapytanie GetNieruchomoscByIdQuery.

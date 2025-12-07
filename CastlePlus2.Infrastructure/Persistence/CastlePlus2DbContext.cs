@@ -47,6 +47,11 @@ namespace CastlePlus2.Infrastructure.Persistence
         public DbSet<Adres> Adresy { get; set; } = null!;
 
         /// <summary>
+        /// DbSet odpowiadający tabeli [rdzen].[Budynek] w bazie danych.
+        /// </summary>
+        public DbSet<Budynek> Budynki { get; set; } = null!;
+
+        /// <summary>
         /// Metoda wywoływana przy tworzeniu modelu EF Core.
         /// - Wykorzystujemy ją do zastosowania konfiguracji encji
         ///   (IEntityTypeConfiguration&lt;T&gt;), które rozbijemy na osobne klasy.

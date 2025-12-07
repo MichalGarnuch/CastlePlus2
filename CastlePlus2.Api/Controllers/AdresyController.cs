@@ -1,5 +1,5 @@
-﻿using CastlePlus2.Application.Adresy.Commands.CreateAdres;
-using CastlePlus2.Application.Adresy.Queries.GetAdresById;
+﻿using CastlePlus2.Application.Adresy.Queries.GetAdresById;
+using CastlePlus2.Application.Rdzen.Adresy.Commands.CreateAdres;
 using CastlePlus2.Contracts.DTOs.Rdzen;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

@@ -7,7 +7,7 @@ using CastlePlus2.Application.Interfaces.Rdzen;
 using CastlePlus2.Domain.Entities.Rdzen;
 using MediatR;
 
-namespace CastlePlus2.Application.Nieruchomosci.Commands.CreateNieruchomosc
+namespace CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomosc
 {
     /// <summary>
     /// Handler obsługujący komendę CreateNieruchomoscCommand.
