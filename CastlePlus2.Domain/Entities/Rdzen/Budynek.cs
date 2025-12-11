@@ -60,5 +60,8 @@ namespace CastlePlus2.Domain.Entities.Rdzen
         /// </summary>
         [Column("PowierzchniaUzytkowa", TypeName = "decimal(12,2)")]
         public decimal? PowierzchniaUzytkowa { get; set; }
+
+        public ICollection<Lokal> Lokale { get; set; } = new List<Lokal>();
+
     }
 }

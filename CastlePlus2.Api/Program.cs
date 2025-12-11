@@ -60,6 +60,9 @@ builder.Services.AddSingleton(mapper);
 builder.Services.AddScoped<INieruchomoscRepository, NieruchomoscRepository>();
 builder.Services.AddScoped<IAdresRepository, AdresRepository>();
 builder.Services.AddScoped<IBudynekRepository, BudynekRepository>();
+builder.Services.AddScoped<ILokalRepository, LokalRepository>();
+builder.Services.AddScoped<IPomieszczenieRepository, PomieszczenieRepository>();
+
 // -------------------------------------------------------------------------
 // 4. Konfiguracja API i Swaggera (TU BYŁ PROBLEM)
 // -------------------------------------------------------------------------

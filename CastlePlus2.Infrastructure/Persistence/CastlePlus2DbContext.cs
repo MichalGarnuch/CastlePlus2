@@ -51,6 +51,10 @@ namespace CastlePlus2.Infrastructure.Persistence
         /// </summary>
         public DbSet<Budynek> Budynki { get; set; } = null!;
 
+        public DbSet<Lokal> Lokale { get; set; } = null!;
+        public DbSet<Pomieszczenie> Pomieszczenia { get; set; } = default!;
+
+
         /// <summary>
         /// Metoda wywoływana przy tworzeniu modelu EF Core.
         /// - Wykorzystujemy ją do zastosowania konfiguracji encji
