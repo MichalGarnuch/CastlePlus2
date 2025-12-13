@@ -69,10 +69,7 @@ namespace CastlePlus2.Infrastructure.Persistence
         public DbSet<AlokacjaKosztu> AlokacjeKosztow { get; set; } = null!;
         public DbSet<KategoriaKosztu> KategorieKosztow { get; set; } = null!;
         public DbSet<Faktura> Faktury { get; set; } = null!;
-
-
-
-
+        public DbSet<PozycjaKosztu> PozycjeKosztow { get; set; } = null!;
 
 
         /// <summary>

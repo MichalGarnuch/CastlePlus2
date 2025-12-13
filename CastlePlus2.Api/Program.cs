@@ -79,7 +79,7 @@ builder.Services.AddScoped<IPowiazanieDokumentuRepository, PowiazanieDokumentuRe
 builder.Services.AddScoped<IAlokacjaKosztuRepository, AlokacjaKosztuRepository>();
 builder.Services.AddScoped<IKategoriaKosztuRepository, KategoriaKosztuRepository>();
 builder.Services.AddScoped<IFakturaRepository, FakturaRepository>();
-
+builder.Services.AddScoped<IPozycjaKosztuRepository, PozycjaKosztuRepository>();
 
 
 
