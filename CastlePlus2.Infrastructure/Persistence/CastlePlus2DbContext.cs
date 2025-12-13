@@ -1,4 +1,5 @@
-﻿using CastlePlus2.Domain.Entities.Rdzen;
+﻿using CastlePlus2.Domain.Entities.Dokumenty;
+using CastlePlus2.Domain.Entities.Rdzen;
 using CastlePlus2.Domain.Entities.Utrzymanie;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -59,6 +60,7 @@ namespace CastlePlus2.Infrastructure.Persistence
         public DbSet<PrzypisanieAdresu> PrzypisaniaAdresow => Set<PrzypisanieAdresu>();
         public DbSet<ZleceniePracy> ZleceniaPracy { get; set; } = null!;
         public DbSet<PowiazanieZlecenia> PowiazaniaZlecenia { get; set; } = null!;
+        public DbSet<Dokument> Dokumenty { get; set; } = null!;
 
 
         /// <summary>

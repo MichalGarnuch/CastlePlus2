@@ -14,7 +14,6 @@
     <Folder Include="Entities\Finanse\" />
     <Folder Include="Entities\Najem\" />
     <Folder Include="Entities\Media\" />
-    <Folder Include="Entities\Dokumenty\" />
     <Folder Include="Entities\Slowniki\" />
     <Folder Include="Entities\Podmioty\" />
     <Folder Include="Repositories\" />
