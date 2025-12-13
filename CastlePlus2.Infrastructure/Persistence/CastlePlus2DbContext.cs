@@ -58,6 +58,8 @@ namespace CastlePlus2.Infrastructure.Persistence
         public DbSet<Pomieszczenie> Pomieszczenia { get; set; } = default!;
         public DbSet<PrzypisanieAdresu> PrzypisaniaAdresow => Set<PrzypisanieAdresu>();
         public DbSet<ZleceniePracy> ZleceniaPracy { get; set; } = null!;
+        public DbSet<PowiazanieZlecenia> PowiazaniaZlecenia { get; set; } = null!;
+
 
         /// <summary>
         /// Metoda wywoływana przy tworzeniu modelu EF Core.

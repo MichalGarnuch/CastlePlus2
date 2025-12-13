@@ -66,6 +66,8 @@ builder.Services.AddScoped<ILokalRepository, LokalRepository>();
 builder.Services.AddScoped<IPomieszczenieRepository, PomieszczenieRepository>();
 builder.Services.AddScoped<IPrzypisanieAdresuRepository, PrzypisanieAdresuRepository>();
 builder.Services.AddScoped<IZleceniePracyRepository, ZleceniePracyRepository>();
+builder.Services.AddScoped<IPowiazanieZleceniaRepository, PowiazanieZleceniaRepository>();
+
 
 
 // -------------------------------------------------------------------------
