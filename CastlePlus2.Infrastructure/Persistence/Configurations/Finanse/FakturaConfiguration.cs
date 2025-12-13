@@ -61,19 +61,19 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Finanse
 
 
             // pamiętać żeby potem odkomentować
-            // FK -> podmioty.Podmiot
-            //builder.HasOne(x => x.Podmiot)
-            //       .WithMany()
-            //       .HasForeignKey(x => x.IdPodmiotu)
-            //       .HasConstraintName("FK_fi_Faktura_Podmiot")
-            //       .OnDelete(DeleteBehavior.Restrict);
+            //FK -> podmioty.Podmiot
+            builder.HasOne(x => x.Podmiot)
+                   .WithMany()
+                   .HasForeignKey(x => x.IdPodmiotu)
+                   .HasConstraintName("FK_fi_Faktura_Podmiot")
+                   .OnDelete(DeleteBehavior.Restrict);
 
-            //// FK -> slowniki.Waluta (KodWaluty)
-            //builder.HasOne(x => x.Waluta)
-            //       .WithMany()
-            //       .HasForeignKey(x => x.KodWaluty)
-            //       .HasConstraintName("FK_fi_Faktura_Waluta")
-            //       .OnDelete(DeleteBehavior.Restrict);
+            // FK -> slowniki.Waluta (KodWaluty)
+            builder.HasOne(x => x.Waluta)
+                   .WithMany()
+                   .HasForeignKey(x => x.KodWaluty)
+                   .HasConstraintName("FK_fi_Faktura_Waluta")
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

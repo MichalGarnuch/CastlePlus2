@@ -1,5 +1,5 @@
 ﻿using System;
-
+using CastlePlus2.Domain.Entities.Finanse;
 namespace CastlePlus2.Domain.Entities.Finanse
 {
     /// <summary>
@@ -15,7 +15,7 @@ namespace CastlePlus2.Domain.Entities.Finanse
         public decimal KwotaBrutto { get; set; }    // decimal(18,2)
 
         // Nawigacje opcjonalne (nie tworzą kolumn)
-        // niezapomnieć odkodować public PozycjaKosztu? PozycjaKosztu { get; set; }
+        public PozycjaKosztu? PozycjaKosztu { get; set; }
         public CastlePlus2.Domain.Entities.Rdzen.Encja? Encja { get; set; }
     }
 }

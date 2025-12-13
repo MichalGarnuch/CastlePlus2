@@ -44,18 +44,18 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Finanse
                    .HasDatabaseName("IX_fi_Platnosc_Podmiot");
 
             //// FK -> podmioty.Podmiot
-            //builder.HasOne(x => x.Podmiot)
-            //       .WithMany()
-            //       .HasForeignKey(x => x.IdPodmiotu)
-            //       .HasConstraintName("FK_fi_Platnosc_Podmiot")
-            //       .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(x => x.Podmiot)
+                   .WithMany()
+                   .HasForeignKey(x => x.IdPodmiotu)
+                   .HasConstraintName("FK_fi_Platnosc_Podmiot")
+                   .OnDelete(DeleteBehavior.Restrict);
 
             //// FK -> slowniki.Waluta (KodWaluty)
-            //builder.HasOne(x => x.Waluta)
-            //       .WithMany()
-            //       .HasForeignKey(x => x.KodWaluty)
-            //       .HasConstraintName("FK_fi_Platnosc_Waluta")
-            //       .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(x => x.Waluta)
+                   .WithMany()
+                   .HasForeignKey(x => x.KodWaluty)
+                   .HasConstraintName("FK_fi_Platnosc_Waluta")
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

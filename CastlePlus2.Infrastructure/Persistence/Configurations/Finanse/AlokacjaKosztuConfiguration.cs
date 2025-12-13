@@ -46,11 +46,11 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Finanse
                    .OnDelete(DeleteBehavior.Restrict);
 
             // FK -> finanse.PozycjaKosztu
-            //builder.HasOne(x => x.PozycjaKosztu)
-            //       .WithMany()
-            //       .HasForeignKey(x => x.IdPozycjiKosztu)
-            //       .HasConstraintName("FK_fi_Alokacja_Pozycja")
-            //       .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(x => x.PozycjaKosztu)
+                   .WithMany()
+                   .HasForeignKey(x => x.IdPozycjiKosztu)
+                   .HasConstraintName("FK_fi_Alokacja_Pozycja")
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

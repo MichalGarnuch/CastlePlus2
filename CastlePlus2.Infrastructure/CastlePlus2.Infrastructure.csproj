@@ -15,8 +15,6 @@
   <ItemGroup>
     <Folder Include="Persistence\Configurations\Media\" />
     <Folder Include="Persistence\Configurations\Najem\" />
-    <Folder Include="Persistence\Configurations\Slowniki\" />
-    <Folder Include="Persistence\Configurations\Podmioty\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,6 +1,6 @@
 ﻿using System;
-//using CastlePlus2.Domain.Entities.Podmioty;
-//using CastlePlus2.Domain.Entities.Slowniki;
+using CastlePlus2.Domain.Entities.Podmioty;
+using CastlePlus2.Domain.Entities.Slowniki;
 
 namespace CastlePlus2.Domain.Entities.Finanse
 {
@@ -20,7 +20,7 @@ namespace CastlePlus2.Domain.Entities.Finanse
         public decimal? KwotaBrutto { get; set; }              // decimal(18,2) NULL
 
         // Nawigacje (opcjonalne)
-        // pamiętać żeby odkomentować później public Podmiot? Podmiot { get; set; }
-        // pamiętać żeby odkomentować później public Waluta? Waluta { get; set; }
+        public Podmiot? Podmiot { get; set; }
+        public Waluta? Waluta { get; set; }
     }
 }

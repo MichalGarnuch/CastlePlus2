@@ -13,8 +13,6 @@
   <ItemGroup>
     <Folder Include="DTOs\Media\" />
     <Folder Include="DTOs\Najem\" />
-    <Folder Include="DTOs\Podmioty\" />
-    <Folder Include="DTOs\Slownik\" />
   </ItemGroup>
 
 </Project>
