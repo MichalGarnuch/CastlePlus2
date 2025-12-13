@@ -11,7 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\Finanse\" />
     <Folder Include="Entities\Najem\" />
     <Folder Include="Entities\Media\" />
     <Folder Include="Entities\Slowniki\" />

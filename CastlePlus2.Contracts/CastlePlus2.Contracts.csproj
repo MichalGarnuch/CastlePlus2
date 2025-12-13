@@ -11,7 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DTOs\Finanse\" />
     <Folder Include="DTOs\Media\" />
     <Folder Include="DTOs\Najem\" />
     <Folder Include="DTOs\Podmioty\" />

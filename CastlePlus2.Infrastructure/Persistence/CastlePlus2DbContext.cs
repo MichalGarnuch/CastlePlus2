@@ -1,4 +1,5 @@
 ﻿using CastlePlus2.Domain.Entities.Dokumenty;
+using CastlePlus2.Domain.Entities.Finanse;
 using CastlePlus2.Domain.Entities.Rdzen;
 using CastlePlus2.Domain.Entities.Utrzymanie;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +65,9 @@ namespace CastlePlus2.Infrastructure.Persistence
 
         public DbSet<Dokument> Dokumenty { get; set; } = null!;
         public DbSet<PowiazanieDokumentu> PowiazaniaDokumentow { get; set; } = null!;
+
+        public DbSet<AlokacjaKosztu> AlokacjeKosztow { get; set; } = null!;
+
 
 
         /// <summary>

@@ -1,11 +1,13 @@
 using AutoMapper;
 using CastlePlus2.Application.Interfaces.Dokumenty;
+using CastlePlus2.Application.Interfaces.Finanse;
 using CastlePlus2.Application.Interfaces.Rdzen;
 using CastlePlus2.Application.Interfaces.Utrzymanie;
 using CastlePlus2.Application.Mappings.Rdzen;
 using CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomosc;
 using CastlePlus2.Infrastructure.Persistence;
 using CastlePlus2.Infrastructure.Repositories.Dokumenty;
+using CastlePlus2.Infrastructure.Repositories.Finanse;
 using CastlePlus2.Infrastructure.Repositories.Rdzen;
 using CastlePlus2.Infrastructure.Repositories.Utrzymanie;
 using Microsoft.EntityFrameworkCore;
@@ -73,6 +75,9 @@ builder.Services.AddScoped<IPowiazanieZleceniaRepository, PowiazanieZleceniaRepo
 
 builder.Services.AddScoped<IDokumentRepository, DokumentRepository>();
 builder.Services.AddScoped<IPowiazanieDokumentuRepository, PowiazanieDokumentuRepository>();
+
+builder.Services.AddScoped<IAlokacjaKosztuRepository, AlokacjaKosztuRepository>();
+
 
 // -------------------------------------------------------------------------
 // 4. Konfiguracja API i Swaggera (TU BYŁ PROBLEM)
