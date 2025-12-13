@@ -80,8 +80,7 @@ builder.Services.AddScoped<IAlokacjaKosztuRepository, AlokacjaKosztuRepository>(
 builder.Services.AddScoped<IKategoriaKosztuRepository, KategoriaKosztuRepository>();
 builder.Services.AddScoped<IFakturaRepository, FakturaRepository>();
 builder.Services.AddScoped<IPozycjaKosztuRepository, PozycjaKosztuRepository>();
-
-
+builder.Services.AddScoped<IPlatnoscRepository, PlatnoscRepository>();
 
 // -------------------------------------------------------------------------
 // 4. Konfiguracja API i Swaggera (TU BYŁ PROBLEM)
