@@ -17,7 +17,6 @@
     <Folder Include="DTOs\Najem\" />
     <Folder Include="DTOs\Podmioty\" />
     <Folder Include="DTOs\Slownik\" />
-    <Folder Include="DTOs\Utrzymanie\" />
   </ItemGroup>
 
 </Project>

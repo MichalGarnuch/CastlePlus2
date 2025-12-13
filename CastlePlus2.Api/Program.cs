@@ -1,12 +1,14 @@
+using AutoMapper;
 using CastlePlus2.Application.Interfaces.Rdzen;
+using CastlePlus2.Application.Interfaces.Utrzymanie;
 using CastlePlus2.Application.Mappings.Rdzen;
 using CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomosc;
 using CastlePlus2.Infrastructure.Persistence;
 using CastlePlus2.Infrastructure.Repositories.Rdzen;
+using CastlePlus2.Infrastructure.Repositories.Utrzymanie;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models; // <--- WAŻNE: Ten using jest potrzebny do konfiguracji
-using AutoMapper;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -63,6 +65,7 @@ builder.Services.AddScoped<IBudynekRepository, BudynekRepository>();
 builder.Services.AddScoped<ILokalRepository, LokalRepository>();
 builder.Services.AddScoped<IPomieszczenieRepository, PomieszczenieRepository>();
 builder.Services.AddScoped<IPrzypisanieAdresuRepository, PrzypisanieAdresuRepository>();
+builder.Services.AddScoped<IZleceniePracyRepository, ZleceniePracyRepository>();
 
 
 // -------------------------------------------------------------------------

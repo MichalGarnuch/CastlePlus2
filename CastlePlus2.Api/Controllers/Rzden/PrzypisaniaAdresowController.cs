@@ -4,7 +4,7 @@ using CastlePlus2.Contracts.DTOs.Rdzen;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CastlePlus2.Api.Controllers
+namespace CastlePlus2.Api.Controllers.Rzden
 {
     [ApiController]
     [Route("api/[controller]")]

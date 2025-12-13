@@ -16,7 +16,6 @@
     <Folder Include="Entities\Media\" />
     <Folder Include="Entities\Dokumenty\" />
     <Folder Include="Entities\Slowniki\" />
-    <Folder Include="Entities\Utrzymanie\" />
     <Folder Include="Entities\Podmioty\" />
     <Folder Include="Repositories\" />
   </ItemGroup>

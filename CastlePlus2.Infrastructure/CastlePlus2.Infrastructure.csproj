@@ -17,7 +17,6 @@
     <Folder Include="Persistence\Configurations\Dokumenty\" />
     <Folder Include="Persistence\Configurations\Media\" />
     <Folder Include="Persistence\Configurations\Najem\" />
-    <Folder Include="Persistence\Configurations\Utrzymanie\" />
     <Folder Include="Persistence\Configurations\Slowniki\" />
     <Folder Include="Persistence\Configurations\Podmioty\" />
   </ItemGroup>

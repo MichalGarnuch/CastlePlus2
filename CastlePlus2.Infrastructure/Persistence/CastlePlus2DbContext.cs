@@ -1,10 +1,11 @@
-﻿using System;
+﻿using CastlePlus2.Domain.Entities.Rdzen;
+using CastlePlus2.Domain.Entities.Utrzymanie;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CastlePlus2.Domain.Entities.Rdzen;
-using Microsoft.EntityFrameworkCore;
 
 namespace CastlePlus2.Infrastructure.Persistence
 {
@@ -56,6 +57,7 @@ namespace CastlePlus2.Infrastructure.Persistence
         public DbSet<Lokal> Lokale { get; set; } = null!;
         public DbSet<Pomieszczenie> Pomieszczenia { get; set; } = default!;
         public DbSet<PrzypisanieAdresu> PrzypisaniaAdresow => Set<PrzypisanieAdresu>();
+        public DbSet<ZleceniePracy> ZleceniaPracy { get; set; } = null!;
 
         /// <summary>
         /// Metoda wywoływana przy tworzeniu modelu EF Core.

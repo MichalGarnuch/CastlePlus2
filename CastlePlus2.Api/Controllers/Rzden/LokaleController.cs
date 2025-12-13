@@ -7,7 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CastlePlus2.Api.Controllers
+namespace CastlePlus2.Api.Controllers.Rzden
 {
     /// <summary>
     /// Kontroler REST dla zasobu Lokale.

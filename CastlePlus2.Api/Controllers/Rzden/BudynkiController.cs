@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 
-namespace CastlePlus2.Api.Controllers
+namespace CastlePlus2.Api.Controllers.Rzden
 {
     [ApiController]
     [Route("api/[controller]")]
