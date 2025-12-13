@@ -62,6 +62,8 @@ builder.Services.AddScoped<IAdresRepository, AdresRepository>();
 builder.Services.AddScoped<IBudynekRepository, BudynekRepository>();
 builder.Services.AddScoped<ILokalRepository, LokalRepository>();
 builder.Services.AddScoped<IPomieszczenieRepository, PomieszczenieRepository>();
+builder.Services.AddScoped<IPrzypisanieAdresuRepository, PrzypisanieAdresuRepository>();
+
 
 // -------------------------------------------------------------------------
 // 4. Konfiguracja API i Swaggera (TU BYŁ PROBLEM)

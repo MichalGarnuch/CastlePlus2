@@ -39,21 +39,23 @@ namespace CastlePlus2.Infrastructure.Persistence
         /// <summary>
         /// DbSet dla tabeli [rdzen].[Encja] (tabela bazowa TPT).
         /// </summary>
+        /// 
         public DbSet<Encja> Encje { get; set; } = null!;
 
         /// <summary>
         /// DbSet odpowiadający tabeli [rdzen].[Adres].
         /// </summary>
+        /// 
         public DbSet<Adres> Adresy { get; set; } = null!;
 
         /// <summary>
         /// DbSet odpowiadający tabeli [rdzen].[Budynek] w bazie danych.
         /// </summary>
+        /// 
         public DbSet<Budynek> Budynki { get; set; } = null!;
-
         public DbSet<Lokal> Lokale { get; set; } = null!;
         public DbSet<Pomieszczenie> Pomieszczenia { get; set; } = default!;
-
+        public DbSet<PrzypisanieAdresu> PrzypisaniaAdresow => Set<PrzypisanieAdresu>();
 
         /// <summary>
         /// Metoda wywoływana przy tworzeniu modelu EF Core.
