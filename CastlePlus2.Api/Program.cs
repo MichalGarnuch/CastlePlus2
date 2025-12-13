@@ -72,9 +72,7 @@ builder.Services.AddScoped<IZleceniePracyRepository, ZleceniePracyRepository>();
 builder.Services.AddScoped<IPowiazanieZleceniaRepository, PowiazanieZleceniaRepository>();
 
 builder.Services.AddScoped<IDokumentRepository, DokumentRepository>();
-
-
-
+builder.Services.AddScoped<IPowiazanieDokumentuRepository, PowiazanieDokumentuRepository>();
 
 // -------------------------------------------------------------------------
 // 4. Konfiguracja API i Swaggera (TU BYŁ PROBLEM)
