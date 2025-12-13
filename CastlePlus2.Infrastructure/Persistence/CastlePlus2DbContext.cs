@@ -67,6 +67,9 @@ namespace CastlePlus2.Infrastructure.Persistence
         public DbSet<PowiazanieDokumentu> PowiazaniaDokumentow { get; set; } = null!;
 
         public DbSet<AlokacjaKosztu> AlokacjeKosztow { get; set; } = null!;
+        public DbSet<KategoriaKosztu> KategorieKosztow { get; set; } = null!;
+
+
 
 
 
