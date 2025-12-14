@@ -10,8 +10,4 @@
     <ProjectReference Include="..\CastlePlus2.Shared\CastlePlus2.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DTOs\Media\" />
-  </ItemGroup>
-
 </Project>

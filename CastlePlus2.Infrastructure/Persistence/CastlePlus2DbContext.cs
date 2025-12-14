@@ -1,5 +1,6 @@
 ﻿using CastlePlus2.Domain.Entities.Dokumenty;
 using CastlePlus2.Domain.Entities.Finanse;
+using CastlePlus2.Domain.Entities.Media;
 using CastlePlus2.Domain.Entities.Najem;
 using CastlePlus2.Domain.Entities.Podmioty;
 using CastlePlus2.Domain.Entities.Rdzen;
@@ -63,11 +64,14 @@ namespace CastlePlus2.Infrastructure.Persistence
         public DbSet<Pomieszczenie> Pomieszczenia { get; set; } = default!;
         public DbSet<PrzypisanieAdresu> PrzypisaniaAdresow => Set<PrzypisanieAdresu>();
 
+
         public DbSet<ZleceniePracy> ZleceniaPracy { get; set; } = null!;
         public DbSet<PowiazanieZlecenia> PowiazaniaZlecenia { get; set; } = null!;
 
+
         public DbSet<Dokument> Dokumenty { get; set; } = null!;
         public DbSet<PowiazanieDokumentu> PowiazaniaDokumentow { get; set; } = null!;
+
 
         public DbSet<AlokacjaKosztu> AlokacjeKosztow { get; set; } = null!;
         public DbSet<KategoriaKosztu> KategorieKosztow { get; set; } = null!;
@@ -76,9 +80,11 @@ namespace CastlePlus2.Infrastructure.Persistence
         public DbSet<Platnosc> Platnosci { get; set; } = null!;
         public DbSet<RozliczeniePlatnosci> RozliczeniaPlatnosci { get; set; } = null!;
 
+
         public DbSet<Waluta> Waluty => Set<Waluta>();
         public DbSet<Indeksacja> Indeksacje => Set<Indeksacja>();
         public DbSet<JednostkaMiary> JednostkiMiary => Set<JednostkaMiary>();
+
 
         public DbSet<Podmiot> Podmioty => Set<Podmiot>();
 
@@ -87,6 +93,10 @@ namespace CastlePlus2.Infrastructure.Persistence
         public DbSet<PrzedmiotNajmu> PrzedmiotyNajmu => Set<PrzedmiotNajmu>();
         public DbSet<SkladnikCzynszu> SkladnikiCzynszu => Set<SkladnikCzynszu>();
         public DbSet<Kaucja> Kaucje => Set<Kaucja>();
+
+
+        public DbSet<RodzajMedium> RodzajeMediow { get; set; } = null!;
+
 
         /// <summary>
         /// Metoda wywoływana przy tworzeniu modelu EF Core.

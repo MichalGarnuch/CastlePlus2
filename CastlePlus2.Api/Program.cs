@@ -1,6 +1,7 @@
 using AutoMapper;
 using CastlePlus2.Application.Interfaces.Dokumenty;
 using CastlePlus2.Application.Interfaces.Finanse;
+using CastlePlus2.Application.Interfaces.Media;
 using CastlePlus2.Application.Interfaces.Najem;
 using CastlePlus2.Application.Interfaces.Podmioty;
 using CastlePlus2.Application.Interfaces.Rdzen;
@@ -11,6 +12,7 @@ using CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomosc;
 using CastlePlus2.Infrastructure.Persistence;
 using CastlePlus2.Infrastructure.Repositories.Dokumenty;
 using CastlePlus2.Infrastructure.Repositories.Finanse;
+using CastlePlus2.Infrastructure.Repositories.Media;
 using CastlePlus2.Infrastructure.Repositories.Najem;
 using CastlePlus2.Infrastructure.Repositories.Podmioty;
 using CastlePlus2.Infrastructure.Repositories.Rdzen;
@@ -99,6 +101,9 @@ builder.Services.AddScoped<IUmowaNajmuRepository, UmowaNajmuRepository>();
 builder.Services.AddScoped<IPrzedmiotNajmuRepository, PrzedmiotNajmuRepository>();
 builder.Services.AddScoped<ISkladnikCzynszuRepository, SkladnikCzynszuRepository>();
 builder.Services.AddScoped<IKaucjaRepository, KaucjaRepository>();
+
+builder.Services.AddScoped<IRodzajMediumRepository, RodzajMediumRepository>();
+
 
 
 // -------------------------------------------------------------------------
