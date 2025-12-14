@@ -104,6 +104,7 @@ builder.Services.AddScoped<IKaucjaRepository, KaucjaRepository>();
 
 builder.Services.AddScoped<IRodzajMediumRepository, RodzajMediumRepository>();
 builder.Services.AddScoped<IPrzylaczeRepository, PrzylaczeRepository>();
+builder.Services.AddScoped<ILicznikRepository, LicznikRepository>();
 
 
 
