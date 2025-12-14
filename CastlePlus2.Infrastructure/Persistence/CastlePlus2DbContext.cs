@@ -1,5 +1,6 @@
 ﻿using CastlePlus2.Domain.Entities.Dokumenty;
 using CastlePlus2.Domain.Entities.Finanse;
+using CastlePlus2.Domain.Entities.Najem;
 using CastlePlus2.Domain.Entities.Podmioty;
 using CastlePlus2.Domain.Entities.Rdzen;
 using CastlePlus2.Domain.Entities.Slowniki;
@@ -74,10 +75,18 @@ namespace CastlePlus2.Infrastructure.Persistence
         public DbSet<PozycjaKosztu> PozycjeKosztow { get; set; } = null!;
         public DbSet<Platnosc> Platnosci { get; set; } = null!;
         public DbSet<RozliczeniePlatnosci> RozliczeniaPlatnosci { get; set; } = null!;
+
         public DbSet<Waluta> Waluty => Set<Waluta>();
+        public DbSet<Indeksacja> Indeksacje => Set<Indeksacja>();
+        public DbSet<JednostkaMiary> JednostkiMiary => Set<JednostkaMiary>();
+
         public DbSet<Podmiot> Podmioty => Set<Podmiot>();
 
 
+        public DbSet<UmowaNajmu> UmowyNajmu => Set<UmowaNajmu>();
+        public DbSet<PrzedmiotNajmu> PrzedmiotyNajmu => Set<PrzedmiotNajmu>();
+        public DbSet<SkladnikCzynszu> SkladnikiCzynszu => Set<SkladnikCzynszu>();
+        public DbSet<Kaucja> Kaucje => Set<Kaucja>();
 
         /// <summary>
         /// Metoda wywoływana przy tworzeniu modelu EF Core.

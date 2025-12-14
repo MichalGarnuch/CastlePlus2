@@ -1,6 +1,7 @@
 using AutoMapper;
 using CastlePlus2.Application.Interfaces.Dokumenty;
 using CastlePlus2.Application.Interfaces.Finanse;
+using CastlePlus2.Application.Interfaces.Najem;
 using CastlePlus2.Application.Interfaces.Podmioty;
 using CastlePlus2.Application.Interfaces.Rdzen;
 using CastlePlus2.Application.Interfaces.Slowniki;
@@ -10,6 +11,7 @@ using CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomosc;
 using CastlePlus2.Infrastructure.Persistence;
 using CastlePlus2.Infrastructure.Repositories.Dokumenty;
 using CastlePlus2.Infrastructure.Repositories.Finanse;
+using CastlePlus2.Infrastructure.Repositories.Najem;
 using CastlePlus2.Infrastructure.Repositories.Podmioty;
 using CastlePlus2.Infrastructure.Repositories.Rdzen;
 using CastlePlus2.Infrastructure.Repositories.Slowniki;
@@ -88,7 +90,16 @@ builder.Services.AddScoped<IPlatnoscRepository, PlatnoscRepository>();
 builder.Services.AddScoped<IRozliczeniePlatnosciRepository, RozliczeniePlatnosciRepository>();
 
 builder.Services.AddScoped<IWalutaRepository, WalutaRepository>();
+builder.Services.AddScoped<IIndeksacjaRepository, IndeksacjaRepository>();
+builder.Services.AddScoped<IJednostkaMiaryRepository, JednostkaMiaryRepository>();
+
 builder.Services.AddScoped<IPodmiotRepository, PodmiotRepository>();
+
+builder.Services.AddScoped<IUmowaNajmuRepository, UmowaNajmuRepository>();
+builder.Services.AddScoped<IPrzedmiotNajmuRepository, PrzedmiotNajmuRepository>();
+builder.Services.AddScoped<ISkladnikCzynszuRepository, SkladnikCzynszuRepository>();
+builder.Services.AddScoped<IKaucjaRepository, KaucjaRepository>();
+
 
 // -------------------------------------------------------------------------
 // 4. Konfiguracja API i Swaggera (TU BYŁ PROBLEM)
