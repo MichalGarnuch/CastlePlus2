@@ -103,6 +103,8 @@ builder.Services.AddScoped<IUmowaNajmuRepository, UmowaNajmuRepository>();
 builder.Services.AddScoped<IPrzedmiotNajmuRepository, PrzedmiotNajmuRepository>();
 builder.Services.AddScoped<ISkladnikCzynszuRepository, SkladnikCzynszuRepository>();
 builder.Services.AddScoped<IKaucjaRepository, KaucjaRepository>();
+builder.Services.AddScoped<IWlasnoscRepository, WlasnoscRepository>();
+
 
 builder.Services.AddScoped<IRodzajMediumRepository, RodzajMediumRepository>();
 builder.Services.AddScoped<IPrzylaczeRepository, PrzylaczeRepository>();
