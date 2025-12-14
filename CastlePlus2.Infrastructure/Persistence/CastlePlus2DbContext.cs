@@ -98,6 +98,8 @@ namespace CastlePlus2.Infrastructure.Persistence
         public DbSet<RodzajMedium> RodzajeMediow { get; set; } = null!;
         public DbSet<Przylacze> Przylacza { get; set; } = null!;
         public DbSet<Licznik> Liczniki { get; set; } = null!;
+        public DbSet<Odczyt> Odczyty { get; set; } = null!;
+
 
 
 
