@@ -87,6 +87,8 @@ namespace CastlePlus2.Infrastructure.Persistence
 
 
         public DbSet<Podmiot> Podmioty => Set<Podmiot>();
+        public DbSet<Kontakt> Kontakty { get; set; } = null!;
+
 
 
         public DbSet<UmowaNajmu> UmowyNajmu => Set<UmowaNajmu>();

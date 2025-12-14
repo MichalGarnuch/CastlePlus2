@@ -96,6 +96,8 @@ builder.Services.AddScoped<IIndeksacjaRepository, IndeksacjaRepository>();
 builder.Services.AddScoped<IJednostkaMiaryRepository, JednostkaMiaryRepository>();
 
 builder.Services.AddScoped<IPodmiotRepository, PodmiotRepository>();
+builder.Services.AddScoped<IKontaktRepository, KontaktRepository>();
+
 
 builder.Services.AddScoped<IUmowaNajmuRepository, UmowaNajmuRepository>();
 builder.Services.AddScoped<IPrzedmiotNajmuRepository, PrzedmiotNajmuRepository>();
