@@ -9,6 +9,8 @@ public static class DependencyInjection
     {
         services.AddMudServices();
         // tutaj dopniemy serwisy modułów, np. services.AddScoped<IRodzajMediowService, RodzajMediowService>();
+        services.AddScoped<CastlePlus2.Client.Services.Media.IRodzajeMediowService, CastlePlus2.Client.Services.Media.RodzajeMediowService>();
+
         return services;
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CastlePlus2.Application.Interfaces.Media;
 using CastlePlus2.Domain.Entities.Media;
@@ -7,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CastlePlus2.Infrastructure.Repositories.Media
 {
-    public class RodzajMediumRepository : IRodzajMediumRepository
+    public sealed class RodzajMediumRepository : IRodzajMediumRepository
     {
         private readonly CastlePlus2DbContext _db;
 
@@ -16,28 +18,38 @@ namespace CastlePlus2.Infrastructure.Repositories.Media
             _db = db;
         }
 
-        public async Task<RodzajMedium?> GetByIdAsync(string kodRodzaju, CancellationToken ct)
+        public Task<List<RodzajMedium>> GetAllAsync(CancellationToken ct)
         {
-            return await _db.RodzajeMediow
+            return _db.RodzajeMediow
                 .AsNoTracking()
+                .OrderBy(x => x.KodRodzaju)
+                .ToListAsync(ct);
+        }
+
+        public Task<RodzajMedium?> GetByIdAsync(string kodRodzaju, CancellationToken ct)
+        {
+            return _db.RodzajeMediow
                 .FirstOrDefaultAsync(x => x.KodRodzaju == kodRodzaju, ct);
         }
 
-        public async Task<bool> ExistsAsync(string kodRodzaju, CancellationToken ct)
+        public Task<bool> ExistsAsync(string kodRodzaju, CancellationToken ct)
         {
-            return await _db.RodzajeMediow
-                .AsNoTracking()
-                .AnyAsync(x => x.KodRodzaju == kodRodzaju, ct);
+            return _db.RodzajeMediow.AnyAsync(x => x.KodRodzaju == kodRodzaju, ct);
         }
 
-        public async Task AddAsync(RodzajMedium entity, CancellationToken ct)
+        public Task AddAsync(RodzajMedium entity, CancellationToken ct)
         {
-            await _db.RodzajeMediow.AddAsync(entity, ct);
+            return _db.RodzajeMediow.AddAsync(entity, ct).AsTask();
         }
 
-        public async Task SaveChangesAsync(CancellationToken ct)
+        public void Remove(RodzajMedium entity)
         {
-            await _db.SaveChangesAsync(ct);
+            _db.RodzajeMediow.Remove(entity);
+        }
+
+        public Task SaveChangesAsync(CancellationToken ct)
+        {
+            return _db.SaveChangesAsync(ct);
         }
     }
 }

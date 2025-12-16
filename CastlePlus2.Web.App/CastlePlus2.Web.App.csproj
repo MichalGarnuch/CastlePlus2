@@ -10,4 +10,8 @@
     <ProjectReference Include="..\CastlePlus2.Client\CastlePlus2.Client.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Components\Layout\" />
+  </ItemGroup>
+
 </Project>

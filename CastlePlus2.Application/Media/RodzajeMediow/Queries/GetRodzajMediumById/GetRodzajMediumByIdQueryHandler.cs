@@ -7,7 +7,7 @@ using MediatR;
 
 namespace CastlePlus2.Application.Media.RodzajeMediow.Queries.GetRodzajMediumById
 {
-    public class GetRodzajMediumByIdQueryHandler : IRequestHandler<GetRodzajMediumByIdQuery, RodzajMediumDto?>
+    public sealed class GetRodzajMediumByIdQueryHandler : IRequestHandler<GetRodzajMediumByIdQuery, RodzajMediumDto?>
     {
         private readonly IRodzajMediumRepository _repo;
         private readonly IMapper _mapper;
@@ -21,8 +21,7 @@ namespace CastlePlus2.Application.Media.RodzajeMediow.Queries.GetRodzajMediumByI
         public async Task<RodzajMediumDto?> Handle(GetRodzajMediumByIdQuery request, CancellationToken ct)
         {
             var kod = (request.KodRodzaju ?? string.Empty).Trim();
-            if (kod.Length == 0)
-                return null;
+            if (kod.Length == 0 || kod.Length > 20) return null;
 
             var entity = await _repo.GetByIdAsync(kod, ct);
             return entity is null ? null : _mapper.Map<RodzajMediumDto>(entity);

@@ -3,7 +3,7 @@ using MediatR;
 
 namespace CastlePlus2.Application.Media.RodzajeMediow.Queries.GetRodzajMediumById
 {
-    public class GetRodzajMediumByIdQuery : IRequest<RodzajMediumDto?>
+    public sealed class GetRodzajMediumByIdQuery : IRequest<RodzajMediumDto?>
     {
         public string KodRodzaju { get; }
 
