@@ -1,128 +1,74 @@
 ﻿@inherits LayoutComponentBase
-@using MudBlazor
-@using CastlePlus2.Client.Theme
 
-
-<MudThemeProvider Theme="CastleTheme.Dark" />
-
-
-
-<MudThemeProvider />
+<MudThemeProvider Theme="CastleTheme.Neon" IsDarkMode="true" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="1" Dense="true">
+
+    <MudAppBar Elevation="0" Fixed="true" Class="glass-panel"
+               Style="border-bottom:1px solid rgba(255,255,255,0.05);">
         <MudIconButton Icon="@Icons.Material.Filled.Menu"
                        Color="Color.Inherit"
                        Edge="Edge.Start"
                        OnClick="@ToggleDrawer" />
 
-        <MudText Typo="Typo.h6" Class="ml-2">CastlePlus2</MudText>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Class="ml-4">
+            <MudIcon Icon="@Icons.Material.Filled.Castle" Color="Color.Primary" />
+            <MudText Typo="Typo.h6" Class="fw-700" Style="letter-spacing:1px;">
+                CASTLE+
+            </MudText>
+        </MudStack>
 
         <MudSpacer />
 
-        <MudChip T="string" Variant="Variant.Outlined" Size="Size.Small">
-            ZSI • Web + Mobile
+        <MudChip T="string"
+                 Variant="Variant.Outlined"
+                 Size="Size.Small"
+                 Color="Color.Primary">
+            DEV ENV
         </MudChip>
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen"
-               Variant="DrawerVariant.Responsive"
-               Elevation="1"
                ClipMode="DrawerClipMode.Always"
-               Width="300px">
+               Elevation="0"
+               Style="background:#0b0f19; border-right:1px solid rgba(255,255,255,0.05);">
 
-        <MudDrawerHeader Class="pa-4">
-            <MudStack Spacing="0">
-                <MudText Typo="Typo.subtitle1"><b>Moduły</b></MudText>
-                <MudText Typo="Typo.body2" Color="Color.Secondary">Lista CRUD (vertical slice)</MudText>
-            </MudStack>
-        </MudDrawerHeader>
-
-        <MudNavMenu Dense="true">
-
-            <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
-                Start
+        <MudNavMenu Class="pt-8">
+            <MudText Typo="Typo.overline" Class="px-4 mb-2" Color="Color.Secondary">
+                Core
+            </MudText>
+            <MudNavLink Href="/dashboard"
+                        Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Filled.Dashboard">
+                Dashboard
             </MudNavLink>
 
-            <MudDivider Class="my-2" />
-
-            <!-- SŁOWNIKI -->
-            <MudNavGroup Title="Słowniki" Icon="@Icons.Material.Filled.List" Expanded="true">
-                <MudNavLink Href="/slowniki/rodzaje-mediow" Icon="@Icons.Material.Filled.WaterDrop">
-                    Rodzaje mediów (CRUD #1)
-                </MudNavLink>
-
-                <MudNavLink Href="/slowniki/jednostki-miary" Icon="@Icons.Material.Filled.Straighten">
-                    Jednostki miary (CRUD #2)
-                </MudNavLink>
-
-                <!-- kolejne: RodzajLicznika itd. -->
-            </MudNavGroup>
-
-            <!-- MEDIA -->
-            <MudNavGroup Title="Media" Icon="@Icons.Material.Filled.Speed" Expanded="false">
-                <MudNavLink Href="/media/przylacza" Icon="@Icons.Material.Filled.DeviceHub">
-                    Przyłącza
-                </MudNavLink>
-
-                <MudNavLink Href="/media/liczniki" Icon="@Icons.Material.Filled.GasMeter">
-                    Liczniki
-                </MudNavLink>
-
-                <MudNavLink Href="/media/odczyty" Icon="@Icons.Material.Filled.QueryStats">
-                    Odczyty
-                </MudNavLink>
-            </MudNavGroup>
-
-            <!-- RDZEŃ -->
-            <MudNavGroup Title="Rdzeń" Icon="@Icons.Material.Filled.Apartment" Expanded="false">
-                <MudNavLink Href="/rdzen/nieruchomosci" Icon="@Icons.Material.Filled.LocationCity">
-                    Nieruchomości
-                </MudNavLink>
-
-                <MudNavLink Href="/rdzen/adresy" Icon="@Icons.Material.Filled.Place">
-                    Adresy
-                </MudNavLink>
-            </MudNavGroup>
-
-            <!-- NAJEM -->
-            <MudNavGroup Title="Najem" Icon="@Icons.Material.Filled.Key" Expanded="false">
-                <MudNavLink Href="/najem/umowy" Icon="@Icons.Material.Filled.Description">
-                    Umowy najmu
-                </MudNavLink>
-
-                <MudNavLink Href="/najem/kaucje" Icon="@Icons.Material.Filled.AccountBalanceWallet">
-                    Kaucje
-                </MudNavLink>
-            </MudNavGroup>
-
-            <!-- FINANSE -->
-            <MudNavGroup Title="Finanse" Icon="@Icons.Material.Filled.Payments" Expanded="false">
-                <MudNavLink Href="/finanse/faktury" Icon="@Icons.Material.Filled.ReceiptLong">
-                    Faktury
-                </MudNavLink>
-
-                <MudNavLink Href="/finanse/platnosci" Icon="@Icons.Material.Filled.CreditCard">
-                    Płatności
-                </MudNavLink>
-            </MudNavGroup>
-
+            <MudText Typo="Typo.overline" Class="px-4 mt-6 mb-2" Color="Color.Secondary">
+                Słowniki
+            </MudText>
+            <MudNavLink Href="/slowniki/jednostki-miary"
+                        Icon="@Icons.Material.Filled.Scale">
+                Jednostki Miary
+            </MudNavLink>
+            <MudNavLink Href="/slowniki/rodzaje-mediow"
+                        Icon="@Icons.Material.Filled.WaterDrop">
+                Rodzaje Mediów
+            </MudNavLink>
         </MudNavMenu>
     </MudDrawer>
 
-    <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Class="pa-4 pa-sm-6">
+    <MudMainContent Class="pt-16 px-4 pb-4">
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-6">
             @Body
         </MudContainer>
     </MudMainContent>
+
 </MudLayout>
 
 @code {
     private bool _drawerOpen = true;
-
-    private void ToggleDrawer()
-        => _drawerOpen = !_drawerOpen;
+    private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
 }

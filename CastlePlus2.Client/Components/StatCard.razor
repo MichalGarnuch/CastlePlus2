@@ -1,16 +1,51 @@
 ﻿@using MudBlazor
 
-<MudPaper Class="pa-4" Rounded="Rounded.Xl" Style="height:140px">
-    <MudStack Justify="Justify.SpaceBetween" Style="height:100%">
-        <MudIcon Icon="@Icon" Size="Size.Large" Color="@Color" />
-        <MudText Typo="Typo.h5">@Value</MudText>
-        <MudText Typo="Typo.body2" Color="Color.Secondary">@Title</MudText>
+<MudPaper Class="glass-panel pa-4"
+          Elevation="0"
+          Style="height:140px; overflow:hidden;">
+
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Start">
+        <MudText Typo="Typo.caption"
+                 Style="color:#94a3b8; text-transform:uppercase; font-weight:700; letter-spacing:1px;">
+            @Title
+        </MudText>
+        <MudIcon Icon="@Icon" Size="Size.Medium" Style="@($"color:{GetColorHex()};")" />
     </MudStack>
+
+    <MudSpacer />
+
+    <MudText Typo="Typo.h4" Class="fw-700">@Value</MudText>
+
+    @if (!string.IsNullOrEmpty(Trend))
+    {
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@(TrendUp? Icons.Material.Filled.TrendingUp : Icons.Material.Filled.TrendingDown)"
+                     Size="Size.Small"
+                     Color="@(TrendUp ? Color.Success : Color.Error)" />
+            <MudText Typo="Typo.caption"
+                     Color="@(TrendUp ? Color.Success : Color.Error)">
+                @Trend
+            </MudText>
+        </MudStack>
+    }
 </MudPaper>
 
 @code {
-    [Parameter] public string Title { get; set; } = string.Empty;
-    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Value { get; set; } = "";
     [Parameter] public string Icon { get; set; } = Icons.Material.Filled.Info;
     [Parameter] public Color Color { get; set; } = Color.Primary;
+    [Parameter] public string? Trend { get; set; }
+    [Parameter] public bool TrendUp { get; set; } = true;
+
+    private string GetColorHex() => Color switch
+    {
+        Color.Primary => "#00d2ff",
+        Color.Secondary => "#d946ef",
+        Color.Tertiary => "#8b5cf6",
+        Color.Success => "#22c55e",
+        Color.Error => "#ef4444",
+        Color.Warning => "#eab308",
+        _ => "#ffffff"
+    };
 }

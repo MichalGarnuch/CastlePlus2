@@ -1,0 +1,61 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
+
+html, body {
+    background-color: #0b0f19;
+    background-image: radial-gradient(circle at 50% 0%, #1a2332 0%, #0b0f19 80%);
+    font-family: 'Montserrat', sans-serif !important;
+    height: 100vh;
+    overflow: hidden; /* scrolluje tylko content */
+}
+
+/* ===== GLASS PANEL (reusable) ===== */
+.glass-panel {
+    background: rgba(22, 27, 34, 0.7) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ===== MudBlazor – poprawki pod Glass ===== */
+.mud-table-root,
+.mud-table-container {
+    background: transparent !important;
+}
+
+.mud-table-head .mud-table-cell {
+    color: #94a3b8 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+.mud-table-body .mud-table-cell {
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+    color: #e2e8f0;
+}
+
+.mud-table-hover .mud-table-row:hover {
+    background-color: rgba(0, 210, 255, 0.08) !important;
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0b0f19;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+
+/* ===== Utils ===== */
+.fw-700 {
+    font-weight: 700;
+}
