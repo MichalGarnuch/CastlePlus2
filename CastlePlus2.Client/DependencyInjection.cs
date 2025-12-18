@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using CastlePlus2.Client.Services.Slowniki;
+using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
 
 namespace CastlePlus2.Client;
@@ -10,6 +11,9 @@ public static class DependencyInjection
         services.AddMudServices();
         // tutaj dopniemy serwisy modułów, np. services.AddScoped<IRodzajMediowService, RodzajMediowService>();
         services.AddScoped<CastlePlus2.Client.Services.Media.IRodzajeMediowService, CastlePlus2.Client.Services.Media.RodzajeMediowService>();
+
+        services.AddScoped<IJednostkiMiaryService, JednostkiMiaryService>();
+
 
         return services;
     }

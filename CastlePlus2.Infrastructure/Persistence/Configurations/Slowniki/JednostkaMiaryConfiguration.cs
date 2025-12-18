@@ -23,7 +23,7 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Slowniki
 
             builder.Property(x => x.Nazwa)
                    .HasColumnName("Nazwa")
-                   .HasMaxLength(80)
+                   .HasMaxLength(100)
                    .IsRequired();
         }
     }

@@ -1,0 +1,228 @@
+﻿@page "/slowniki/jednostki-miary"
+@using MudBlazor
+@using CastlePlus2.Client.Services.Slowniki
+@using CastlePlus2.Contracts.DTOs.Slowniki
+@inject IJednostkiMiaryService Service
+@inject ISnackbar Snackbar
+@inject IDialogService Dialogs
+
+<MudPaper Class="pa-4 pa-sm-6" Elevation="1" Rounded="Rounded.Lg">
+
+    <MudStack Spacing="3">
+
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.h5">Jednostki miary</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    Słownik wykorzystywany m.in. w mediach i najmie.
+                </MudText>
+            </MudStack>
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="Add">
+                Dodaj
+            </MudButton>
+        </MudStack>
+
+        <MudGrid Spacing="2">
+            <MudItem xs="12" sm="6" md="5">
+                <MudTextField @bind-Value="_search"
+                              Label="Szukaj (kod lub nazwa)"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Clearable="true"
+                              Immediate="true"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="3">
+                <MudSelect T="int" @bind-Value="_pageSize"
+                           Label="Wiersze na stronie"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense">
+                    <MudSelectItem Value="10">10</MudSelectItem>
+                    <MudSelectItem Value="20">20</MudSelectItem>
+                    <MudSelectItem Value="50">50</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12" md="4">
+                <MudStack Row="true" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center" Spacing="1">
+                    <MudButton Variant="Variant.Outlined"
+                               StartIcon="@Icons.Material.Filled.Refresh"
+                               Disabled="_loading"
+                               OnClick="Reload">
+                        Odśwież
+                    </MudButton>
+                </MudStack>
+            </MudItem>
+        </MudGrid>
+
+        <MudDivider />
+
+        <MudTable Items="_itemsFiltered"
+                  Dense="true"
+                  Hover="true"
+                  Bordered="true"
+                  Striped="true"
+                  Loading="_loading"
+                  RowsPerPage="_pageSize"
+                  Breakpoint="Breakpoint.Sm"
+                  Elevation="0">
+
+            <ToolBarContent>
+                <MudText Typo="Typo.subtitle2">Lista</MudText>
+                <MudSpacer />
+                <MudChip T="string" Variant="Variant.Outlined" Size="Size.Small">
+                    ZSI • Web + Mobile
+                </MudChip>
+            </ToolBarContent>
+
+            <HeaderContent>
+                <MudTh>Kod</MudTh>
+                <MudTh>Nazwa</MudTh>
+                <MudTh></MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd DataLabel="Kod">
+                    <MudText Typo="Typo.body2"><b>@context.KodJednostki</b></MudText>
+                </MudTd>
+
+                <MudTd DataLabel="Nazwa">
+                    <MudText Typo="Typo.body2">@context.Nazwa</MudText>
+                </MudTd>
+
+                <MudTd DataLabel="Akcje" Align="Align.Right">
+                    <MudStack Row="true" Justify="Justify.FlexEnd" Spacing="1">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Primary"
+                                       Title="Edytuj"
+                                       OnClick="@(() => Edit(context))" />
+
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Title="Usuń"
+                                       OnClick="@(() => Delete(context))" />
+                    </MudStack>
+                </MudTd>
+            </RowTemplate>
+
+            <NoRecordsContent>
+                <MudStack AlignItems="AlignItems.Center" Class="pa-6" Spacing="1">
+                    <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" />
+                    <MudText Typo="Typo.subtitle1">Brak danych</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Zmień filtr wyszukiwania lub dodaj nową jednostkę.
+                    </MudText>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Add">
+                        Dodaj jednostkę
+                    </MudButton>
+                </MudStack>
+            </NoRecordsContent>
+
+            <LoadingContent>
+                <MudStack AlignItems="AlignItems.Center" Class="pa-6" Spacing="2">
+                    <MudProgressCircular Indeterminate="true" Size="Size.Large" />
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Ładowanie…</MudText>
+                </MudStack>
+            </LoadingContent>
+
+        </MudTable>
+
+    </MudStack>
+</MudPaper>
+
+@code {
+    private List<JednostkaMiaryDto> _items = new();
+    private bool _loading;
+    private string _search = string.Empty;
+    private int _pageSize = 20;
+
+    private List<JednostkaMiaryDto> _itemsFiltered =>
+        string.IsNullOrWhiteSpace(_search)
+            ? _items
+            : _items.Where(x =>
+                    (x.KodJednostki?.Contains(_search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (x.Nazwa?.Contains(_search, StringComparison.OrdinalIgnoreCase) ?? false))
+                .ToList();
+
+    protected override async Task OnInitializedAsync()
+        => await Reload();
+
+    private async Task Reload()
+    {
+        try
+        {
+            _loading = true;
+            _items = await Service.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania danych: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task Add()
+    {
+        var dlg = await Dialogs.ShowAsync<JednostkaMiaryDialog>("Dodaj jednostkę miary",
+            new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true });
+
+        var res = await dlg.Result;
+        if (res is not null && !res.Canceled)
+        {
+            Snackbar.Add("Dodano.", Severity.Success);
+            await Reload();
+        }
+    }
+
+    private async Task Edit(JednostkaMiaryDto item)
+    {
+        var parameters = new DialogParameters
+        {
+            ["KodJednostki"] = item.KodJednostki,
+            ["Nazwa"] = item.Nazwa
+        };
+
+        var dlg = await Dialogs.ShowAsync<JednostkaMiaryDialog>("Edytuj jednostkę miary",
+            parameters,
+            new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true });
+
+        var res = await dlg.Result;
+        if (res is not null && !res.Canceled)
+        {
+            Snackbar.Add("Zapisano zmiany.", Severity.Success);
+            await Reload();
+        }
+    }
+
+    private async Task Delete(JednostkaMiaryDto item)
+    {
+        var ok = await Dialogs.ShowMessageBox(
+            title: "Usuń jednostkę",
+            markupMessage: (MarkupString)$"Czy na pewno usunąć <b>{item.KodJednostki}</b>?",
+            yesText: "Usuń",
+            cancelText: "Anuluj");
+
+        if (ok == true)
+        {
+            try
+            {
+                await Service.DeleteAsync(item.KodJednostki);
+                Snackbar.Add("Usunięto.", Severity.Success);
+                await Reload();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Nie udało się usunąć: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+}

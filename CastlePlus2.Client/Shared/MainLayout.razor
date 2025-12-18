@@ -1,23 +1,128 @@
 ﻿@inherits LayoutComponentBase
+@using MudBlazor
+@using CastlePlus2.Client.Theme
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+<MudThemeProvider Theme="CastleTheme.Dark" />
 
-        <article class="content px-4">
+
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1" Dense="true">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                       Color="Color.Inherit"
+                       Edge="Edge.Start"
+                       OnClick="@ToggleDrawer" />
+
+        <MudText Typo="Typo.h6" Class="ml-2">CastlePlus2</MudText>
+
+        <MudSpacer />
+
+        <MudChip T="string" Variant="Variant.Outlined" Size="Size.Small">
+            ZSI • Web + Mobile
+        </MudChip>
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen"
+               Variant="DrawerVariant.Responsive"
+               Elevation="1"
+               ClipMode="DrawerClipMode.Always"
+               Width="300px">
+
+        <MudDrawerHeader Class="pa-4">
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.subtitle1"><b>Moduły</b></MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Lista CRUD (vertical slice)</MudText>
+            </MudStack>
+        </MudDrawerHeader>
+
+        <MudNavMenu Dense="true">
+
+            <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
+                Start
+            </MudNavLink>
+
+            <MudDivider Class="my-2" />
+
+            <!-- SŁOWNIKI -->
+            <MudNavGroup Title="Słowniki" Icon="@Icons.Material.Filled.List" Expanded="true">
+                <MudNavLink Href="/slowniki/rodzaje-mediow" Icon="@Icons.Material.Filled.WaterDrop">
+                    Rodzaje mediów (CRUD #1)
+                </MudNavLink>
+
+                <MudNavLink Href="/slowniki/jednostki-miary" Icon="@Icons.Material.Filled.Straighten">
+                    Jednostki miary (CRUD #2)
+                </MudNavLink>
+
+                <!-- kolejne: RodzajLicznika itd. -->
+            </MudNavGroup>
+
+            <!-- MEDIA -->
+            <MudNavGroup Title="Media" Icon="@Icons.Material.Filled.Speed" Expanded="false">
+                <MudNavLink Href="/media/przylacza" Icon="@Icons.Material.Filled.DeviceHub">
+                    Przyłącza
+                </MudNavLink>
+
+                <MudNavLink Href="/media/liczniki" Icon="@Icons.Material.Filled.GasMeter">
+                    Liczniki
+                </MudNavLink>
+
+                <MudNavLink Href="/media/odczyty" Icon="@Icons.Material.Filled.QueryStats">
+                    Odczyty
+                </MudNavLink>
+            </MudNavGroup>
+
+            <!-- RDZEŃ -->
+            <MudNavGroup Title="Rdzeń" Icon="@Icons.Material.Filled.Apartment" Expanded="false">
+                <MudNavLink Href="/rdzen/nieruchomosci" Icon="@Icons.Material.Filled.LocationCity">
+                    Nieruchomości
+                </MudNavLink>
+
+                <MudNavLink Href="/rdzen/adresy" Icon="@Icons.Material.Filled.Place">
+                    Adresy
+                </MudNavLink>
+            </MudNavGroup>
+
+            <!-- NAJEM -->
+            <MudNavGroup Title="Najem" Icon="@Icons.Material.Filled.Key" Expanded="false">
+                <MudNavLink Href="/najem/umowy" Icon="@Icons.Material.Filled.Description">
+                    Umowy najmu
+                </MudNavLink>
+
+                <MudNavLink Href="/najem/kaucje" Icon="@Icons.Material.Filled.AccountBalanceWallet">
+                    Kaucje
+                </MudNavLink>
+            </MudNavGroup>
+
+            <!-- FINANSE -->
+            <MudNavGroup Title="Finanse" Icon="@Icons.Material.Filled.Payments" Expanded="false">
+                <MudNavLink Href="/finanse/faktury" Icon="@Icons.Material.Filled.ReceiptLong">
+                    Faktury
+                </MudNavLink>
+
+                <MudNavLink Href="/finanse/platnosci" Icon="@Icons.Material.Filled.CreditCard">
+                    Płatności
+                </MudNavLink>
+            </MudNavGroup>
+
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="pa-4 pa-sm-6">
             @Body
-        </article>
-    </main>
-</div>
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
+@code {
+    private bool _drawerOpen = true;
+
+    private void ToggleDrawer()
+        => _drawerOpen = !_drawerOpen;
+}

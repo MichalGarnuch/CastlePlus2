@@ -14,24 +14,22 @@ namespace CastlePlus2.Infrastructure.Repositories.Slowniki
             _db = db;
         }
 
-        public async Task AddAsync(JednostkaMiary entity, CancellationToken ct)
-        {
-            await _db.JednostkiMiary.AddAsync(entity, ct);
-        }
-
-        public Task<JednostkaMiary?> GetByKodAsync(string kod, CancellationToken ct)
-        {
-            return _db.JednostkiMiary.FirstOrDefaultAsync(x => x.KodJednostki == kod, ct);
-        }
-
         public Task<List<JednostkaMiary>> GetAllAsync(CancellationToken ct)
-        {
-            return _db.JednostkiMiary.OrderBy(x => x.KodJednostki).ToListAsync(ct);
-        }
+            => _db.JednostkiMiary.AsNoTracking().OrderBy(x => x.KodJednostki).ToListAsync(ct);
+
+        public Task<JednostkaMiary?> GetByKodAsync(string kodJednostki, CancellationToken ct)
+            => _db.JednostkiMiary.FirstOrDefaultAsync(x => x.KodJednostki == kodJednostki, ct);
+
+        public Task<bool> ExistsAsync(string kodJednostki, CancellationToken ct)
+            => _db.JednostkiMiary.AnyAsync(x => x.KodJednostki == kodJednostki, ct);
+
+        public Task AddAsync(JednostkaMiary entity, CancellationToken ct)
+            => _db.JednostkiMiary.AddAsync(entity, ct).AsTask();
+
+        public void Remove(JednostkaMiary entity)
+            => _db.JednostkiMiary.Remove(entity);
 
         public Task<int> SaveChangesAsync(CancellationToken ct)
-        {
-            return _db.SaveChangesAsync(ct);
-        }
+            => _db.SaveChangesAsync(ct);
     }
 }

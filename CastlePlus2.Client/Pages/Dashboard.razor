@@ -1,0 +1,75 @@
+﻿@page "/dashboard"
+@using MudBlazor
+
+<MudGrid Spacing="3">
+
+    <!-- HERO / MAP / IMAGE -->
+    <MudItem xs="12">
+        <MudPaper Height="380px"
+                  Class="pa-4"
+                  Style="
+                    background-image:url('/img/city.jpg');
+                    background-size:cover;
+                    border-radius:16px;">
+            <MudText Typo="Typo.h4">CastlePlus2 – Centrum Operacyjne</MudText>
+            <MudText Color="Color.Secondary">
+                Nieruchomości • Media • Najem • Finanse
+            </MudText>
+        </MudPaper>
+    </MudItem>
+
+    <!-- KPI -->
+    <MudItem xs="12" md="3">
+        <StatCard Title="Nieruchomości" Value="128" Icon="@Icons.Material.Filled.Apartment" />
+    </MudItem>
+
+    <MudItem xs="12" md="3">
+        <StatCard Title="Liczniki" Value="412" Icon="@Icons.Material.Filled.GasMeter" />
+    </MudItem>
+
+    <MudItem xs="12" md="3">
+        <StatCard Title="Aktywne umowy" Value="96" Icon="@Icons.Material.Filled.Key" />
+    </MudItem>
+
+    <MudItem xs="12" md="3">
+        <StatCard Title="Alerty" Value="7" Color="Color.Error" Icon="@Icons.Material.Filled.Warning" />
+    </MudItem>
+
+    <!-- OPERACJE -->
+    <MudItem xs="12" md="6">
+        <MudPaper Class="pa-4" Rounded="Rounded.Xl">
+            <MudText Typo="Typo.h6">Operacje szybkie</MudText>
+
+            <MudStack Spacing="2" Class="mt-3">
+                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add">
+                    Dodaj nieruchomość
+                </MudButton>
+
+                <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Speed">
+                    Przejdź do mediów
+                </MudButton>
+
+                <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.List">
+                    Słowniki
+                </MudButton>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+
+    <!-- ALERTY -->
+    <MudItem xs="12" md="6">
+        <MudPaper Class="pa-4" Rounded="Rounded.Xl">
+            <MudText Typo="Typo.h6">Alerty krytyczne</MudText>
+
+            <MudList T="string" Dense="true">
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Error" IconColor="Color.Error">
+                    Brak odczytu – licznik WODA_12
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Warning" IconColor="Color.Warning">
+                    Przekroczenie zużycia – kWh
+                </MudListItem>
+            </MudList>
+        </MudPaper>
+    </MudItem>
+
+</MudGrid>

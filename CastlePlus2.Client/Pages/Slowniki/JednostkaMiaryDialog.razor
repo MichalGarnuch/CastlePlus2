@@ -1,0 +1,109 @@
+﻿@using MudBlazor
+@using CastlePlus2.Client.Services.Slowniki
+@using CastlePlus2.Contracts.DTOs.Slowniki
+@inject IJednostkiMiaryService Service
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="2">
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true">
+                Kod jest kluczem głównym – po utworzeniu nie można go zmienić.
+            </MudAlert>
+
+            <MudForm @ref="_form">
+                <MudTextField @bind-Value="_kod"
+                              Label="Kod"
+                              HelperText="np. kWh, m3, szt"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Required="true"
+                              RequiredError="Kod jest wymagany"
+                              Disabled="@IsEdit"
+                              MaxLength="20"
+                              Immediate="true" />
+
+                <MudTextField @bind-Value="_nazwa"
+                              Label="Nazwa"
+                              HelperText="Pełna nazwa jednostki"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Required="true"
+                              RequiredError="Nazwa jest wymagana"
+                              MaxLength="100"
+                              Immediate="true" />
+            </MudForm>
+        </MudStack>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel" Disabled="_saving">
+            Anuluj
+        </MudButton>
+
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Filled.Save"
+                   Disabled="_saving"
+                   OnClick="Save">
+            @_savingText
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    // MudBlazor v8+
+    [CascadingParameter] public IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public string? KodJednostki { get; set; }
+    [Parameter] public string? Nazwa { get; set; }
+
+    private MudForm _form = default!;
+    private string _kod = string.Empty;
+    private string _nazwa = string.Empty;
+
+    private bool _saving;
+    private string _savingText => _saving ? "Zapisywanie..." : "Zapisz";
+    private bool IsEdit => !string.IsNullOrWhiteSpace(KodJednostki);
+
+    protected override void OnInitialized()
+    {
+        if (IsEdit)
+        {
+            _kod = KodJednostki!;
+            _nazwa = Nazwa ?? string.Empty;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task Save()
+    {
+        await _form.Validate();
+        if (!_form.IsValid) return;
+
+        _saving = true;
+
+        try
+        {
+            if (IsEdit)
+            {
+                await Service.UpdateAsync(_kod, new UpdateJednostkaMiaryRequest { Nazwa = _nazwa });
+            }
+            else
+            {
+                await Service.CreateAsync(new CreateJednostkaMiaryRequest { KodJednostki = _kod, Nazwa = _nazwa });
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}
