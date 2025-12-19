@@ -1,6 +1,8 @@
-﻿namespace CastlePlus2.Contracts.DTOs.Slowniki
+﻿using MediatR;
+
+namespace CastlePlus2.Application.Slowniki.Indeksacje.Commands.UpdateIndeksacja
 {
-    public class IndeksacjaDto
+    public class UpdateIndeksacjaCommand : IRequest<bool>
     {
         public string KodIndeksacji { get; set; } = default!;
         public string Nazwa { get; set; } = default!;

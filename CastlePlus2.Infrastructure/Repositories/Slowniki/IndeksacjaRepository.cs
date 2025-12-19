@@ -33,5 +33,11 @@ namespace CastlePlus2.Infrastructure.Repositories.Slowniki
         {
             return _db.SaveChangesAsync(ct);
         }
+        public Task RemoveAsync(Indeksacja entity, CancellationToken ct)
+        {
+            _db.Indeksacje.Remove(entity);
+            return Task.CompletedTask;
+        }
+
     }
 }

@@ -1,3 +1,4 @@
+using MudBlazor.Services;
 using CastlePlus2.Client;
 using CastlePlus2.Web.App.Components;
 
@@ -5,6 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddMudServices();
+
 
 builder.Services.AddHttpClient("ApiClient", client => client.BaseAddress = new Uri("http://localhost:5072/"));
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ApiClient"));

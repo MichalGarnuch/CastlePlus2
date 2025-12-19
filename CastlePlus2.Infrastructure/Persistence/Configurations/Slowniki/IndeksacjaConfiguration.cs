@@ -25,6 +25,11 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Slowniki
                    .HasColumnName("Nazwa")
                    .HasMaxLength(100)
                    .IsRequired();
+
+            builder.Property(x => x.AdresZrodlaURL)
+                   .HasColumnName("AdresZrodlaURL")
+                   .HasMaxLength(400)
+                   .IsRequired(false);
         }
     }
 }

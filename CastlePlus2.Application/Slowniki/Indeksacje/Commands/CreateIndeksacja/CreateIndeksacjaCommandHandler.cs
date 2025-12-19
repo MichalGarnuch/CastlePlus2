@@ -19,14 +19,11 @@ namespace CastlePlus2.Application.Slowniki.Indeksacje.Commands.CreateIndeksacja
 
         public async Task<IndeksacjaDto> Handle(CreateIndeksacjaCommand request, CancellationToken ct)
         {
-            var existing = await _repo.GetByKodAsync(request.KodIndeksacji, ct);
-            if (existing != null)
-                return _mapper.Map<IndeksacjaDto>(existing);
-
             var entity = new Indeksacja
             {
                 KodIndeksacji = request.KodIndeksacji,
-                Nazwa = request.Nazwa
+                Nazwa = request.Nazwa,
+                AdresZrodlaURL = request.AdresZrodlaURL
             };
 
             await _repo.AddAsync(entity, ct);

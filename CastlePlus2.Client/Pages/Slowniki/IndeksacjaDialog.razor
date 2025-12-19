@@ -1,0 +1,83 @@
+﻿@using CastlePlus2.Client.Services.Slowniki
+@using CastlePlus2.Contracts.DTOs.Slowniki
+@inject IIndeksacjeService Service
+
+<MudDialog Class="glass-panel">
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudTextField @bind-Value="_kod"
+                          Label="Kod indeksacji"
+                          Required="true"
+                          Disabled="@IsEdit"
+                          MaxLength="20" />
+
+            <MudTextField @bind-Value="_nazwa"
+                          Label="Nazwa"
+                          Required="true"
+                          MaxLength="100" />
+
+            <MudTextField @bind-Value="_url"
+                          Label="Adres źródła URL"
+                          Required="false"
+                          MaxLength="400" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public string? KodIndeksacji { get; set; }
+    [Parameter] public string? Nazwa { get; set; }
+    [Parameter] public string? AdresZrodlaURL { get; set; }
+
+    private MudForm _form = default!;
+    private string _kod = string.Empty;
+    private string _nazwa = string.Empty;
+    private string? _url;
+
+    private bool IsEdit => !string.IsNullOrWhiteSpace(KodIndeksacji);
+
+    protected override void OnInitialized()
+    {
+        if (IsEdit)
+        {
+            _kod = KodIndeksacji!;
+            _nazwa = Nazwa ?? string.Empty;
+            _url = AdresZrodlaURL;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task Save()
+    {
+        await _form.Validate();
+        if (!_form.IsValid) return;
+
+        if (IsEdit)
+        {
+            await Service.UpdateAsync(_kod, new UpdateIndeksacjaRequest
+            {
+                Nazwa = _nazwa,
+                AdresZrodlaURL = _url
+            });
+        }
+        else
+        {
+            await Service.CreateAsync(new CreateIndeksacjaRequest
+            {
+                KodIndeksacji = _kod,
+                Nazwa = _nazwa,
+                AdresZrodlaURL = _url
+            });
+        }
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}

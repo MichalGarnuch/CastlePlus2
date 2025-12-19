@@ -1,4 +1,5 @@
-﻿using CastlePlus2.Client; // To musi być widoczne
+﻿using MudBlazor.Services;
+using CastlePlus2.Client; // To musi być widoczne
 using Microsoft.Extensions.Logging;
 
 namespace CastlePlus2.Mobile
@@ -15,6 +16,8 @@ namespace CastlePlus2.Mobile
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
+
+            builder.Services.AddMudServices();
 
             // 1. Dodajemy WebView
             builder.Services.AddMauiBlazorWebView();

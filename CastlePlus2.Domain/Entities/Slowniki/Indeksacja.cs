@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CastlePlus2.Domain.Entities.Slowniki
+﻿namespace CastlePlus2.Domain.Entities.Slowniki
 {
     /// <summary>
     /// Słownik indeksacji (np. CPI, stała, brak).
@@ -15,6 +9,6 @@ namespace CastlePlus2.Domain.Entities.Slowniki
     {
         public string KodIndeksacji { get; set; } = default!;
         public string Nazwa { get; set; } = default!;
+        public string? AdresZrodlaURL { get; set; } // nvarchar(400) NULL
     }
 }
-

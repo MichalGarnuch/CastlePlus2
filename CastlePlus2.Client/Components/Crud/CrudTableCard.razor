@@ -1,0 +1,22 @@
+﻿@using MudBlazor
+
+<MudPaper Class="glass-panel pa-4 pa-sm-6"
+          Elevation="0"
+          Rounded="Rounded.Xl">
+
+    @if (!string.IsNullOrEmpty(Title))
+    {
+        <MudText Typo="Typo.h6"
+                 Class="mb-4"
+                 Style="font-weight:700;">
+            @Title
+        </MudText>
+    }
+
+    @ChildContent
+</MudPaper>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

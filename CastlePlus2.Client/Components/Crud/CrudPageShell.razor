@@ -1,0 +1,49 @@
+﻿@using MudBlazor
+
+<MudStack Spacing="4" Class="mb-4">
+
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudStack Spacing="0">
+            <MudText Typo="Typo.h5"
+                     Style="font-weight:800; letter-spacing:0.5px;"
+                     Class="neon-text-gradient">
+                @Title
+            </MudText>
+
+            @if (!string.IsNullOrEmpty(Subtitle))
+            {
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    @Subtitle
+                </MudText>
+            }
+        </MudStack>
+
+        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+            @Actions
+        </MudStack>
+    </MudStack>
+
+    @if (IsLoading)
+    {
+        <MudPaper Class="glass-panel pa-8" Elevation="0">
+            <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+                <MudText Color="Color.Secondary">
+                    Ładowanie danych...
+                </MudText>
+            </MudStack>
+        </MudPaper>
+    }
+    else
+    {
+        @ChildContent
+    }
+</MudStack>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string Subtitle { get; set; } = string.Empty;
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public RenderFragment? Actions { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

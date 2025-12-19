@@ -13,6 +13,7 @@ public static class DependencyInjection
         services.AddScoped<CastlePlus2.Client.Services.Media.IRodzajeMediowService, CastlePlus2.Client.Services.Media.RodzajeMediowService>();
 
         services.AddScoped<IJednostkiMiaryService, JednostkiMiaryService>();
+        services.AddScoped<IIndeksacjeService, IndeksacjeService>();
 
 
         return services;

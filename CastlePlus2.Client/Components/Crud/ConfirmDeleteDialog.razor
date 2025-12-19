@@ -1,0 +1,46 @@
+﻿@using MudBlazor
+
+<MudDialog Class="glass-panel">
+    <DialogContent>
+        <MudStack Row="true"
+                  AlignItems="AlignItems.Center"
+                  Spacing="3"
+                  Class="py-2">
+
+            <MudIcon Icon="@Icons.Material.Filled.Warning"
+                     Color="Color.Error"
+                     Size="Size.Large" />
+
+            <MudStack Spacing="1">
+                <MudText Typo="Typo.h6">@Title</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    @Message
+                </MudText>
+            </MudStack>
+        </MudStack>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">
+            Anuluj
+        </MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Error"
+                   OnClick="Confirm">
+            Usuń
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public string Title { get; set; } = "Potwierdzenie";
+    [Parameter]
+    public string Message { get; set; }
+        = "Czy na pewno chcesz usunąć ten element?";
+
+    private void Cancel() => MudDialog.Cancel();
+    private void Confirm() => MudDialog.Close(DialogResult.Ok(true));
+}
