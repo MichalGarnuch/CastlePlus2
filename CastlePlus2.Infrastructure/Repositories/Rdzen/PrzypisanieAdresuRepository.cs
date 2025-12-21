@@ -36,5 +36,24 @@ namespace CastlePlus2.Infrastructure.Repositories.Rdzen
         {
             return _db.SaveChangesAsync(cancellationToken);
         }
+        public Task<List<PrzypisanieAdresu>> GetAllAsync(CancellationToken cancellationToken)
+        {
+            return _db.PrzypisaniaAdresow
+                .AsNoTracking()
+                .OrderByDescending(x => x.IdPrzypisaniaAdresu)
+                .ToListAsync(cancellationToken);
+        }
+
+        public Task<PrzypisanieAdresu?> GetForUpdateAsync(long id, CancellationToken cancellationToken)
+        {
+            return _db.PrzypisaniaAdresow
+                .FirstOrDefaultAsync(x => x.IdPrzypisaniaAdresu == id, cancellationToken);
+        }
+
+        public void Remove(PrzypisanieAdresu entity)
+        {
+            _db.PrzypisaniaAdresow.Remove(entity);
+        }
+
     }
 }

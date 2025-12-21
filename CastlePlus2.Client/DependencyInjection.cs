@@ -13,16 +13,16 @@ public static class DependencyInjection
     {
         services.AddMudServices();
         // tutaj dopniemy serwisy modułów, np. services.AddScoped<IRodzajMediowService, RodzajMediowService>();
-        services.AddScoped<CastlePlus2.Client.Services.Media.IRodzajeMediowService, CastlePlus2.Client.Services.Media.RodzajeMediowService>();
+        services.AddScoped<IRodzajeMediowService, RodzajeMediowService>();
 
         services.AddScoped<IJednostkiMiaryService, JednostkiMiaryService>();
         services.AddScoped<IIndeksacjeService, IndeksacjeService>();
         services.AddScoped<IWalutyService, WalutyService>();
+
         services.AddScoped<IAdresyService, AdresyService>();
+        services.AddScoped<IPrzypisaniaAdresowService, PrzypisaniaAdresowService>();
+
         services.AddScoped<IPodmiotyService, PodmiotyService>();
-
-
-
 
         return services;
     }

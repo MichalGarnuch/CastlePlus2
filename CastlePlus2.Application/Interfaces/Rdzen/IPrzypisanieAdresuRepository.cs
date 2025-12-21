@@ -17,6 +17,9 @@ namespace CastlePlus2.Application.Interfaces.Rdzen
         /// Zwraca aktywne przypisanie adresu dla encji (DoDnia == null), jeżeli istnieje.
         /// </summary>
         Task<PrzypisanieAdresu?> GetAktywneDlaEncjiAsync(Guid idEncji, CancellationToken cancellationToken);
+        Task<List<PrzypisanieAdresu>> GetAllAsync(CancellationToken cancellationToken);
+        Task<PrzypisanieAdresu?> GetForUpdateAsync(long id, CancellationToken cancellationToken);
+        void Remove(PrzypisanieAdresu entity);
 
     }
 }

@@ -1,0 +1,226 @@
+﻿@page "/rdzen/przypisania-adresow"
+@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Rdzen
+@using CastlePlus2.Contracts.Requests.Rdzen
+@using CastlePlus2.Client.Services.Rdzen
+@inject IPrzypisaniaAdresowService Service
+@inject IAdresyService AdresyService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Przypisania adresów</MudText>
+
+<MudPaper Class="pa-4">
+    <MudTable Items="_items"
+              Dense="true"
+              Hover="true"
+              Bordered="true"
+              Striped="true">
+
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudSpacer />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="CreateAsync">
+                Dodaj
+            </MudButton>
+        </ToolBarContent>
+
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>IdEncji</MudTh>
+            <MudTh>Adres</MudTh>
+            <MudTh>Od</MudTh>
+            <MudTh>Do</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.IdPrzypisaniaAdresu</MudTd>
+            <MudTd DataLabel="IdEncji">@context.IdEncji</MudTd>
+            <MudTd DataLabel="Adres">@GetAdresLabel(context.IdAdresu)</MudTd>
+            <MudTd DataLabel="Od">@context.OdDnia</MudTd>
+            <MudTd DataLabel="Do">@context.DoDnia</MudTd>
+
+            <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               OnClick="@(() => EditAsync(context))" />
+
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="@(() => DeleteAsync(context))" />
+            </MudTd>
+        </RowTemplate>
+
+        <NoRecordsContent>
+            <MudText Class="pa-4">Brak rekordów.</MudText>
+        </NoRecordsContent>
+
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<PrzypisanieAdresuDto> _items = new();
+    private Dictionary<long, string> _adresy = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAdresyAsync();
+        await ReloadAsync();
+    }
+
+    private async Task LoadAdresyAsync()
+    {
+        try
+        {
+            var list = await AdresyService.GetAllAsync();
+            _adresy = (list ?? new List<AdresDto>())
+                .ToDictionary(a => a.IdAdresu, a => !string.IsNullOrWhiteSpace(a.AdresPelny) ? a.AdresPelny : a.AdresSformatowany);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania adresów (lookup): {ex.Message}", Severity.Error);
+            _adresy = new();
+        }
+    }
+
+    private string GetAdresLabel(long idAdresu)
+        => _adresy.TryGetValue(idAdresu, out var s) ? s : $"IdAdresu={idAdresu}";
+
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            var data = await Service.GetAllAsync();
+            _items = (data ?? new List<PrzypisanieAdresuDto>()).ToList();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania przypisań: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task CreateAsync()
+    {
+        var parameters = new DialogParameters
+        {
+            ["Model"] = new PrzypisanieAdresuDto
+            {
+                OdDnia = DateOnly.FromDateTime(DateTime.Today)
+            },
+            ["Adresy"] = _adresy,
+            ["IsEdit"] = false
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+        var dialog = await DialogService.ShowAsync<PrzypisanieAdresuDialog>("Dodaj przypisanie adresu", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is PrzypisanieAdresuDto model)
+        {
+            try
+            {
+                var req = new CreatePrzypisanieAdresuRequest
+                {
+                    IdEncji = model.IdEncji,
+                    IdAdresu = model.IdAdresu,
+                    OdDnia = model.OdDnia
+                };
+
+                var newId = await Service.CreateAsync(req);
+                Snackbar.Add($"Dodano (Id={newId}).", Severity.Success);
+
+                await ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Błąd dodawania: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task EditAsync(PrzypisanieAdresuDto item)
+    {
+        var clone = new PrzypisanieAdresuDto
+        {
+            IdPrzypisaniaAdresu = item.IdPrzypisaniaAdresu,
+            IdEncji = item.IdEncji,
+            IdAdresu = item.IdAdresu,
+            OdDnia = item.OdDnia,
+            DoDnia = item.DoDnia
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["Adresy"] = _adresy,
+            ["IsEdit"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+        var dialog = await DialogService.ShowAsync<PrzypisanieAdresuDialog>("Edytuj przypisanie adresu", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is PrzypisanieAdresuDto model)
+        {
+            try
+            {
+                var req = new UpdatePrzypisanieAdresuRequest
+                {
+                    IdAdresu = model.IdAdresu,
+                    OdDnia = model.OdDnia,
+                    DoDnia = model.DoDnia
+                };
+
+                var ok = await Service.UpdateAsync(model.IdPrzypisaniaAdresu, req);
+                if (!ok)
+                {
+                    Snackbar.Add("Nie znaleziono rekordu do edycji (404).", Severity.Warning);
+                    return;
+                }
+
+                Snackbar.Add("Zapisano.", Severity.Success);
+                await ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task DeleteAsync(PrzypisanieAdresuDto item)
+    {
+        bool? confirm = await DialogService.ShowMessageBox(
+            "Usuń",
+            $"Czy na pewno usunąć przypisanie Id={item.IdPrzypisaniaAdresu}?",
+            yesText: "Usuń",
+            cancelText: "Anuluj");
+
+        if (confirm != true) return;
+
+        try
+        {
+            var ok = await Service.DeleteAsync(item.IdPrzypisaniaAdresu);
+            if (!ok)
+            {
+                Snackbar.Add("Nie znaleziono rekordu do usunięcia (404).", Severity.Warning);
+                return;
+            }
+
+            Snackbar.Add("Usunięto.", Severity.Success);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd usuwania: {ex.Message}", Severity.Error);
+        }
+    }
+}
