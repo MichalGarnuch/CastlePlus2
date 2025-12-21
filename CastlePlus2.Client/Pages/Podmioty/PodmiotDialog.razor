@@ -1,0 +1,75 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Podmioty
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(IsEdit ? "Edycja podmiotu" : "Nowy podmiot")
+            </MudText>
+
+            @if (IsEdit)
+            {
+                <MudTextField Value="@Model.IdPodmiotu.ToString()"
+                              Label="IdPodmiotu"
+                              Disabled="true"
+                              Margin="Margin.Dense" />
+            }
+
+            <MudTextField @bind-Value="Model.Nazwa"
+                          Label="Nazwa"
+                          Required="true"
+                          RequiredError="Nazwa jest wymagana"
+                          Margin="Margin.Dense" />
+
+            <MudTextField @bind-Value="Model.TypPodmiotu"
+                          Label="TypPodmiotu"
+                          Required="true"
+                          RequiredError="TypPodmiotu jest wymagany"
+                          Margin="Margin.Dense" />
+
+            <MudTextField @bind-Value="Model.NIP"
+                          Label="NIP"
+                          Margin="Margin.Dense" />
+
+            <MudTextField @bind-Value="Model.REGON"
+                          Label="REGON"
+                          Margin="Margin.Dense" />
+
+            <MudTextField @bind-Value="Model.PESEL"
+                          Label="PESEL"
+                          Margin="Margin.Dense" />
+
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public PodmiotDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    private MudForm? _form;
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SaveAsync()
+    {
+        if (_form is null) return;
+
+        await _form.Validate();
+        if (!_form.IsValid) return;
+
+        Model.Nazwa = Model.Nazwa.Trim();
+        Model.TypPodmiotu = Model.TypPodmiotu.Trim();
+
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+}

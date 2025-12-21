@@ -33,5 +33,11 @@ namespace CastlePlus2.Infrastructure.Repositories.Podmioty
         {
             return _db.SaveChangesAsync(ct);
         }
+
+        public void Remove(Podmiot podmiot)
+        {
+            _db.Podmioty.Remove(podmiot);
+        }
+
     }
 }

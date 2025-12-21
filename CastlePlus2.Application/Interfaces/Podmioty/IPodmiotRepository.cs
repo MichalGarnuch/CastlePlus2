@@ -7,6 +7,8 @@ namespace CastlePlus2.Application.Interfaces.Podmioty
         Task AddAsync(Podmiot podmiot, CancellationToken ct);
         Task<Podmiot?> GetByIdAsync(long idPodmiotu, CancellationToken ct);
         Task<List<Podmiot>> GetAllAsync(CancellationToken ct);
+        void Remove(Podmiot podmiot);
+
         Task<int> SaveChangesAsync(CancellationToken ct);
     }
 }
