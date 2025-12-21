@@ -1,4 +1,6 @@
 ﻿using CastlePlus2.Client.Services.Slowniki;
+using CastlePlus2.Client.Services.Media;
+using CastlePlus2.Client.Services.Rdzen;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
 
@@ -15,6 +17,8 @@ public static class DependencyInjection
         services.AddScoped<IJednostkiMiaryService, JednostkiMiaryService>();
         services.AddScoped<IIndeksacjeService, IndeksacjeService>();
         services.AddScoped<IWalutyService, WalutyService>();
+        services.AddScoped<IAdresyService, AdresyService>();
+
 
 
         return services;

@@ -112,6 +112,7 @@ builder.Services.AddScoped<ILicznikRepository, LicznikRepository>();
 builder.Services.AddScoped<IOdczytRepository, OdczytRepository>();
 
 
+
 // -------------------------------------------------------------------------
 // 4. Konfiguracja API i Swaggera (TU BYŁ PROBLEM)
 // -------------------------------------------------------------------------
