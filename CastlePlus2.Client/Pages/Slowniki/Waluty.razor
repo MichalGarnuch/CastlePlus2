@@ -1,0 +1,192 @@
+﻿@page "/slowniki/waluty"
+@using MudBlazor
+@using CastlePlus2.Client.Services.Slowniki
+@using CastlePlus2.Contracts.DTOs.Slowniki
+@inject IWalutyService Service
+@inject ISnackbar Snackbar
+@inject IDialogService Dialogs
+
+<MudPaper Class="glass-panel pa-4 pa-sm-6" Elevation="0" Rounded="Rounded.Xl">
+    <MudStack Spacing="3">
+
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.h5" Class="fw-700">Waluty</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">[slowniki].[Waluta]</MudText>
+            </MudStack>
+
+            <MudStack Row="true" Spacing="1">
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="Reload" />
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="OpenCreate">
+                    Dodaj
+                </MudButton>
+            </MudStack>
+        </MudStack>
+
+        <MudTextField @bind-Value="_q"
+                      Placeholder="Szukaj po kodzie lub nazwie"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Immediate="true"
+                      Class="mt-1" />
+
+        <MudTable Items="_filtered"
+                  Dense="true"
+                  Hover="true"
+                  Bordered="true"
+                  Loading="_loading">
+            <HeaderContent>
+                <MudTh>Kod</MudTh>
+                <MudTh>Nazwa</MudTh>
+                <MudTh Class="text-right"></MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd DataLabel="Kod">@context.KodWaluty</MudTd>
+                <MudTd DataLabel="Nazwa">@context.Nazwa</MudTd>
+                <MudTd DataLabel="Akcje" Class="text-right">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                   OnClick="@(() => OpenEdit(context))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   OnClick="@(() => ConfirmDelete(context))" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudStack>
+</MudPaper>
+
+@code {
+    private bool _loading = true;
+    private string _q = string.Empty;
+    private List<WalutaDto> _items = new();
+
+    private IEnumerable<WalutaDto> _filtered =>
+        string.IsNullOrWhiteSpace(_q)
+            ? _items
+            : _items.Where(x =>
+                (x.KodWaluty?.Contains(_q, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.Nazwa?.Contains(_q, StringComparison.OrdinalIgnoreCase) ?? false));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Reload();
+    }
+
+    private async Task Reload()
+    {
+        _loading = true;
+        try
+        {
+            _items = await Service.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task OpenCreate()
+    {
+        var p = new DialogParameters
+        {
+            ["IsCreate"] = true,
+            ["KodWaluty"] = string.Empty,
+            ["Nazwa"] = string.Empty
+        };
+
+        var dlg = await Dialogs.ShowAsync<WalutaDialog>("Dodaj walutę", p);
+        var result = await dlg.Result;
+        if (result.Canceled) return;
+
+        var dto = (WalutaDto)result.Data!;
+        try
+        {
+            await Service.CreateAsync(new CreateWalutaRequest
+            {
+                KodWaluty = dto.KodWaluty,
+                Nazwa = dto.Nazwa
+            });
+
+            Snackbar.Add("Dodano.", Severity.Success);
+            await Reload();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd dodawania: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OpenEdit(WalutaDto item)
+    {
+        if (string.IsNullOrWhiteSpace(item.KodWaluty))
+        {
+            Snackbar.Add("Brak kodu waluty – nie można edytować.", Severity.Error);
+            return;
+        }
+
+        var p = new DialogParameters
+        {
+            ["IsCreate"] = false,
+            ["KodWaluty"] = item.KodWaluty,
+            ["Nazwa"] = item.Nazwa ?? string.Empty
+        };
+
+        var dlg = await Dialogs.ShowAsync<WalutaDialog>("Edytuj walutę", p);
+        var result = await dlg.Result;
+        if (result.Canceled) return;
+
+        var dto = (WalutaDto)result.Data!;
+        try
+        {
+            await Service.UpdateAsync(item.KodWaluty, new UpdateWalutaRequest
+            {
+                Nazwa = dto.Nazwa
+            });
+
+            Snackbar.Add("Zapisano.", Severity.Success);
+            await Reload();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd edycji: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task ConfirmDelete(WalutaDto item)
+    {
+        if (string.IsNullOrWhiteSpace(item.KodWaluty))
+        {
+            Snackbar.Add("Brak kodu waluty – nie można usunąć.", Severity.Error);
+            return;
+        }
+
+        var ok = await Dialogs.ShowMessageBox(
+            "Usuń",
+            $"Czy na pewno usunąć walutę: {item.KodWaluty} – {item.Nazwa}?",
+            yesText: "Usuń",
+            cancelText: "Anuluj");
+
+        if (ok != true) return;
+
+        try
+        {
+            await Service.DeleteAsync(item.KodWaluty);
+            Snackbar.Add("Usunięto.", Severity.Success);
+            await Reload();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd usuwania: {ex.Message}", Severity.Error);
+        }
+    }
+}

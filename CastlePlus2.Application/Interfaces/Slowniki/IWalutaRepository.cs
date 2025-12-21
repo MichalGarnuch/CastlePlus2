@@ -7,6 +7,9 @@ namespace CastlePlus2.Application.Interfaces.Slowniki
         Task AddAsync(Waluta waluta, CancellationToken ct);
         Task<Waluta?> GetByKodAsync(string kodWaluty, CancellationToken ct);
         Task<List<Waluta>> GetAllAsync(CancellationToken ct);
+
+        void Remove(Waluta waluta);
+
         Task<int> SaveChangesAsync(CancellationToken ct);
     }
 }

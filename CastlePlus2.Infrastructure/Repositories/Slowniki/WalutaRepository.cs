@@ -29,6 +29,11 @@ namespace CastlePlus2.Infrastructure.Repositories.Slowniki
             return _db.Waluty.OrderBy(x => x.KodWaluty).ToListAsync(ct);
         }
 
+        public void Remove(Waluta waluta)
+        {
+            _db.Waluty.Remove(waluta);
+        }
+
         public Task<int> SaveChangesAsync(CancellationToken ct)
         {
             return _db.SaveChangesAsync(ct);

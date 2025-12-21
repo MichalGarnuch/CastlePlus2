@@ -14,6 +14,7 @@ public static class DependencyInjection
 
         services.AddScoped<IJednostkiMiaryService, JednostkiMiaryService>();
         services.AddScoped<IIndeksacjeService, IndeksacjeService>();
+        services.AddScoped<IWalutyService, WalutyService>();
 
 
         return services;

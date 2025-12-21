@@ -1,0 +1,66 @@
+﻿@using CastlePlus2.Contracts.DTOs.Slowniki
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            @if (IsCreate)
+            {
+                <MudTextField @bind-Value="KodWaluty"
+                              Label="Kod waluty"
+                              Required="true"
+                              Immediate="true"
+                              MaxLength="3"
+                              HelperText="Dokładnie 3 znaki (np. PLN, EUR)" />
+            }
+            else
+            {
+                <MudTextField Value="@KodWaluty"
+                              Label="Kod waluty"
+                              Disabled="true" />
+            }
+
+            <MudTextField @bind-Value="Nazwa"
+                          Label="Nazwa"
+                          Required="true"
+                          Immediate="true"
+                          MaxLength="50" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public bool IsCreate { get; set; } = true;
+
+    [Parameter] public string KodWaluty { get; set; } = string.Empty;
+    [Parameter] public string Nazwa { get; set; } = string.Empty;
+
+    private MudForm _form = default!;
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task Save()
+    {
+        await _form.Validate();
+        if (!_form.IsValid) return;
+
+        KodWaluty = (KodWaluty ?? string.Empty).Trim().ToUpperInvariant();
+        Nazwa = (Nazwa ?? string.Empty).Trim();
+
+        if (IsCreate && KodWaluty.Length != 3)
+            return; // Required + MaxLength już łapią, to jest dodatkowy bezpiecznik.
+
+        MudDialog.Close(DialogResult.Ok(new WalutaDto
+        {
+            KodWaluty = KodWaluty,
+            Nazwa = Nazwa
+        }));
+    }
+}
