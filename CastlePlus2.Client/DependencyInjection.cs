@@ -22,6 +22,8 @@ public static class DependencyInjection
         services.AddScoped<IAdresyService, AdresyService>();
         services.AddScoped<IPrzypisaniaAdresowService, PrzypisaniaAdresowService>();
         services.AddScoped<INieruchomosciService, NieruchomosciService>();
+        services.AddScoped<IBudynkiService, BudynkiService>();
+
 
         services.AddScoped<IPodmiotyService, PodmiotyService>();
 

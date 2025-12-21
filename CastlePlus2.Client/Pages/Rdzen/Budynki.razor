@@ -1,0 +1,280 @@
+﻿@page "/rdzen/budynki"
+@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Rdzen
+@using CastlePlus2.Contracts.Requests.Rdzen
+@using CastlePlus2.Client.Services.Rdzen
+@inject IBudynkiService BudynkiService
+@inject INieruchomosciService NieruchomosciService
+@inject IAdresyService AdresyService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Budynki</MudText>
+
+<MudPaper Class="pa-4">
+    <MudTable Items="_items"
+              Dense="true"
+              Hover="true"
+              Bordered="true"
+              Striped="true"
+              Filter="FilterFunc">
+
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudSpacer />
+
+            <MudTextField @bind-Value="_search"
+                          Placeholder="Szukaj..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Class="mr-4"
+                          Margin="Margin.Dense" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="CreateAsync">
+                Dodaj
+            </MudButton>
+        </ToolBarContent>
+
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Nieruchomość</MudTh>
+            <MudTh>Kod budynku</MudTh>
+            <MudTh>Adres</MudTh>
+            <MudTh>Kondygnacje</MudTh>
+            <MudTh>Pow. użytkowa</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Nieruchomość">@GetNieruchomoscLabel(context.IdNieruchomosci)</MudTd>
+            <MudTd DataLabel="Kod budynku">@context.KodBudynku</MudTd>
+            <MudTd DataLabel="Adres">@GetAdresLabel(context.IdAdresu)</MudTd>
+            <MudTd DataLabel="Kondygnacje">@context.Kondygnacje</MudTd>
+            <MudTd DataLabel="Pow. użytkowa">@context.PowierzchniaUzytkowa</MudTd>
+
+            <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               OnClick="@(() => EditAsync(context))" />
+
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="@(() => DeleteAsync(context))" />
+            </MudTd>
+        </RowTemplate>
+
+        <NoRecordsContent>
+            <MudText Class="pa-4">Brak rekordów.</MudText>
+        </NoRecordsContent>
+
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<BudynekDto> _items = new();
+    private string _search = string.Empty;
+
+    private List<NieruchomoscDto> _nieruchomosci = new();
+    private List<AdresDto> _adresy = new();
+
+    // szybkie lookupy do wyświetlania nazw zamiast ID
+    private Dictionary<Guid, string> _nieruchomosciMap = new();
+    private Dictionary<long, string> _adresyMap = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLookupsAsync();
+        await ReloadAsync();
+    }
+
+    private async Task LoadLookupsAsync()
+    {
+        try
+        {
+            _nieruchomosci = await NieruchomosciService.GetAllAsync();
+            _adresy = await AdresyService.GetAllAsync();
+
+            _nieruchomosciMap = (_nieruchomosci ?? new()).ToDictionary(
+                x => x.Id,
+                x => string.IsNullOrWhiteSpace(x.Nazwa) ? x.Id.ToString() : x.Nazwa);
+
+            _adresyMap = (_adresy ?? new()).ToDictionary(
+                x => x.IdAdresu,
+                x => !string.IsNullOrWhiteSpace(x.AdresPelny)
+                        ? x.AdresPelny
+                        : (!string.IsNullOrWhiteSpace(x.AdresSformatowany) ? x.AdresSformatowany : x.IdAdresu.ToString()));
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania słowników: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private string GetNieruchomoscLabel(Guid id)
+        => _nieruchomosciMap.TryGetValue(id, out var v) ? v : id.ToString();
+
+    private string GetAdresLabel(long? id)
+    {
+        if (id is null) return string.Empty;
+        return _adresyMap.TryGetValue(id.Value, out var v) ? v : id.Value.ToString();
+    }
+
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            var data = await BudynkiService.GetAllAsync();
+            _items = (data ?? new List<BudynekDto>()).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania budynków: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private bool FilterFunc(BudynekDto item)
+    {
+        if (string.IsNullOrWhiteSpace(_search))
+            return true;
+
+        var s = _search.Trim();
+
+        var nier = GetNieruchomoscLabel(item.IdNieruchomosci);
+        var adr = GetAdresLabel(item.IdAdresu);
+
+        return item.Id.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || item.KodBudynku.Contains(s, StringComparison.OrdinalIgnoreCase)
+               || nier.Contains(s, StringComparison.OrdinalIgnoreCase)
+               || adr.Contains(s, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task CreateAsync()
+    {
+        var parameters = new DialogParameters
+        {
+            ["Model"] = new BudynekDto(),
+            ["IsEdit"] = false,
+            ["Nieruchomosci"] = _nieruchomosci,
+            ["Adresy"] = _adresy
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<BudynekDialog>("Dodaj budynek", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is BudynekDto model)
+        {
+            try
+            {
+                var request = new CreateBudynekRequest
+                {
+                    IdNieruchomosci = model.IdNieruchomosci,
+                    KodBudynku = model.KodBudynku,
+                    IdAdresu = model.IdAdresu,
+                    Kondygnacje = model.Kondygnacje,
+                    PowierzchniaUzytkowa = model.PowierzchniaUzytkowa
+                };
+
+                var newId = await BudynkiService.CreateAsync(request);
+                Snackbar.Add($"Dodano budynek (Id={newId}).", Severity.Success);
+                await ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Błąd dodawania budynku: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task EditAsync(BudynekDto item)
+    {
+        var clone = new BudynekDto
+        {
+            Id = item.Id,
+            IdNieruchomosci = item.IdNieruchomosci,
+            KodBudynku = item.KodBudynku,
+            IdAdresu = item.IdAdresu,
+            Kondygnacje = item.Kondygnacje,
+            PowierzchniaUzytkowa = item.PowierzchniaUzytkowa
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["Nieruchomosci"] = _nieruchomosci,
+            ["Adresy"] = _adresy
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<BudynekDialog>("Edytuj budynek", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is BudynekDto model)
+        {
+            try
+            {
+                var request = new UpdateBudynekRequest
+                {
+                    IdNieruchomosci = model.IdNieruchomosci,
+                    KodBudynku = model.KodBudynku,
+                    IdAdresu = model.IdAdresu,
+                    Kondygnacje = model.Kondygnacje,
+                    PowierzchniaUzytkowa = model.PowierzchniaUzytkowa
+                };
+
+                var ok = await BudynkiService.UpdateAsync(model.Id, request);
+                if (!ok)
+                {
+                    Snackbar.Add("Nie znaleziono rekordu do edycji (404).", Severity.Warning);
+                    return;
+                }
+
+                var idx = _items.FindIndex(x => x.Id == model.Id);
+                if (idx >= 0)
+                    _items[idx] = model;
+
+                await InvokeAsync(StateHasChanged);
+
+                Snackbar.Add("Zapisano zmiany.", Severity.Success);
+                await ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task DeleteAsync(BudynekDto item)
+    {
+        bool? confirm = await DialogService.ShowMessageBox(
+            "Usuń",
+            $"Czy na pewno usunąć budynek Id={item.Id}?",
+            yesText: "Usuń",
+            cancelText: "Anuluj");
+
+        if (confirm != true)
+            return;
+
+        try
+        {
+            await BudynkiService.DeleteAsync(item.Id);
+            Snackbar.Add("Usunięto.", Severity.Success);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd usuwania: {ex.Message}", Severity.Error);
+        }
+    }
+}

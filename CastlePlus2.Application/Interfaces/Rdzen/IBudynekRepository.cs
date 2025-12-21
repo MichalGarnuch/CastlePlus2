@@ -30,6 +30,10 @@ namespace CastlePlus2.Application.Interfaces.Rdzen
         /// Zapis zmian w bazie.
         /// </summary>
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task<List<Budynek>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<Budynek?> GetForUpdateAsync(Guid id, CancellationToken cancellationToken = default);
+        void Remove(Budynek entity);
+
     }
 }
 

@@ -1,0 +1,90 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Rdzen
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(IsEdit ? "Edycja budynku" : "Nowy budynek")
+            </MudText>
+
+            <MudSelect T="Guid"
+                       Label="Nieruchomość"
+                       Dense="true"
+                       Margin="Margin.Dense"
+                       Required="true"
+                       @bind-Value="Model.IdNieruchomosci">
+                @foreach (var n in (Nieruchomosci ?? new()))
+                {
+                    <MudSelectItem T="Guid" Value="n.Id">@(!string.IsNullOrWhiteSpace(n.Nazwa) ? n.Nazwa : n.Id.ToString())</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudTextField Label="Kod budynku"
+                          Dense="true"
+                          Margin="Margin.Dense"
+                          Required="true"
+                          @bind-Value="Model.KodBudynku" />
+
+            <MudSelect T="long?"
+                       Label="Adres (opcjonalnie)"
+                       Dense="true"
+                       Margin="Margin.Dense"
+                       Clearable="true"
+                       @bind-Value="Model.IdAdresu">
+                <MudSelectItem T="long?" Value="null">(brak)</MudSelectItem>
+                @foreach (var a in (Adresy ?? new()))
+                {
+                    var label = !string.IsNullOrWhiteSpace(a.AdresPelny)
+                    ? a.AdresPelny
+                    : (!string.IsNullOrWhiteSpace(a.AdresSformatowany) ? a.AdresSformatowany : a.IdAdresu.ToString());
+
+                    <MudSelectItem T="long?" Value="a.IdAdresu">@label</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudNumericField T="short?"
+                             Label="Kondygnacje"
+                             Dense="true"
+                             Margin="Margin.Dense"
+                             @bind-Value="Model.Kondygnacje" />
+
+            <MudNumericField T="decimal?"
+                             Label="Powierzchnia użytkowa"
+                             Dense="true"
+                             Margin="Margin.Dense"
+                             @bind-Value="Model.PowierzchniaUzytkowa" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public BudynekDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    [Parameter] public List<NieruchomoscDto>? Nieruchomosci { get; set; }
+    [Parameter] public List<AdresDto>? Adresy { get; set; }
+
+    private MudForm? _form;
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task Submit()
+    {
+        if (_form is not null)
+        {
+            await _form.Validate();
+            if (!_form.IsValid)
+                return;
+        }
+
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+}

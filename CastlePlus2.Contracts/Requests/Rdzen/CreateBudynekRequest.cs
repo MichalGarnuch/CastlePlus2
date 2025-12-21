@@ -1,10 +1,13 @@
-﻿namespace CastlePlus2.Contracts.DTOs.Rdzen
-{
-    public class BudynekDto
-    {
-        public Guid Id { get; set; }
+﻿using System.ComponentModel.DataAnnotations;
 
+namespace CastlePlus2.Contracts.Requests.Rdzen
+{
+    public class CreateBudynekRequest
+    {
+        [Required]
         public Guid IdNieruchomosci { get; set; }
+
+        [Required, MaxLength(50)]
         public string KodBudynku { get; set; } = string.Empty;
 
         public long? IdAdresu { get; set; }
