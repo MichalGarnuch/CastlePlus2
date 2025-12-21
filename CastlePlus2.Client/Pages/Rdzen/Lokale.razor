@@ -1,0 +1,256 @@
+﻿@page "/rdzen/lokale"
+@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Rdzen
+@using CastlePlus2.Contracts.Requests.Rdzen
+@using CastlePlus2.Client.Services.Rdzen
+@inject ILokaleService LokaleService
+@inject IBudynkiService BudynkiService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Lokale</MudText>
+
+<MudPaper Class="pa-4">
+    <MudTable Items="_items"
+              Dense="true"
+              Hover="true"
+              Bordered="true"
+              Striped="true"
+              Filter="FilterFunc">
+
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudSpacer />
+
+            <MudTextField @bind-Value="_search"
+                          Placeholder="Szukaj..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Class="mr-4"
+                          Margin="Margin.Dense" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="CreateAsync">
+                Dodaj
+            </MudButton>
+        </ToolBarContent>
+
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Budynek</MudTh>
+            <MudTh>Kod lokalu</MudTh>
+            <MudTh>Powierzchnia</MudTh>
+            <MudTh>Przeznaczenie</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Budynek">@GetBudynekLabel(context.IdBudynku)</MudTd>
+            <MudTd DataLabel="Kod lokalu">@context.KodLokalu</MudTd>
+            <MudTd DataLabel="Powierzchnia">@context.Powierzchnia</MudTd>
+            <MudTd DataLabel="Przeznaczenie">@context.Przeznaczenie</MudTd>
+
+            <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               OnClick="@(() => EditAsync(context))" />
+
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="@(() => DeleteAsync(context))" />
+            </MudTd>
+        </RowTemplate>
+
+        <NoRecordsContent>
+            <MudText Class="pa-4">Brak rekordów.</MudText>
+        </NoRecordsContent>
+
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<LokalDto> _items = new();
+    private string _search = string.Empty;
+
+    private List<BudynekDto> _budynki = new();
+    private Dictionary<Guid, string> _budynkiMap = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLookupsAsync();
+        await ReloadAsync();
+    }
+
+    private async Task LoadLookupsAsync()
+    {
+        try
+        {
+            _budynki = await BudynkiService.GetAllAsync();
+
+            _budynkiMap = (_budynki ?? new()).ToDictionary(
+                b => b.Id,
+                b => string.IsNullOrWhiteSpace(b.KodBudynku) ? b.Id.ToString() : b.KodBudynku
+            );
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania budynków (lookup): {ex.Message}", Severity.Error);
+            _budynki = new();
+            _budynkiMap = new();
+        }
+    }
+
+    private string GetBudynekLabel(Guid id)
+        => _budynkiMap.TryGetValue(id, out var v) ? v : id.ToString();
+
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            var data = await LokaleService.GetAllAsync();
+            _items = (data ?? new List<LokalDto>()).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania lokali: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private bool FilterFunc(LokalDto item)
+    {
+        if (string.IsNullOrWhiteSpace(_search))
+            return true;
+
+        var s = _search.Trim();
+        var bud = GetBudynekLabel(item.IdBudynku);
+
+        return item.Id.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || item.KodLokalu.Contains(s, StringComparison.OrdinalIgnoreCase)
+               || bud.Contains(s, StringComparison.OrdinalIgnoreCase)
+               || (item.Przeznaczenie?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false);
+    }
+
+    private async Task CreateAsync()
+    {
+        var parameters = new DialogParameters
+        {
+            ["Model"] = new LokalDto(),
+            ["IsEdit"] = false,
+            ["Budynki"] = _budynki
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<LokalDialog>("Dodaj lokal", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is LokalDto model)
+        {
+            try
+            {
+                var request = new CreateLokalRequest
+                {
+                    IdBudynku = model.IdBudynku,
+                    KodLokalu = model.KodLokalu,
+                    Powierzchnia = model.Powierzchnia,
+                    Przeznaczenie = model.Przeznaczenie
+                };
+
+                var newId = await LokaleService.CreateAsync(request);
+                Snackbar.Add($"Dodano lokal (Id={newId}).", Severity.Success);
+                await ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Błąd dodawania lokalu: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task EditAsync(LokalDto item)
+    {
+        var clone = new LokalDto
+        {
+            Id = item.Id,
+            IdBudynku = item.IdBudynku,
+            KodLokalu = item.KodLokalu,
+            Powierzchnia = item.Powierzchnia,
+            Przeznaczenie = item.Przeznaczenie
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["Budynki"] = _budynki
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<LokalDialog>("Edytuj lokal", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is LokalDto model)
+        {
+            try
+            {
+                var request = new UpdateLokalRequest
+                {
+                    IdBudynku = model.IdBudynku,
+                    KodLokalu = model.KodLokalu,
+                    Powierzchnia = model.Powierzchnia,
+                    Przeznaczenie = model.Przeznaczenie
+                };
+
+                var ok = await LokaleService.UpdateAsync(model.Id, request);
+                if (!ok)
+                {
+                    Snackbar.Add("Nie znaleziono rekordu do edycji (404).", Severity.Warning);
+                    return;
+                }
+
+                Snackbar.Add("Zapisano zmiany.", Severity.Success);
+                await ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task DeleteAsync(LokalDto item)
+    {
+        bool? confirm = await DialogService.ShowMessageBox(
+            "Usuń",
+            $"Czy na pewno usunąć lokal Id={item.Id}?",
+            yesText: "Usuń",
+            cancelText: "Anuluj");
+
+        if (confirm != true)
+            return;
+
+        try
+        {
+            var ok = await LokaleService.DeleteAsync(item.Id);
+            if (!ok)
+            {
+                Snackbar.Add("Nie znaleziono rekordu do usunięcia (404).", Severity.Warning);
+                return;
+            }
+
+            Snackbar.Add("Usunięto.", Severity.Success);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd usuwania: {ex.Message}", Severity.Error);
+        }
+    }
+}

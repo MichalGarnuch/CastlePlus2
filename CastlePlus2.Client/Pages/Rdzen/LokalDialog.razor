@@ -1,0 +1,72 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Rdzen
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(IsEdit ? "Edycja lokalu" : "Nowy lokal")
+            </MudText>
+
+            <MudSelect T="Guid"
+                       Label="Budynek"
+                       Dense="true"
+                       Margin="Margin.Dense"
+                       Required="true"
+                       @bind-Value="Model.IdBudynku">
+                @foreach (var b in (Budynki ?? new()))
+                {
+                    var label = !string.IsNullOrWhiteSpace(b.KodBudynku) ? b.KodBudynku : b.Id.ToString();
+                    <MudSelectItem T="Guid" Value="b.Id">@label</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudTextField Label="Kod lokalu"
+                          Dense="true"
+                          Margin="Margin.Dense"
+                          Required="true"
+                          @bind-Value="Model.KodLokalu" />
+
+            <MudNumericField T="decimal?"
+                             Label="Powierzchnia"
+                             Dense="true"
+                             Margin="Margin.Dense"
+                             @bind-Value="Model.Powierzchnia" />
+
+            <MudTextField Label="Przeznaczenie"
+                          Dense="true"
+                          Margin="Margin.Dense"
+                          @bind-Value="Model.Przeznaczenie" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public LokalDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    [Parameter] public List<BudynekDto>? Budynki { get; set; }
+
+    private MudForm? _form;
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task Submit()
+    {
+        if (_form is not null)
+        {
+            await _form.Validate();
+            if (!_form.IsValid) return;
+        }
+
+        Model.KodLokalu = (Model.KodLokalu ?? string.Empty).Trim();
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+}

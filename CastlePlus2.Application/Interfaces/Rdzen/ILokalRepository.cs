@@ -25,5 +25,9 @@ namespace CastlePlus2.Application.Interfaces.Rdzen
         Task AddAsync(Lokal entity, CancellationToken cancellationToken = default);
 
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<Lokal>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<Lokal?> GetForUpdateAsync(Guid id, CancellationToken cancellationToken = default);
+        void Remove(Lokal entity);
+
     }
 }
