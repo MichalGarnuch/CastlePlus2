@@ -1,99 +1,62 @@
 ﻿@using CastlePlus2.Contracts.DTOs.Media
-@using CastlePlus2.Client.Services.Media
-@inject IRodzajeMediowService Service
-@inject ISnackbar Snackbar
-@using CastlePlus2.Client.Pages.Media
-
+@using MudBlazor
 
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-            @if (Mode == RodzajMediumDialogMode.Create)
+
+            @if (IsCreate)
             {
-                <MudTextField @bind-Value="_modelKod"
-                              Label="Kod (max 20)"
+                <MudTextField @bind-Value="KodRodzaju"
+                              Label="Kod rodzaju"
                               Required="true"
+                              MaxLength="20"
                               Immediate="true" />
             }
             else
             {
-                <MudTextField Value="@_modelKod" Label="Kod" Disabled="true" />
+                <MudTextField Value="@KodRodzaju"
+                              Label="Kod rodzaju"
+                              Disabled="true" />
             }
 
-            <MudTextField @bind-Value="_modelNazwa"
-                          Label="Nazwa (max 100)"
+            <MudTextField @bind-Value="Nazwa"
+                          Label="Nazwa"
                           Required="true"
+                          MaxLength="100"
                           Immediate="true" />
+
         </MudForm>
     </DialogContent>
+
     <DialogActions>
         <MudButton OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Save">Zapisz</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save">
+            Zapisz
+        </MudButton>
     </DialogActions>
 </MudDialog>
 
 @code {
-    [CascadingParameter] private MudBlazor.IMudDialogInstance MudDialog { get; set; } = default!;
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
 
+    [Parameter] public bool IsCreate { get; set; }
+    [Parameter] public string KodRodzaju { get; set; } = string.Empty;
+    [Parameter] public string Nazwa { get; set; } = string.Empty;
 
-    [Parameter] public RodzajMediumDialogMode Mode { get; set; } = RodzajMediumDialogMode.Create;
-    [Parameter] public RodzajMediumDto? Existing { get; set; }
+    private MudForm _form = default!;
 
-    private MudForm? _form;
-    private string _modelKod = string.Empty;
-    private string _modelNazwa = string.Empty;
-
-    protected override void OnInitialized()
-    {
-        if (Existing is not null)
-        {
-            _modelKod = Existing.KodRodzaju;
-            _modelNazwa = Existing.Nazwa;
-        }
-    }
+    private void Cancel() => MudDialog.Cancel();
 
     private async Task Save()
     {
-        var kod = (_modelKod ?? string.Empty).Trim();
-        var nazwa = (_modelNazwa ?? string.Empty).Trim();
+        await _form.Validate();
+        if (!_form.IsValid) return;
 
-        if (kod.Length == 0 || kod.Length > 20)
+        MudDialog.Close(DialogResult.Ok(new RodzajMediumDto
         {
-            Snackbar.Add("Kod jest wymagany (1–20 znaków).", Severity.Warning);
-            return;
-        }
-
-        if (nazwa.Length == 0 || nazwa.Length > 100)
-        {
-            Snackbar.Add("Nazwa jest wymagana (1–100 znaków).", Severity.Warning);
-            return;
-        }
-
-        try
-        {
-            if (Mode == RodzajMediumDialogMode.Create)
-            {
-                await Service.CreateAsync(new CreateRodzajMediumRequest { KodRodzaju = kod, Nazwa = nazwa });
-                Snackbar.Add("Dodano.", Severity.Success);
-            }
-            else
-            {
-                var updated = await Service.UpdateAsync(kod, new UpdateRodzajMediumRequest { Nazwa = nazwa });
-                if (updated is null)
-                {
-                    Snackbar.Add("Nie znaleziono rekordu do edycji.", Severity.Warning);
-                    return;
-                }
-                Snackbar.Add("Zapisano zmiany.", Severity.Success);
-            }
-
-            MudDialog.Close(DialogResult.Ok(true));
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
-        }
+            KodRodzaju = KodRodzaju.Trim(),
+            Nazwa = Nazwa.Trim()
+        }));
     }
-
-    private void Cancel() => MudDialog.Cancel();
 }
