@@ -44,5 +44,25 @@ namespace CastlePlus2.Infrastructure.Repositories.Rdzen
         {
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
+        public async Task<List<Nieruchomosc>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Nieruchomosci
+                .Include(n => n.AdresGlowny)
+                .AsNoTracking()
+                .OrderBy(n => n.Nazwa)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<Nieruchomosc?> GetForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Nieruchomosci
+                .FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
+        }
+
+        public void Remove(Nieruchomosc entity)
+        {
+            _dbContext.Nieruchomosci.Remove(entity);
+        }
+
     }
 }

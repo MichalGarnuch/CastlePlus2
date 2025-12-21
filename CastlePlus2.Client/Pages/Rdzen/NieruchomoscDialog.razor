@@ -1,0 +1,86 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Rdzen
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(IsEdit ? "Edycja nieruchomości" : "Nowa nieruchomość")
+            </MudText>
+
+            @if (IsEdit)
+            {
+                <MudTextField Value="@Model.Id.ToString()"
+                              Label="Id"
+                              Disabled="true"
+                              Margin="Margin.Dense" />
+            }
+
+            <MudTextField @bind-Value="Model.Nazwa"
+                          Label="Nazwa"
+                          Required="true"
+                          RequiredError="Nazwa jest wymagana"
+                          Margin="Margin.Dense" />
+
+            <MudSelect T="long?"
+                       Label="Adres główny (opcjonalnie)"
+                       @bind-Value="Model.IdAdresuGlownego"
+                       Clearable="true"
+                       Margin="Margin.Dense">
+                <MudSelectItem Value="@((long?)null)">(brak)</MudSelectItem>
+
+                @foreach (var kv in Adresy)
+                {
+                    <MudSelectItem Value="@((long?)kv.Key)">@kv.Value</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="long?"
+                       Label="Właściciel (podmiot) (opcjonalnie)"
+                       @bind-Value="Model.IdPodmiotuWlasciciela"
+                       Clearable="true"
+                       Margin="Margin.Dense">
+                <MudSelectItem Value="@((long?)null)">(brak)</MudSelectItem>
+
+                @foreach (var kv in Podmioty)
+                {
+                    <MudSelectItem Value="@((long?)kv.Key)">@kv.Value</MudSelectItem>
+                }
+            </MudSelect>
+
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public NieruchomoscDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    // Lookups przekazane z Nieruchomosci.razor
+    [Parameter] public Dictionary<long, string> Adresy { get; set; } = new();
+    [Parameter] public Dictionary<long, string> Podmioty { get; set; } = new();
+
+    private MudForm? _form;
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SaveAsync()
+    {
+        if (_form is null) return;
+
+        await _form.Validate();
+        if (!_form.IsValid) return;
+
+        // Minimalne porządkowanie
+        Model.Nazwa = (Model.Nazwa ?? string.Empty).Trim();
+
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+}

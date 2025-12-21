@@ -32,28 +32,21 @@ namespace CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomos
             _mapper = mapper;
         }
 
-        public async Task<NieruchomoscDto> Handle(
-            CreateNieruchomoscCommand request,
-            CancellationToken cancellationToken)
+        public async Task<NieruchomoscDto> Handle(CreateNieruchomoscCommand request, CancellationToken cancellationToken)
         {
-            // Tworzymy nową encję domenową
             var entity = new Nieruchomosc
             {
-                Id = Guid.NewGuid(),                  // IdEncji (PK)
-                Nazwa = request.Nazwa,
-                IdAdresuGlownego = request.IdAdresuGlownego,
-                IdPodmiotuWlasciciela = request.IdPodmiotuWlasciciela
-                // Geometria dojdzie później (np. WKT -> geometry)
+                Id = Guid.NewGuid(),
+                Nazwa = request.Request.Nazwa,
+                IdAdresuGlownego = request.Request.IdAdresuGlownego,
+                IdPodmiotuWlasciciela = request.Request.IdPodmiotuWlasciciela
             };
 
             await _repository.AddAsync(entity, cancellationToken);
             await _repository.SaveChangesAsync(cancellationToken);
 
-            // Po zapisie możemy mieć uzupełnione nawigacje (np. AdresGlowny)
-            // – AutoMapper użyje profilu NieruchomoscProfile.
-            var dto = _mapper.Map<NieruchomoscDto>(entity);
-
-            return dto;
+            return _mapper.Map<NieruchomoscDto>(entity);
         }
+
     }
 }

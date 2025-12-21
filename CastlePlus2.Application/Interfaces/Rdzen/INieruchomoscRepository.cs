@@ -38,6 +38,10 @@ namespace CastlePlus2.Application.Interfaces.Rdzen
         /// Zapisuje wszystkie zmiany wykonane w repozytorium do bazy danych.
         /// </summary>
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task<List<Nieruchomosc>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<Nieruchomosc?> GetForUpdateAsync(Guid id, CancellationToken cancellationToken = default);
+        void Remove(Nieruchomosc entity);
+
     }
 }
 
