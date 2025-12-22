@@ -89,7 +89,7 @@
             ["IsCreate"] = true
         };
 
-        var dlg = Dialogs.Show<RodzajMediumDialog>("Dodaj rodzaj medium", p);
+        var dlg = await Dialogs.ShowAsync<RodzajMediumDialog>("Dodaj rodzaj medium", p);
         var result = await dlg.Result;
 
         if (result.Canceled) return;
@@ -114,7 +114,7 @@
             ["Nazwa"] = item.Nazwa
         };
 
-        var dlg = Dialogs.Show<RodzajMediumDialog>("Edytuj rodzaj medium", p);
+        var dlg = await Dialogs.ShowAsync<RodzajMediumDialog>("Edytuj rodzaj medium", p);
         var result = await dlg.Result;
 
         if (result.Canceled) return;

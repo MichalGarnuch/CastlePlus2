@@ -22,40 +22,32 @@ namespace CastlePlus2.Infrastructure.Repositories.Rdzen
             _dbContext = dbContext;
         }
 
-        public async Task<Pomieszczenie?> GetByIdAsync(
-            Guid id,
-            CancellationToken cancellationToken = default)
+        public async Task<Pomieszczenie?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Pomieszczenia
+                .AsNoTracking()
                 .Include(p => p.Lokal)
                 .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
         }
 
-        public async Task<IReadOnlyList<Pomieszczenie>> GetByLokalAsync(
-            Guid idEncjiLokal,
-            CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<Pomieszczenie>> GetByLokalAsync(Guid idEncjiLokal, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Pomieszczenia
+                .AsNoTracking()
                 .Where(p => p.IdEncjiNadrzednej == idEncjiLokal)
                 .OrderBy(p => p.KodPomieszczenia)
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<bool> ExistsWithCodeForLokalAsync(
-            Guid idEncjiLokal,
-            string kodPomieszczenia,
-            CancellationToken cancellationToken = default)
+        public async Task<bool> ExistsWithCodeForLokalAsync(Guid idEncjiLokal, string kodPomieszczenia, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Pomieszczenia
                 .AnyAsync(
-                    p => p.IdEncjiNadrzednej == idEncjiLokal
-                      && p.KodPomieszczenia == kodPomieszczenia,
+                    p => p.IdEncjiNadrzednej == idEncjiLokal && p.KodPomieszczenia == kodPomieszczenia,
                     cancellationToken);
         }
 
-        public async Task AddAsync(
-            Pomieszczenie entity,
-            CancellationToken cancellationToken = default)
+        public async Task AddAsync(Pomieszczenie entity, CancellationToken cancellationToken = default)
         {
             await _dbContext.Pomieszczenia.AddAsync(entity, cancellationToken);
         }
@@ -63,6 +55,27 @@ namespace CastlePlus2.Infrastructure.Repositories.Rdzen
         public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        // DODANE pod pełny CRUD:
+
+        public async Task<List<Pomieszczenie>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Pomieszczenia
+                .AsNoTracking()
+                .OrderBy(x => x.KodPomieszczenia)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<Pomieszczenie?> GetForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Pomieszczenia
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        }
+
+        public void Remove(Pomieszczenie entity)
+        {
+            _dbContext.Pomieszczenia.Remove(entity);
         }
     }
 }

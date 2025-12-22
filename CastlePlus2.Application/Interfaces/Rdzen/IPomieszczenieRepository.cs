@@ -25,5 +25,9 @@ namespace CastlePlus2.Application.Interfaces.Rdzen
         Task AddAsync(Pomieszczenie entity, CancellationToken cancellationToken = default);
 
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task<List<Pomieszczenie>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<Pomieszczenie?> GetForUpdateAsync(Guid id, CancellationToken cancellationToken = default);
+        void Remove(Pomieszczenie entity);
+
     }
 }

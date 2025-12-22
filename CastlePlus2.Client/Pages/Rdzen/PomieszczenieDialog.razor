@@ -1,0 +1,60 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Rdzen
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+
+            <MudSelect T="Guid"
+                       Label="Lokal"
+                       Dense="true"
+                       Required="true"
+                       @bind-Value="Model.IdEncjiNadrzednej">
+                @foreach (var l in Lokale)
+                {
+                    <MudSelectItem Value="@l.Id">
+                        @(!string.IsNullOrWhiteSpace(l.KodLokalu) ? l.KodLokalu : l.Id.ToString())
+                    </MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudTextField Label="Kod pomieszczenia"
+                          Dense="true"
+                          Required="true"
+                          @bind-Value="Model.KodPomieszczenia" />
+
+            <MudNumericField T="decimal?"
+                             Label="Powierzchnia"
+                             Dense="true"
+                             @bind-Value="Model.Powierzchnia" />
+
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public PomieszczenieDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public List<LokalDto> Lokale { get; set; } = new();
+
+    private MudForm? _form;
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SaveAsync()
+    {
+        if (_form is null) return;
+
+        await _form.Validate();
+        if (!_form.IsValid) return;
+
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+}
