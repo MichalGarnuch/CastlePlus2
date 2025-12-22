@@ -203,8 +203,8 @@
                     Powierzchnia = model.Powierzchnia
                 };
 
-                var ok = await PomieszczeniaService.UpdateAsync(model.Id, cmd);
-                if (!ok)
+                var dto = await PomieszczeniaService.UpdateAsync(model.Id, cmd);
+                if (dto is null)
                 {
                     Snackbar.Add("Nie znaleziono rekordu do edycji (404).", Severity.Warning);
                     return;

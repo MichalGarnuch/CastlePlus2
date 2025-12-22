@@ -45,59 +45,25 @@ namespace CastlePlus2.Client.Services.Rdzen
             return await resp.Content.ReadFromJsonAsync<PomieszczenieDto>(cancellationToken: ct);
         }
 
-        public async Task<Guid> CreateAsync(CreatePomieszczenieRequest request, CancellationToken ct = default)
+        public async Task<PomieszczenieDto> CreateAsync(CreatePomieszczenieRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PostAsJsonAsync(BaseUrl, request, ct);
             resp.EnsureSuccessStatusCode();
 
-            // Czytamy "surowy" JSON, bo API może zwracać:
-            // 1) sam Guid (np. "b7f1..."), albo
-            // 2) obiekt DTO { "id": "...", ... } / { "Id": "...", ... }
-            var json = await resp.Content.ReadAsStringAsync(ct);
-
-            if (string.IsNullOrWhiteSpace(json))
-                throw new InvalidOperationException("API zwróciło pustą odpowiedź dla POST (oczekiwano Id).");
-
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            // przypadek 1: "guid-string"
-            if (root.ValueKind == JsonValueKind.String)
-            {
-                var s = root.GetString();
-                if (Guid.TryParse(s, out var gid))
-                    return gid;
-            }
-
-            // przypadek 2: { "id": "guid" } lub { "Id": "guid" }
-            if (root.ValueKind == JsonValueKind.Object)
-            {
-                if (root.TryGetProperty("id", out var idLower) && idLower.ValueKind == JsonValueKind.String)
-                {
-                    var s = idLower.GetString();
-                    if (Guid.TryParse(s, out var gid))
-                        return gid;
-                }
-
-                if (root.TryGetProperty("Id", out var idUpper) && idUpper.ValueKind == JsonValueKind.String)
-                {
-                    var s = idUpper.GetString();
-                    if (Guid.TryParse(s, out var gid))
-                        return gid;
-                }
-            }
-
-            throw new InvalidOperationException($"Nie rozpoznano formatu odpowiedzi POST. Oczekiwano Guid albo obiektu z polem Id/id. Odpowiedź: {json}");
+            var dto = await resp.Content.ReadFromJsonAsync<PomieszczenieDto>(cancellationToken: ct);
+            return dto!;
         }
 
-
-        public async Task<bool> UpdateAsync(Guid id, UpdatePomieszczenieRequest request, CancellationToken ct = default)
+        public async Task<PomieszczenieDto?> UpdateAsync(Guid id, UpdatePomieszczenieRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PutAsJsonAsync($"{BaseUrl}/{id}", request, ct);
-            if (resp.StatusCode == HttpStatusCode.NotFound) return false;
+            if (resp.StatusCode == HttpStatusCode.NotFound) return null;
 
             resp.EnsureSuccessStatusCode();
-            return true;
+            if (resp.Content.Headers.ContentLength is null || resp.Content.Headers.ContentLength == 0)
+                return await GetByIdAsync(id, ct);
+
+            return await resp.Content.ReadFromJsonAsync<PomieszczenieDto>(cancellationToken: ct);
         }
 
         public async Task<bool> DeleteAsync(Guid id, CancellationToken ct = default)

@@ -4,6 +4,7 @@ using CastlePlus2.Application.Rdzen.Pomieszczenia.Commands.UpdatePomieszczenie;
 using CastlePlus2.Application.Rdzen.Pomieszczenia.Queries.GetAllPomieszczenia;
 using CastlePlus2.Application.Rdzen.Pomieszczenia.Queries.GetPomieszczenieById;
 using CastlePlus2.Contracts.DTOs.Rdzen;
+using CastlePlus2.Contracts.Requests.Rdzen;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -29,8 +30,15 @@ namespace CastlePlus2.Api.Controllers.Rzden
         [ProducesResponseType(typeof(PomieszczenieDto), 201)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<PomieszczenieDto>> CreatePomieszczenie(
-            [FromBody] CreatePomieszczenieCommand command)
+            [FromBody] CreatePomieszczenieRequest request)
         {
+            var command = new CreatePomieszczenieCommand
+            {
+                IdEncjiNadrzednej = request.IdEncjiNadrzednej,
+                KodPomieszczenia = request.KodPomieszczenia,
+                Powierzchnia = request.Powierzchnia
+            };
+
             var dto = await _mediator.Send(command);
 
             // Zwracamy 201 Created z lokalizacją zasobu
@@ -49,13 +57,7 @@ namespace CastlePlus2.Api.Controllers.Rzden
         public async Task<ActionResult<PomieszczenieDto>> GetPomieszczenieById(Guid id)
         {
             var dto = await _mediator.Send(new GetPomieszczenieByIdQuery { Id = id });
-
-            if (dto == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(dto);
+            return dto == null ? NotFound() : Ok(dto);
         }
 
         // --- DODAJEMY: GET ALL ---
