@@ -1,4 +1,9 @@
-﻿using System.Threading;
+﻿// PLIK: CastlePlus2.Infrastructure/Repositories/Media/LicznikRepository.cs
+// (CAŁY PLIK - bo dodajemy GetAll/GetForUpdate/Remove + overload NumerExists)
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CastlePlus2.Application.Interfaces.Media;
 using CastlePlus2.Domain.Entities.Media;
@@ -16,10 +21,24 @@ namespace CastlePlus2.Infrastructure.Repositories.Media
             _db = db;
         }
 
+        public async Task<List<Licznik>> GetAllAsync(CancellationToken ct)
+        {
+            return await _db.Liczniki
+                .AsNoTracking()
+                .OrderBy(x => x.IdLicznika)
+                .ToListAsync(ct);
+        }
+
         public async Task<Licznik?> GetByIdAsync(long idLicznika, CancellationToken ct)
         {
             return await _db.Liczniki
                 .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.IdLicznika == idLicznika, ct);
+        }
+
+        public async Task<Licznik?> GetForUpdateAsync(long idLicznika, CancellationToken ct)
+        {
+            return await _db.Liczniki
                 .FirstOrDefaultAsync(x => x.IdLicznika == idLicznika, ct);
         }
 
@@ -30,10 +49,15 @@ namespace CastlePlus2.Infrastructure.Repositories.Media
                 .AnyAsync(x => x.NumerNV == numerNV, ct);
         }
 
+        public async Task<bool> NumerExistsAsync(string numerNV, long excludeIdLicznika, CancellationToken ct)
+        {
+            return await _db.Liczniki
+                .AsNoTracking()
+                .AnyAsync(x => x.NumerNV == numerNV && x.IdLicznika != excludeIdLicznika, ct);
+        }
+
         public async Task<bool> PrzylaczeExistsAsync(long idPrzylacza, CancellationToken ct)
         {
-            // Feature-slice: nie wstrzykujemy repo od Przylacza tutaj.
-            // Sprawdzamy istnienie po tabeli (DbSet), żeby walidować FK.
             return await _db.Przylacza
                 .AsNoTracking()
                 .AnyAsync(x => x.IdPrzylacza == idPrzylacza, ct);
@@ -41,8 +65,6 @@ namespace CastlePlus2.Infrastructure.Repositories.Media
 
         public async Task<bool> JednostkaExistsAsync(string kodJednostki, CancellationToken ct)
         {
-            // Nie robimy osobnego repo słownika, tylko szybki check FK.
-            // Uwaga: musi istnieć encja JednostkaMiary w Domain + DbSet w DbContext.
             return await _db.Set<CastlePlus2.Domain.Entities.Slowniki.JednostkaMiary>()
                 .AsNoTracking()
                 .AnyAsync(x => x.KodJednostki == kodJednostki, ct);
@@ -58,6 +80,11 @@ namespace CastlePlus2.Infrastructure.Repositories.Media
         public async Task AddAsync(Licznik entity, CancellationToken ct)
         {
             await _db.Liczniki.AddAsync(entity, ct);
+        }
+
+        public void Remove(Licznik entity)
+        {
+            _db.Liczniki.Remove(entity);
         }
 
         public async Task SaveChangesAsync(CancellationToken ct)

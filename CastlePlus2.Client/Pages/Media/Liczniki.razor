@@ -1,0 +1,271 @@
+﻿@page "/media/liczniki"
+
+@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Media
+@using CastlePlus2.Contracts.DTOs.Slowniki
+@using CastlePlus2.Contracts.Requests.Media
+@using CastlePlus2.Client.Services.Media
+@using CastlePlus2.Client.Services.Slowniki
+
+@inject ILicznikiService LicznikiService
+@inject IPrzylaczaService PrzylaczaService
+@inject IJednostkiMiaryService JednostkiMiaryService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Liczniki</MudText>
+
+<MudPaper Class="pa-4">
+    <MudTable Items="_items"
+              Dense="true"
+              Hover="true"
+              Bordered="true"
+              Striped="true"
+              Filter="FilterFunc">
+
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudSpacer />
+
+            <MudTextField @bind-Value="_search"
+                          Placeholder="Szukaj..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Class="mr-4"
+                          Margin="Margin.Dense" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="CreateAsync">
+                Dodaj
+            </MudButton>
+        </ToolBarContent>
+
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>IdPrzylacza</MudTh>
+            <MudTh>NumerNV</MudTh>
+            <MudTh>KodJednostki</MudTh>
+            <MudTh>Współczynnik</MudTh>
+            <MudTh>Aktywny</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.IdLicznika</MudTd>
+            <MudTd DataLabel="IdPrzylacza">@context.IdPrzylacza</MudTd>
+            <MudTd DataLabel="NumerNV">@context.NumerNV</MudTd>
+            <MudTd DataLabel="KodJednostki">@context.KodJednostki</MudTd>
+            <MudTd DataLabel="Współczynnik">@context.WspolczynnikPrzeliczeniowy</MudTd>
+            <MudTd DataLabel="Aktywny">@context.Aktywny</MudTd>
+
+            <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               OnClick="@(() => EditAsync(context))" />
+
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="@(() => DeleteAsync(context))" />
+            </MudTd>
+        </RowTemplate>
+
+        <NoRecordsContent>
+            <MudText Class="pa-4">Brak rekordów.</MudText>
+        </NoRecordsContent>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<LicznikDto> _items = new();
+    private string _search = string.Empty;
+
+    private List<PrzylaczeDto> _przylacza = new();
+    private List<JednostkaMiaryDto> _jednostki = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLookupsAsync();
+        await ReloadAsync();
+    }
+
+    private async Task LoadLookupsAsync()
+    {
+        try
+        {
+            _przylacza = (await PrzylaczaService.GetAllAsync()) ?? new();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania przyłączy: {ex.Message}", Severity.Error);
+            _przylacza = new();
+        }
+
+        try
+        {
+            _jednostki = (await JednostkiMiaryService.GetAllAsync()) ?? new();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania jednostek miary: {ex.Message}", Severity.Error);
+            _jednostki = new();
+        }
+    }
+
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            _items = (await LicznikiService.GetAllAsync()) ?? new();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania liczników: {ex.Message}", Severity.Error);
+            _items = new();
+        }
+    }
+
+    private bool FilterFunc(LicznikDto item)
+    {
+        if (string.IsNullOrWhiteSpace(_search))
+            return true;
+
+        var s = _search.Trim();
+
+        return item.IdLicznika.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || item.IdPrzylacza.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || (item.NumerNV?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || (item.KodJednostki?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || (item.WspolczynnikPrzeliczeniowy?.ToString()?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || item.Aktywny.ToString().Contains(s, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task CreateAsync()
+    {
+        var model = new LicznikDto
+        {
+            Aktywny = true
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = model,
+            ["IsEdit"] = false,
+            ["Przylacza"] = _przylacza,
+            ["Jednostki"] = _jednostki,
+            ["Liczniki"] = _items
+        };
+
+        var dialog = DialogService.Show<LicznikDialog>("Nowy licznik", parameters, new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true });
+        var result = await dialog.Result;
+
+        if (result.Canceled) return;
+
+        var dto = (LicznikDto)result.Data;
+
+        try
+        {
+            var created = await LicznikiService.CreateAsync(new CreateLicznikRequest
+            {
+                IdPrzylacza = dto.IdPrzylacza,
+                IdLicznikaNadrzednego = dto.IdLicznikaNadrzednego,
+                NumerNV = dto.NumerNV,
+                KodJednostki = dto.KodJednostki,
+                WspolczynnikPrzeliczeniowy = dto.WspolczynnikPrzeliczeniowy,
+                Aktywny = dto.Aktywny
+            });
+
+            _items.Add(created);
+            Snackbar.Add("Dodano licznik.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd dodawania: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task EditAsync(LicznikDto item)
+    {
+        var parameters = new DialogParameters
+        {
+            ["Model"] = item,
+            ["IsEdit"] = true,
+            ["Przylacza"] = _przylacza,
+            ["Jednostki"] = _jednostki,
+            ["Liczniki"] = _items
+        };
+
+        var dialog = DialogService.Show<LicznikDialog>($"Edycja: {item.NumerNV}", parameters, new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true });
+        var result = await dialog.Result;
+
+        if (result.Canceled) return;
+
+        var dto = (LicznikDto)result.Data;
+
+        try
+        {
+            var updated = await LicznikiService.UpdateAsync(item.IdLicznika, new UpdateLicznikRequest
+            {
+                IdPrzylacza = dto.IdPrzylacza,
+                IdLicznikaNadrzednego = dto.IdLicznikaNadrzednego,
+                NumerNV = dto.NumerNV,
+                KodJednostki = dto.KodJednostki,
+                WspolczynnikPrzeliczeniowy = dto.WspolczynnikPrzeliczeniowy,
+                Aktywny = dto.Aktywny
+            });
+
+            if (updated is null)
+            {
+                Snackbar.Add("Rekord nie istnieje (404).", Severity.Warning);
+                await ReloadAsync();
+                return;
+            }
+
+            var idx = _items.FindIndex(x => x.IdLicznika == updated.IdLicznika);
+            if (idx >= 0) _items[idx] = updated;
+
+            Snackbar.Add("Zapisano zmiany.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd edycji: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task DeleteAsync(LicznikDto item)
+    {
+        var parameters = new DialogParameters
+        {
+            ["ContentText"] = $"Usunąć licznik Id={item.IdLicznika}, NumerNV={item.NumerNV}?",
+            ["ButtonText"] = "Usuń",
+            ["Color"] = Color.Error
+        };
+
+        var dialog = DialogService.Show<CastlePlus2.Client.Components.Crud.ConfirmDeleteDialog>("Potwierdź", parameters);
+        var result = await dialog.Result;
+
+        if (result.Canceled) return;
+
+        try
+        {
+            var ok = await LicznikiService.DeleteAsync(item.IdLicznika);
+            if (!ok)
+            {
+                Snackbar.Add("Rekord nie istnieje (404).", Severity.Warning);
+                await ReloadAsync();
+                return;
+            }
+
+            _items.RemoveAll(x => x.IdLicznika == item.IdLicznika);
+            Snackbar.Add("Usunięto licznik.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd usuwania: {ex.Message}", Severity.Error);
+        }
+    }
+}

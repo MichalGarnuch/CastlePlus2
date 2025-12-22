@@ -15,6 +15,7 @@ public static class DependencyInjection
         // tutaj dopniemy serwisy modułów, np. services.AddScoped<IRodzajMediowService, RodzajMediowService>();
         services.AddScoped<IRodzajeMediowService, RodzajeMediowService>();
         services.AddScoped<IPrzylaczaService, PrzylaczaService>();
+        services.AddScoped<ILicznikiService, LicznikiService>();
 
         services.AddScoped<IJednostkiMiaryService, JednostkiMiaryService>();
         services.AddScoped<IIndeksacjeService, IndeksacjeService>();

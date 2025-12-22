@@ -1,0 +1,117 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Media
+@using CastlePlus2.Contracts.DTOs.Slowniki
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+
+            <MudSelect T="long"
+                       Label="Przyłącze (IdPrzylacza)"
+                       Dense="true"
+                       Required="true"
+                       @bind-Value="_model.IdPrzylacza">
+                @foreach (var p in _przylacza)
+                {
+                    <MudSelectItem T="long" Value="@p.IdPrzylacza">@($"Id={p.IdPrzylacza} / Rodzaj={p.KodRodzaju}")</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="long?"
+                       Label="Licznik nadrzędny (opcjonalnie)"
+                       Dense="true"
+                       @bind-Value="_model.IdLicznikaNadrzednego">
+                <MudSelectItem T="long?" Value="@(null)">Brak</MudSelectItem>
+                @foreach (var l in _liczniki.Where(x => x.IdLicznika != _model.IdLicznika))
+                {
+                    <MudSelectItem T="long?" Value="@l.IdLicznika">@($"Id={l.IdLicznika} / {l.NumerNV}")</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudTextField Label="NumerNV"
+                          Dense="true"
+                          Required="true"
+                          @bind-Value="_model.NumerNV" />
+
+            <MudSelect T="string"
+                       Label="KodJednostki"
+                       Dense="true"
+                       Required="true"
+                       @bind-Value="_model.KodJednostki">
+                @foreach (var j in _jednostki)
+                {
+                    <MudSelectItem T="string" Value="@j.KodJednostki">@($"{j.Nazwa} ({j.KodJednostki})")</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudNumericField T="decimal?"
+                             Label="Współczynnik przeliczeniowy (decimal(12,6))"
+                             Dense="true"
+                             @bind-Value="_model.WspolczynnikPrzeliczeniowy" />
+
+            // CHANGE – popraw MudSwitch (dodaj T="bool")
+            <MudSwitch T="bool"
+                       Label="Aktywny"
+                       Color="Color.Primary"
+                       @bind-Checked="_model.Aktywny" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync">
+            Zapisz
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public LicznikDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    [Parameter] public List<PrzylaczeDto> Przylacza { get; set; } = new();
+    [Parameter] public List<JednostkaMiaryDto> Jednostki { get; set; } = new();
+    [Parameter] public List<LicznikDto> Liczniki { get; set; } = new();
+
+    private MudForm? _form;
+    private LicznikDto _model = new();
+
+    private List<PrzylaczeDto> _przylacza = new();
+    private List<JednostkaMiaryDto> _jednostki = new();
+    private List<LicznikDto> _liczniki = new();
+
+    protected override void OnInitialized()
+    {
+        _model = new LicznikDto
+        {
+            IdLicznika = Model.IdLicznika,
+            IdPrzylacza = Model.IdPrzylacza,
+            IdLicznikaNadrzednego = Model.IdLicznikaNadrzednego,
+            NumerNV = Model.NumerNV,
+            KodJednostki = Model.KodJednostki,
+            WspolczynnikPrzeliczeniowy = Model.WspolczynnikPrzeliczeniowy,
+            Aktywny = Model.Aktywny
+        };
+
+        _przylacza = Przylacza ?? new();
+        _jednostki = Jednostki ?? new();
+        _liczniki = Liczniki ?? new();
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SubmitAsync()
+    {
+        if (_form is null)
+            return;
+
+        await _form.Validate();
+
+        if (!_form.IsValid)
+            return;
+
+        MudDialog.Close(DialogResult.Ok(_model));
+    }
+}
