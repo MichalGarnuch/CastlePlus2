@@ -1,0 +1,89 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Media
+@using CastlePlus2.Contracts.DTOs.Rdzen
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+
+            <MudSelect T="Guid"
+                       Label="Gospodarz (Nieruchomość)"
+                       Dense="true"
+                       Required="true"
+                       @bind-Value="_model.IdEncjiGospodarza">
+                @foreach (var n in _nieruchomosci)
+                {
+                    <MudSelectItem T="Guid" Value="@n.Id">@n.Nazwa</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="string"
+                       Label="Rodzaj medium"
+                       Dense="true"
+                       Required="true"
+                       @bind-Value="_model.KodRodzaju">
+                @foreach (var r in _rodzaje)
+                {
+                    <MudSelectItem T="string" Value="@r.KodRodzaju">@($"{r.Nazwa} ({r.KodRodzaju})")</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudTextField Label="Opis"
+                          Dense="true"
+                          Lines="3"
+                          @bind-Value="_model.Opis" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync">
+            Zapisz
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public PrzylaczeDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    [Parameter] public List<RodzajMediumDto> Rodzaje { get; set; } = new();
+    [Parameter] public List<NieruchomoscDto> Nieruchomosci { get; set; } = new();
+
+    private MudForm? _form;
+    private PrzylaczeDto _model = new();
+
+    private List<RodzajMediumDto> _rodzaje = new();
+    private List<NieruchomoscDto> _nieruchomosci = new();
+
+    protected override void OnInitialized()
+    {
+        _model = new PrzylaczeDto
+        {
+            IdPrzylacza = Model.IdPrzylacza,
+            IdEncjiGospodarza = Model.IdEncjiGospodarza,
+            KodRodzaju = Model.KodRodzaju,
+            Opis = Model.Opis
+        };
+
+        _rodzaje = Rodzaje ?? new();
+        _nieruchomosci = Nieruchomosci ?? new();
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SubmitAsync()
+    {
+        if (_form is null)
+            return;
+
+        await _form.Validate();
+
+        if (!_form.IsValid)
+            return;
+
+        MudDialog.Close(DialogResult.Ok(_model));
+    }
+}

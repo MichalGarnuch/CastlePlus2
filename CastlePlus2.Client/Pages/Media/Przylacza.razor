@@ -1,0 +1,267 @@
+﻿@page "/media/przylacza"
+@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Media
+@using CastlePlus2.Contracts.DTOs.Rdzen
+@using CastlePlus2.Contracts.DTOs.Media
+@using CastlePlus2.Contracts.Requests.Media
+@using CastlePlus2.Client.Services.Media
+@using CastlePlus2.Client.Services.Rdzen
+
+@inject IPrzylaczaService PrzylaczaService
+@inject IRodzajeMediowService RodzajeMediowService
+@inject INieruchomosciService NieruchomosciService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Przyłącza</MudText>
+
+<MudPaper Class="pa-4">
+    <MudTable Items="_items"
+              Dense="true"
+              Hover="true"
+              Bordered="true"
+              Striped="true"
+              Filter="FilterFunc">
+
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudSpacer />
+
+            <MudTextField @bind-Value="_search"
+                          Placeholder="Szukaj..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Class="mr-4"
+                          Margin="Margin.Dense" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="CreateAsync">
+                Dodaj
+            </MudButton>
+        </ToolBarContent>
+
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Gospodarz</MudTh>
+            <MudTh>Rodzaj</MudTh>
+            <MudTh>Opis</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.IdPrzylacza</MudTd>
+            <MudTd DataLabel="Gospodarz">@GetNieruchomoscLabel(context.IdEncjiGospodarza)</MudTd>
+            <MudTd DataLabel="Rodzaj">@(!string.IsNullOrWhiteSpace(context.NazwaRodzaju) ? context.NazwaRodzaju : context.KodRodzaju)</MudTd>
+            <MudTd DataLabel="Opis">@context.Opis</MudTd>
+
+            <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               OnClick="@(() => EditAsync(context))" />
+
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="@(() => DeleteAsync(context))" />
+            </MudTd>
+        </RowTemplate>
+
+        <NoRecordsContent>
+            <MudText Class="pa-4">Brak rekordów.</MudText>
+        </NoRecordsContent>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<PrzylaczeDto> _items = new();
+    private string _search = string.Empty;
+
+    private List<RodzajMediumDto> _rodzaje = new();
+    private List<NieruchomoscDto> _nieruchomosci = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLookupsAsync();
+        await ReloadAsync();
+    }
+
+    private async Task LoadLookupsAsync()
+    {
+        try
+        {
+            _rodzaje = (await RodzajeMediowService.GetAllAsync()) ?? new();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania rodzajów mediów: {ex.Message}", Severity.Error);
+            _rodzaje = new();
+        }
+
+        try
+        {
+            _nieruchomosci = (await NieruchomosciService.GetAllAsync()) ?? new();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania nieruchomości: {ex.Message}", Severity.Error);
+            _nieruchomosci = new();
+        }
+    }
+
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            _items = (await PrzylaczaService.GetAllAsync()) ?? new();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania przyłączy: {ex.Message}", Severity.Error);
+            _items = new();
+        }
+    }
+
+    private string GetNieruchomoscLabel(Guid idEncji)
+    {
+        var n = _nieruchomosci.FirstOrDefault(x => x.Id == idEncji);
+        if (n is null) return idEncji.ToString();
+        return string.IsNullOrWhiteSpace(n.Nazwa) ? n.Id.ToString() : n.Nazwa;
+    }
+
+    private bool FilterFunc(PrzylaczeDto item)
+    {
+        if (string.IsNullOrWhiteSpace(_search))
+            return true;
+
+        var s = _search.Trim();
+
+        return item.IdPrzylacza.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || item.IdEncjiGospodarza.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || GetNieruchomoscLabel(item.IdEncjiGospodarza).Contains(s, StringComparison.OrdinalIgnoreCase)
+               || (item.KodRodzaju?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || (item.NazwaRodzaju?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || (item.Opis?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false);
+    }
+
+    private async Task CreateAsync()
+    {
+        var parameters = new DialogParameters
+        {
+            ["Model"] = new PrzylaczeDto(),
+            ["IsEdit"] = false,
+            ["Rodzaje"] = _rodzaje,
+            ["Nieruchomosci"] = _nieruchomosci
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<PrzylaczeDialog>("Dodaj przyłącze", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is PrzylaczeDto model)
+        {
+            try
+            {
+                var req = new CreatePrzylaczeRequest
+                {
+                    IdEncjiGospodarza = model.IdEncjiGospodarza,
+                    KodRodzaju = model.KodRodzaju,
+                    Opis = model.Opis
+                };
+
+                var dto = await PrzylaczaService.CreateAsync(req);
+                Snackbar.Add($"Dodano przyłącze (Id={dto.IdPrzylacza}).", Severity.Success);
+                await ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Błąd dodawania: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task EditAsync(PrzylaczeDto item)
+    {
+        var clone = new PrzylaczeDto
+        {
+            IdPrzylacza = item.IdPrzylacza,
+            IdEncjiGospodarza = item.IdEncjiGospodarza,
+            KodRodzaju = item.KodRodzaju,
+            Opis = item.Opis,
+            NazwaRodzaju = item.NazwaRodzaju
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["Rodzaje"] = _rodzaje,
+            ["Nieruchomosci"] = _nieruchomosci
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<PrzylaczeDialog>("Edytuj przyłącze", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is PrzylaczeDto model)
+        {
+            try
+            {
+                var req = new UpdatePrzylaczeRequest
+                {
+                    IdEncjiGospodarza = model.IdEncjiGospodarza,
+                    KodRodzaju = model.KodRodzaju,
+                    Opis = model.Opis
+                };
+
+                var dto = await PrzylaczaService.UpdateAsync(model.IdPrzylacza, req);
+                if (dto is null)
+                {
+                    Snackbar.Add("Nie znaleziono rekordu do edycji (404).", Severity.Warning);
+                    return;
+                }
+
+                Snackbar.Add("Zapisano zmiany.", Severity.Success);
+                await ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task DeleteAsync(PrzylaczeDto item)
+    {
+        bool? confirm = await DialogService.ShowMessageBox(
+            "Usuń",
+            $"Czy na pewno usunąć przyłącze Id={item.IdPrzylacza}?",
+            yesText: "Usuń",
+            cancelText: "Anuluj");
+
+        if (confirm != true)
+            return;
+
+        try
+        {
+            var ok = await PrzylaczaService.DeleteAsync(item.IdPrzylacza);
+            if (!ok)
+            {
+                Snackbar.Add("Nie znaleziono rekordu do usunięcia (404).", Severity.Warning);
+                return;
+            }
+
+            Snackbar.Add("Usunięto.", Severity.Success);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd usuwania: {ex.Message}", Severity.Error);
+        }
+    }
+}
