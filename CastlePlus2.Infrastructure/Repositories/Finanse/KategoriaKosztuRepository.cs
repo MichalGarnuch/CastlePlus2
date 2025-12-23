@@ -21,6 +21,20 @@ namespace CastlePlus2.Infrastructure.Repositories.Finanse
                 .FirstOrDefaultAsync(x => x.IdKategoriiKosztu == id, ct);
         }
 
+        public async Task<KategoriaKosztu?> GetForUpdateAsync(long id, CancellationToken ct)
+        {
+            return await _db.KategorieKosztow
+                .FirstOrDefaultAsync(x => x.IdKategoriiKosztu == id, ct);
+        }
+
+        public async Task<List<KategoriaKosztu>> GetAllAsync(CancellationToken ct)
+        {
+            return await _db.KategorieKosztow
+                .AsNoTracking()
+                .OrderByDescending(x => x.IdKategoriiKosztu)
+                .ToListAsync(ct);
+        }
+
         public async Task<bool> ExistsByKodAsync(string kod, CancellationToken ct)
         {
             return await _db.KategorieKosztow
@@ -28,9 +42,22 @@ namespace CastlePlus2.Infrastructure.Repositories.Finanse
                 .AnyAsync(x => x.Kod == kod, ct);
         }
 
+        public async Task<bool> ExistsOtherByKodAsync(string kod, long excludeIdKategoriiKosztu, CancellationToken ct)
+        {
+            return await _db.KategorieKosztow
+                .AsNoTracking()
+                .AnyAsync(x => x.Kod == kod && x.IdKategoriiKosztu != excludeIdKategoriiKosztu, ct);
+        }
+
         public async Task AddAsync(KategoriaKosztu entity, CancellationToken ct)
         {
             await _db.KategorieKosztow.AddAsync(entity, ct);
+        }
+
+        public Task RemoveAsync(KategoriaKosztu entity, CancellationToken ct)
+        {
+            _db.KategorieKosztow.Remove(entity);
+            return Task.CompletedTask;
         }
 
         public async Task SaveChangesAsync(CancellationToken ct)

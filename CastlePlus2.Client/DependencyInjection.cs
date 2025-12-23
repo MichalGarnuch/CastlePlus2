@@ -43,6 +43,8 @@ public static class DependencyInjection
         services.AddScoped<IFakturyService, FakturyService>();
         services.AddScoped<IPlatnosciService, PlatnosciService>();
         services.AddScoped<IAlokacjeKosztowService, AlokacjeKosztowService>();
+        services.AddScoped<IKategorieKosztowService, KategorieKosztowService>();
+
 
         return services;
     }
