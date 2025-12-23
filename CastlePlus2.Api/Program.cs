@@ -71,46 +71,45 @@ builder.Services.AddSingleton(mapper);
 // -------------------------------------------------------------------------
 // 3. Rejestracja Warstwy Infrastructure (Repozytoria)
 // -------------------------------------------------------------------------
+//RDZEN
 builder.Services.AddScoped<INieruchomoscRepository, NieruchomoscRepository>();
 builder.Services.AddScoped<IAdresRepository, AdresRepository>();
 builder.Services.AddScoped<IBudynekRepository, BudynekRepository>();
 builder.Services.AddScoped<ILokalRepository, LokalRepository>();
 builder.Services.AddScoped<IPomieszczenieRepository, PomieszczenieRepository>();
 builder.Services.AddScoped<IPrzypisanieAdresuRepository, PrzypisanieAdresuRepository>();
-
+builder.Services.AddScoped<IEncjaRepository, EncjaRepository>();
+//UTRZYMANIE
 builder.Services.AddScoped<IZleceniePracyRepository, ZleceniePracyRepository>();
 builder.Services.AddScoped<IPowiazanieZleceniaRepository, PowiazanieZleceniaRepository>();
-
+//DOKUMENTY
 builder.Services.AddScoped<IDokumentRepository, DokumentRepository>();
 builder.Services.AddScoped<IPowiazanieDokumentuRepository, PowiazanieDokumentuRepository>();
-
+//FINANSE
 builder.Services.AddScoped<IAlokacjaKosztuRepository, AlokacjaKosztuRepository>();
 builder.Services.AddScoped<IKategoriaKosztuRepository, KategoriaKosztuRepository>();
 builder.Services.AddScoped<IFakturaRepository, FakturaRepository>();
 builder.Services.AddScoped<IPozycjaKosztuRepository, PozycjaKosztuRepository>();
 builder.Services.AddScoped<IPlatnoscRepository, PlatnoscRepository>();
 builder.Services.AddScoped<IRozliczeniePlatnosciRepository, RozliczeniePlatnosciRepository>();
-
+//SLOWNIK
 builder.Services.AddScoped<IWalutaRepository, WalutaRepository>();
 builder.Services.AddScoped<IIndeksacjaRepository, IndeksacjaRepository>();
 builder.Services.AddScoped<IJednostkaMiaryRepository, JednostkaMiaryRepository>();
-
+//PODMIOTY
 builder.Services.AddScoped<IPodmiotRepository, PodmiotRepository>();
 builder.Services.AddScoped<IKontaktRepository, KontaktRepository>();
-
-
+//NAJEM
 builder.Services.AddScoped<IUmowaNajmuRepository, UmowaNajmuRepository>();
 builder.Services.AddScoped<IPrzedmiotNajmuRepository, PrzedmiotNajmuRepository>();
 builder.Services.AddScoped<ISkladnikCzynszuRepository, SkladnikCzynszuRepository>();
 builder.Services.AddScoped<IKaucjaRepository, KaucjaRepository>();
 builder.Services.AddScoped<IWlasnoscRepository, WlasnoscRepository>();
-
-
+//MEDIA
 builder.Services.AddScoped<IRodzajMediumRepository, RodzajMediumRepository>();
 builder.Services.AddScoped<IPrzylaczeRepository, PrzylaczeRepository>();
 builder.Services.AddScoped<ILicznikRepository, LicznikRepository>();
 builder.Services.AddScoped<IOdczytRepository, OdczytRepository>();
-
 
 
 // -------------------------------------------------------------------------
