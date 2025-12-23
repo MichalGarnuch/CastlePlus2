@@ -1,0 +1,208 @@
+﻿@page "/rdzen/encje"
+@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Rdzen
+@using CastlePlus2.Contracts.Requests.Rdzen
+@using CastlePlus2.Client.Services.Rdzen
+@inject IEncjeService EncjeService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Encje</MudText>
+
+<MudPaper Class="pa-4">
+    <MudTable Items="_items"
+              Dense="true"
+              Hover="true"
+              Bordered="true"
+              Striped="true"
+              Filter="FilterFunc">
+
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudSpacer />
+
+            <MudTextField @bind-Value="_search"
+                          Placeholder="Szukaj..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Class="mr-4"
+                          Margin="Margin.Dense" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="CreateAsync">
+                Dodaj
+            </MudButton>
+        </ToolBarContent>
+
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Typ</MudTh>
+            <MudTh>Kod</MudTh>
+            <MudTh>Utworzono</MudTh>
+            <MudTh>Zmieniono</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Typ">@context.TypEncji</MudTd>
+            <MudTd DataLabel="Kod">@context.KodEncji</MudTd>
+            <MudTd DataLabel="Utworzono">@context.UtworzonoUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</MudTd>
+            <MudTd DataLabel="Zmieniono">@context.ZmienionoUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</MudTd>
+
+            <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               OnClick="@(() => EditAsync(context))" />
+
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="@(() => DeleteAsync(context))" />
+            </MudTd>
+        </RowTemplate>
+
+        <NoRecordsContent>
+            <MudText Class="pa-4">Brak rekordów.</MudText>
+        </NoRecordsContent>
+
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<EncjaDto> _items = new();
+    private string _search = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            var data = await EncjeService.GetAllAsync();
+            _items = (data ?? new List<EncjaDto>()).ToList();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania encji: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private bool FilterFunc(EncjaDto item)
+    {
+        if (string.IsNullOrWhiteSpace(_search))
+        {
+            return true;
+        }
+
+        var s = _search.Trim();
+
+        return item.Id.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || (item.TypEncji?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || (item.KodEncji?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false);
+    }
+
+    private async Task CreateAsync()
+    {
+        var parameters = new DialogParameters
+        {
+            ["Model"] = new EncjaDto(),
+            ["IsEdit"] = false
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };
+
+        var dialog = await DialogService.ShowAsync<EncjaDialog>("Dodaj encję", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is EncjaDto model)
+        {
+            try
+            {
+                var request = new CreateEncjaRequest
+                {
+                    TypEncji = model.TypEncji,
+                    KodEncji = model.KodEncji
+                };
+
+                var newId = await EncjeService.CreateAsync(request);
+                Snackbar.Add($"Dodano encję (Id={newId}).", Severity.Success);
+                await ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Błąd dodawania encji: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task EditAsync(EncjaDto item)
+    {
+        var clone = new EncjaDto
+        {
+            Id = item.Id,
+            TypEncji = item.TypEncji,
+            KodEncji = item.KodEncji,
+            UtworzonoUtc = item.UtworzonoUtc,
+            ZmienionoUtc = item.ZmienionoUtc
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };
+
+        var dialog = await DialogService.ShowAsync<EncjaDialog>("Edytuj encję", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is EncjaDto model)
+        {
+            try
+            {
+                var request = new UpdateEncjaRequest
+                {
+                    TypEncji = model.TypEncji,
+                    KodEncji = model.KodEncji
+                };
+
+                var ok = await EncjeService.UpdateAsync(model.Id, request);
+                if (!ok)
+                {
+                    Snackbar.Add("Nie znaleziono encji do aktualizacji.", Severity.Warning);
+                    return;
+                }
+
+                Snackbar.Add("Zaktualizowano encję.", Severity.Success);
+                await ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Błąd aktualizacji encji: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task DeleteAsync(EncjaDto item)
+    {
+        var ok = await EncjeService.DeleteAsync(item.Id);
+        if (!ok)
+        {
+            Snackbar.Add("Nie znaleziono encji do usunięcia.", Severity.Warning);
+            return;
+        }
+
+        Snackbar.Add("Usunięto encję.", Severity.Success);
+        await ReloadAsync();
+    }
+}
