@@ -1,0 +1,128 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Finanse
+@using CastlePlus2.Contracts.DTOs.Podmioty
+@using CastlePlus2.Contracts.DTOs.Slowniki
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(_isEdit ? "Edycja płatności" : "Nowa płatność")
+            </MudText>
+
+            <MudGrid Spacing="2">
+                <MudItem xs="12">
+                    <MudSelect T="long"
+                               Label="Podmiot (IdPodmiotu)"
+                               Dense="true"
+                               Required="true"
+                               @bind-Value="_model.IdPodmiotu">
+                        @foreach (var p in _podmioty)
+                        {
+                            <MudSelectItem T="long" Value="@p.IdPodmiotu">@($"Id={p.IdPodmiotu} / {p.Nazwa}")</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudDatePicker Label="Data płatności"
+                                   Dense="true"
+                                   Required="true"
+                                   RequiredError="Data płatności jest wymagana"
+                                   @bind-Date="_dataPlatnosci" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudSelect T="string"
+                               Label="Waluta (KodWaluty)"
+                               Dense="true"
+                               Required="true"
+                               @bind-Value="_model.KodWaluty">
+                        @foreach (var w in _waluty)
+                        {
+                            <MudSelectItem T="string" Value="@w.KodWaluty">@($"{w.KodWaluty} / {w.Nazwa}")</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudNumericField T="decimal"
+                                     Label="Kwota"
+                                     Dense="true"
+                                     Required="true"
+                                     RequiredError="Kwota jest wymagana"
+                                     @bind-Value="_model.Kwota" />
+                </MudItem>
+
+                @if (_isEdit)
+                {
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            IdPlatnosci: @_model.IdPlatnosci
+                        </MudText>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public PlatnoscDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public List<PodmiotDto> Podmioty { get; set; } = new();
+    [Parameter] public List<WalutaDto> Waluty { get; set; } = new();
+
+    private MudForm? _form;
+    private bool _isEdit => IsEdit;
+
+    private PlatnoscDto _model = new();
+    private List<PodmiotDto> _podmioty = new();
+    private List<WalutaDto> _waluty = new();
+
+    private DateTime? _dataPlatnosci;
+
+    protected override void OnInitialized()
+    {
+        _podmioty = Podmioty ?? new();
+        _waluty = Waluty ?? new();
+
+        _model = new PlatnoscDto
+        {
+            IdPlatnosci = Model.IdPlatnosci,
+            IdPodmiotu = Model.IdPodmiotu,
+            DataPlatnosci = Model.DataPlatnosci,
+            KodWaluty = Model.KodWaluty ?? "PLN",
+            Kwota = Model.Kwota
+        };
+
+        _dataPlatnosci = _model.DataPlatnosci == default ? DateTime.Today : _model.DataPlatnosci;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SubmitAsync()
+    {
+        if (_form is null)
+            return;
+
+        await _form.Validate();
+        if (!_form.IsValid)
+            return;
+
+        if (_dataPlatnosci is null)
+            return;
+
+        _model.KodWaluty = (_model.KodWaluty ?? string.Empty).Trim().ToUpperInvariant();
+        _model.DataPlatnosci = _dataPlatnosci.Value.Date;
+
+        MudDialog.Close(DialogResult.Ok(_model));
+    }
+}

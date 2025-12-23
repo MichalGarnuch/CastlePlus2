@@ -40,6 +40,7 @@ public static class DependencyInjection
 
         //FINANSE
         services.AddScoped<IFakturyService, FakturyService>();
+        services.AddScoped<IPlatnosciService, PlatnosciService>();
 
         return services;
     }
