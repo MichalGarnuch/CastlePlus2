@@ -1,0 +1,290 @@
+﻿@page "/podmioty/kontakty"
+@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Podmioty
+@using CastlePlus2.Contracts.Requests.Podmioty
+@using CastlePlus2.Client.Services.Podmioty
+@inject IPodmiotyService PodmiotyService
+@inject IKontaktyService KontaktyService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Kontakty</MudText>
+
+<MudPaper Class="pa-4 mb-4">
+    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+        <MudSelect T="long?"
+                   Label="Podmiot"
+                   Dense="true"
+                   @bind-Value="_selectedPodmiotId"
+                   @bind-Value:after="ReloadAsync">
+            @if (_podmioty.Count == 0)
+            {
+                <MudSelectItem T="long?" Value="null">Brak podmiotów</MudSelectItem>
+            }
+            else
+            {
+                @foreach (var podmiot in _podmioty)
+                {
+                    <MudSelectItem T="long?" Value="@podmiot.IdPodmiotu">
+                        @($"Id={podmiot.IdPodmiotu} / {podmiot.Nazwa}")
+                    </MudSelectItem>
+                }
+            }
+        </MudSelect>
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Refresh"
+                   OnClick="ReloadAsync">
+            Odśwież
+        </MudButton>
+    </MudStack>
+</MudPaper>
+
+<MudPaper Class="pa-4">
+    <MudTable Items="_items"
+              Dense="true"
+              Hover="true"
+              Bordered="true"
+              Striped="true"
+              Filter="FilterFunc">
+
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudSpacer />
+
+            <MudTextField @bind-Value="_search"
+                          Placeholder="Szukaj..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Class="mr-4"
+                          Margin="Margin.Dense" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       Disabled="@(!_selectedPodmiotId.HasValue)"
+                       OnClick="CreateAsync">
+                Dodaj
+            </MudButton>
+        </ToolBarContent>
+
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>IdPodmiotu</MudTh>
+            <MudTh>Rodzaj</MudTh>
+            <MudTh>Wartosc</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.IdKontaktu</MudTd>
+            <MudTd DataLabel="IdPodmiotu">@context.IdPodmiotu</MudTd>
+            <MudTd DataLabel="Rodzaj">@context.Rodzaj</MudTd>
+            <MudTd DataLabel="Wartosc">@context.Wartosc</MudTd>
+
+            <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               OnClick="@(() => EditAsync(context))" />
+
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="@(() => DeleteAsync(context))" />
+            </MudTd>
+        </RowTemplate>
+
+        <NoRecordsContent>
+            <MudText Class="pa-4">Brak rekordów.</MudText>
+        </NoRecordsContent>
+
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<PodmiotDto> _podmioty = new();
+    private List<KontaktDto> _items = new();
+    private long? _selectedPodmiotId;
+    private string _search = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPodmiotyAsync();
+        await ReloadAsync();
+    }
+
+    private async Task LoadPodmiotyAsync()
+    {
+        try
+        {
+            _podmioty = (await PodmiotyService.GetAllAsync()).ToList();
+            _selectedPodmiotId ??= _podmioty.FirstOrDefault()?.IdPodmiotu;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania podmiotów: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task ReloadAsync()
+    {
+        if (!_selectedPodmiotId.HasValue)
+        {
+            _items = new List<KontaktDto>();
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        try
+        {
+            var data = await KontaktyService.GetByPodmiotIdAsync(_selectedPodmiotId.Value);
+            _items = (data ?? new List<KontaktDto>()).ToList();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania kontaktów: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private bool FilterFunc(KontaktDto item)
+    {
+        if (string.IsNullOrWhiteSpace(_search))
+            return true;
+
+        var s = _search.Trim();
+
+        return item.IdKontaktu.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || item.IdPodmiotu.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || item.Rodzaj.Contains(s, StringComparison.OrdinalIgnoreCase)
+               || item.Wartosc.Contains(s, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task CreateAsync()
+    {
+        if (!_selectedPodmiotId.HasValue)
+        {
+            Snackbar.Add("Wybierz podmiot przed dodaniem kontaktu.", Severity.Warning);
+            return;
+        }
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = new KontaktDto { IdPodmiotu = _selectedPodmiotId.Value },
+            ["IsEdit"] = false,
+            ["Podmioty"] = _podmioty
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<KontaktDialog>("Dodaj kontakt", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is KontaktDto model)
+        {
+            try
+            {
+                var request = new CreateKontaktRequest
+                {
+                    IdPodmiotu = model.IdPodmiotu,
+                    Rodzaj = model.Rodzaj,
+                    Wartosc = model.Wartosc
+                };
+
+                var newId = await KontaktyService.CreateAsync(request);
+                Snackbar.Add($"Dodano kontakt (Id={newId}).", Severity.Success);
+                await ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Błąd dodawania: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task EditAsync(KontaktDto item)
+    {
+        var clone = new KontaktDto
+        {
+            IdKontaktu = item.IdKontaktu,
+            IdPodmiotu = item.IdPodmiotu,
+            Rodzaj = item.Rodzaj,
+            Wartosc = item.Wartosc
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["Podmioty"] = _podmioty
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<KontaktDialog>("Edytuj kontakt", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is KontaktDto model)
+        {
+            try
+            {
+                var request = new UpdateKontaktRequest
+                {
+                    IdPodmiotu = model.IdPodmiotu,
+                    Rodzaj = model.Rodzaj,
+                    Wartosc = model.Wartosc
+                };
+
+                var ok = await KontaktyService.UpdateAsync(model.IdKontaktu, request);
+                if (!ok)
+                {
+                    Snackbar.Add("Nie znaleziono rekordu do edycji (404).", Severity.Warning);
+                    return;
+                }
+
+                var idx = _items.FindIndex(x => x.IdKontaktu == model.IdKontaktu);
+                if (idx >= 0) _items[idx] = model;
+                await InvokeAsync(StateHasChanged);
+
+                Snackbar.Add("Zapisano zmiany.", Severity.Success);
+                await ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task DeleteAsync(KontaktDto item)
+    {
+        bool? confirm = await DialogService.ShowMessageBox(
+            "Usuń",
+            $"Czy na pewno usunąć kontakt Id={item.IdKontaktu}?",
+            yesText: "Usuń",
+            cancelText: "Anuluj");
+
+        if (confirm != true)
+            return;
+
+        try
+        {
+            var ok = await KontaktyService.DeleteAsync(item.IdKontaktu);
+            if (!ok)
+            {
+                Snackbar.Add("Nie znaleziono rekordu do usunięcia (404).", Severity.Warning);
+                return;
+            }
+
+            Snackbar.Add("Usunięto.", Severity.Success);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd usuwania: {ex.Message}", Severity.Error);
+        }
+    }
+}

@@ -24,7 +24,11 @@ namespace CastlePlus2.Infrastructure.Repositories.Podmioty
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IdKontaktu == idKontaktu, ct);
         }
-
+        public async Task<Kontakt?> GetByIdForUpdateAsync(long idKontaktu, CancellationToken ct)
+        {
+            return await _db.Kontakty
+                .FirstOrDefaultAsync(x => x.IdKontaktu == idKontaktu, ct);
+        }
         public async Task<List<Kontakt>> GetByPodmiotIdAsync(long idPodmiotu, CancellationToken ct)
         {
             return await _db.Kontakty
@@ -45,7 +49,10 @@ namespace CastlePlus2.Infrastructure.Repositories.Podmioty
         {
             await _db.Kontakty.AddAsync(kontakt, ct);
         }
-
+        public void Remove(Kontakt kontakt)
+        {
+            _db.Kontakty.Remove(kontakt);
+        }
         public async Task SaveChangesAsync(CancellationToken ct)
         {
             await _db.SaveChangesAsync(ct);

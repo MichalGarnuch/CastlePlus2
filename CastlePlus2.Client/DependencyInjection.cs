@@ -37,6 +37,7 @@ public static class DependencyInjection
         //PODMIOTY
         services.AddScoped<IPodmiotyService, PodmiotyService>();
         services.AddScoped<IWlasnosciService, WlasnosciService>();
+        services.AddScoped<IKontaktyService, KontaktyService>();
 
         //FINANSE
         services.AddScoped<IFakturyService, FakturyService>();
