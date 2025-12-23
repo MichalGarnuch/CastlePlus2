@@ -1,0 +1,102 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Najem
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(IsEdit ? "Edycja kaucji" : "Nowa kaucja")
+            </MudText>
+
+            @if (IsEdit)
+            {
+                <MudTextField Value="@Model.IdOperacjiKaucji.ToString()"
+                              Label="IdOperacjiKaucji"
+                              Disabled="true"
+                              Margin="Margin.Dense" />
+            }
+
+            <MudTextField @bind-Value="_idUmowyText"
+                          Label="IdUmowyNajmu (GUID)"
+                          Required="true"
+                          RequiredError="IdUmowyNajmu jest wymagane"
+                          Margin="Margin.Dense" />
+
+            <MudNumericField T="decimal"
+                             Label="Kwota"
+                             Required="true"
+                             RequiredError="Kwota jest wymagana"
+                             Margin="Margin.Dense"
+                             @bind-Value="Model.Kwota" />
+
+            <MudTextField @bind-Value="Model.RodzajOperacji"
+                          Label="Rodzaj operacji"
+                          Required="true"
+                          RequiredError="Rodzaj operacji jest wymagany"
+                          Margin="Margin.Dense" />
+
+            <MudTextField @bind-Value="Model.KodWaluty"
+                          Label="Kod waluty"
+                          Required="true"
+                          RequiredError="Kod waluty jest wymagany"
+                          Margin="Margin.Dense" />
+
+            <MudDatePicker Label="Data operacji"
+                           Date="@_dataOperacji"
+                           DateChanged="OnDataOperacjiChanged"
+                           Margin="Margin.Dense"
+                           Required="true" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public KaucjaDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    private MudForm? _form;
+    private string _idUmowyText = string.Empty;
+    private DateTime? _dataOperacji;
+
+    protected override void OnInitialized()
+    {
+        _idUmowyText = Model.IdUmowyNajmu == Guid.Empty ? string.Empty : Model.IdUmowyNajmu.ToString();
+
+        _dataOperacji = new DateTime(Model.DataOperacji.Year, Model.DataOperacji.Month, Model.DataOperacji.Day);
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void OnDataOperacjiChanged(DateTime? dt)
+    {
+        _dataOperacji = dt;
+        if (dt is not null)
+            Model.DataOperacji = DateOnly.FromDateTime(dt.Value);
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_form is null) return;
+
+        await _form.Validate();
+        if (!_form.IsValid) return;
+
+        if (!Guid.TryParse(_idUmowyText?.Trim(), out var guid))
+        {
+            return;
+        }
+
+        Model.IdUmowyNajmu = guid;
+        Model.RodzajOperacji = (Model.RodzajOperacji ?? string.Empty).Trim();
+        Model.KodWaluty = (Model.KodWaluty ?? string.Empty).Trim().ToUpperInvariant();
+
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+}

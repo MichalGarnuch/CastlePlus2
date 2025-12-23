@@ -6,12 +6,11 @@
     /// </summary>
     public class Kaucja
     {
-        public long IdKaucji { get; set; }
+        public long IdOperacjiKaucji { get; set; }
         public Guid IdUmowyNajmu { get; set; }
+        public string RodzajOperacji { get; set; } = string.Empty;
         public decimal Kwota { get; set; }
         public string KodWaluty { get; set; } = string.Empty;
-        public DateOnly DataWplaty { get; set; }
-        public DateOnly? DataZwrotu { get; set; }
-        public string Status { get; set; } = string.Empty;
+        public DateOnly DataOperacji { get; set; }
     }
 }

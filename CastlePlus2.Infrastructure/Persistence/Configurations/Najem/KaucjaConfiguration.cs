@@ -13,15 +13,20 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Najem
         {
             builder.ToTable("Kaucja", "najem");
 
-            builder.HasKey(x => x.IdKaucji)
+            builder.HasKey(x => x.IdOperacjiKaucji)
                    .HasName("PK_nj_Kaucja");
 
-            builder.Property(x => x.IdKaucji)
-                   .HasColumnName("IdKaucji")
+            builder.Property(x => x.IdOperacjiKaucji)
+                   .HasColumnName("IdOperacjiKaucji")
                    .ValueGeneratedOnAdd();
 
             builder.Property(x => x.IdUmowyNajmu)
                    .HasColumnName("IdUmowyNajmu")
+                   .IsRequired();
+
+            builder.Property(x => x.RodzajOperacji)
+                   .HasColumnName("RodzajOperacji")
+                   .HasMaxLength(20)
                    .IsRequired();
 
             builder.Property(x => x.Kwota)
@@ -34,19 +39,9 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Najem
                    .HasColumnType("char(3)")
                    .IsRequired();
 
-            builder.Property(x => x.DataWplaty)
-                   .HasColumnName("DataWplaty")
+            builder.Property(x => x.DataOperacji)
+                   .HasColumnName("DataOperacji")
                    .HasColumnType("date")
-                   .IsRequired();
-
-            builder.Property(x => x.DataZwrotu)
-                   .HasColumnName("DataZwrotu")
-                   .HasColumnType("date")
-                   .IsRequired(false);
-
-            builder.Property(x => x.Status)
-                   .HasColumnName("Status")
-                   .HasMaxLength(30)
                    .IsRequired();
         }
     }

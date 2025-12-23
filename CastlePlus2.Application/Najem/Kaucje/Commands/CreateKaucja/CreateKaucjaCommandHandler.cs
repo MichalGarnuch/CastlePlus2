@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System;
+using AutoMapper;
 using CastlePlus2.Application.Interfaces.Najem;
 using CastlePlus2.Contracts.DTOs.Najem;
 using CastlePlus2.Domain.Entities.Najem;
@@ -19,14 +20,28 @@ namespace CastlePlus2.Application.Najem.Kaucje.Commands.CreateKaucja
 
         public async Task<KaucjaDto> Handle(CreateKaucjaCommand request, CancellationToken ct)
         {
+            if (request.IdUmowyNajmu == Guid.Empty)
+                throw new InvalidOperationException("IdUmowyNajmu jest wymagany.");
+
+            if (string.IsNullOrWhiteSpace(request.RodzajOperacji))
+                throw new InvalidOperationException("RodzajOperacji jest wymagany.");
+
+            if (request.RodzajOperacji.Length > 20)
+                throw new InvalidOperationException("RodzajOperacji może mieć maksymalnie 20 znaków.");
+
+            if (string.IsNullOrWhiteSpace(request.KodWaluty))
+                throw new InvalidOperationException("KodWaluty jest wymagany.");
+
+            if (request.KodWaluty.Trim().Length != 3)
+                throw new InvalidOperationException("KodWaluty musi mieć dokładnie 3 znaki.");
+
             var entity = new Kaucja
             {
                 IdUmowyNajmu = request.IdUmowyNajmu,
+                RodzajOperacji = request.RodzajOperacji.Trim(),
                 Kwota = request.Kwota,
-                KodWaluty = request.KodWaluty,
-                DataWplaty = request.DataWplaty,
-                DataZwrotu = request.DataZwrotu,
-                Status = request.Status
+                KodWaluty = request.KodWaluty.Trim().ToUpperInvariant(),
+                DataOperacji = request.DataOperacji
             };
 
             await _repo.AddAsync(entity, ct);
