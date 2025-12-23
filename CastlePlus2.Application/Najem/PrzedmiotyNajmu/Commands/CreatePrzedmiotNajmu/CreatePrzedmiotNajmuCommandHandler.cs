@@ -19,13 +19,14 @@ namespace CastlePlus2.Application.Najem.PrzedmiotyNajmu.Commands.CreatePrzedmiot
 
         public async Task<PrzedmiotNajmuDto> Handle(CreatePrzedmiotNajmuCommand request, CancellationToken ct)
         {
+            var payload = request.Request;
             var entity = new PrzedmiotNajmu
             {
-                IdUmowyNajmu = request.IdUmowyNajmu,
-                IdEncji = request.IdEncji,
-                UdzialProcent = request.UdzialProcent,
-                OdDnia = request.OdDnia,
-                DoDnia = request.DoDnia
+                IdUmowyNajmu = payload.IdUmowyNajmu,
+                IdEncji = payload.IdEncji,
+                UdzialProcent = payload.UdzialProcent,
+                OdDnia = payload.OdDnia,
+                DoDnia = payload.DoDnia
             };
 
             await _repo.AddAsync(entity, ct);

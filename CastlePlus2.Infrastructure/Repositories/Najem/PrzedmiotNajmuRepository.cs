@@ -21,12 +21,27 @@ namespace CastlePlus2.Infrastructure.Repositories.Najem
 
         public Task<PrzedmiotNajmu?> GetByIdAsync(long id, CancellationToken ct)
         {
-            return _db.PrzedmiotyNajmu.FirstOrDefaultAsync(x => x.IdPrzedmiotuNajmu == id, ct);
+            return _db.PrzedmiotyNajmu
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.IdPrzedmiotuNajmu == id, ct);
         }
 
         public Task<List<PrzedmiotNajmu>> GetAllAsync(CancellationToken ct)
         {
-            return _db.PrzedmiotyNajmu.OrderByDescending(x => x.IdPrzedmiotuNajmu).ToListAsync(ct);
+            return _db.PrzedmiotyNajmu
+                .AsNoTracking()
+                .OrderByDescending(x => x.IdPrzedmiotuNajmu)
+                .ToListAsync(ct);
+        }
+
+        public Task<PrzedmiotNajmu?> GetForUpdateAsync(long id, CancellationToken ct)
+        {
+            return _db.PrzedmiotyNajmu.FirstOrDefaultAsync(x => x.IdPrzedmiotuNajmu == id, ct);
+        }
+
+        public void Remove(PrzedmiotNajmu entity)
+        {
+            _db.PrzedmiotyNajmu.Remove(entity);
         }
 
         public Task<int> SaveChangesAsync(CancellationToken ct)

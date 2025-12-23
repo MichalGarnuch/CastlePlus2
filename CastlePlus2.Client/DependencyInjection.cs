@@ -3,6 +3,7 @@ using CastlePlus2.Client.Services.Media;
 using CastlePlus2.Client.Services.Podmioty;
 using CastlePlus2.Client.Services.Rdzen;
 using CastlePlus2.Client.Services.Slowniki;
+using CastlePlus2.Client.Services.Najem;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
 
@@ -44,6 +45,9 @@ public static class DependencyInjection
         services.AddScoped<IPlatnosciService, PlatnosciService>();
         services.AddScoped<IAlokacjeKosztowService, AlokacjeKosztowService>();
         services.AddScoped<IKategorieKosztowService, KategorieKosztowService>();
+
+        //NAJEM
+        services.AddScoped<IPrzedmiotyNajmuService, PrzedmiotyNajmuService>();
 
 
         return services;
