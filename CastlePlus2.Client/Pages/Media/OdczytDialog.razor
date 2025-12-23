@@ -1,0 +1,126 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Media
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(_isEdit ? "Edycja odczytu" : "Nowy odczyt")
+            </MudText>
+
+            <MudGrid Spacing="2">
+                <MudItem xs="12">
+                    <MudSelect T="long"
+                               Label="Licznik"
+                               Value="_model.IdLicznika"
+                               ValueChanged="OnLicznikChanged"
+                               Required="true"
+                               RequiredError="Licznik jest wymagany"
+                               Margin="Margin.Dense">
+                        @foreach (var l in Liczniki)
+                        {
+                            <MudSelectItem T="long" Value="@l.IdLicznika">@($"{l.NumerNV} (Id={l.IdLicznika})")</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Data odczytu"
+                                   Date="_dataOdczytu"
+                                   DateChanged="OnDataChanged"
+                                   Required="true"
+                                   RequiredError="Data odczytu jest wymagana"
+                                   Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="decimal"
+                                     @bind-Value="_model.Wskazanie"
+                                     Label="Wskazanie"
+                                     Required="true"
+                                     RequiredError="Wskazanie jest wymagane"
+                                     Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_model.Zrodlo"
+                                  Label="Źródło (max 20)"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+
+                @if (_isEdit)
+                {
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            IdOdczytu: @_model.IdOdczytu
+                        </MudText>
+                    </MudItem>
+                }
+            </MudGrid>
+
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public OdczytDto Model { get; set; } = new();
+    [Parameter] public List<LicznikDto> Liczniki { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    private MudForm? _form;
+    private bool _isEdit => IsEdit;
+
+    private OdczytDto _model = new();
+    private DateTime? _dataOdczytu;
+
+    protected override void OnInitialized()
+    {
+        _model = new OdczytDto
+        {
+            IdOdczytu = Model.IdOdczytu,
+            IdLicznika = Model.IdLicznika,
+            DataOdczytu = Model.DataOdczytu,
+            Wskazanie = Model.Wskazanie,
+            Zrodlo = Model.Zrodlo
+        };
+
+        _dataOdczytu = _model.DataOdczytu == default ? DateTime.Today : _model.DataOdczytu;
+    }
+
+    private void OnLicznikChanged(long value)
+    {
+        _model.IdLicznika = value;
+    }
+
+    private void OnDataChanged(DateTime? value)
+    {
+        _dataOdczytu = value;
+        _model.DataOdczytu = (value ?? DateTime.Today).Date;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SaveAsync()
+    {
+        if (_form is null)
+            return;
+
+        await _form.Validate();
+        if (!_form.IsValid)
+            return;
+
+        // Normalizacja: SQL 'date' -> bez czasu
+        _model.DataOdczytu = (_dataOdczytu ?? DateTime.Today).Date;
+        _model.Zrodlo = _model.Zrodlo?.Trim();
+
+        MudDialog.Close(DialogResult.Ok(_model));
+    }
+}

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CastlePlus2.Application.Interfaces.Media;
@@ -24,24 +26,42 @@ namespace CastlePlus2.Infrastructure.Repositories.Media
                 .FirstOrDefaultAsync(x => x.IdOdczytu == idOdczytu, ct);
         }
 
+        public async Task<List<Odczyt>> GetAllAsync(CancellationToken ct)
+        {
+            return await _db.Odczyty
+                .AsNoTracking()
+                .OrderByDescending(x => x.IdOdczytu)
+                .ToListAsync(ct);
+        }
+
+        public async Task<Odczyt?> GetForUpdateAsync(long idOdczytu, CancellationToken ct)
+        {
+            return await _db.Odczyty
+                .FirstOrDefaultAsync(x => x.IdOdczytu == idOdczytu, ct);
+        }
+
         public async Task<bool> LicznikExistsAsync(long idLicznika, CancellationToken ct)
         {
             return await _db.Liczniki
                 .AsNoTracking()
-                .AnyAsync(l => l.IdLicznika == idLicznika, ct);
+                .AnyAsync(x => x.IdLicznika == idLicznika, ct);
         }
 
         public async Task<bool> ExistsForLicznikAndDateAsync(long idLicznika, DateTime dataOdczytu, CancellationToken ct)
         {
-            var d = dataOdczytu.Date;
             return await _db.Odczyty
                 .AsNoTracking()
-                .AnyAsync(o => o.IdLicznika == idLicznika && o.DataOdczytu == d, ct);
+                .AnyAsync(x => x.IdLicznika == idLicznika && x.DataOdczytu == dataOdczytu.Date, ct);
         }
 
         public async Task AddAsync(Odczyt entity, CancellationToken ct)
         {
             await _db.Odczyty.AddAsync(entity, ct);
+        }
+
+        public void Remove(Odczyt entity)
+        {
+            _db.Odczyty.Remove(entity);
         }
 
         public async Task SaveChangesAsync(CancellationToken ct)

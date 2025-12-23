@@ -13,14 +13,18 @@ public static class DependencyInjection
     {
         services.AddMudServices();
         // tutaj dopniemy serwisy modułów, np. services.AddScoped<IRodzajMediowService, RodzajMediowService>();
+        //MEDIA
         services.AddScoped<IRodzajeMediowService, RodzajeMediowService>();
         services.AddScoped<IPrzylaczaService, PrzylaczaService>();
         services.AddScoped<ILicznikiService, LicznikiService>();
+        services.AddScoped<IOdczytyService, OdczytyService>();
 
+        //SLOWNIK
         services.AddScoped<IJednostkiMiaryService, JednostkiMiaryService>();
         services.AddScoped<IIndeksacjeService, IndeksacjeService>();
         services.AddScoped<IWalutyService, WalutyService>();
 
+        //RDZEN
         services.AddScoped<IAdresyService, AdresyService>();
         services.AddScoped<IPrzypisaniaAdresowService, PrzypisaniaAdresowService>();
         services.AddScoped<INieruchomosciService, NieruchomosciService>();
@@ -28,6 +32,7 @@ public static class DependencyInjection
         services.AddScoped<ILokaleService, LokaleService>();
         services.AddScoped<IPomieszczeniaService, PomieszczeniaService>();
 
+        //PODMIOTY
         services.AddScoped<IPodmiotyService, PodmiotyService>();
 
         return services;
