@@ -1,4 +1,5 @@
 ﻿using CastlePlus2.Contracts.DTOs.Podmioty;
+using CastlePlus2.Contracts.Requests.Podmioty;
 using MediatR;
 
 namespace CastlePlus2.Application.Podmioty.Wlasnosci.Commands.CreateWlasnosc

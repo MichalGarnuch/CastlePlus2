@@ -1,0 +1,241 @@
+﻿@page "/podmioty/wlasnosci"
+@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Podmioty
+@using CastlePlus2.Contracts.Requests.Podmioty
+@using CastlePlus2.Client.Services.Podmioty
+@inject IWlasnosciService WlasnosciService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Własności</MudText>
+
+<MudPaper Class="pa-4">
+    <MudTable Items="_items"
+              Dense="true"
+              Hover="true"
+              Bordered="true"
+              Striped="true"
+              Filter="FilterFunc">
+
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudSpacer />
+
+            <MudTextField @bind-Value="_search"
+                          Placeholder="Szukaj..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Class="mr-4"
+                          Margin="Margin.Dense" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="CreateAsync">
+                Dodaj
+            </MudButton>
+        </ToolBarContent>
+
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>IdEncji</MudTh>
+            <MudTh>IdPodmiotu</MudTh>
+            <MudTh>Udział %</MudTh>
+            <MudTh>Od dnia</MudTh>
+            <MudTh>Do dnia</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.IdWlasnosci</MudTd>
+            <MudTd DataLabel="IdEncji">@context.IdEncji</MudTd>
+            <MudTd DataLabel="IdPodmiotu">@context.IdPodmiotu</MudTd>
+            <MudTd DataLabel="Udział %">@context.UdzialProcent</MudTd>
+            <MudTd DataLabel="Od dnia">@context.OdDnia.ToString("yyyy-MM-dd")</MudTd>
+            <MudTd DataLabel="Do dnia">@(context.DoDnia is null ? "-" : context.DoDnia.Value.ToString("yyyy-MM-dd"))</MudTd>
+
+            <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               OnClick="@(() => EditAsync(context))" />
+
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="@(() => DeleteAsync(context))" />
+            </MudTd>
+        </RowTemplate>
+
+        <NoRecordsContent>
+            <MudText Class="pa-4">Brak rekordów.</MudText>
+        </NoRecordsContent>
+
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<WlasnoscDto> _items = new();
+    private string _search = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            var data = await WlasnosciService.GetAllAsync();
+            _items = (data ?? new List<WlasnoscDto>()).ToList();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania własności: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private bool FilterFunc(WlasnoscDto item)
+    {
+        if (string.IsNullOrWhiteSpace(_search))
+            return true;
+
+        var s = _search.Trim();
+
+        return item.IdWlasnosci.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || item.IdEncji.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || item.IdPodmiotu.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || item.UdzialProcent.ToString().Contains(s, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task CreateAsync()
+    {
+        var model = new WlasnoscDto
+        {
+            OdDnia = DateOnly.FromDateTime(DateTime.Today)
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = model,
+            ["IsEdit"] = false
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<WlasnoscDialog>("Dodaj własność", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is WlasnoscDto dto)
+        {
+            try
+            {
+                var request = new CreateWlasnoscRequest
+                {
+                    IdEncji = dto.IdEncji,
+                    IdPodmiotu = dto.IdPodmiotu,
+                    UdzialProcent = dto.UdzialProcent,
+                    OdDnia = dto.OdDnia,
+                    DoDnia = dto.DoDnia
+                };
+
+                var created = await WlasnosciService.CreateAsync(request);
+                Snackbar.Add($"Dodano własność (Id={created.IdWlasnosci}).", Severity.Success);
+                await ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Błąd dodawania: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task EditAsync(WlasnoscDto item)
+    {
+        var clone = new WlasnoscDto
+        {
+            IdWlasnosci = item.IdWlasnosci,
+            IdEncji = item.IdEncji,
+            IdPodmiotu = item.IdPodmiotu,
+            UdzialProcent = item.UdzialProcent,
+            OdDnia = item.OdDnia,
+            DoDnia = item.DoDnia
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<WlasnoscDialog>("Edytuj własność", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is WlasnoscDto dto)
+        {
+            try
+            {
+                var request = new UpdateWlasnoscRequest
+                {
+                    IdEncji = dto.IdEncji,
+                    IdPodmiotu = dto.IdPodmiotu,
+                    UdzialProcent = dto.UdzialProcent,
+                    OdDnia = dto.OdDnia,
+                    DoDnia = dto.DoDnia
+                };
+
+                var updated = await WlasnosciService.UpdateAsync(dto.IdWlasnosci, request);
+                if (updated is null)
+                {
+                    Snackbar.Add("Nie znaleziono rekordu do edycji (404).", Severity.Warning);
+                    return;
+                }
+
+                var idx = _items.FindIndex(x => x.IdWlasnosci == dto.IdWlasnosci);
+                if (idx >= 0) _items[idx] = dto;
+                await InvokeAsync(StateHasChanged);
+
+                Snackbar.Add("Zapisano zmiany.", Severity.Success);
+                await ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task DeleteAsync(WlasnoscDto item)
+    {
+        bool? confirm = await DialogService.ShowMessageBox(
+            "Usuń",
+            $"Czy na pewno usunąć własność Id={item.IdWlasnosci}?",
+            yesText: "Usuń",
+            cancelText: "Anuluj");
+
+        if (confirm != true)
+            return;
+
+        try
+        {
+            var ok = await WlasnosciService.DeleteAsync(item.IdWlasnosci);
+            if (!ok)
+            {
+                Snackbar.Add("Nie znaleziono rekordu do usunięcia (404).", Severity.Warning);
+                return;
+            }
+
+            Snackbar.Add("Usunięto.", Severity.Success);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd usuwania: {ex.Message}", Severity.Error);
+        }
+    }
+}

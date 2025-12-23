@@ -1,0 +1,110 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Podmioty
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(IsEdit ? "Edycja własności" : "Nowa własność")
+            </MudText>
+
+            @if (IsEdit)
+            {
+                <MudTextField Value="@Model.IdWlasnosci.ToString()"
+                              Label="IdWlasnosci"
+                              Disabled="true"
+                              Margin="Margin.Dense" />
+            }
+
+            <MudTextField @bind-Value="_idEncjiText"
+                          Label="IdEncji (GUID)"
+                          Required="true"
+                          RequiredError="IdEncji jest wymagane"
+                          Margin="Margin.Dense" />
+
+            <MudNumericField T="long"
+                             Label="IdPodmiotu"
+                             Required="true"
+                             RequiredError="IdPodmiotu jest wymagane"
+                             Margin="Margin.Dense"
+                             @bind-Value="Model.IdPodmiotu" />
+
+            <MudNumericField T="decimal"
+                             Label="Udział procent"
+                             Required="true"
+                             RequiredError="Udział procent jest wymagany"
+                             Margin="Margin.Dense"
+                             @bind-Value="Model.UdzialProcent" />
+
+            <MudDatePicker Label="Od dnia"
+                           Date="@_odDnia"
+                           DateChanged="OnOdDniaChanged"
+                           Margin="Margin.Dense"
+                           Required="true" />
+
+            <MudDatePicker Label="Do dnia (opcjonalnie)"
+                           Date="@_doDnia"
+                           DateChanged="OnDoDniaChanged"
+                           Margin="Margin.Dense" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public WlasnoscDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    private MudForm? _form;
+
+    private string _idEncjiText = string.Empty;
+    private DateTime? _odDnia;
+    private DateTime? _doDnia;
+
+    protected override void OnInitialized()
+    {
+        _idEncjiText = Model.IdEncji == Guid.Empty ? string.Empty : Model.IdEncji.ToString();
+
+        _odDnia = new DateTime(Model.OdDnia.Year, Model.OdDnia.Month, Model.OdDnia.Day);
+        _doDnia = Model.DoDnia is null
+            ? null
+            : new DateTime(Model.DoDnia.Value.Year, Model.DoDnia.Value.Month, Model.DoDnia.Value.Day);
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void OnOdDniaChanged(DateTime? dt)
+    {
+        _odDnia = dt;
+        if (dt is not null)
+            Model.OdDnia = DateOnly.FromDateTime(dt.Value);
+    }
+
+    private void OnDoDniaChanged(DateTime? dt)
+    {
+        _doDnia = dt;
+        Model.DoDnia = dt is null ? null : DateOnly.FromDateTime(dt.Value);
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_form is null) return;
+
+        await _form.Validate();
+        if (!_form.IsValid) return;
+
+        if (!Guid.TryParse(_idEncjiText?.Trim(), out var guid))
+        {
+            return;
+        }
+
+        Model.IdEncji = guid;
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+}

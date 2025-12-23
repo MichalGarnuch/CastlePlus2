@@ -10,8 +10,11 @@ namespace CastlePlus2.Application.Interfaces.Podmioty
     {
         Task<Wlasnosc?> GetByIdAsync(long idWlasnosci, CancellationToken ct);
         Task<IReadOnlyList<Wlasnosc>> GetByEncjaIdAsync(Guid idEncji, CancellationToken ct);
+        Task<List<Wlasnosc>> GetAllAsync(CancellationToken ct);
+        Task<Wlasnosc?> GetForUpdateAsync(long idWlasnosci, CancellationToken ct);
 
         Task AddAsync(Wlasnosc entity, CancellationToken ct);
+        void Remove(Wlasnosc entity);
         Task SaveChangesAsync(CancellationToken ct);
 
         Task<bool> EncjaExistsAsync(Guid idEncji, CancellationToken ct);

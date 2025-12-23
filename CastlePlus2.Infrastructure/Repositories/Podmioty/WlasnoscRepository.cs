@@ -35,10 +35,27 @@ namespace CastlePlus2.Infrastructure.Repositories.Podmioty
                 .OrderByDescending(x => x.OdDnia)
                 .ToListAsync(ct);
         }
+        public async Task<List<Wlasnosc>> GetAllAsync(CancellationToken ct)
+        {
+            return await _db.Wlasnosci
+                .AsNoTracking()
+                .OrderByDescending(x => x.OdDnia)
+                .ToListAsync(ct);
+        }
+
+        public async Task<Wlasnosc?> GetForUpdateAsync(long idWlasnosci, CancellationToken ct)
+        {
+            return await _db.Wlasnosci
+                .FirstOrDefaultAsync(x => x.IdWlasnosci == idWlasnosci, ct);
+        }
 
         public async Task AddAsync(Wlasnosc entity, CancellationToken ct)
         {
             await _db.Wlasnosci.AddAsync(entity, ct);
+        }
+        public void Remove(Wlasnosc entity)
+        {
+            _db.Wlasnosci.Remove(entity);
         }
 
         public async Task SaveChangesAsync(CancellationToken ct)
