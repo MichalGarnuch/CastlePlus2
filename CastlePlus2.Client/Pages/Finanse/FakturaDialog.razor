@@ -1,0 +1,142 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Finanse
+@using CastlePlus2.Contracts.DTOs.Podmioty
+@using CastlePlus2.Contracts.DTOs.Slowniki
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(_isEdit ? "Edycja faktury" : "Nowa faktura")
+            </MudText>
+
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Model.NumerFaktury"
+                                  Label="Numer faktury"
+                                  Dense="true"
+                                  Required="true"
+                                  RequiredError="Numer faktury jest wymagany"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="long"
+                               Label="Podmiot (IdPodmiotu)"
+                               Dense="true"
+                               Required="true"
+                               @bind-Value="Model.IdPodmiotu">
+                        @foreach (var p in Podmioty)
+                        {
+                            <MudSelectItem T="long" Value="@p.IdPodmiotu">
+                                @($"Id={p.IdPodmiotu} / {p.Nazwa}" + (string.IsNullOrWhiteSpace(p.NIP) ? "" : $" (NIP {p.NIP})"))
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Data wystawienia"
+                                   Dense="true"
+                                   Required="true"
+                                   RequiredError="Data wystawienia jest wymagana"
+                                   @bind-Date="_dataWystawienia" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Data sprzedaży (opcjonalnie)"
+                                   Dense="true"
+                                   @bind-Date="_dataSprzedazy" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="string"
+                               Label="Waluta (KodWaluty)"
+                               Dense="true"
+                               Required="true"
+                               @bind-Value="Model.KodWaluty">
+                        @foreach (var w in Waluty)
+                        {
+                            <MudSelectItem T="string" Value="@w.KodWaluty">@($"{w.KodWaluty} / {w.Nazwa}")</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="decimal?"
+                                     Label="Kwota netto"
+                                     Dense="true"
+                                     @bind-Value="Model.KwotaNetto" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="decimal?"
+                                     Label="Kwota brutto"
+                                     Dense="true"
+                                     @bind-Value="Model.KwotaBrutto" />
+                </MudItem>
+
+                @if (_isEdit)
+                {
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            IdFaktury: @Model.IdFaktury
+                        </MudText>
+                    </MudItem>
+                }
+            </MudGrid>
+
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public FakturaDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    [Parameter] public List<PodmiotDto> Podmioty { get; set; } = new();
+    [Parameter] public List<WalutaDto> Waluty { get; set; } = new();
+
+    private MudForm? _form;
+    private bool _isEdit => IsEdit;
+
+    private DateTime? _dataWystawienia;
+    private DateTime? _dataSprzedazy;
+
+    protected override void OnInitialized()
+    {
+        _dataWystawienia = Model.DataWystawienia == default ? DateTime.Today : Model.DataWystawienia;
+        _dataSprzedazy = Model.DataSprzedazy;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SaveAsync()
+    {
+        if (_form is null)
+            return;
+
+        await _form.Validate();
+        if (!_form.IsValid)
+            return;
+
+        if (_dataWystawienia is null)
+            return;
+
+        Model.NumerFaktury = (Model.NumerFaktury ?? string.Empty).Trim();
+        Model.KodWaluty = (Model.KodWaluty ?? string.Empty).Trim().ToUpperInvariant();
+
+        Model.DataWystawienia = _dataWystawienia.Value.Date;
+        Model.DataSprzedazy = _dataSprzedazy?.Date;
+
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+}

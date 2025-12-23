@@ -1,4 +1,5 @@
-﻿using CastlePlus2.Client.Services.Media;
+﻿using CastlePlus2.Client.Services.Finanse;
+using CastlePlus2.Client.Services.Media;
 using CastlePlus2.Client.Services.Podmioty;
 using CastlePlus2.Client.Services.Rdzen;
 using CastlePlus2.Client.Services.Slowniki;
@@ -34,6 +35,9 @@ public static class DependencyInjection
 
         //PODMIOTY
         services.AddScoped<IPodmiotyService, PodmiotyService>();
+
+        //FINANSE
+        services.AddScoped<IFakturyService, FakturyService>();
 
         return services;
     }

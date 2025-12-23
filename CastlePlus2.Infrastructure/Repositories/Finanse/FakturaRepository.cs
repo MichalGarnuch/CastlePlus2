@@ -14,10 +14,25 @@ namespace CastlePlus2.Infrastructure.Repositories.Finanse
             _db = db;
         }
 
+        public async Task<List<Faktura>> GetAllAsync(CancellationToken ct)
+        {
+            return await _db.Faktury
+                .AsNoTracking()
+                .OrderByDescending(x => x.IdFaktury)
+                .ToListAsync(ct);
+        }
+
         public async Task<Faktura?> GetByIdAsync(long idFaktury, CancellationToken ct)
         {
             return await _db.Faktury
                 .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.IdFaktury == idFaktury, ct);
+        }
+
+        public async Task<Faktura?> GetForUpdateAsync(long idFaktury, CancellationToken ct)
+        {
+            // tracking (do update/delete)
+            return await _db.Faktury
                 .FirstOrDefaultAsync(x => x.IdFaktury == idFaktury, ct);
         }
 
@@ -28,9 +43,21 @@ namespace CastlePlus2.Infrastructure.Repositories.Finanse
                 .AnyAsync(x => x.NumerFaktury == numerFaktury, ct);
         }
 
+        public async Task<bool> ExistsByNumerAsync(string numerFaktury, long excludeIdFaktury, CancellationToken ct)
+        {
+            return await _db.Faktury
+                .AsNoTracking()
+                .AnyAsync(x => x.NumerFaktury == numerFaktury && x.IdFaktury != excludeIdFaktury, ct);
+        }
+
         public async Task AddAsync(Faktura entity, CancellationToken ct)
         {
             await _db.Faktury.AddAsync(entity, ct);
+        }
+
+        public void Remove(Faktura entity)
+        {
+            _db.Faktury.Remove(entity);
         }
 
         public async Task SaveChangesAsync(CancellationToken ct)
