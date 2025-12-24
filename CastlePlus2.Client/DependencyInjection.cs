@@ -49,6 +49,8 @@ public static class DependencyInjection
         //NAJEM
         services.AddScoped<IPrzedmiotyNajmuService, PrzedmiotyNajmuService>();
         services.AddScoped<IKaucjeService, KaucjeService>();
+        services.AddScoped<ISkladnikiCzynszuService, SkladnikiCzynszuService>();
+        services.AddScoped<IUmowyNajmuService, UmowyNajmuService>();
 
         return services;
     }

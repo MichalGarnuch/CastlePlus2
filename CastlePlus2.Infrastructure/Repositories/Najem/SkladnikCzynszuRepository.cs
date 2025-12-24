@@ -28,7 +28,10 @@ namespace CastlePlus2.Infrastructure.Repositories.Najem
         {
             return _db.SkladnikiCzynszu.OrderByDescending(x => x.IdSkladnikaCzynszu).ToListAsync(ct);
         }
-
+        public void Remove(SkladnikCzynszu entity)
+        {
+            _db.SkladnikiCzynszu.Remove(entity);
+        }
         public Task<int> SaveChangesAsync(CancellationToken ct)
         {
             return _db.SaveChangesAsync(ct);

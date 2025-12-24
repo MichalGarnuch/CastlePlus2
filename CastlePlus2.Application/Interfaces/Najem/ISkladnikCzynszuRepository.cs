@@ -7,6 +7,7 @@ namespace CastlePlus2.Application.Interfaces.Najem
         Task AddAsync(SkladnikCzynszu entity, CancellationToken ct);
         Task<SkladnikCzynszu?> GetByIdAsync(long id, CancellationToken ct);
         Task<List<SkladnikCzynszu>> GetAllAsync(CancellationToken ct);
+        void Remove(SkladnikCzynszu entity);
         Task<int> SaveChangesAsync(CancellationToken ct);
     }
 }

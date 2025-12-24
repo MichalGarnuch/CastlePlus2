@@ -1,0 +1,215 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Najem
+@using CastlePlus2.Contracts.DTOs.Slowniki
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(_isEdit ? "Edycja składnika czynszu" : "Nowy składnik czynszu")
+            </MudText>
+
+            @if (_isEdit)
+            {
+                <MudTextField Value="@_model.IdSkladnikaCzynszu.ToString()"
+                              Label="IdSkladnikaCzynszu"
+                              Disabled="true"
+                              Margin="Margin.Dense" />
+            }
+
+            <MudGrid Spacing="2">
+                <MudItem xs="12">
+                    <MudSelect T="Guid"
+                               Label="Umowa najmu"
+                               Value="_model.IdUmowyNajmu"
+                               ValueChanged="OnUmowaChanged"
+                               Required="true"
+                               RequiredError="Umowa najmu jest wymagana"
+                               Margin="Margin.Dense">
+                        @foreach (var u in UmowyNajmu)
+                        {
+                            <MudSelectItem T="Guid" Value="@u.Id">@GetUmowaLabel(u)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_model.Nazwa"
+                                  Label="Nazwa"
+                                  Required="true"
+                                  RequiredError="Nazwa jest wymagana"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="string"
+                               Label="Jednostka"
+                               Value="_model.KodJednostki"
+                               ValueChanged="OnJednostkaChanged"
+                               Required="true"
+                               RequiredError="Jednostka jest wymagana"
+                               Margin="Margin.Dense">
+                        @foreach (var j in Jednostki)
+                        {
+                            <MudSelectItem T="string" Value="@j.KodJednostki">@GetJednostkaLabel(j)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="string"
+                               Label="Indeksacja"
+                               Value="_kodIndeksacji"
+                               ValueChanged="OnIndeksacjaChanged"
+                               Margin="Margin.Dense">
+                        <MudSelectItem T="string" Value="@(string.Empty)">Brak</MudSelectItem>
+                        @foreach (var i in Indeksacje)
+                        {
+                            <MudSelectItem T="string" Value="@i.KodIndeksacji">@GetIndeksacjaLabel(i)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="decimal"
+                                     Label="Stawka"
+                                     Required="true"
+                                     RequiredError="Stawka jest wymagana"
+                                     Margin="Margin.Dense"
+                                     @bind-Value="_model.Stawka" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="decimal?"
+                                     Label="Ilość bazowa"
+                                     Margin="Margin.Dense"
+                                     @bind-Value="_model.IloscBazowa" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Od dnia"
+                                   Date="_odDnia"
+                                   DateChanged="OnOdDniaChanged"
+                                   Required="true"
+                                   RequiredError="Data od jest wymagana"
+                                   Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Do dnia (opcjonalnie)"
+                                   Date="_doDnia"
+                                   DateChanged="OnDoDniaChanged"
+                                   Margin="Margin.Dense" />
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public SkladnikCzynszuDto Model { get; set; } = new();
+    [Parameter] public List<UmowaNajmuDto> UmowyNajmu { get; set; } = new();
+    [Parameter] public List<JednostkaMiaryDto> Jednostki { get; set; } = new();
+    [Parameter] public List<IndeksacjaDto> Indeksacje { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    private MudForm? _form;
+    private bool _isEdit => IsEdit;
+
+    private SkladnikCzynszuDto _model = new();
+    private DateTime? _odDnia;
+    private DateTime? _doDnia;
+    private string _kodIndeksacji = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        _model = new SkladnikCzynszuDto
+        {
+            IdSkladnikaCzynszu = Model.IdSkladnikaCzynszu,
+            IdUmowyNajmu = Model.IdUmowyNajmu,
+            Nazwa = Model.Nazwa,
+            KodJednostki = Model.KodJednostki,
+            Stawka = Model.Stawka,
+            IloscBazowa = Model.IloscBazowa,
+            KodIndeksacji = Model.KodIndeksacji,
+            OdDnia = Model.OdDnia,
+            DoDnia = Model.DoDnia
+        };
+
+        _odDnia = new DateTime(_model.OdDnia.Year, _model.OdDnia.Month, _model.OdDnia.Day);
+        _doDnia = _model.DoDnia is null
+            ? null
+            : new DateTime(_model.DoDnia.Value.Year, _model.DoDnia.Value.Month, _model.DoDnia.Value.Day);
+
+        _kodIndeksacji = _model.KodIndeksacji ?? string.Empty;
+    }
+
+    private void OnUmowaChanged(Guid value)
+    {
+        _model.IdUmowyNajmu = value;
+    }
+
+    private void OnJednostkaChanged(string value)
+    {
+        _model.KodJednostki = value;
+    }
+
+    private void OnIndeksacjaChanged(string value)
+    {
+        _kodIndeksacji = value;
+        _model.KodIndeksacji = string.IsNullOrWhiteSpace(value) ? null : value;
+    }
+
+    private void OnOdDniaChanged(DateTime? value)
+    {
+        _odDnia = value;
+        if (value is not null)
+            _model.OdDnia = DateOnly.FromDateTime(value.Value);
+    }
+
+    private void OnDoDniaChanged(DateTime? value)
+    {
+        _doDnia = value;
+        _model.DoDnia = value is null ? null : DateOnly.FromDateTime(value.Value);
+    }
+
+    private string GetUmowaLabel(UmowaNajmuDto umowa)
+    {
+        return $"{umowa.NumerUmowy} (Id={umowa.Id})";
+    }
+
+    private string GetJednostkaLabel(JednostkaMiaryDto jednostka)
+    {
+        return $"{jednostka.Nazwa} ({jednostka.KodJednostki})";
+    }
+
+    private string GetIndeksacjaLabel(IndeksacjaDto indeksacja)
+    {
+        return $"{indeksacja.Nazwa} ({indeksacja.KodIndeksacji})";
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SaveAsync()
+    {
+        if (_form is null)
+            return;
+
+        await _form.Validate();
+        if (!_form.IsValid)
+            return;
+
+        _model.Nazwa = _model.Nazwa?.Trim() ?? string.Empty;
+        _model.KodJednostki = _model.KodJednostki?.Trim() ?? string.Empty;
+        _model.KodIndeksacji = string.IsNullOrWhiteSpace(_kodIndeksacji) ? null : _kodIndeksacji.Trim();
+
+        MudDialog.Close(DialogResult.Ok(_model));
+    }
+}
