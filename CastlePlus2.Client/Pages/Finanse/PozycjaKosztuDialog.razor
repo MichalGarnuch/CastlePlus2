@@ -1,0 +1,94 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Finanse
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(_isEdit ? "Edycja pozycji kosztu" : "Nowa pozycja kosztu")
+            </MudText>
+
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="long"
+                                     Label="IdFaktury"
+                                     Dense="true"
+                                     Required="true"
+                                     @bind-Value="Model.IdFaktury" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="long"
+                                     Label="IdKategoriiKosztu"
+                                     Dense="true"
+                                     Required="true"
+                                     @bind-Value="Model.IdKategoriiKosztu" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Model.Opis"
+                                  Label="Opis (opcjonalnie)"
+                                  Dense="true"
+                                  MaxLength="200"
+                                  Immediate="true" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="decimal"
+                                     Label="Kwota netto"
+                                     Dense="true"
+                                     Required="true"
+                                     @bind-Value="Model.KwotaNetto" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="decimal"
+                                     Label="Kwota brutto"
+                                     Dense="true"
+                                     Required="true"
+                                     @bind-Value="Model.KwotaBrutto" />
+                </MudItem>
+
+                @if (_isEdit)
+                {
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            IdPozycjiKosztu: @Model.IdPozycjiKosztu
+                        </MudText>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveAsync">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public PozycjaKosztuDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    private MudForm? _form;
+    private bool _isEdit => IsEdit;
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SaveAsync()
+    {
+        if (_form is null)
+            return;
+
+        await _form.Validate();
+        if (!_form.IsValid)
+            return;
+
+        Model.Opis = string.IsNullOrWhiteSpace(Model.Opis) ? null : Model.Opis.Trim();
+
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+}
