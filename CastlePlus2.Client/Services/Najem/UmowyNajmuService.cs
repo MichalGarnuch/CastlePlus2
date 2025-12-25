@@ -1,36 +1,70 @@
-﻿using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
+﻿using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using CastlePlus2.Contracts.DTOs.Najem;
+using CastlePlus2.Contracts.Requests.Najem;
 
 namespace CastlePlus2.Client.Services.Najem
 {
     public class UmowyNajmuService : IUmowyNajmuService
     {
-        private readonly HttpClient _httpClient;
+        private readonly HttpClient _http;
         private const string BaseUrl = "api/najem/UmowyNajmu";
 
-        public UmowyNajmuService(HttpClient httpClient)
+        public UmowyNajmuService(HttpClient http)
         {
-            _httpClient = httpClient;
+            _http = http;
         }
 
         public async Task<List<UmowaNajmuDto>> GetAllAsync(CancellationToken ct = default)
         {
-            return await _httpClient.GetFromJsonAsync<List<UmowaNajmuDto>>(BaseUrl, ct) ?? new List<UmowaNajmuDto>();
+            using var req = new HttpRequestMessage(HttpMethod.Get, BaseUrl);
+            req.Headers.CacheControl = new CacheControlHeaderValue { NoCache = true, NoStore = true };
+            req.Headers.Pragma.ParseAdd("no-cache");
+
+            var resp = await _http.SendAsync(req, ct);
+            resp.EnsureSuccessStatusCode();
+            return await resp.Content.ReadFromJsonAsync<List<UmowaNajmuDto>>(cancellationToken: ct) ?? new();
         }
 
         public async Task<UmowaNajmuDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
-            var response = await _httpClient.GetAsync($"{BaseUrl}/{id}", ct);
-            if (response.StatusCode == HttpStatusCode.NotFound)
-                return null;
+            using var req = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/{id}");
+            req.Headers.CacheControl = new CacheControlHeaderValue { NoCache = true, NoStore = true };
+            req.Headers.Pragma.ParseAdd("no-cache");
 
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<UmowaNajmuDto>(cancellationToken: ct);
+            var resp = await _http.SendAsync(req, ct);
+            if (resp.StatusCode == HttpStatusCode.NotFound) return null;
+
+            resp.EnsureSuccessStatusCode();
+            return await resp.Content.ReadFromJsonAsync<UmowaNajmuDto>(cancellationToken: ct);
+        }
+
+        public async Task<Guid> CreateAsync(CreateUmowaNajmuRequest request, CancellationToken ct = default)
+        {
+            var resp = await _http.PostAsJsonAsync(BaseUrl, request, ct);
+            resp.EnsureSuccessStatusCode();
+
+            var dto = await resp.Content.ReadFromJsonAsync<UmowaNajmuDto>(cancellationToken: ct);
+            return dto!.Id;
+        }
+
+        public async Task<bool> UpdateAsync(Guid id, UpdateUmowaNajmuRequest request, CancellationToken ct = default)
+        {
+            var resp = await _http.PutAsJsonAsync($"{BaseUrl}/{id}", request, ct);
+            if (resp.StatusCode == HttpStatusCode.NotFound) return false;
+
+            resp.EnsureSuccessStatusCode();
+            return true;
+        }
+
+        public async Task<bool> DeleteAsync(Guid id, CancellationToken ct = default)
+        {
+            var resp = await _http.DeleteAsync($"{BaseUrl}/{id}", ct);
+            if (resp.StatusCode == HttpStatusCode.NotFound) return false;
+
+            resp.EnsureSuccessStatusCode();
+            return true;
         }
     }
 }

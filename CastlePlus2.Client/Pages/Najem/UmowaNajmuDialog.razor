@@ -1,0 +1,165 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Najem
+@using CastlePlus2.Contracts.DTOs.Podmioty
+@using CastlePlus2.Contracts.DTOs.Slowniki
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(_isEdit ? "Edycja umowy najmu" : "Nowa umowa najmu")
+            </MudText>
+
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="long"
+                               Label="Wynajmujący (IdPodmiotu)"
+                               Dense="true"
+                               Required="true"
+                               @bind-Value="Model.IdWynajmujacego">
+                        @foreach (var p in Podmioty)
+                        {
+                            <MudSelectItem T="long" Value="@p.IdPodmiotu">
+                                @($"{p.IdPodmiotu} / {p.Nazwa}")
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="long"
+                               Label="Najemca (IdPodmiotu)"
+                               Dense="true"
+                               Required="true"
+                               @bind-Value="Model.IdNajemcy">
+                        @foreach (var p in Podmioty)
+                        {
+                            <MudSelectItem T="long" Value="@p.IdPodmiotu">
+                                @($"{p.IdPodmiotu} / {p.Nazwa}")
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Data zawarcia"
+                                   Dense="true"
+                                   Required="true"
+                                   RequiredError="Data zawarcia jest wymagana"
+                                   @bind-Date="_dataZawarcia" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Data początku"
+                                   Dense="true"
+                                   Required="true"
+                                   RequiredError="Data początku jest wymagana"
+                                   @bind-Date="_dataPoczatku" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Data zakończenia (opcjonalnie)"
+                                   Dense="true"
+                                   @bind-Date="_dataZakonczenia" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="string"
+                               Label="Waluta (KodWaluty)"
+                               Dense="true"
+                               Required="true"
+                               @bind-Value="Model.KodWaluty">
+                        @foreach (var w in Waluty)
+                        {
+                            <MudSelectItem T="string" Value="@w.KodWaluty">
+                                @($"{w.KodWaluty} / {w.Nazwa}")
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="string"
+                               Label="Indeksacja (opcjonalnie)"
+                               Dense="true"
+                               @bind-Value="_kodIndeksacji">
+                        <MudSelectItem T="string" Value="@(string.Empty)">Brak</MudSelectItem>
+                        @foreach (var i in Indeksacje)
+                        {
+                            <MudSelectItem T="string" Value="@i.KodIndeksacji">
+                                @($"{i.KodIndeksacji} / {i.Nazwa}")
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                @if (_isEdit)
+                {
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            IdEncji: @Model.Id
+                        </MudText>
+                    </MudItem>
+                }
+            </MudGrid>
+
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public UmowaNajmuDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    [Parameter] public List<PodmiotDto> Podmioty { get; set; } = new();
+    [Parameter] public List<WalutaDto> Waluty { get; set; } = new();
+    [Parameter] public List<IndeksacjaDto> Indeksacje { get; set; } = new();
+
+    private MudForm? _form;
+    private bool _isEdit => IsEdit;
+
+    private DateTime? _dataZawarcia;
+    private DateTime? _dataPoczatku;
+    private DateTime? _dataZakonczenia;
+    private string _kodIndeksacji = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        _dataZawarcia = Model.DataZawarcia == default ? DateTime.Today : Model.DataZawarcia;
+        _dataPoczatku = Model.DataPoczatku == default ? DateTime.Today : Model.DataPoczatku;
+        _dataZakonczenia = Model.DataZakonczenia;
+        _kodIndeksacji = Model.KodIndeksacji ?? string.Empty;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SaveAsync()
+    {
+        if (_form is null)
+            return;
+
+        await _form.Validate();
+        if (!_form.IsValid)
+            return;
+
+        if (_dataZawarcia is null || _dataPoczatku is null)
+            return;
+
+        Model.KodWaluty = (Model.KodWaluty ?? string.Empty).Trim().ToUpperInvariant();
+        Model.KodIndeksacji = string.IsNullOrWhiteSpace(_kodIndeksacji) ? null : _kodIndeksacji.Trim().ToUpperInvariant();
+
+        Model.DataZawarcia = _dataZawarcia.Value.Date;
+        Model.DataPoczatku = _dataPoczatku.Value.Date;
+        Model.DataZakonczenia = _dataZakonczenia?.Date;
+
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+}

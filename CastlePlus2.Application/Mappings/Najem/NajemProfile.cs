@@ -8,9 +8,7 @@ namespace CastlePlus2.Application.Mappings.Najem
     {
         public NajemProfile()
         {
-            CreateMap<UmowaNajmu, UmowaNajmuDto>()
-                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.Id));
-
+            CreateMap<UmowaNajmu, UmowaNajmuDto>();
             CreateMap<PrzedmiotNajmu, PrzedmiotNajmuDto>();
             CreateMap<SkladnikCzynszu, SkladnikCzynszuDto>();
             CreateMap<Kaucja, KaucjaDto>();

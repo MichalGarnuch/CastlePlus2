@@ -7,6 +7,8 @@ namespace CastlePlus2.Application.Interfaces.Najem
         Task AddAsync(UmowaNajmu entity, CancellationToken ct);
         Task<UmowaNajmu?> GetByIdAsync(Guid idEncji, CancellationToken ct);
         Task<List<UmowaNajmu>> GetAllAsync(CancellationToken ct);
+        Task<UmowaNajmu?> GetForUpdateAsync(Guid idEncji, CancellationToken ct);
+        void Remove(UmowaNajmu entity);
         Task<int> SaveChangesAsync(CancellationToken ct);
     }
 }
