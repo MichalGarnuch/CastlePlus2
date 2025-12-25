@@ -1,0 +1,213 @@
+﻿@page "/finanse/rozliczenia-platnosci"
+@using MudBlazor
+@using CastlePlus2.Client.Services.Finanse
+@using CastlePlus2.Contracts.DTOs.Finanse
+@using CastlePlus2.Contracts.Requests.Finanse
+@inject IRozliczeniaPlatnosciService Service
+@inject ISnackbar Snackbar
+@inject IDialogService Dialogs
+
+<MudPaper Class="glass-panel pa-4 pa-sm-6" Elevation="0" Rounded="Rounded.Xl">
+    <MudStack Spacing="3">
+
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.h5" Class="fw-700">Rozliczenia płatności</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">[finanse].[RozliczeniePlatnosci]</MudText>
+            </MudStack>
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="OpenCreateDialog">
+                Dodaj
+            </MudButton>
+        </MudStack>
+
+        <MudTextField @bind-Value="_search"
+                      Placeholder="Szukaj (Id / IdPłatności / IdFaktury)..."
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Immediate="true"
+                      Margin="Margin.Dense" />
+
+        <MudTable Items="_items"
+                  Dense="true"
+                  Hover="true"
+                  Bordered="true"
+                  Striped="true"
+                  Filter="FilterFunc"
+                  Elevation="0">
+
+            <HeaderContent>
+                <MudTh>Id</MudTh>
+                <MudTh>IdPłatności</MudTh>
+                <MudTh>IdFaktury</MudTh>
+                <MudTh>Kwota</MudTh>
+                <MudTh Class="text-right"></MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd DataLabel="Id">@context.IdRozliczenia</MudTd>
+                <MudTd DataLabel="IdPłatności">@context.IdPlatnosci</MudTd>
+                <MudTd DataLabel="IdFaktury">@context.IdFaktury</MudTd>
+                <MudTd DataLabel="Kwota">@context.Kwota</MudTd>
+
+                <MudTd DataLabel="Akcje" Class="text-right">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   OnClick="@(() => OpenEditDialog(context))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   Size="Size.Small"
+                                   OnClick="@(() => DeleteAsync(context))" />
+                </MudTd>
+            </RowTemplate>
+
+            <NoRecordsContent>
+                <MudText>Brak rekordów.</MudText>
+            </NoRecordsContent>
+        </MudTable>
+
+    </MudStack>
+</MudPaper>
+
+@code {
+    private List<RozliczeniePlatnosciDto> _items = new();
+    private string _search = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            _items = (await Service.GetAllAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private bool FilterFunc(RozliczeniePlatnosciDto x)
+    {
+        if (string.IsNullOrWhiteSpace(_search))
+            return true;
+
+        var s = _search.Trim();
+
+        return x.IdRozliczenia.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || x.IdPlatnosci.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || x.IdFaktury.ToString().Contains(s, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task OpenCreateDialog()
+    {
+        var model = new RozliczeniePlatnosciDto();
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = model,
+            ["IsEdit"] = false
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };
+        var dialog = Dialogs.Show<RozliczeniePlatnosciDialog>("Nowe rozliczenie", parameters, options);
+        var result = await dialog.Result;
+
+        if (result.Canceled || result.Data is not RozliczeniePlatnosciDto dto)
+            return;
+
+        try
+        {
+            var created = await Service.CreateAsync(new CreateRozliczeniePlatnosciRequest
+            {
+                IdPlatnosci = dto.IdPlatnosci,
+                IdFaktury = dto.IdFaktury,
+                Kwota = dto.Kwota
+            });
+
+            Snackbar.Add($"Dodano (Id={created.IdRozliczenia}).", Severity.Success);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd dodawania: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OpenEditDialog(RozliczeniePlatnosciDto item)
+    {
+        var clone = new RozliczeniePlatnosciDto
+        {
+            IdRozliczenia = item.IdRozliczenia,
+            IdPlatnosci = item.IdPlatnosci,
+            IdFaktury = item.IdFaktury,
+            Kwota = item.Kwota
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };
+        var dialog = Dialogs.Show<RozliczeniePlatnosciDialog>("Edycja rozliczenia", parameters, options);
+        var result = await dialog.Result;
+
+        if (result.Canceled || result.Data is not RozliczeniePlatnosciDto dto)
+            return;
+
+        try
+        {
+            var updated = await Service.UpdateAsync(dto.IdRozliczenia, new UpdateRozliczeniePlatnosciRequest
+            {
+                IdPlatnosci = dto.IdPlatnosci,
+                IdFaktury = dto.IdFaktury,
+                Kwota = dto.Kwota
+            });
+
+            if (updated is null)
+            {
+                Snackbar.Add("Nie znaleziono rekordu (404).", Severity.Warning);
+                return;
+            }
+
+            Snackbar.Add("Zapisano zmiany.", Severity.Success);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task DeleteAsync(RozliczeniePlatnosciDto item)
+    {
+        bool? confirm = await Dialogs.ShowMessageBox(
+            "Usuń",
+            $"Czy na pewno usunąć rozliczenie Id={item.IdRozliczenia}?",
+            yesText: "Usuń",
+            cancelText: "Anuluj");
+
+        if (confirm != true)
+            return;
+
+        try
+        {
+            await Service.DeleteAsync(item.IdRozliczenia);
+            Snackbar.Add("Usunięto.", Severity.Success);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd usuwania: {ex.Message}", Severity.Error);
+        }
+    }
+}
