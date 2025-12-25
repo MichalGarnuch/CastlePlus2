@@ -1,0 +1,229 @@
+﻿@page "/utrzymanie/zlecenia-pracy"
+@using MudBlazor
+@using CastlePlus2.Client.Services.Utrzymanie
+@using CastlePlus2.Contracts.DTOs.Utrzymanie
+@using CastlePlus2.Contracts.Requests.Utrzymanie
+@inject IZleceniaPracyService Service
+@inject IDialogService Dialogs
+@inject ISnackbar Snackbar
+
+<MudPaper Class="glass-panel pa-4 pa-sm-6" Elevation="0" Rounded="Rounded.Xl">
+    <MudStack Spacing="3">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.h5" Class="fw-700">Zlecenia pracy</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">[utrzymanie].[ZleceniePracy]</MudText>
+            </MudStack>
+
+            <MudStack Row="true" Spacing="1">
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="Reload" />
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="OpenCreate">
+                    Dodaj
+                </MudButton>
+            </MudStack>
+        </MudStack>
+
+        <MudTextField @bind-Value="_q"
+                      Placeholder="Szukaj po tytule, statusie, ID lub encji"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Immediate="true"
+                      Class="mt-1" />
+
+        <MudTable Items="_filtered"
+                  Dense="true"
+                  Hover="true"
+                  Bordered="true"
+                  Loading="_loading">
+            <HeaderContent>
+                <MudTh>Id</MudTh>
+                <MudTh>Encja gospodarza</MudTh>
+                <MudTh>Tytuł</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh>Utworzono</MudTh>
+                <MudTh>Zamknięto</MudTh>
+                <MudTh Class="text-right"></MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd DataLabel="Id">@context.IdZlecenia</MudTd>
+                <MudTd DataLabel="Encja">@context.IdEncjiGospodarza</MudTd>
+                <MudTd DataLabel="Tytuł">@context.Tytul</MudTd>
+                <MudTd DataLabel="Status">@context.Status</MudTd>
+                <MudTd DataLabel="Utworzono">@FormatDate(context.DataUtworzenia)</MudTd>
+                <MudTd DataLabel="Zamknięto">@FormatDate(context.DataZamkniecia)</MudTd>
+                <MudTd DataLabel="Akcje" Class="text-right">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                   OnClick="@(() => OpenEdit(context))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   OnClick="@(() => ConfirmDelete(context))" />
+                </MudTd>
+            </RowTemplate>
+
+            <NoRecordsContent>
+                <MudText Class="pa-4">Brak rekordów.</MudText>
+            </NoRecordsContent>
+        </MudTable>
+    </MudStack>
+</MudPaper>
+
+@code {
+    private bool _loading = true;
+    private string _q = string.Empty;
+    private List<ZleceniePracyDto> _items = new();
+
+    private IEnumerable<ZleceniePracyDto> _filtered =>
+        string.IsNullOrWhiteSpace(_q)
+            ? _items
+            : _items.Where(x =>
+                x.IdZlecenia.ToString().Contains(_q, StringComparison.OrdinalIgnoreCase)
+                || x.IdEncjiGospodarza.ToString().Contains(_q, StringComparison.OrdinalIgnoreCase)
+                || (x.Tytul?.Contains(_q, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (x.Status?.Contains(_q, StringComparison.OrdinalIgnoreCase) ?? false));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Reload();
+    }
+
+    private async Task Reload()
+    {
+        _loading = true;
+        try
+        {
+            _items = await Service.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private string FormatDate(DateTime? date)
+        => date is null ? "—" : date.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+
+    private async Task OpenCreate()
+    {
+        var model = new ZleceniePracyDto
+        {
+            Status = "Nowe",
+            Tytul = string.Empty
+        };
+
+        var p = new DialogParameters
+        {
+            ["Model"] = model,
+            ["IsEdit"] = false
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+
+        var dlg = await Dialogs.ShowAsync<ZleceniePracyDialog>("Dodaj zlecenie pracy", p, options);
+        var result = await dlg.Result;
+        if (result.Canceled) return;
+
+        var dto = (ZleceniePracyDto)result.Data!;
+        try
+        {
+            await Service.CreateAsync(new CreateZleceniePracyRequest
+            {
+                IdEncjiGospodarza = dto.IdEncjiGospodarza,
+                Tytul = dto.Tytul,
+                Opis = dto.Opis,
+                Status = dto.Status,
+                DataZamkniecia = dto.DataZamkniecia
+            });
+
+            Snackbar.Add("Dodano.", Severity.Success);
+            await Reload();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd dodawania: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OpenEdit(ZleceniePracyDto item)
+    {
+        var clone = new ZleceniePracyDto
+        {
+            IdZlecenia = item.IdZlecenia,
+            IdEncjiGospodarza = item.IdEncjiGospodarza,
+            Tytul = item.Tytul,
+            Opis = item.Opis,
+            Status = item.Status,
+            DataUtworzenia = item.DataUtworzenia,
+            DataZamkniecia = item.DataZamkniecia
+        };
+
+        var p = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+
+        var dlg = await Dialogs.ShowAsync<ZleceniePracyDialog>("Edytuj zlecenie pracy", p, options);
+        var result = await dlg.Result;
+        if (result.Canceled) return;
+
+        var dto = (ZleceniePracyDto)result.Data!;
+        try
+        {
+            var updated = await Service.UpdateAsync(item.IdZlecenia, new UpdateZleceniePracyRequest
+            {
+                IdEncjiGospodarza = dto.IdEncjiGospodarza,
+                Tytul = dto.Tytul,
+                Opis = dto.Opis,
+                Status = dto.Status,
+                DataZamkniecia = dto.DataZamkniecia
+            });
+
+            if (updated is null)
+            {
+                Snackbar.Add("Nie znaleziono zlecenia do edycji.", Severity.Warning);
+                return;
+            }
+
+            Snackbar.Add("Zapisano.", Severity.Success);
+            await Reload();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd edycji: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task ConfirmDelete(ZleceniePracyDto item)
+    {
+        var ok = await Dialogs.ShowMessageBox(
+            "Usuń",
+            $"Czy na pewno usunąć zlecenie: {item.IdZlecenia} – {item.Tytul}?",
+            yesText: "Usuń",
+            cancelText: "Anuluj");
+
+        if (ok != true) return;
+
+        try
+        {
+            await Service.DeleteAsync(item.IdZlecenia);
+            Snackbar.Add("Usunięto.", Severity.Success);
+            await Reload();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd usuwania: {ex.Message}", Severity.Error);
+        }
+    }
+}

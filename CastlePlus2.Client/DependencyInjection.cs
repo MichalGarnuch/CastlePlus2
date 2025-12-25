@@ -4,6 +4,7 @@ using CastlePlus2.Client.Services.Podmioty;
 using CastlePlus2.Client.Services.Rdzen;
 using CastlePlus2.Client.Services.Slowniki;
 using CastlePlus2.Client.Services.Najem;
+using CastlePlus2.Client.Services.Utrzymanie;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
 
@@ -53,6 +54,9 @@ public static class DependencyInjection
         services.AddScoped<IKaucjeService, KaucjeService>();
         services.AddScoped<ISkladnikiCzynszuService, SkladnikiCzynszuService>();
         services.AddScoped<IUmowyNajmuService, UmowyNajmuService>();
+
+        //UTRZYMANIE
+        services.AddScoped<IZleceniaPracyService, ZleceniaPracyService>();
 
         return services;
     }

@@ -19,5 +19,6 @@ namespace CastlePlus2.Application.Utrzymanie.ZleceniaPracy.Commands.CreateZlecen
         /// Status tekstowy (nvarchar(20)). Trzymamy prosto jak w SQL.
         /// </summary>
         public string Status { get; set; } = "Nowe";
+        public DateTime? DataZamkniecia { get; set; }
     }
 }

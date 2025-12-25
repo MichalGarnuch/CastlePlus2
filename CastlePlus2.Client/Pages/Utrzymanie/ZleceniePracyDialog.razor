@@ -1,0 +1,112 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Utrzymanie
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(IsEdit ? "Edycja zlecenia pracy" : "Nowe zlecenie pracy")
+            </MudText>
+
+            @if (IsEdit)
+            {
+                <MudTextField Value="@Model.IdZlecenia.ToString()"
+                              Label="IdZlecenia"
+                              Disabled="true"
+                              Margin="Margin.Dense" />
+            }
+
+            <MudTextField @bind-Value="_idEncjiText"
+                          Label="IdEncjiGospodarza (GUID)"
+                          Required="true"
+                          RequiredError="IdEncjiGospodarza jest wymagane"
+                          Margin="Margin.Dense" />
+
+            <MudTextField @bind-Value="Model.Tytul"
+                          Label="Tytuł"
+                          Required="true"
+                          RequiredError="Tytuł jest wymagany"
+                          MaxLength="200"
+                          Margin="Margin.Dense" />
+
+            <MudTextField @bind-Value="Model.Status"
+                          Label="Status"
+                          Required="true"
+                          RequiredError="Status jest wymagany"
+                          MaxLength="20"
+                          Margin="Margin.Dense" />
+
+            <MudTextField @bind-Value="Model.Opis"
+                          Label="Opis (opcjonalnie)"
+                          MaxLength="1000"
+                          Lines="3"
+                          Margin="Margin.Dense" />
+
+            <MudDatePicker Label="Data zamknięcia (opcjonalnie)"
+                           Date="_dataZamkniecia"
+                           DateChanged="OnDataZamknieciaChanged"
+                           Margin="Margin.Dense" />
+
+            @if (IsEdit)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    Utworzono: @Model.DataUtworzenia.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+                </MudText>
+            }
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public ZleceniePracyDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    private MudForm? _form;
+    private string _idEncjiText = string.Empty;
+    private DateTime? _dataZamkniecia;
+
+    protected override void OnInitialized()
+    {
+        _idEncjiText = Model.IdEncjiGospodarza == Guid.Empty
+            ? string.Empty
+            : Model.IdEncjiGospodarza.ToString();
+
+        _dataZamkniecia = Model.DataZamkniecia;
+    }
+
+    private void OnDataZamknieciaChanged(DateTime? value)
+    {
+        _dataZamkniecia = value;
+        Model.DataZamkniecia = value;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SaveAsync()
+    {
+        if (_form is null) return;
+
+        await _form.Validate();
+        if (!_form.IsValid) return;
+
+        if (!Guid.TryParse(_idEncjiText?.Trim(), out var encjaId))
+        {
+            return;
+        }
+
+        Model.IdEncjiGospodarza = encjaId;
+        Model.Tytul = (Model.Tytul ?? string.Empty).Trim();
+        Model.Status = (Model.Status ?? string.Empty).Trim();
+        Model.Opis = string.IsNullOrWhiteSpace(Model.Opis) ? null : Model.Opis.Trim();
+        Model.DataZamkniecia = _dataZamkniecia;
+
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+}

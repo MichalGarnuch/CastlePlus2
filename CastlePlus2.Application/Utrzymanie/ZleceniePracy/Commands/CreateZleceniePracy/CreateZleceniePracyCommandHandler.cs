@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using CastlePlus2.Application.Interfaces.Utrzymanie;
 using CastlePlus2.Contracts.DTOs.Utrzymanie;
 using CastlePlus2.Domain.Entities.Utrzymanie;
@@ -27,6 +24,9 @@ namespace CastlePlus2.Application.Utrzymanie.ZleceniaPracy.Commands.CreateZlecen
             if (string.IsNullOrWhiteSpace(request.Tytul))
                 throw new InvalidOperationException("Tytuł zlecenia jest wymagany.");
 
+            if (request.IdEncjiGospodarza == Guid.Empty)
+                throw new InvalidOperationException("Id encji gospodarza jest wymagane.");
+
             if (request.Tytul.Length > 200)
                 throw new InvalidOperationException("Tytuł zlecenia nie może przekraczać 200 znaków.");
 
@@ -39,6 +39,9 @@ namespace CastlePlus2.Application.Utrzymanie.ZleceniaPracy.Commands.CreateZlecen
             if (request.Status.Length > 20)
                 throw new InvalidOperationException("Status nie może przekraczać 20 znaków.");
 
+            if (request.DataZamkniecia is not null && request.DataZamkniecia.Value.Year < 1900)
+                throw new InvalidOperationException("Data zamknięcia jest nieprawidłowa.");
+
             // Encja prosta (nie TPT). PK to IDENTITY bigint – nie ustawiamy IdZlecenia.
             var entity = new ZleceniePracy
             {
@@ -50,7 +53,7 @@ namespace CastlePlus2.Application.Utrzymanie.ZleceniaPracy.Commands.CreateZlecen
                 // DataUtworzenia ma DEFAULT w SQL, ale ustawiamy też w kodzie,
                 // żeby zachowanie było przewidywalne nawet przy zmianie bazy.
                 DataUtworzenia = DateTime.UtcNow,
-                DataZamkniecia = null
+                DataZamkniecia = request.DataZamkniecia
             };
 
             await _repository.AddAsync(entity, cancellationToken);
