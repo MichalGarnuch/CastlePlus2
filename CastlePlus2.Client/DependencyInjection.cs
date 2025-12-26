@@ -1,9 +1,10 @@
-﻿using CastlePlus2.Client.Services.Finanse;
+﻿using CastlePlus2.Client.Services.Dokumenty;
+using CastlePlus2.Client.Services.Finanse;
 using CastlePlus2.Client.Services.Media;
+using CastlePlus2.Client.Services.Najem;
 using CastlePlus2.Client.Services.Podmioty;
 using CastlePlus2.Client.Services.Rdzen;
 using CastlePlus2.Client.Services.Slowniki;
-using CastlePlus2.Client.Services.Najem;
 using CastlePlus2.Client.Services.Utrzymanie;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
@@ -57,6 +58,9 @@ public static class DependencyInjection
 
         //UTRZYMANIE
         services.AddScoped<IZleceniaPracyService, ZleceniaPracyService>();
+
+        //DOKUMENTY
+        services.AddScoped<IDokumentyService, DokumentyService>();
 
         return services;
     }

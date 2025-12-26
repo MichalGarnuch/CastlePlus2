@@ -1,0 +1,111 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Dokumenty
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(_isEdit ? "Edycja dokumentu" : "Nowy dokument")
+            </MudText>
+
+            <MudGrid Spacing="2">
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Model.Nazwa"
+                                  Label="Nazwa"
+                                  Dense="true"
+                                  Required="true"
+                                  RequiredError="Nazwa jest wymagana"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Model.SciezkaPliku"
+                                  Label="Ścieżka pliku"
+                                  Dense="true"
+                                  Required="true"
+                                  RequiredError="Ścieżka pliku jest wymagana"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Model.Opis"
+                                  Label="Opis (opcjonalnie)"
+                                  Lines="3"
+                                  Dense="true"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_idEncjiOwnerText"
+                                  Label="IdEncjiOwner (GUID, opcjonalnie)"
+                                  Dense="true"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+
+                @if (_isEdit)
+                {
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            IdDokumentu: @Model.IdDokumentu (Data: @Model.DataUtworzenia)
+                        </MudText>
+                    </MudItem>
+                }
+            </MudGrid>
+
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public DokumentDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    private MudForm? _form;
+    private bool _isEdit => IsEdit;
+
+    private string? _idEncjiOwnerText;
+
+    protected override void OnInitialized()
+    {
+        _idEncjiOwnerText = Model.IdEncjiOwner?.ToString();
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SaveAsync()
+    {
+        if (_form is null)
+            return;
+
+        await _form.Validate();
+        if (!_form.IsValid)
+            return;
+
+        // IdEncjiOwner jest opcjonalny – parsujemy tylko jeśli użytkownik coś wpisał
+        if (string.IsNullOrWhiteSpace(_idEncjiOwnerText))
+        {
+            Model.IdEncjiOwner = null;
+        }
+        else
+        {
+            if (!Guid.TryParse(_idEncjiOwnerText.Trim(), out var guid))
+                return;
+
+            Model.IdEncjiOwner = guid;
+        }
+
+        Model.Nazwa = (Model.Nazwa ?? string.Empty).Trim();
+        Model.SciezkaPliku = (Model.SciezkaPliku ?? string.Empty).Trim();
+        Model.Opis = string.IsNullOrWhiteSpace(Model.Opis) ? null : Model.Opis.Trim();
+
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+}
