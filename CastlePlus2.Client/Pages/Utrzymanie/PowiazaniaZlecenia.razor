@@ -1,0 +1,152 @@
+﻿@page "/utrzymanie/powiazania-zlecenia"
+
+@using MudBlazor
+@using CastlePlus2.Client.Services.Utrzymanie
+@using CastlePlus2.Contracts.DTOs.Utrzymanie
+@using CastlePlus2.Contracts.Requests.Utrzymanie
+
+@inject IPowiazaniaZleceniaService Service
+@inject IDialogService Dialogs
+@inject ISnackbar Snackbar
+
+<MudPaper Class="glass-panel pa-4" Rounded="Rounded.Xl" Elevation="0">
+
+    <MudStack Spacing="3">
+
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h5" Class="fw-700">Powiązania zleceń</MudText>
+
+            <MudButton StartIcon="@Icons.Material.Filled.Add"
+                       Color="Color.Primary"
+                       Variant="Variant.Filled"
+                       OnClick="OpenCreate">
+                Dodaj
+            </MudButton>
+        </MudStack>
+
+        <MudTextField @bind-Value="_q"
+                      Placeholder="Szukaj po ID..."
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Immediate="true" />
+
+        <MudTable Items="_filtered" Dense Hover Bordered Loading="_loading">
+            <HeaderContent>
+                <MudTh>IdPowiazania</MudTh>
+                <MudTh>IdZlecenia</MudTh>
+                <MudTh>IdEncji</MudTh>
+                <MudTh />
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd>@context.IdPowiazania</MudTd>
+                <MudTd>@context.IdZlecenia</MudTd>
+                <MudTd>@context.IdEncji</MudTd>
+                <MudTd Align="Align.Right">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                   OnClick="@(() => OpenEdit(context))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   OnClick="@(() => Delete(context))" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+
+    </MudStack>
+</MudPaper>
+
+@code {
+    private bool _loading = true;
+    private string _q = string.Empty;
+    private List<PowiazanieZleceniaDto> _items = new();
+
+    private IEnumerable<PowiazanieZleceniaDto> _filtered =>
+        string.IsNullOrWhiteSpace(_q)
+            ? _items
+            : _items.Where(x =>
+                x.IdPowiazania.ToString().Contains(_q, StringComparison.OrdinalIgnoreCase) ||
+                x.IdZlecenia.ToString().Contains(_q, StringComparison.OrdinalIgnoreCase) ||
+                x.IdEncji.ToString().Contains(_q, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Reload();
+    }
+
+    private async Task Reload()
+    {
+        _loading = true;
+        try
+        {
+            _items = await Service.GetAllAsync();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task OpenCreate()
+    {
+        var p = new DialogParameters
+        {
+            ["IsCreate"] = true
+        };
+
+        var dlg = await Dialogs.ShowAsync<PowiazanieZleceniaDialog>("Dodaj powiązanie", p);
+        var result = await dlg.Result;
+
+        if (result.Canceled) return;
+
+        var dto = (PowiazanieZleceniaDto)result.Data!;
+        await Service.CreateAsync(new CreatePowiazanieZleceniaRequest
+        {
+            IdZlecenia = dto.IdZlecenia,
+            IdEncji = dto.IdEncji
+        });
+
+        Snackbar.Add("Dodano.", Severity.Success);
+        await Reload();
+    }
+
+    private async Task OpenEdit(PowiazanieZleceniaDto item)
+    {
+        var p = new DialogParameters
+        {
+            ["IsCreate"] = false,
+            ["IdPowiazania"] = item.IdPowiazania,
+            ["IdZlecenia"] = item.IdZlecenia,
+            ["IdEncji"] = item.IdEncji
+        };
+
+        var dlg = await Dialogs.ShowAsync<PowiazanieZleceniaDialog>("Edytuj powiązanie", p);
+        var result = await dlg.Result;
+
+        if (result.Canceled) return;
+
+        var dto = (PowiazanieZleceniaDto)result.Data!;
+        await Service.UpdateAsync(item.IdPowiazania, new UpdatePowiazanieZleceniaRequest
+        {
+            IdZlecenia = dto.IdZlecenia,
+            IdEncji = dto.IdEncji
+        });
+
+        Snackbar.Add("Zapisano.", Severity.Success);
+        await Reload();
+    }
+
+    private async Task Delete(PowiazanieZleceniaDto item)
+    {
+        var ok = await Dialogs.ShowMessageBox(
+            "Usuń",
+            $"Usunąć powiązanie {item.IdPowiazania} (Zlecenie: {item.IdZlecenia})?",
+            yesText: "Usuń",
+            cancelText: "Anuluj");
+
+        if (ok != true) return;
+
+        await Service.DeleteAsync(item.IdPowiazania);
+        Snackbar.Add("Usunięto.", Severity.Success);
+        await Reload();
+    }
+}

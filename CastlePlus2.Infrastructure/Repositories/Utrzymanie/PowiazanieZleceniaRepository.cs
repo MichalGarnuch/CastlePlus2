@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CastlePlus2.Application.Interfaces.Utrzymanie;
@@ -17,10 +19,17 @@ namespace CastlePlus2.Infrastructure.Repositories.Utrzymanie
             _db = db;
         }
 
+        public Task<List<PowiazanieZlecenia>> GetAllAsync(CancellationToken ct)
+        {
+            return _db.PowiazaniaZlecenia
+                .AsNoTracking()
+                .OrderBy(x => x.IdPowiazania)
+                .ToListAsync(ct);
+        }
+
         public async Task<PowiazanieZlecenia?> GetByIdAsync(long idPowiazania, CancellationToken ct)
         {
             return await _db.PowiazaniaZlecenia
-                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IdPowiazania == idPowiazania, ct);
         }
 
@@ -34,6 +43,11 @@ namespace CastlePlus2.Infrastructure.Repositories.Utrzymanie
         public async Task AddAsync(PowiazanieZlecenia entity, CancellationToken ct)
         {
             await _db.PowiazaniaZlecenia.AddAsync(entity, ct);
+        }
+
+        public void Remove(PowiazanieZlecenia entity)
+        {
+            _db.PowiazaniaZlecenia.Remove(entity);
         }
 
         public async Task SaveChangesAsync(CancellationToken ct)

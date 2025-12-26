@@ -58,6 +58,7 @@ public static class DependencyInjection
 
         //UTRZYMANIE
         services.AddScoped<IZleceniaPracyService, ZleceniaPracyService>();
+        services.AddScoped<IPowiazaniaZleceniaService, PowiazaniaZleceniaService>();
 
         //DOKUMENTY
         services.AddScoped<IDokumentyService, DokumentyService>();

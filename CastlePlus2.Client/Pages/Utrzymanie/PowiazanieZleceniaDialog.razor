@@ -1,0 +1,84 @@
+﻿﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Utrzymanie
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(IsCreate ? "Nowe powiązanie" : "Edycja powiązania")
+            </MudText>
+
+            @if (!IsCreate)
+            {
+                <MudTextField Value="@IdPowiazania.ToString()"
+                              Label="IdPowiazania"
+                              Disabled="true"
+                              Margin="Margin.Dense" />
+            }
+
+            <MudNumericField T="long"
+                             Label="IdZlecenia"
+                             Required="true"
+                             RequiredError="IdZlecenia jest wymagane"
+                             Margin="Margin.Dense"
+                             @bind-Value="_idZlecenia" />
+
+            <MudTextField @bind-Value="_idEncjiText"
+                          Label="IdEncji (GUID)"
+                          Required="true"
+                          RequiredError="IdEncji jest wymagane"
+                          Margin="Margin.Dense"
+                          Error="_guidInvalid"
+                          ErrorText="Podaj poprawny GUID" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public bool IsCreate { get; set; }
+    [Parameter] public long IdPowiazania { get; set; }
+    [Parameter] public long IdZlecenia { get; set; }
+    [Parameter] public Guid IdEncji { get; set; }
+
+    private MudForm? _form;
+    private long _idZlecenia;
+    private string _idEncjiText = string.Empty;
+    private bool _guidInvalid;
+
+    protected override void OnInitialized()
+    {
+        _idZlecenia = IdZlecenia;
+        _idEncjiText = IdEncji == Guid.Empty ? string.Empty : IdEncji.ToString();
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SaveAsync()
+    {
+        if (_form is null) return;
+
+        _guidInvalid = false;
+        await _form.Validate();
+        if (!_form.IsValid) return;
+
+        if (!Guid.TryParse(_idEncjiText?.Trim(), out var guid))
+        {
+            _guidInvalid = true;
+            return;
+        }
+
+        MudDialog.Close(DialogResult.Ok(new PowiazanieZleceniaDto
+        {
+            IdPowiazania = IdPowiazania,
+            IdZlecenia = _idZlecenia,
+            IdEncji = guid
+        }));
+    }
+}
