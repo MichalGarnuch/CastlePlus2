@@ -1,0 +1,86 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Dokumenty
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(_isEdit ? "Edycja powiązania" : "Nowe powiązanie")
+            </MudText>
+
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="long"
+                                     Label="IdDokumentu"
+                                     Dense="true"
+                                     Required="true"
+                                     @bind-Value="Model.IdDokumentu" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_idEncjiText"
+                                  Label="IdEncji (GUID)"
+                                  Dense="true"
+                                  Required="true"
+                                  RequiredError="IdEncji jest wymagane"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+
+                @if (_isEdit)
+                {
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            IdPowiazania: @Model.IdPowiazania
+                        </MudText>
+                    </MudItem>
+                }
+            </MudGrid>
+
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public PowiazanieDokumentuDto Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    private MudForm? _form;
+    private bool _isEdit => IsEdit;
+
+    private string _idEncjiText = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        _idEncjiText = Model.IdEncji == Guid.Empty ? string.Empty : Model.IdEncji.ToString();
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SaveAsync()
+    {
+        if (_form is null)
+            return;
+
+        await _form.Validate();
+        if (!_form.IsValid)
+            return;
+
+        if (!Guid.TryParse(_idEncjiText.Trim(), out var guid) || guid == Guid.Empty)
+            return;
+
+        Model.IdEncji = guid;
+
+        if (Model.IdDokumentu <= 0)
+            return;
+
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+}
