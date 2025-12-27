@@ -9,7 +9,7 @@ namespace CastlePlus2.Client.Services.Media
         Task<LicznikDto?> GetByIdAsync(long id, CancellationToken ct = default);
 
         Task<LicznikDto> CreateAsync(CreateLicznikRequest request, CancellationToken ct = default);
-        Task<LicznikDto?> UpdateAsync(long id, UpdateLicznikRequest request, CancellationToken ct = default);
+        Task<bool> UpdateAsync(long id, UpdateLicznikRequest request, CancellationToken ct = default);
         Task<bool> DeleteAsync(long id, CancellationToken ct = default);
     }
 }

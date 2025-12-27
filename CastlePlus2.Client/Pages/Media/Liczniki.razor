@@ -21,10 +21,10 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
-
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudText Typo="Typo.h6">Lista Liczników</MudText>
             <MudSpacer />
 
             <MudTextField @bind-Value="_search"
@@ -83,6 +83,7 @@
 @code {
     private List<LicznikDto> _items = new();
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ
 
     private List<PrzylaczeDto> _przylacza = new();
     private List<JednostkaMiaryDto> _jednostki = new();
@@ -118,14 +119,21 @@
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
             _items = (await LicznikiService.GetAllAsync()) ?? new();
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania liczników: {ex.Message}", Severity.Error);
             _items = new();
+        }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
         }
     }
 
@@ -181,6 +189,7 @@
 
             _items.Add(created);
             Snackbar.Add("Dodano licznik.", Severity.Success);
+            await ReloadAsync();
         }
         catch (Exception ex)
         {
@@ -208,7 +217,7 @@
 
         try
         {
-            var updated = await LicznikiService.UpdateAsync(item.IdLicznika, new UpdateLicznikRequest
+            var ok = await LicznikiService.UpdateAsync(item.IdLicznika, new UpdateLicznikRequest
             {
                 IdPrzylacza = dto.IdPrzylacza,
                 IdLicznikaNadrzednego = dto.IdLicznikaNadrzednego,
@@ -218,16 +227,29 @@
                 Aktywny = dto.Aktywny
             });
 
-            if (updated is null)
+            if (!ok)
             {
                 Snackbar.Add("Rekord nie istnieje (404).", Severity.Warning);
                 await ReloadAsync();
                 return;
             }
 
-            var idx = _items.FindIndex(x => x.IdLicznika == updated.IdLicznika);
-            if (idx >= 0) _items[idx] = updated;
+            var idx = _items.FindIndex(x => x.IdLicznika == item.IdLicznika);
+            if (idx >= 0)
+            {
+                _items[idx] = new LicznikDto
+                {
+                    IdLicznika = item.IdLicznika,
+                    IdPrzylacza = dto.IdPrzylacza,
+                    IdLicznikaNadrzednego = dto.IdLicznikaNadrzednego,
+                    NumerNV = dto.NumerNV,
+                    KodJednostki = dto.KodJednostki,
+                    WspolczynnikPrzeliczeniowy = dto.WspolczynnikPrzeliczeniowy,
+                    Aktywny = dto.Aktywny
+                };
+            }
 
+            await InvokeAsync(StateHasChanged);
             Snackbar.Add("Zapisano zmiany.", Severity.Success);
         }
         catch (Exception ex)
@@ -238,17 +260,14 @@
 
     private async Task DeleteAsync(LicznikDto item)
     {
-        var parameters = new DialogParameters
-        {
-            ["ContentText"] = $"Usunąć licznik Id={item.IdLicznika}, NumerNV={item.NumerNV}?",
-            ["ButtonText"] = "Usuń",
-            ["Color"] = Color.Error
-        };
+        // Używamy standardowego MessageBox, jeśli ConfirmDeleteDialog nie istnieje
+        bool? confirm = await DialogService.ShowMessageBox(
+            "Usuń",
+            $"Czy na pewno usunąć licznik Id={item.IdLicznika}?",
+            yesText: "Usuń",
+            cancelText: "Anuluj");
 
-        var dialog = DialogService.Show<CastlePlus2.Client.Components.Crud.ConfirmDeleteDialog>("Potwierdź", parameters);
-        var result = await dialog.Result;
-
-        if (result.Canceled) return;
+        if (confirm != true) return;
 
         try
         {
@@ -262,6 +281,7 @@
 
             _items.RemoveAll(x => x.IdLicznika == item.IdLicznika);
             Snackbar.Add("Usunięto licznik.", Severity.Success);
+            await ReloadAsync();
         }
         catch (Exception ex)
         {

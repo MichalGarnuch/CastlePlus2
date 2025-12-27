@@ -61,12 +61,24 @@ namespace CastlePlus2.Api.Controllers.Media
         }
 
         [HttpPut("{id:long}")]
-        [ProducesResponseType(typeof(LicznikDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdateLicznikRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(new UpdateLicznikCommand(id, request), ct);
-            return result is null ? NotFound() : Ok(result);
+            if (request is null) return BadRequest();
+
+            var ok = await _mediator.Send(new UpdateLicznikCommand
+            {
+                IdLicznika = id,
+                IdPrzylacza = request.IdPrzylacza,
+                IdLicznikaNadrzednego = request.IdLicznikaNadrzednego,
+                NumerNV = request.NumerNV,
+                KodJednostki = request.KodJednostki,
+                WspolczynnikPrzeliczeniowy = request.WspolczynnikPrzeliczeniowy,
+                Aktywny = request.Aktywny
+            }, ct);
+
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:long}")]
