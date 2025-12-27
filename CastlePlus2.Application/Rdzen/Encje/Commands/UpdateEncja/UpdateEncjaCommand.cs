@@ -1,18 +1,11 @@
-﻿using CastlePlus2.Contracts.DTOs.Rdzen;
-using CastlePlus2.Contracts.Requests.Rdzen;
-using MediatR;
+﻿using MediatR;
 
 namespace CastlePlus2.Application.Rdzen.Encje.Commands.UpdateEncja
 {
-    public class UpdateEncjaCommand : IRequest<EncjaDto?>
+    public class UpdateEncjaCommand : IRequest<bool>
     {
-        public Guid Id { get; }
-        public UpdateEncjaRequest Request { get; }
-
-        public UpdateEncjaCommand(Guid id, UpdateEncjaRequest request)
-        {
-            Id = id;
-            Request = request;
-        }
+        public Guid Id { get; set; }
+        public string TypEncji { get; set; } = string.Empty;
+        public string? KodEncji { get; set; }
     }
 }

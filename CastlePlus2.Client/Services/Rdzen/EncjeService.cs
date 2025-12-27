@@ -44,13 +44,12 @@ namespace CastlePlus2.Client.Services.Rdzen
             return await resp.Content.ReadFromJsonAsync<EncjaDto>(cancellationToken: ct);
         }
 
-        public async Task<Guid> CreateAsync(CreateEncjaRequest request, CancellationToken ct = default)
+        public async Task<EncjaDto> CreateAsync(CreateEncjaRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PostAsJsonAsync(BaseUrl, request, ct);
             resp.EnsureSuccessStatusCode();
 
-            var dto = await resp.Content.ReadFromJsonAsync<EncjaDto>(cancellationToken: ct);
-            return dto!.Id;
+            return (await resp.Content.ReadFromJsonAsync<EncjaDto>(cancellationToken: ct))!;
         }
 
         public async Task<bool> UpdateAsync(Guid id, UpdateEncjaRequest request, CancellationToken ct = default)

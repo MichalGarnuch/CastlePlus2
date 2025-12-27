@@ -7,7 +7,7 @@ namespace CastlePlus2.Client.Services.Rdzen
     {
         Task<List<EncjaDto>> GetAllAsync(CancellationToken ct = default);
         Task<EncjaDto?> GetByIdAsync(Guid id, CancellationToken ct = default);
-        Task<Guid> CreateAsync(CreateEncjaRequest request, CancellationToken ct = default);
+        Task<EncjaDto> CreateAsync(CreateEncjaRequest request, CancellationToken ct = default);
         Task<bool> UpdateAsync(Guid id, UpdateEncjaRequest request, CancellationToken ct = default);
         Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
     }

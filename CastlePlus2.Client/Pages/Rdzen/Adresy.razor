@@ -15,8 +15,8 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
-
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Lista</MudText>
             <MudSpacer />
@@ -82,6 +82,7 @@
 @code {
     private List<AdresDto> _items = new();
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ (startuje jako true)
 
     protected override async Task OnInitializedAsync()
     {
@@ -90,22 +91,23 @@
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
             var data = await AdresyService.GetAllAsync();
-
-            // nowa instancja listy = MudTable nie trzyma starej referencji
             _items = (data ?? new List<AdresDto>()).ToList();
-
-            // wymuś re-render po async
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania adresów: {ex.Message}", Severity.Error);
         }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz pasek na końcu
+        }
     }
-
 
     private bool FilterFunc(AdresDto item)
     {
@@ -219,34 +221,8 @@
                     return;
                 }
 
-                // 1) Aktualizacja lokalnej listy (żeby UI natychmiast pokazał nowe dane)
-                var idx = _items.FindIndex(x => x.IdAdresu == model.IdAdresu);
-                if (idx >= 0)
-                {
-                    _items[idx] = new AdresDto
-                    {
-                        IdAdresu = model.IdAdresu,
-                        Kraj = model.Kraj,
-                        Wojewodztwo = model.Wojewodztwo,
-                        Powiat = model.Powiat,
-                        Gmina = model.Gmina,
-                        Miejscowosc = model.Miejscowosc,
-                        Ulica = model.Ulica,
-                        Numer = model.Numer,
-                        KodPocztowy = model.KodPocztowy,
-                        AdresPelny = model.AdresPelny
-                        // AdresSformatowany (jeśli jest liczony) odświeży się z pól
-                    };
-                }
-
-                // 2) Wymuszenie renderu
-                await InvokeAsync(StateHasChanged);
-
                 Snackbar.Add("Zapisano zmiany.", Severity.Success);
-
-                // 3) Dodatkowo: dociągnij świeży stan z API (na wypadek, gdyby serwer coś normalizował)
                 await ReloadAsync();
-
             }
             catch (Exception ex)
             {

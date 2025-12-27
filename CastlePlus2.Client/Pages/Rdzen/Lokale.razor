@@ -16,14 +16,14 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
-
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudText Typo="Typo.h6">Lista Lokali</MudText>
             <MudSpacer />
 
             <MudTextField @bind-Value="_search"
-                          Placeholder="Szukaj..."
+                          Placeholder="Szukaj (Kod, ID, Budynek)..."
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Search"
                           Immediate="true"
@@ -39,20 +39,20 @@
         </ToolBarContent>
 
         <HeaderContent>
-            <MudTh>Id</MudTh>
-            <MudTh>Budynek</MudTh>
             <MudTh>Kod lokalu</MudTh>
             <MudTh>Powierzchnia</MudTh>
             <MudTh>Przeznaczenie</MudTh>
+            <MudTh>Budynek</MudTh>
             <MudTh></MudTh>
         </HeaderContent>
 
         <RowTemplate>
-            <MudTd DataLabel="Id">@context.Id</MudTd>
-            <MudTd DataLabel="Budynek">@GetBudynekLabel(context.IdBudynku)</MudTd>
             <MudTd DataLabel="Kod lokalu">@context.KodLokalu</MudTd>
             <MudTd DataLabel="Powierzchnia">@context.Powierzchnia</MudTd>
             <MudTd DataLabel="Przeznaczenie">@context.Przeznaczenie</MudTd>
+            <MudTd DataLabel="Budynek">
+                <MudText Typo="Typo.caption">@GetBudynekLabel(context.IdBudynku)</MudText>
+            </MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
@@ -77,6 +77,7 @@
 @code {
     private List<LokalDto> _items = new();
     private string _search = string.Empty;
+    private bool _loading = true; // Domyślnie true, żeby pasek był widoczny przy wejściu
 
     private List<BudynekDto> _budynki = new();
     private Dictionary<Guid, string> _budynkiMap = new();
@@ -111,14 +112,24 @@
 
     private async Task ReloadAsync()
     {
+        // 1. Włącz pasek
+        _loading = true;
         try
         {
+            // Sztuczne opóźnienie (opcjonalne, tylko do testów, usuń na produkcji)
+            // await Task.Delay(500);
+
             var data = await LokaleService.GetAllAsync();
             _items = (data ?? new List<LokalDto>()).ToList();
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania lokali: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            // 2. Wyłącz pasek (zawsze)
+            _loading = false;
         }
     }
 
@@ -131,7 +142,7 @@
         var bud = GetBudynekLabel(item.IdBudynku);
 
         return item.Id.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
-               || item.KodLokalu.Contains(s, StringComparison.OrdinalIgnoreCase)
+               || (item.KodLokalu?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
                || bud.Contains(s, StringComparison.OrdinalIgnoreCase)
                || (item.Przeznaczenie?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false);
     }
@@ -146,7 +157,6 @@
         };
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
-
         var dialog = await DialogService.ShowAsync<LokalDialog>("Dodaj lokal", parameters, options);
         var result = await dialog.Result;
 
@@ -163,7 +173,7 @@
                 };
 
                 var created = await LokaleService.CreateAsync(request);
-                Snackbar.Add($"Dodano lokal (Id={created.Id}).", Severity.Success);
+                Snackbar.Add($"Dodano lokal: {created.KodLokalu}", Severity.Success);
                 await ReloadAsync();
             }
             catch (Exception ex)
@@ -192,7 +202,6 @@
         };
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
-
         var dialog = await DialogService.ShowAsync<LokalDialog>("Edytuj lokal", parameters, options);
         var result = await dialog.Result;
 
@@ -211,7 +220,7 @@
                 var ok = await LokaleService.UpdateAsync(model.Id, request);
                 if (!ok)
                 {
-                    Snackbar.Add("Nie znaleziono rekordu do edycji (404).", Severity.Warning);
+                    Snackbar.Add("Nie znaleziono rekordu (404).", Severity.Warning);
                     return;
                 }
 
@@ -220,7 +229,7 @@
             }
             catch (Exception ex)
             {
-                Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
+                Snackbar.Add($"Błąd edycji: {ex.Message}", Severity.Error);
             }
         }
     }
@@ -229,19 +238,18 @@
     {
         bool? confirm = await DialogService.ShowMessageBox(
             "Usuń",
-            $"Czy na pewno usunąć lokal Id={item.Id}?",
+            $"Czy na pewno usunąć lokal {item.KodLokalu}?",
             yesText: "Usuń",
             cancelText: "Anuluj");
 
-        if (confirm != true)
-            return;
+        if (confirm != true) return;
 
         try
         {
             var ok = await LokaleService.DeleteAsync(item.Id);
             if (!ok)
             {
-                Snackbar.Add("Nie znaleziono rekordu do usunięcia (404).", Severity.Warning);
+                Snackbar.Add("Nie znaleziono rekordu (404).", Severity.Warning);
                 return;
             }
 

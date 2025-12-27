@@ -15,10 +15,10 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
-
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudText Typo="Typo.h6">Lista Encji</MudText>
             <MudSpacer />
 
             <MudTextField @bind-Value="_search"
@@ -76,6 +76,7 @@
 @code {
     private List<EncjaDto> _items = new();
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ (startuje jako true)
 
     protected override async Task OnInitializedAsync()
     {
@@ -84,6 +85,8 @@
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
             var data = await EncjeService.GetAllAsync();
@@ -94,14 +97,16 @@
         {
             Snackbar.Add($"Błąd pobierania encji: {ex.Message}", Severity.Error);
         }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
+        }
     }
 
     private bool FilterFunc(EncjaDto item)
     {
         if (string.IsNullOrWhiteSpace(_search))
-        {
             return true;
-        }
 
         var s = _search.Trim();
 
@@ -114,7 +119,7 @@
     {
         var parameters = new DialogParameters
         {
-            ["Model"] = new EncjaDto(),
+            ["Model"] = new EncjaDto(), // EncjaDto dla encji ma pewnie pola Typ/Kod
             ["IsEdit"] = false
         };
 
@@ -133,8 +138,8 @@
                     KodEncji = model.KodEncji
                 };
 
-                var newId = await EncjeService.CreateAsync(request);
-                Snackbar.Add($"Dodano encję (Id={newId}).", Severity.Success);
+                var created = await EncjeService.CreateAsync(request);
+                Snackbar.Add($"Dodano encję (Id={created.Id}).", Severity.Success);
                 await ReloadAsync();
             }
             catch (Exception ex)
@@ -195,14 +200,29 @@
 
     private async Task DeleteAsync(EncjaDto item)
     {
-        var ok = await EncjeService.DeleteAsync(item.Id);
-        if (!ok)
-        {
-            Snackbar.Add("Nie znaleziono encji do usunięcia.", Severity.Warning);
-            return;
-        }
+        bool? confirm = await DialogService.ShowMessageBox(
+            "Usuń",
+            $"Czy na pewno usunąć encję Id={item.Id}?",
+            yesText: "Usuń",
+            cancelText: "Anuluj");
 
-        Snackbar.Add("Usunięto encję.", Severity.Success);
-        await ReloadAsync();
+        if (confirm != true) return;
+
+        try
+        {
+            var ok = await EncjeService.DeleteAsync(item.Id);
+            if (!ok)
+            {
+                Snackbar.Add("Nie znaleziono encji do usunięcia.", Severity.Warning);
+                return;
+            }
+
+            Snackbar.Add("Usunięto encję.", Severity.Success);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd usuwania: {ex.Message}", Severity.Error);
+        }
     }
 }

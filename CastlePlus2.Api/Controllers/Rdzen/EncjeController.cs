@@ -51,7 +51,8 @@ namespace CastlePlus2.Api.Controllers.Rzden
 
             var command = new CreateEncjaCommand
             {
-                Request = request
+                TypEncji = request.TypEncji,
+                KodEncji = request.KodEncji
             };
 
             var result = await _mediator.Send(command, ct);
@@ -60,14 +61,20 @@ namespace CastlePlus2.Api.Controllers.Rzden
 
         // PUT: api/Encje/{id}
         [HttpPut("{id:guid}")]
-        [ProducesResponseType(typeof(EncjaDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Put(Guid id, [FromBody] UpdateEncjaRequest request, CancellationToken ct)
         {
             if (request is null) return BadRequest();
 
-            var result = await _mediator.Send(new UpdateEncjaCommand(id, request), ct);
-            return result is null ? NotFound() : Ok(result);
+            var ok = await _mediator.Send(new UpdateEncjaCommand
+            {
+                Id = id,
+                TypEncji = request.TypEncji,
+                KodEncji = request.KodEncji
+            }, ct);
+
+            return ok ? NoContent() : NotFound();
         }
 
         // DELETE: api/Encje/{id}

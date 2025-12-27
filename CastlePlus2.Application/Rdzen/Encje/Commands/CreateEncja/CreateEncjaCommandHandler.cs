@@ -25,8 +25,8 @@ namespace CastlePlus2.Application.Rdzen.Encje.Commands.CreateEncja
             var entity = new Encja
             {
                 Id = Guid.NewGuid(),
-                TypEncji = request.Request.TypEncji,
-                KodEncji = request.Request.KodEncji
+                TypEncji = request.TypEncji,
+                KodEncji = request.KodEncji
             };
 
             await _repo.AddAsync(entity, ct);
