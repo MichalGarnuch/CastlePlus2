@@ -1,18 +1,15 @@
-﻿using CastlePlus2.Contracts.DTOs.Media;
-using CastlePlus2.Contracts.Requests.Media;
+﻿using System;
 using MediatR;
 
 namespace CastlePlus2.Application.Media.Przylacza.Commands.UpdatePrzylacze
 {
-    public sealed class UpdatePrzylaczeCommand : IRequest<PrzylaczeDto?>
+    // Standard: Command płaski, Controller mapuje Request -> Command
+    public sealed class UpdatePrzylaczeCommand : IRequest<bool>
     {
-        public long IdPrzylacza { get; }
-        public UpdatePrzylaczeRequest Request { get; }
+        public long IdPrzylacza { get; set; }
 
-        public UpdatePrzylaczeCommand(long idPrzylacza, UpdatePrzylaczeRequest request)
-        {
-            IdPrzylacza = idPrzylacza;
-            Request = request;
-        }
+        public Guid IdEncjiGospodarza { get; set; }
+        public string KodRodzaju { get; set; } = string.Empty;
+        public string? Opis { get; set; }
     }
 }
