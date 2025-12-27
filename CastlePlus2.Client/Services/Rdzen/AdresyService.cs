@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http.Json;
 using CastlePlus2.Contracts.DTOs.Rdzen;
 using CastlePlus2.Contracts.Requests.Rdzen;
@@ -50,12 +51,12 @@ namespace CastlePlus2.Client.Services.Rdzen
             return await resp.Content.ReadFromJsonAsync<AdresDto>(cancellationToken: ct);
         }
 
-        public async Task<long> CreateAsync(CreateAdresRequest request, CancellationToken ct = default)
+        public async Task<AdresDto> CreateAsync(CreateAdresRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PostAsJsonAsync(BaseUrl, request, ct);
             resp.EnsureSuccessStatusCode();
-            var id = await resp.Content.ReadFromJsonAsync<long>(cancellationToken: ct);
-            return id;
+            var dto = await resp.Content.ReadFromJsonAsync<AdresDto>(cancellationToken: ct);
+            return dto ?? throw new InvalidOperationException("Brak danych adresu w odpowiedzi.");
         }
 
         public async Task<bool> UpdateAsync(long id, UpdateAdresRequest request, CancellationToken ct = default)

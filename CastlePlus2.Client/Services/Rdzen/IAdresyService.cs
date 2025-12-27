@@ -8,7 +8,7 @@ namespace CastlePlus2.Client.Services.Rdzen
         Task<List<AdresDto>> GetAllAsync(CancellationToken ct = default);
         Task<AdresDto?> GetByIdAsync(long id, CancellationToken ct = default);
 
-        Task<long> CreateAsync(CreateAdresRequest request, CancellationToken ct = default);
+        Task<AdresDto> CreateAsync(CreateAdresRequest request, CancellationToken ct = default);
         Task<bool> UpdateAsync(long id, UpdateAdresRequest request, CancellationToken ct = default);
         Task<bool> DeleteAsync(long id, CancellationToken ct = default);
     }

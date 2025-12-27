@@ -157,8 +157,8 @@
                     AdresPelny = model.AdresPelny
                 };
 
-                var newId = await AdresyService.CreateAsync(request);
-                Snackbar.Add($"Dodano adres (Id={newId}).", Severity.Success);
+                var created = await AdresyService.CreateAsync(request);
+                Snackbar.Add($"Dodano adres (Id={created.IdAdresu}).", Severity.Success);
                 await ReloadAsync();
             }
             catch (Exception ex)

@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CastlePlus2.Contracts.DTOs.Rdzen;
 using MediatR;
 
 namespace CastlePlus2.Application.Rdzen.Adresy.Commands.CreateAdres
 {
     /// <summary>
     /// Komenda tworząca nowy adres.
-    /// Zwraca IdAdresu (long).
     /// </summary>
-    public class CreateAdresCommand : IRequest<long>
+    public class CreateAdresCommand : IRequest<AdresDto>
     {
         public string Kraj { get; set; } = "Polska";
         public string? Wojewodztwo { get; set; }
