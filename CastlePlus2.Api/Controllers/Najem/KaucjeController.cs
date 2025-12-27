@@ -56,21 +56,30 @@ namespace CastlePlus2.Api.Controllers.Najem
         }
 
         [HttpPut("{id:long}")]
-        [ProducesResponseType(typeof(KaucjaDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdateKaucjaRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(new UpdateKaucjaCommand(id, request), ct);
-            return result == null ? NotFound() : Ok(result);
+            var ok = await _mediator.Send(new UpdateKaucjaCommand
+            {
+                IdOperacjiKaucji = id,
+                IdUmowyNajmu = request.IdUmowyNajmu,
+                RodzajOperacji = request.RodzajOperacji,
+                Kwota = request.Kwota,
+                KodWaluty = request.KodWaluty,
+                DataOperacji = request.DataOperacji
+            }, ct);
+
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:long}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken ct)
         {
             var ok = await _mediator.Send(new DeleteKaucjaCommand(id), ct);
-            return ok ? Ok() : NotFound();
+            return ok ? NoContent() : NotFound();
         }
     }
 }

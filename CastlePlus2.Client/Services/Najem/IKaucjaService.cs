@@ -8,7 +8,7 @@ namespace CastlePlus2.Client.Services.Najem
         Task<List<KaucjaDto>> GetAllAsync(CancellationToken ct = default);
         Task<KaucjaDto?> GetByIdAsync(long id, CancellationToken ct = default);
         Task<KaucjaDto> CreateAsync(CreateKaucjaRequest request, CancellationToken ct = default);
-        Task<KaucjaDto?> UpdateAsync(long id, UpdateKaucjaRequest request, CancellationToken ct = default);
+        Task<bool> UpdateAsync(long id, UpdateKaucjaRequest request, CancellationToken ct = default);
         Task<bool> DeleteAsync(long id, CancellationToken ct = default);
     }
 }

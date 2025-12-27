@@ -53,13 +53,13 @@ namespace CastlePlus2.Client.Services.Najem
             return (await resp.Content.ReadFromJsonAsync<KaucjaDto>(cancellationToken: ct))!;
         }
 
-        public async Task<KaucjaDto?> UpdateAsync(long id, UpdateKaucjaRequest request, CancellationToken ct = default)
+        public async Task<bool> UpdateAsync(long id, UpdateKaucjaRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PutAsJsonAsync($"{BaseUrl}/{id}", request, ct);
-            if (resp.StatusCode == HttpStatusCode.NotFound) return null;
+            if (resp.StatusCode == HttpStatusCode.NotFound) return false;
 
             resp.EnsureSuccessStatusCode();
-            return await resp.Content.ReadFromJsonAsync<KaucjaDto>(cancellationToken: ct);
+            return true;
         }
 
         public async Task<bool> DeleteAsync(long id, CancellationToken ct = default)

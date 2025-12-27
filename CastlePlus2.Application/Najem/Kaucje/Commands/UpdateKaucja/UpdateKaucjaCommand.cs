@@ -1,18 +1,14 @@
-﻿using CastlePlus2.Contracts.DTOs.Najem;
-using CastlePlus2.Contracts.Requests.Najem;
-using MediatR;
+﻿using MediatR;
 
 namespace CastlePlus2.Application.Najem.Kaucje.Commands.UpdateKaucja
 {
-    public class UpdateKaucjaCommand : IRequest<KaucjaDto?>
+    public class UpdateKaucjaCommand : IRequest<bool>
     {
-        public long IdOperacjiKaucji { get; }
-        public UpdateKaucjaRequest Request { get; }
-
-        public UpdateKaucjaCommand(long idKaucji, UpdateKaucjaRequest request)
-        {
-            IdOperacjiKaucji = idKaucji;
-            Request = request;
-        }
+        public long IdOperacjiKaucji { get; set; }
+        public Guid IdUmowyNajmu { get; set; }
+        public string RodzajOperacji { get; set; } = default!;
+        public decimal Kwota { get; set; }
+        public string KodWaluty { get; set; } = default!;
+        public DateOnly DataOperacji { get; set; }
     }
 }

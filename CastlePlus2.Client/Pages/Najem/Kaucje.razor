@@ -17,10 +17,10 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
-
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudText Typo="Typo.h6">Lista Kaucji</MudText>
             <MudSpacer />
 
             <MudTextField @bind-Value="_search"
@@ -79,6 +79,7 @@
 @code {
     private List<KaucjaDto> _items = new();
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ
 
     protected override async Task OnInitializedAsync()
     {
@@ -87,13 +88,20 @@
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
             _items = await KaucjeService.GetAllAsync();
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania kaucji: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
         }
     }
 
@@ -147,6 +155,7 @@
 
             _items.Insert(0, created);
             Snackbar.Add("Dodano kaucję.", Severity.Success);
+            await ReloadAsync();
         }
         catch (Exception ex)
         {
@@ -181,7 +190,7 @@
 
         try
         {
-            var updated = await KaucjeService.UpdateAsync(item.IdOperacjiKaucji, new UpdateKaucjaRequest
+            var ok = await KaucjeService.UpdateAsync(item.IdOperacjiKaucji, new UpdateKaucjaRequest
             {
                 IdUmowyNajmu = dto.IdUmowyNajmu,
                 RodzajOperacji = dto.RodzajOperacji,
@@ -190,15 +199,17 @@
                 DataOperacji = dto.DataOperacji
             });
 
-            if (updated is null)
+            if (!ok)
             {
                 Snackbar.Add("Rekord nie istnieje (404).", Severity.Warning);
                 await ReloadAsync();
                 return;
             }
 
-            var idx = _items.FindIndex(x => x.IdOperacjiKaucji == updated.IdOperacjiKaucji);
-            if (idx >= 0) _items[idx] = updated;
+            dto.IdOperacjiKaucji = item.IdOperacjiKaucji;
+            var idx = _items.FindIndex(x => x.IdOperacjiKaucji == item.IdOperacjiKaucji);
+            if (idx >= 0) _items[idx] = dto;
+            await InvokeAsync(StateHasChanged);
 
             Snackbar.Add("Zapisano zmiany.", Severity.Success);
         }
@@ -231,6 +242,7 @@
 
             _items.RemoveAll(x => x.IdOperacjiKaucji == item.IdOperacjiKaucji);
             Snackbar.Add("Usunięto kaucję.", Severity.Success);
+            await ReloadAsync(); // Dla pewności odświeżamy
         }
         catch (Exception ex)
         {
