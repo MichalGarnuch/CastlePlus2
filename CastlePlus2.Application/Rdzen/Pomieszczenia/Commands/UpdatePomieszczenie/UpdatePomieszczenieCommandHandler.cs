@@ -1,29 +1,25 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
 using CastlePlus2.Application.Interfaces.Rdzen;
-using CastlePlus2.Contracts.DTOs.Rdzen;
 using MediatR;
 
 namespace CastlePlus2.Application.Rdzen.Pomieszczenia.Commands.UpdatePomieszczenie
 {
     public class UpdatePomieszczenieCommandHandler
-        : IRequestHandler<UpdatePomieszczenieCommand, PomieszczenieDto?>
+        : IRequestHandler<UpdatePomieszczenieCommand, bool>
     {
         private readonly IPomieszczenieRepository _repository;
-        private readonly IMapper _mapper;
 
-        public UpdatePomieszczenieCommandHandler(IPomieszczenieRepository repository, IMapper mapper)
+        public UpdatePomieszczenieCommandHandler(IPomieszczenieRepository repository)
         {
             _repository = repository;
-            _mapper = mapper;
         }
 
-        public async Task<PomieszczenieDto?> Handle(UpdatePomieszczenieCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(UpdatePomieszczenieCommand request, CancellationToken cancellationToken)
         {
             var entity = await _repository.GetForUpdateAsync(request.Id, cancellationToken);
             if (entity is null)
-                return null;
+                return false;
 
             entity.IdEncjiNadrzednej = request.IdEncjiNadrzednej;
             entity.KodPomieszczenia = request.KodPomieszczenia;
@@ -31,7 +27,7 @@ namespace CastlePlus2.Application.Rdzen.Pomieszczenia.Commands.UpdatePomieszczen
 
             await _repository.SaveChangesAsync(cancellationToken);
 
-            return _mapper.Map<PomieszczenieDto>(entity);
+            return true;
         }
     }
 }

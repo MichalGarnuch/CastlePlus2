@@ -1,10 +1,8 @@
-﻿using System;
-using CastlePlus2.Contracts.DTOs.Rdzen;
-using MediatR;
+﻿using MediatR;
 
 namespace CastlePlus2.Application.Rdzen.Pomieszczenia.Commands.UpdatePomieszczenie
 {
-    public class UpdatePomieszczenieCommand : IRequest<PomieszczenieDto?>
+    public class UpdatePomieszczenieCommand : IRequest<bool>
     {
         public Guid Id { get; set; }
 

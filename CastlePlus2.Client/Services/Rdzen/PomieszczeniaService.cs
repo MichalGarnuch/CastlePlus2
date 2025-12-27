@@ -54,16 +54,13 @@ namespace CastlePlus2.Client.Services.Rdzen
             return dto!;
         }
 
-        public async Task<PomieszczenieDto?> UpdateAsync(Guid id, UpdatePomieszczenieRequest request, CancellationToken ct = default)
+        public async Task<bool> UpdateAsync(Guid id, UpdatePomieszczenieRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PutAsJsonAsync($"{BaseUrl}/{id}", request, ct);
-            if (resp.StatusCode == HttpStatusCode.NotFound) return null;
+            if (resp.StatusCode == HttpStatusCode.NotFound) return false;
 
             resp.EnsureSuccessStatusCode();
-            if (resp.Content.Headers.ContentLength is null || resp.Content.Headers.ContentLength == 0)
-                return await GetByIdAsync(id, ct);
-
-            return await resp.Content.ReadFromJsonAsync<PomieszczenieDto>(cancellationToken: ct);
+            return true;
         }
 
         public async Task<bool> DeleteAsync(Guid id, CancellationToken ct = default)

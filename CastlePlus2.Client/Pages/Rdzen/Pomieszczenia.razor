@@ -16,10 +16,10 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
-
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudText Typo="Typo.h6">Lista Pomieszczeń</MudText>
             <MudSpacer />
 
             <MudTextField @bind-Value="_search"
@@ -75,6 +75,7 @@
 @code {
     private List<PomieszczenieDto> _items = new();
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ
 
     private List<LokalDto> _lokale = new();
 
@@ -99,14 +100,21 @@
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
             _items = (await PomieszczeniaService.GetAllAsync()) ?? new();
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania pomieszczeń: {ex.Message}", Severity.Error);
             _items = new();
+        }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
         }
     }
 
@@ -147,24 +155,23 @@
 
         if (result.Canceled) return;
         if (result.Data is not PomieszczenieDto model) return;
+
+        try
         {
-            try
+            var cmd = new CreatePomieszczenieRequest
             {
-                var cmd = new CreatePomieszczenieRequest
-                {
-                    IdEncjiNadrzednej = model.IdEncjiNadrzednej,
-                    KodPomieszczenia = model.KodPomieszczenia,
-                    Powierzchnia = model.Powierzchnia
-                };
+                IdEncjiNadrzednej = model.IdEncjiNadrzednej,
+                KodPomieszczenia = model.KodPomieszczenia,
+                Powierzchnia = model.Powierzchnia
+            };
 
-                var newId = await PomieszczeniaService.CreateAsync(cmd);
-                Snackbar.Add($"Dodano pomieszczenie (Id={newId}).", Severity.Success);
-
-            }
-            catch (Exception ex)
-            {
-                Snackbar.Add($"Błąd dodawania: {ex.Message}", Severity.Error);
-            }
+            var dto = await PomieszczeniaService.CreateAsync(cmd);
+            Snackbar.Add($"Dodano pomieszczenie (Id={dto.Id}).", Severity.Success);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd dodawania: {ex.Message}", Severity.Error);
         }
     }
 
@@ -193,31 +200,28 @@
         if (result.Canceled) return;
         if (result.Data is not PomieszczenieDto model) return;
 
+        try
         {
-            try
+            var cmd = new UpdatePomieszczenieRequest
             {
-                var cmd = new UpdatePomieszczenieRequest
-                {
-                    IdEncjiNadrzednej = model.IdEncjiNadrzednej,
-                    KodPomieszczenia = model.KodPomieszczenia,
-                    Powierzchnia = model.Powierzchnia
-                };
+                IdEncjiNadrzednej = model.IdEncjiNadrzednej,
+                KodPomieszczenia = model.KodPomieszczenia,
+                Powierzchnia = model.Powierzchnia
+            };
 
-                var dto = await PomieszczeniaService.UpdateAsync(model.Id, cmd);
-                if (dto is null)
-                {
-                    Snackbar.Add("Nie znaleziono rekordu do edycji (404).", Severity.Warning);
-                    return;
-                }
-
-
-                Snackbar.Add("Zapisano zmiany.", Severity.Success);
-                await ReloadAsync();
-            }
-            catch (Exception ex)
+            var ok = await PomieszczeniaService.UpdateAsync(model.Id, cmd);
+            if (!ok)
             {
-                Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
+                Snackbar.Add("Nie znaleziono rekordu do edycji (404).", Severity.Warning);
+                return;
             }
+
+            Snackbar.Add("Zapisano zmiany.", Severity.Success);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
         }
     }
 
@@ -229,8 +233,7 @@
             yesText: "Usuń",
             cancelText: "Anuluj");
 
-        if (confirm != true)
-            return;
+        if (confirm != true) return;
 
         try
         {
