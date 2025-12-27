@@ -4,62 +4,66 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(IsEdit ? "Edycja budynku" : "Nowy budynek")
-            </MudText>
+            <MudGrid Spacing="2">
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Model.KodBudynku"
+                                  Label="Kod Budynku"
+                                  Required="true"
+                                  RequiredError="Kod jest wymagany"
+                                  MaxLength="50"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense" />
+                </MudItem>
 
-            <MudSelect T="Guid"
-                       Label="Nieruchomość"
-                       Dense="true"
-                       Margin="Margin.Dense"
-                       Required="true"
-                       @bind-Value="Model.IdNieruchomosci">
-                @foreach (var n in (Nieruchomosci ?? new()))
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_idNieruchomosciString"
+                                  Label="ID Nieruchomości (GUID)"
+                                  Required="true"
+                                  RequiredError="Musisz podać ID Nieruchomości"
+                                  HelperText="Wklej GUID nieruchomości nadrzędnej"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="6">
+                    <MudNumericField T="short?"
+                                     @bind-Value="Model.Kondygnacje"
+                                     Label="Kondygnacje"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="6">
+                    <MudNumericField T="decimal?"
+                                     @bind-Value="Model.PowierzchniaUzytkowa"
+                                     Label="Powierzchnia (m²)"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudNumericField T="long?"
+                                     @bind-Value="Model.IdAdresu"
+                                     Label="ID Adresu (opcjonalne)"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense" />
+                </MudItem>
+
+                @if (IsEdit)
                 {
-                    <MudSelectItem T="Guid" Value="n.Id">@(!string.IsNullOrWhiteSpace(n.Nazwa) ? n.Nazwa : n.Id.ToString())</MudSelectItem>
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            ID: @Model.Id
+                        </MudText>
+                    </MudItem>
                 }
-            </MudSelect>
-
-            <MudTextField Label="Kod budynku"
-                          Dense="true"
-                          Margin="Margin.Dense"
-                          Required="true"
-                          @bind-Value="Model.KodBudynku" />
-
-            <MudSelect T="long?"
-                       Label="Adres (opcjonalnie)"
-                       Dense="true"
-                       Margin="Margin.Dense"
-                       Clearable="true"
-                       @bind-Value="Model.IdAdresu">
-                <MudSelectItem T="long?" Value="null">(brak)</MudSelectItem>
-                @foreach (var a in (Adresy ?? new()))
-                {
-                    var label = !string.IsNullOrWhiteSpace(a.AdresPelny)
-                    ? a.AdresPelny
-                    : (!string.IsNullOrWhiteSpace(a.AdresSformatowany) ? a.AdresSformatowany : a.IdAdresu.ToString());
-
-                    <MudSelectItem T="long?" Value="a.IdAdresu">@label</MudSelectItem>
-                }
-            </MudSelect>
-
-            <MudNumericField T="short?"
-                             Label="Kondygnacje"
-                             Dense="true"
-                             Margin="Margin.Dense"
-                             @bind-Value="Model.Kondygnacje" />
-
-            <MudNumericField T="decimal?"
-                             Label="Powierzchnia użytkowa"
-                             Dense="true"
-                             Margin="Margin.Dense"
-                             @bind-Value="Model.PowierzchniaUzytkowa" />
+            </MudGrid>
         </MudForm>
     </DialogContent>
 
     <DialogActions>
         <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit">Zapisz</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Zapisz</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -69,21 +73,32 @@
     [Parameter] public BudynekDto Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
 
-    [Parameter] public List<NieruchomoscDto>? Nieruchomosci { get; set; }
-    [Parameter] public List<AdresDto>? Adresy { get; set; }
-
     private MudForm? _form;
+    private string _idNieruchomosciString = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        if (Model.IdNieruchomosci != Guid.Empty)
+            _idNieruchomosciString = Model.IdNieruchomosci.ToString();
+    }
 
     private void Cancel() => MudDialog.Cancel();
 
     private async Task Submit()
     {
-        if (_form is not null)
-        {
-            await _form.Validate();
-            if (!_form.IsValid)
-                return;
-        }
+        if (_form is null) return;
+
+        await _form.Validate();
+        if (!_form.IsValid) return;
+
+        // Ręczna walidacja GUIDa (docelowo zamienisz to na MudSelect + lista nieruchomości)
+        if (!Guid.TryParse(_idNieruchomosciString?.Trim(), out var guidResult))
+            return;
+
+        Model.IdNieruchomosci = guidResult;
+
+        // Minimalne porządki
+        Model.KodBudynku = (Model.KodBudynku ?? string.Empty).Trim();
 
         MudDialog.Close(DialogResult.Ok(Model));
     }

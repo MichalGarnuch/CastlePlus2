@@ -1,8 +1,17 @@
-﻿using CastlePlus2.Contracts.DTOs.Rdzen;
-using CastlePlus2.Contracts.Requests.Rdzen;
-using MediatR;
+﻿using MediatR;
 
 namespace CastlePlus2.Application.Rdzen.Budynki.Commands.UpdateBudynek
 {
-    public sealed record UpdateBudynekCommand(Guid Id, UpdateBudynekRequest Request) : IRequest<BudynekDto?>;
+    // Standard: Command płaski, Controller mapuje Request -> Command
+    public sealed class UpdateBudynekCommand : IRequest<bool>
+    {
+        public Guid Id { get; set; }
+
+        public Guid IdNieruchomosci { get; set; }
+        public string KodBudynku { get; set; } = string.Empty;
+
+        public long? IdAdresu { get; set; }
+        public short? Kondygnacje { get; set; }
+        public decimal? PowierzchniaUzytkowa { get; set; }
+    }
 }

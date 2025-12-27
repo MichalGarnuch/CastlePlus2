@@ -3,13 +3,14 @@ using CastlePlus2.Application.Rdzen.Budynki.Commands.DeleteBudynek;
 using CastlePlus2.Application.Rdzen.Budynki.Commands.UpdateBudynek;
 using CastlePlus2.Application.Rdzen.Budynki.Queries.GetAllBudynki;
 using CastlePlus2.Application.Rdzen.Budynki.Queries.GetBudynekById;
+using CastlePlus2.Application.Rdzen.Budynki.Queries.GetBudynkiByNieruchomoscId;
 using CastlePlus2.Contracts.DTOs.Rdzen;
 using CastlePlus2.Contracts.Requests.Rdzen;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CastlePlus2.Api.Controllers.Rzden
+namespace CastlePlus2.Api.Controllers.Rdzen
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -22,7 +23,6 @@ namespace CastlePlus2.Api.Controllers.Rzden
             _mediator = mediator;
         }
 
-        // GET: api/Budynki
         [HttpGet]
         [ProducesResponseType(typeof(List<BudynekDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<List<BudynekDto>>> GetAll(CancellationToken ct)
@@ -31,7 +31,6 @@ namespace CastlePlus2.Api.Controllers.Rzden
             return Ok(result);
         }
 
-        // GET: api/Budynki/{id}
         [HttpGet("{id:guid}")]
         [ProducesResponseType(typeof(BudynekDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -41,13 +40,11 @@ namespace CastlePlus2.Api.Controllers.Rzden
             return result is null ? NotFound() : Ok(result);
         }
 
-        // POST: api/Budynki
         [HttpPost]
         [ProducesResponseType(typeof(BudynekDto), StatusCodes.Status201Created)]
         public async Task<IActionResult> Post([FromBody] CreateBudynekRequest request, CancellationToken ct)
         {
-            if (request is null)
-                return BadRequest();
+            if (request is null) return BadRequest();
 
             var command = new CreateBudynekCommand
             {
@@ -59,26 +56,29 @@ namespace CastlePlus2.Api.Controllers.Rzden
             };
 
             var result = await _mediator.Send(command, ct);
-            if (result is null)
-                return StatusCode(StatusCodes.Status500InternalServerError);
-
             return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
         }
 
-        // PUT: api/Budynki/{id}
         [HttpPut("{id:guid}")]
-        [ProducesResponseType(typeof(BudynekDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Put(Guid id, [FromBody] UpdateBudynekRequest request, CancellationToken ct)
         {
-            if (request is null)
-                return BadRequest();
+            if (request is null) return BadRequest();
 
-            var result = await _mediator.Send(new UpdateBudynekCommand(id, request), ct);
-            return result is null ? NotFound() : Ok(result);
+            var ok = await _mediator.Send(new UpdateBudynekCommand
+            {
+                Id = id,
+                IdNieruchomosci = request.IdNieruchomosci,
+                KodBudynku = request.KodBudynku,
+                IdAdresu = request.IdAdresu,
+                Kondygnacje = request.Kondygnacje,
+                PowierzchniaUzytkowa = request.PowierzchniaUzytkowa
+            }, ct);
+
+            return ok ? NoContent() : NotFound();
         }
 
-        // DELETE: api/Budynki/{id}
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -86,6 +86,12 @@ namespace CastlePlus2.Api.Controllers.Rzden
         {
             var ok = await _mediator.Send(new DeleteBudynekCommand(id), ct);
             return ok ? NoContent() : NotFound();
+        }
+        [HttpGet("by-nieruchomosc/{idNieruchomosci:guid}")]
+        public async Task<ActionResult<List<BudynekDto>>> GetByNieruchomosc(Guid idNieruchomosci, CancellationToken ct)
+        {
+            var list = await _mediator.Send(new GetBudynkiByNieruchomoscIdQuery(idNieruchomosci), ct);
+            return Ok(list);
         }
     }
 }

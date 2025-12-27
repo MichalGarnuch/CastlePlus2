@@ -1,3 +1,5 @@
+using CastlePlus2.Application;
+using CastlePlus2.Api.Middleware;
 using AutoMapper;
 using CastlePlus2.Application.Interfaces.Dokumenty;
 using CastlePlus2.Application.Interfaces.Finanse;
@@ -47,9 +49,12 @@ builder.Services.AddDbContext<CastlePlus2DbContext>(options =>
 // -------------------------------------------------------------------------
 // 2. Rejestracja Warstwy Application (CQRS, Mapper)
 // -------------------------------------------------------------------------
-builder.Services.AddMediatR(cfg => {
-    cfg.RegisterServicesFromAssembly(typeof(CreateNieruchomoscCommand).Assembly);
-});
+
+//builder.Services.AddMediatR(cfg => {
+//    cfg.RegisterServicesFromAssembly(typeof(CreateNieruchomoscCommand).Assembly);
+//});
+
+builder.Services.AddApplication();
 
 // RĘCZNA konfiguracja AutoMapper – bez pakietu DI
 var mapperConfig = new MapperConfiguration(cfg =>
@@ -125,6 +130,9 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 
 // -------------------------------------------------------------------------
 // 5. Pipeline HTTP

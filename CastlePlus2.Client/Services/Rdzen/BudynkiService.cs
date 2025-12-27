@@ -9,8 +9,6 @@ namespace CastlePlus2.Client.Services.Rdzen
     public class BudynkiService : IBudynkiService
     {
         private readonly HttpClient _http;
-
-        // Jeżeli kontroler ma [Route("api/[controller]")] i nazywa się BudynkiController => "api/Budynki"
         private const string BaseUrl = "api/Budynki";
 
         public BudynkiService(HttpClient http)
@@ -43,13 +41,12 @@ namespace CastlePlus2.Client.Services.Rdzen
             return await resp.Content.ReadFromJsonAsync<BudynekDto>(cancellationToken: ct);
         }
 
-        public async Task<Guid> CreateAsync(CreateBudynekRequest request, CancellationToken ct = default)
+        public async Task<BudynekDto> CreateAsync(CreateBudynekRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PostAsJsonAsync(BaseUrl, request, ct);
             resp.EnsureSuccessStatusCode();
 
-            var dto = await resp.Content.ReadFromJsonAsync<BudynekDto>(cancellationToken: ct);
-            return dto!.Id;
+            return (await resp.Content.ReadFromJsonAsync<BudynekDto>(cancellationToken: ct))!;
         }
 
         public async Task<bool> UpdateAsync(Guid id, UpdateBudynekRequest request, CancellationToken ct = default)

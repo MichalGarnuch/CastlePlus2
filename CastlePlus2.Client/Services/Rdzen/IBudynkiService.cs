@@ -8,7 +8,7 @@ namespace CastlePlus2.Client.Services.Rdzen
         Task<List<BudynekDto>> GetAllAsync(CancellationToken ct = default);
         Task<BudynekDto?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
-        Task<Guid> CreateAsync(CreateBudynekRequest request, CancellationToken ct = default);
+        Task<BudynekDto> CreateAsync(CreateBudynekRequest request, CancellationToken ct = default);
         Task<bool> UpdateAsync(Guid id, UpdateBudynekRequest request, CancellationToken ct = default);
         Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
     }

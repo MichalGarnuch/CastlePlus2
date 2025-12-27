@@ -1,34 +1,30 @@
-﻿using AutoMapper;
-using CastlePlus2.Application.Interfaces.Rdzen;
-using CastlePlus2.Contracts.DTOs.Rdzen;
+﻿using CastlePlus2.Application.Interfaces.Rdzen;
 using MediatR;
 
 namespace CastlePlus2.Application.Rdzen.Budynki.Commands.UpdateBudynek
 {
-    public sealed class UpdateBudynekCommandHandler : IRequestHandler<UpdateBudynekCommand, BudynekDto?>
+    public sealed class UpdateBudynekCommandHandler : IRequestHandler<UpdateBudynekCommand, bool>
     {
         private readonly IBudynekRepository _repo;
-        private readonly IMapper _mapper;
 
-        public UpdateBudynekCommandHandler(IBudynekRepository repo, IMapper mapper)
+        public UpdateBudynekCommandHandler(IBudynekRepository repo)
         {
             _repo = repo;
-            _mapper = mapper;
         }
 
-        public async Task<BudynekDto?> Handle(UpdateBudynekCommand cmd, CancellationToken ct)
+        public async Task<bool> Handle(UpdateBudynekCommand cmd, CancellationToken ct)
         {
             var entity = await _repo.GetForUpdateAsync(cmd.Id, ct);
-            if (entity is null) return null;
+            if (entity is null) return false;
 
-            entity.IdNieruchomosci = cmd.Request.IdNieruchomosci;
-            entity.KodBudynku = cmd.Request.KodBudynku;
-            entity.IdAdresu = cmd.Request.IdAdresu;
-            entity.Kondygnacje = cmd.Request.Kondygnacje;
-            entity.PowierzchniaUzytkowa = cmd.Request.PowierzchniaUzytkowa;
+            entity.IdNieruchomosci = cmd.IdNieruchomosci;
+            entity.KodBudynku = cmd.KodBudynku;
+            entity.IdAdresu = cmd.IdAdresu;
+            entity.Kondygnacje = cmd.Kondygnacje;
+            entity.PowierzchniaUzytkowa = cmd.PowierzchniaUzytkowa;
 
             await _repo.SaveChangesAsync(ct);
-            return _mapper.Map<BudynekDto>(entity);
+            return true;
         }
     }
 }
