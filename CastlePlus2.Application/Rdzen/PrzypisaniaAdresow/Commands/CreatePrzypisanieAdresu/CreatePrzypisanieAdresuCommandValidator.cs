@@ -1,0 +1,22 @@
+﻿using FluentValidation;
+
+namespace CastlePlus2.Application.Rdzen.PrzypisaniaAdresow.Commands.CreatePrzypisanieAdresu
+{
+    public sealed class CreatePrzypisanieAdresuCommandValidator : AbstractValidator<CreatePrzypisanieAdresuCommand>
+    {
+        public CreatePrzypisanieAdresuCommandValidator()
+        {
+            // Rule from SQL: IdEncji uniqueidentifier NOT NULL
+            RuleFor(x => x.IdEncji)
+                .NotEmpty();
+
+            // Rule from SQL: IdAdresu bigint NOT NULL
+            RuleFor(x => x.IdAdresu)
+                .NotEmpty();
+
+            // Rule from SQL: OdDnia date NOT NULL
+            RuleFor(x => x.OdDnia)
+                .NotEmpty();
+        }
+    }
+}

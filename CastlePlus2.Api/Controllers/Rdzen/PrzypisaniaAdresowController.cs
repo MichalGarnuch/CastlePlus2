@@ -44,6 +44,8 @@ namespace CastlePlus2.Api.Controllers.Rzden
         [ProducesResponseType(typeof(PrzypisanieAdresuDto), StatusCodes.Status201Created)]
         public async Task<ActionResult<PrzypisanieAdresuDto>> Create([FromBody] CreatePrzypisanieAdresuRequest request, CancellationToken ct)
         {
+            if (request is null) return BadRequest();
+
             var created = await _mediator.Send(
                 new CreatePrzypisanieAdresuCommand(request.IdEncji, request.IdAdresu, request.OdDnia), ct);
 
@@ -51,13 +53,22 @@ namespace CastlePlus2.Api.Controllers.Rzden
         }
 
         [HttpPut("{id:long}")]
-        [ProducesResponseType(typeof(PrzypisanieAdresuDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<PrzypisanieAdresuDto>> Update(long id, [FromBody] UpdatePrzypisanieAdresuRequest request, CancellationToken ct)
+        public async Task<IActionResult> Update(long id, [FromBody] UpdatePrzypisanieAdresuRequest request, CancellationToken ct)
         {
-            var updated = await _mediator.Send(new UpdatePrzypisanieAdresuCommand(id, request), ct);
-            if (updated is null) return NotFound();
-            return Ok(updated);
+            if (request is null) return BadRequest();
+
+            var ok = await _mediator.Send(new UpdatePrzypisanieAdresuCommand
+            {
+                IdPrzypisaniaAdresu = id,
+                IdEncji = request.IdEncji,
+                IdAdresu = request.IdAdresu,
+                OdDnia = request.OdDnia,
+                DoDnia = request.DoDnia
+            }, ct);
+
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:long}")]

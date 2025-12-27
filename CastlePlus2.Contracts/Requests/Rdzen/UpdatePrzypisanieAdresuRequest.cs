@@ -5,11 +5,11 @@ namespace CastlePlus2.Contracts.Requests.Rdzen
     public class UpdatePrzypisanieAdresuRequest
     {
         [Required]
+        public Guid IdEncji { get; set; }
         public long IdAdresu { get; set; }
 
         [Required]
         public DateOnly OdDnia { get; set; }
-
         public DateOnly? DoDnia { get; set; }
     }
 }

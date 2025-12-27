@@ -15,8 +15,8 @@
               Dense="true"
               Hover="true"
               Bordered="true"
-              Striped="true">
-
+              Striped="true"
+              Loading="_loading">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Lista</MudText>
             <MudSpacer />
@@ -68,6 +68,7 @@
 @code {
     private List<PrzypisanieAdresuDto> _items = new();
     private Dictionary<long, string> _adresy = new();
+    private bool _loading = true; // 2. DODANO ZMIENNĄ
 
     protected override async Task OnInitializedAsync()
     {
@@ -95,6 +96,8 @@
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
             var data = await Service.GetAllAsync();
@@ -104,6 +107,10 @@
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania przypisań: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
         }
     }
 
@@ -134,8 +141,8 @@
                     OdDnia = model.OdDnia
                 };
 
-                var newId = await Service.CreateAsync(req);
-                Snackbar.Add($"Dodano (Id={newId}).", Severity.Success);
+                var created = await Service.CreateAsync(req);
+                Snackbar.Add($"Dodano (Id={created.IdPrzypisaniaAdresu}).", Severity.Success);
 
                 await ReloadAsync();
             }
@@ -174,6 +181,7 @@
             {
                 var req = new UpdatePrzypisanieAdresuRequest
                 {
+                    IdEncji = model.IdEncji,
                     IdAdresu = model.IdAdresu,
                     OdDnia = model.OdDnia,
                     DoDnia = model.DoDnia

@@ -43,13 +43,12 @@ namespace CastlePlus2.Client.Services.Rdzen
             return await resp.Content.ReadFromJsonAsync<PrzypisanieAdresuDto>(cancellationToken: ct);
         }
 
-        public async Task<long> CreateAsync(CreatePrzypisanieAdresuRequest request, CancellationToken ct = default)
+        public async Task<PrzypisanieAdresuDto> CreateAsync(CreatePrzypisanieAdresuRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PostAsJsonAsync(BaseUrl, request, ct);
             resp.EnsureSuccessStatusCode();
 
-            var dto = await resp.Content.ReadFromJsonAsync<PrzypisanieAdresuDto>(cancellationToken: ct);
-            return dto!.IdPrzypisaniaAdresu;
+            return (await resp.Content.ReadFromJsonAsync<PrzypisanieAdresuDto>(cancellationToken: ct))!;
         }
 
         public async Task<bool> UpdateAsync(long id, UpdatePrzypisanieAdresuRequest request, CancellationToken ct = default)
