@@ -8,7 +8,7 @@ namespace CastlePlus2.Client.Services.Rdzen
         Task<List<NieruchomoscDto>> GetAllAsync(CancellationToken ct = default);
         Task<NieruchomoscDto?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
-        Task<Guid> CreateAsync(CreateNieruchomoscRequest request, CancellationToken ct = default);
+        Task<NieruchomoscDto> CreateAsync(CreateNieruchomoscRequest request, CancellationToken ct = default);
         Task<bool> UpdateAsync(Guid id, UpdateNieruchomoscRequest request, CancellationToken ct = default);
         Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
     }

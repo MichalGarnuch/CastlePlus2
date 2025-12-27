@@ -1,32 +1,28 @@
-﻿using AutoMapper;
-using CastlePlus2.Application.Interfaces.Rdzen;
-using CastlePlus2.Contracts.DTOs.Rdzen;
+﻿using CastlePlus2.Application.Interfaces.Rdzen;
 using MediatR;
 
 namespace CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.UpdateNieruchomosc
 {
-    public sealed class UpdateNieruchomoscCommandHandler : IRequestHandler<UpdateNieruchomoscCommand, NieruchomoscDto?>
+    public sealed class UpdateNieruchomoscCommandHandler : IRequestHandler<UpdateNieruchomoscCommand, bool>
     {
         private readonly INieruchomoscRepository _repo;
-        private readonly IMapper _mapper;
 
-        public UpdateNieruchomoscCommandHandler(INieruchomoscRepository repo, IMapper mapper)
+        public UpdateNieruchomoscCommandHandler(INieruchomoscRepository repo)
         {
             _repo = repo;
-            _mapper = mapper;
         }
 
-        public async Task<NieruchomoscDto?> Handle(UpdateNieruchomoscCommand cmd, CancellationToken ct)
+        public async Task<bool> Handle(UpdateNieruchomoscCommand cmd, CancellationToken ct)
         {
             var entity = await _repo.GetForUpdateAsync(cmd.Id, ct);
-            if (entity is null) return null;
+            if (entity is null) return false;
 
-            entity.Nazwa = cmd.Request.Nazwa;
-            entity.IdAdresuGlownego = cmd.Request.IdAdresuGlownego;
-            entity.IdPodmiotuWlasciciela = cmd.Request.IdPodmiotuWlasciciela;
+            entity.Nazwa = cmd.Nazwa;
+            entity.IdAdresuGlownego = cmd.IdAdresuGlownego;
+            entity.IdPodmiotuWlasciciela = cmd.IdPodmiotuWlasciciela;
 
             await _repo.SaveChangesAsync(ct);
-            return _mapper.Map<NieruchomoscDto>(entity);
+            return true;
         }
     }
 }

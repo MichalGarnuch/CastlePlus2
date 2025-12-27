@@ -19,8 +19,8 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
-
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Lista</MudText>
             <MudSpacer />
@@ -78,6 +78,7 @@
 @code {
     private List<NieruchomoscDto> _items = new();
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ
 
     // Lookups
     private Dictionary<long, string> _adresy = new();
@@ -135,6 +136,8 @@
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
             var data = await Service.GetAllAsync();
@@ -144,6 +147,10 @@
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania nieruchomości: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
         }
     }
 
@@ -190,8 +197,8 @@
                     IdPodmiotuWlasciciela = model.IdPodmiotuWlasciciela
                 };
 
-                var newId = await Service.CreateAsync(req);
-                Snackbar.Add($"Dodano nieruchomość (Id={newId}).", Severity.Success);
+                var created = await Service.CreateAsync(req);
+                Snackbar.Add($"Dodano nieruchomość (Id={created.Id}).", Severity.Success);
                 await ReloadAsync();
             }
             catch (Exception ex)

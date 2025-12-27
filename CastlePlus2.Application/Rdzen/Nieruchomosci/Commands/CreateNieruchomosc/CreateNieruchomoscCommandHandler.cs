@@ -37,9 +37,9 @@ namespace CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomos
             var entity = new Nieruchomosc
             {
                 Id = Guid.NewGuid(),
-                Nazwa = request.Request.Nazwa,
-                IdAdresuGlownego = request.Request.IdAdresuGlownego,
-                IdPodmiotuWlasciciela = request.Request.IdPodmiotuWlasciciela
+                Nazwa = request.Nazwa,
+                IdAdresuGlownego = request.IdAdresuGlownego,
+                IdPodmiotuWlasciciela = request.IdPodmiotuWlasciciela
             };
 
             await _repository.AddAsync(entity, cancellationToken);

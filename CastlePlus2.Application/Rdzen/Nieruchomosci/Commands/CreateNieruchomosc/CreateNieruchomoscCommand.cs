@@ -1,11 +1,13 @@
 ﻿using CastlePlus2.Contracts.DTOs.Rdzen;
-using CastlePlus2.Contracts.Requests.Rdzen;
 using MediatR;
 
 namespace CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomosc
 {
+    // Standard: Command płaski, Controller mapuje Request -> Command
     public class CreateNieruchomoscCommand : IRequest<NieruchomoscDto>
     {
-        public CreateNieruchomoscRequest Request { get; set; } = new();
+        public string Nazwa { get; set; } = string.Empty;
+        public long? IdAdresuGlownego { get; set; }
+        public long? IdPodmiotuWlasciciela { get; set; }
     }
 }
