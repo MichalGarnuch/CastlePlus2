@@ -8,7 +8,7 @@ namespace CastlePlus2.Client.Services.Podmioty
         Task<List<PodmiotDto>> GetAllAsync(CancellationToken ct = default);
         Task<PodmiotDto?> GetByIdAsync(long id, CancellationToken ct = default);
 
-        Task<long> CreateAsync(CreatePodmiotRequest request, CancellationToken ct = default);
+        Task<PodmiotDto> CreateAsync(CreatePodmiotRequest request, CancellationToken ct = default);
         Task<bool> UpdateAsync(long id, UpdatePodmiotRequest request, CancellationToken ct = default);
         Task<bool> DeleteAsync(long id, CancellationToken ct = default);
     }

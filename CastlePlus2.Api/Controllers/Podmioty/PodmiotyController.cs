@@ -56,12 +56,21 @@ namespace CastlePlus2.Api.Controllers.Podmioty
         }
 
         [HttpPut("{id:long}")]
-        [ProducesResponseType(typeof(PodmiotDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdatePodmiotRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(new UpdatePodmiotCommand { IdPodmiotu = id, Request = request }, ct);
-            return result is null ? NotFound() : Ok(result);
+            var ok = await _mediator.Send(new UpdatePodmiotCommand
+            {
+                IdPodmiotu = id,
+                Nazwa = request.Nazwa,
+                NIP = request.NIP,
+                REGON = request.REGON,
+                PESEL = request.PESEL,
+                TypPodmiotu = request.TypPodmiotu
+            }, ct);
+
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:long}")]

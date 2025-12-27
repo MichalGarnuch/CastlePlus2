@@ -15,10 +15,10 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
-
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudText Typo="Typo.h6">Lista Podmiotów</MudText>
             <MudSpacer />
 
             <MudTextField @bind-Value="_search"
@@ -78,6 +78,7 @@
 @code {
     private List<PodmiotDto> _items = new();
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ (startuje jako true)
 
     protected override async Task OnInitializedAsync()
     {
@@ -86,6 +87,8 @@
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
             var data = await PodmiotyService.GetAllAsync();
@@ -95,6 +98,10 @@
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania podmiotów: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
         }
     }
 
@@ -139,8 +146,8 @@
                     PESEL = model.PESEL
                 };
 
-                var newId = await PodmiotyService.CreateAsync(request);
-                Snackbar.Add($"Dodano podmiot (Id={newId}).", Severity.Success);
+                var created = await PodmiotyService.CreateAsync(request);
+                Snackbar.Add($"Dodano podmiot (Id={created.IdPodmiotu}).", Severity.Success);
                 await ReloadAsync();
             }
             catch (Exception ex)
@@ -193,11 +200,6 @@
                     return;
                 }
 
-                // natychmiastowa aktualizacja listy w UI
-                var idx = _items.FindIndex(x => x.IdPodmiotu == model.IdPodmiotu);
-                if (idx >= 0) _items[idx] = model;
-                await InvokeAsync(StateHasChanged);
-
                 Snackbar.Add("Zapisano zmiany.", Severity.Success);
                 await ReloadAsync();
             }
@@ -216,8 +218,7 @@
             yesText: "Usuń",
             cancelText: "Anuluj");
 
-        if (confirm != true)
-            return;
+        if (confirm != true) return;
 
         try
         {

@@ -41,12 +41,12 @@ namespace CastlePlus2.Client.Services.Podmioty
             return await resp.Content.ReadFromJsonAsync<PodmiotDto>(cancellationToken: ct);
         }
 
-        public async Task<long> CreateAsync(CreatePodmiotRequest request, CancellationToken ct = default)
+        public async Task<PodmiotDto> CreateAsync(CreatePodmiotRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PostAsJsonAsync(BaseUrl, request, ct);
             resp.EnsureSuccessStatusCode();
             var dto = await resp.Content.ReadFromJsonAsync<PodmiotDto>(cancellationToken: ct);
-            return dto!.IdPodmiotu;
+            return dto!;
         }
 
         public async Task<bool> UpdateAsync(long id, UpdatePodmiotRequest request, CancellationToken ct = default)
