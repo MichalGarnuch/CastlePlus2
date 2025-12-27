@@ -15,8 +15,8 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
-
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Lista</MudText>
             <MudSpacer />
@@ -78,6 +78,7 @@
 @code {
     private List<PrzedmiotNajmuDto> _items = new();
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ
 
     protected override async Task OnInitializedAsync()
     {
@@ -86,6 +87,8 @@
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
             var data = await PrzedmiotyNajmuService.GetAllAsync();
@@ -95,6 +98,10 @@
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania przedmiotów najmu: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
         }
     }
 
@@ -189,8 +196,8 @@
                     DoDnia = dto.DoDnia
                 };
 
-                var updated = await PrzedmiotyNajmuService.UpdateAsync(dto.IdPrzedmiotuNajmu, request);
-                if (updated is null)
+                var ok = await PrzedmiotyNajmuService.UpdateAsync(dto.IdPrzedmiotuNajmu, request);
+                if (!ok)
                 {
                     Snackbar.Add("Nie znaleziono rekordu do edycji (404).", Severity.Warning);
                     return;
@@ -218,8 +225,7 @@
             yesText: "Usuń",
             cancelText: "Anuluj");
 
-        if (confirm != true)
-            return;
+        if (confirm != true) return;
 
         try
         {

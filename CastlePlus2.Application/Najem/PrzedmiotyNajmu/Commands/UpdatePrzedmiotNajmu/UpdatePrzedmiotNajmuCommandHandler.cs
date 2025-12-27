@@ -1,39 +1,34 @@
-﻿using AutoMapper;
-using CastlePlus2.Application.Interfaces.Najem;
-using CastlePlus2.Contracts.DTOs.Najem;
+﻿using CastlePlus2.Application.Interfaces.Najem;
 using MediatR;
 
 namespace CastlePlus2.Application.Najem.PrzedmiotyNajmu.Commands.UpdatePrzedmiotNajmu
 {
-    public class UpdatePrzedmiotNajmuCommandHandler : IRequestHandler<UpdatePrzedmiotNajmuCommand, PrzedmiotNajmuDto?>
+    public class UpdatePrzedmiotNajmuCommandHandler : IRequestHandler<UpdatePrzedmiotNajmuCommand, bool>
     {
         private readonly IPrzedmiotNajmuRepository _repo;
-        private readonly IMapper _mapper;
 
-        public UpdatePrzedmiotNajmuCommandHandler(IPrzedmiotNajmuRepository repo, IMapper mapper)
+        public UpdatePrzedmiotNajmuCommandHandler(IPrzedmiotNajmuRepository repo)
         {
             _repo = repo;
-            _mapper = mapper;
         }
 
-        public async Task<PrzedmiotNajmuDto?> Handle(UpdatePrzedmiotNajmuCommand request, CancellationToken ct)
+        public async Task<bool> Handle(UpdatePrzedmiotNajmuCommand request, CancellationToken ct)
         {
             var entity = await _repo.GetForUpdateAsync(request.IdPrzedmiotuNajmu, ct);
             if (entity == null)
             {
-                return null;
+                return false;
             }
 
-            var payload = request.Request;
-            entity.IdUmowyNajmu = payload.IdUmowyNajmu;
-            entity.IdEncji = payload.IdEncji;
-            entity.UdzialProcent = payload.UdzialProcent;
-            entity.OdDnia = payload.OdDnia;
-            entity.DoDnia = payload.DoDnia;
+            entity.IdUmowyNajmu = request.IdUmowyNajmu;
+            entity.IdEncji = request.IdEncji;
+            entity.UdzialProcent = request.UdzialProcent;
+            entity.OdDnia = request.OdDnia;
+            entity.DoDnia = request.DoDnia;
 
             await _repo.SaveChangesAsync(ct);
 
-            return _mapper.Map<PrzedmiotNajmuDto>(entity);
+            return true;
         }
     }
 }

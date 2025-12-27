@@ -21,20 +21,51 @@ namespace CastlePlus2.Api.Controllers.Najem
             _mediator = mediator;
         }
 
-        [HttpPost]
-        [ProducesResponseType(typeof(PrzedmiotNajmuDto), StatusCodes.Status201Created)]
-        public async Task<IActionResult> Create([FromBody] CreatePrzedmiotNajmuRequest request, CancellationToken ct)
-        {
-            var result = await _mediator.Send(new CreatePrzedmiotNajmuCommand { Request = request }, ct);
-            return CreatedAtAction(nameof(GetById), new { id = result.IdPrzedmiotuNajmu }, result);
-        }
-
         [HttpGet]
         [ProducesResponseType(typeof(List<PrzedmiotNajmuDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
             var result = await _mediator.Send(new GetAllPrzedmiotyNajmuQuery(), ct);
             return Ok(result);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(typeof(PrzedmiotNajmuDto), StatusCodes.Status201Created)]
+        public async Task<IActionResult> Create([FromBody] CreatePrzedmiotNajmuRequest request, CancellationToken ct)
+        {
+            if (request is null) return BadRequest();
+
+            var result = await _mediator.Send(new CreatePrzedmiotNajmuCommand
+            {
+                IdUmowyNajmu = request.IdUmowyNajmu,
+                IdEncji = request.IdEncji,
+                UdzialProcent = request.UdzialProcent,
+                OdDnia = request.OdDnia,
+                DoDnia = request.DoDnia
+            }, ct);
+
+            return CreatedAtAction(nameof(GetById), new { id = result.IdPrzedmiotuNajmu }, result);
+        }
+
+        // TA WERSJA JEST POPRAWNA (Zostawiamy)
+        [HttpPut("{id:long}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdatePrzedmiotNajmuRequest request, CancellationToken ct)
+        {
+            if (request is null) return BadRequest();
+
+            var ok = await _mediator.Send(new UpdatePrzedmiotNajmuCommand
+            {
+                IdPrzedmiotuNajmu = id,
+                IdUmowyNajmu = request.IdUmowyNajmu,
+                IdEncji = request.IdEncji,
+                UdzialProcent = request.UdzialProcent,
+                OdDnia = request.OdDnia,
+                DoDnia = request.DoDnia
+            }, ct);
+
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpGet("{id:long}")]
@@ -44,18 +75,7 @@ namespace CastlePlus2.Api.Controllers.Najem
             return result == null ? NotFound() : Ok(result);
         }
 
-        [HttpPut("{id:long}")]
-        [ProducesResponseType(typeof(PrzedmiotNajmuDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdatePrzedmiotNajmuRequest request, CancellationToken ct)
-        {
-            var result = await _mediator.Send(new UpdatePrzedmiotNajmuCommand
-            {
-                IdPrzedmiotuNajmu = id,
-                Request = request
-            }, ct);
-            return result == null ? NotFound() : Ok(result);
-        }
+        // [USUNIĘTO BŁĘDNĄ METODĘ UPDATE TUTAJ]
 
         [HttpDelete("{id:long}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]

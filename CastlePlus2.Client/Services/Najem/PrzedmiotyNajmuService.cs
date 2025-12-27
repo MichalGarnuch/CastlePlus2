@@ -50,13 +50,13 @@ namespace CastlePlus2.Client.Services.Najem
             return dto ?? throw new InvalidOperationException("API zwróciło pustą odpowiedź (PrzedmiotNajmuDto = null).");
         }
 
-        public async Task<PrzedmiotNajmuDto?> UpdateAsync(long id, UpdatePrzedmiotNajmuRequest request, CancellationToken ct = default)
+        public async Task<bool> UpdateAsync(long id, UpdatePrzedmiotNajmuRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PutAsJsonAsync($"{BaseUrl}/{id}", request, ct);
-            if (resp.StatusCode == HttpStatusCode.NotFound) return null;
+            if (resp.StatusCode == HttpStatusCode.NotFound) return false;
 
             resp.EnsureSuccessStatusCode();
-            return await resp.Content.ReadFromJsonAsync<PrzedmiotNajmuDto>(cancellationToken: ct);
+            return true;
         }
 
         public async Task<bool> DeleteAsync(long id, CancellationToken ct = default)
