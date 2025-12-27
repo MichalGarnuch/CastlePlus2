@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using CastlePlus2.Contracts.DTOs.Slowniki;
+using CastlePlus2.Contracts.Requests.Slownik;
 using Microsoft.Extensions.Logging;
 
 namespace CastlePlus2.Client.Services.Slowniki

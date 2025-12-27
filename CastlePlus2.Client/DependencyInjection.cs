@@ -16,7 +16,8 @@ public static class DependencyInjection
     public static IServiceCollection AddCastlePlus2Client(this IServiceCollection services)
     {
         services.AddMudServices();
-        // tutaj dopniemy serwisy modułów, np. services.AddScoped<IRodzajMediowService, RodzajMediowService>();
+        // tutaj dopniemy serwisy modułów
+
         //MEDIA
         services.AddScoped<IRodzajeMediowService, RodzajeMediowService>();
         services.AddScoped<IPrzylaczaService, PrzylaczaService>();

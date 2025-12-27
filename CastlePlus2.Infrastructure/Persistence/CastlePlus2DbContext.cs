@@ -38,41 +38,24 @@ namespace CastlePlus2.Infrastructure.Persistence
         // DbSet'y – tutaj dodajemy zbiory encji odwzorowujące tabele.
         // -------------------------------------------------------------
 
-        /// <summary>
-        /// DbSet odpowiadający tabeli [rdzen].[Nieruchomosc] w bazie danych.
-        /// </summary>
+        // RDZEN
         public DbSet<Nieruchomosc> Nieruchomosci { get; set; } = null!;
-
-        /// <summary>
-        /// DbSet dla tabeli [rdzen].[Encja] (tabela bazowa TPT).
-        /// </summary>
-        /// 
         public DbSet<Encja> Encje { get; set; } = null!;
-
-        /// <summary>
-        /// DbSet odpowiadający tabeli [rdzen].[Adres].
-        /// </summary>
-        /// 
         public DbSet<Adres> Adresy { get; set; } = null!;
-
-        /// <summary>
-        /// DbSet odpowiadający tabeli [rdzen].[Budynek] w bazie danych.
-        /// </summary>
-        /// 
         public DbSet<Budynek> Budynki { get; set; } = null!;
         public DbSet<Lokal> Lokale { get; set; } = null!;
         public DbSet<Pomieszczenie> Pomieszczenia { get; set; } = default!;
         public DbSet<PrzypisanieAdresu> PrzypisaniaAdresow => Set<PrzypisanieAdresu>();
 
-
+        //UTRZYMANIE
         public DbSet<ZleceniePracy> ZleceniaPracy { get; set; } = null!;
         public DbSet<PowiazanieZlecenia> PowiazaniaZlecenia { get; set; } = null!;
 
-
+        //DOKUMENTY
         public DbSet<Dokument> Dokumenty { get; set; } = null!;
         public DbSet<PowiazanieDokumentu> PowiazaniaDokumentow { get; set; } = null!;
 
-
+        //FINANSE
         public DbSet<AlokacjaKosztu> AlokacjeKosztow { get; set; } = null!;
         public DbSet<KategoriaKosztu> KategorieKosztow { get; set; } = null!;
         public DbSet<Faktura> Faktury { get; set; } = null!;
@@ -80,32 +63,27 @@ namespace CastlePlus2.Infrastructure.Persistence
         public DbSet<Platnosc> Platnosci { get; set; } = null!;
         public DbSet<RozliczeniePlatnosci> RozliczeniaPlatnosci { get; set; } = null!;
 
-
+        // SŁOWNIKI
         public DbSet<Waluta> Waluty => Set<Waluta>();
         public DbSet<Indeksacja> Indeksacje => Set<Indeksacja>();
         public DbSet<JednostkaMiary> JednostkiMiary => Set<JednostkaMiary>();
 
-
+        // PODMIOTY
         public DbSet<Podmiot> Podmioty => Set<Podmiot>();
         public DbSet<Kontakt> Kontakty { get; set; } = null!;
         public DbSet<Wlasnosc> Wlasnosci { get; set; } = null!;
 
-
-
-
+        // NAJEM
         public DbSet<UmowaNajmu> UmowyNajmu => Set<UmowaNajmu>();
         public DbSet<PrzedmiotNajmu> PrzedmiotyNajmu => Set<PrzedmiotNajmu>();
         public DbSet<SkladnikCzynszu> SkladnikiCzynszu => Set<SkladnikCzynszu>();
         public DbSet<Kaucja> Kaucje => Set<Kaucja>();
 
-
+        // MEDIA
         public DbSet<RodzajMedium> RodzajeMediow { get; set; } = null!;
         public DbSet<Przylacze> Przylacza { get; set; } = null!;
         public DbSet<Licznik> Liczniki { get; set; } = null!;
         public DbSet<Odczyt> Odczyty { get; set; } = null!;
-
-
-
 
         /// <summary>
         /// Metoda wywoływana przy tworzeniu modelu EF Core.

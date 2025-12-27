@@ -1,4 +1,5 @@
 ﻿using CastlePlus2.Contracts.DTOs.Slowniki;
+using CastlePlus2.Contracts.Requests.Slownik;
 
 namespace CastlePlus2.Client.Services.Slowniki
 {

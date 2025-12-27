@@ -3,9 +3,9 @@ using CastlePlus2.Application.Slowniki.Waluty.Commands.UpdateWaluta;
 using CastlePlus2.Application.Slowniki.Waluty.Commands.DeleteWaluta;
 using CastlePlus2.Application.Slowniki.Waluty.Queries.GetAllWaluty;
 using CastlePlus2.Application.Slowniki.Waluty.Queries.GetWalutaByKod;
-using CastlePlus2.Contracts.DTOs.Slowniki;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using CastlePlus2.Contracts.Requests.Slownik;
 
 namespace CastlePlus2.Api.Controllers.Slowniki
 {

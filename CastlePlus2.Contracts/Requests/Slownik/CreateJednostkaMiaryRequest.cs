@@ -1,4 +1,4 @@
-﻿namespace CastlePlus2.Contracts.DTOs.Slowniki
+﻿namespace CastlePlus2.Contracts.Requests.Slownik
 {
     public class CreateJednostkaMiaryRequest
     {
