@@ -12,7 +12,7 @@ namespace CastlePlus2.Client.Services.Media
         Task<OdczytDto?> GetByIdAsync(long idOdczytu, CancellationToken ct = default);
 
         Task<OdczytDto> CreateAsync(CreateOdczytRequest request, CancellationToken ct = default);
-        Task<OdczytDto?> UpdateAsync(long idOdczytu, UpdateOdczytRequest request, CancellationToken ct = default);
+        Task<bool> UpdateAsync(long idOdczytu, UpdateOdczytRequest request, CancellationToken ct = default);
 
         Task<bool> DeleteAsync(long idOdczytu, CancellationToken ct = default);
     }

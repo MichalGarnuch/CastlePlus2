@@ -43,14 +43,14 @@ namespace CastlePlus2.Client.Services.Media
             return dto!;
         }
 
-        public async Task<OdczytDto?> UpdateAsync(long idOdczytu, UpdateOdczytRequest request, CancellationToken ct = default)
+        public async Task<bool> UpdateAsync(long idOdczytu, UpdateOdczytRequest request, CancellationToken ct = default)
         {
             var response = await _httpClient.PutAsJsonAsync($"{BaseUrl}/{idOdczytu}", request, ct);
             if (response.StatusCode == HttpStatusCode.NotFound)
-                return null;
+                return false;
 
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<OdczytDto>(cancellationToken: ct);
+            return true;
         }
 
         public async Task<bool> DeleteAsync(long idOdczytu, CancellationToken ct = default)

@@ -59,12 +59,20 @@ namespace CastlePlus2.Api.Controllers.Media
         }
 
         [HttpPut("{id:long}")]
-        [ProducesResponseType(typeof(OdczytDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdateOdczytRequest request, CancellationToken ct)
         {
-            var dto = await _mediator.Send(new UpdateOdczytCommand(id, request), ct);
-            return dto is null ? NotFound() : Ok(dto);
+            var ok = await _mediator.Send(new UpdateOdczytCommand
+            {
+                IdOdczytu = id,
+                IdLicznika = request.IdLicznika,
+                DataOdczytu = request.DataOdczytu,
+                Wskazanie = request.Wskazanie,
+                Zrodlo = request.Zrodlo
+            }, ct);
+
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:long}")]
