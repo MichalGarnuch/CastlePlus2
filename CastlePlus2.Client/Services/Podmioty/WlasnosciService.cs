@@ -62,13 +62,13 @@ namespace CastlePlus2.Client.Services.Podmioty
             return dto ?? throw new InvalidOperationException("API zwróciło pustą odpowiedź (WlasnoscDto = null).");
         }
 
-        public async Task<WlasnoscDto?> UpdateAsync(long id, UpdateWlasnoscRequest request, CancellationToken ct = default)
+        public async Task<bool> UpdateAsync(long id, UpdateWlasnoscRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PutAsJsonAsync($"{BaseUrl}/{id}", request, ct);
-            if (resp.StatusCode == HttpStatusCode.NotFound) return null;
+            if (resp.StatusCode == HttpStatusCode.NotFound) return false;
 
             resp.EnsureSuccessStatusCode();
-            return await resp.Content.ReadFromJsonAsync<WlasnoscDto>(cancellationToken: ct);
+            return true;
         }
 
         public async Task<bool> DeleteAsync(long id, CancellationToken ct = default)

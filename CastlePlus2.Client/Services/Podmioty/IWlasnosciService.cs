@@ -9,7 +9,7 @@ namespace CastlePlus2.Client.Services.Podmioty
         Task<WlasnoscDto?> GetByIdAsync(long id, CancellationToken ct = default);
         Task<List<WlasnoscDto>> GetByEncjaAsync(Guid idEncji, CancellationToken ct = default);
         Task<WlasnoscDto> CreateAsync(CreateWlasnoscRequest request, CancellationToken ct = default);
-        Task<WlasnoscDto?> UpdateAsync(long id, UpdateWlasnoscRequest request, CancellationToken ct = default);
+        Task<bool> UpdateAsync(long id, UpdateWlasnoscRequest request, CancellationToken ct = default);
         Task<bool> DeleteAsync(long id, CancellationToken ct = default);
     }
 }

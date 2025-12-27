@@ -34,8 +34,18 @@ namespace CastlePlus2.Api.Controllers.Podmioty
         [ProducesResponseType(typeof(WlasnoscDto), StatusCodes.Status201Created)]
         public async Task<IActionResult> Create([FromBody] CreateWlasnoscRequest request, CancellationToken ct)
         {
-            // Swagger: wklejasz request, klikasz Execute, a w odpowiedzi dostajesz m.in. IdWlasnosci
-            var result = await _mediator.Send(new CreateWlasnoscCommand { Request = request }, ct);
+            if (request is null) return BadRequest();
+
+            var command = new CreateWlasnoscCommand
+            {
+                IdEncji = request.IdEncji,
+                IdPodmiotu = request.IdPodmiotu,
+                UdzialProcent = request.UdzialProcent,
+                OdDnia = request.OdDnia,
+                DoDnia = request.DoDnia
+            };
+
+            var result = await _mediator.Send(command, ct);
             return CreatedAtAction(nameof(GetById), new { id = result.IdWlasnosci }, result);
         }
 
@@ -77,12 +87,23 @@ namespace CastlePlus2.Api.Controllers.Podmioty
         /// Aktualizuje wpis własności.
         /// </summary>
         [HttpPut("{id:long}")]
-        [ProducesResponseType(typeof(WlasnoscDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdateWlasnoscRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(new UpdateWlasnoscCommand(id, request), ct);
-            return result is null ? NotFound() : Ok(result);
+            if (request is null) return BadRequest();
+
+            var ok = await _mediator.Send(new UpdateWlasnoscCommand
+            {
+                IdWlasnosci = id,
+                IdEncji = request.IdEncji,
+                IdPodmiotu = request.IdPodmiotu,
+                UdzialProcent = request.UdzialProcent,
+                OdDnia = request.OdDnia,
+                DoDnia = request.DoDnia
+            }, ct);
+
+            return ok ? NoContent() : NotFound();
         }
 
         /// <summary>
