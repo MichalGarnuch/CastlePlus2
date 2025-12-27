@@ -47,12 +47,18 @@ namespace CastlePlus2.Api.Controllers.Podmioty
             return result is null ? NotFound() : Ok(result);
         }
         [HttpPut("{id:long}")]
-        [ProducesResponseType(typeof(KontaktDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdateKontaktRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(new UpdateKontaktCommand { IdKontaktu = id, Request = request }, ct);
-            return result is null ? NotFound() : Ok(result);
+            var ok = await _mediator.Send(new UpdateKontaktCommand
+            {
+                IdKontaktu = id,
+                IdPodmiotu = request.IdPodmiotu,
+                Rodzaj = request.Rodzaj,
+                Wartosc = request.Wartosc
+            }, ct);
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:long}")]

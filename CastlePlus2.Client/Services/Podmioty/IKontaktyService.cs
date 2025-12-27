@@ -7,7 +7,7 @@ namespace CastlePlus2.Client.Services.Podmioty
     {
         Task<List<KontaktDto>> GetByPodmiotIdAsync(long idPodmiotu, CancellationToken ct = default);
         Task<KontaktDto?> GetByIdAsync(long idKontaktu, CancellationToken ct = default);
-        Task<long> CreateAsync(CreateKontaktRequest request, CancellationToken ct = default);
+        Task<KontaktDto> CreateAsync(CreateKontaktRequest request, CancellationToken ct = default);
         Task<bool> UpdateAsync(long idKontaktu, UpdateKontaktRequest request, CancellationToken ct = default);
         Task<bool> DeleteAsync(long idKontaktu, CancellationToken ct = default);
     }

@@ -47,10 +47,10 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
-
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudText Typo="Typo.h6">Lista Kontaktów</MudText>
             <MudSpacer />
 
             <MudTextField @bind-Value="_search"
@@ -109,6 +109,7 @@
     private List<KontaktDto> _items = new();
     private long? _selectedPodmiotId;
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ (startuje jako true)
 
     protected override async Task OnInitializedAsync()
     {
@@ -131,15 +132,17 @@
 
     private async Task ReloadAsync()
     {
-        if (!_selectedPodmiotId.HasValue)
-        {
-            _items = new List<KontaktDto>();
-            await InvokeAsync(StateHasChanged);
-            return;
-        }
-
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
+            if (!_selectedPodmiotId.HasValue)
+            {
+                _items = new List<KontaktDto>();
+                await InvokeAsync(StateHasChanged);
+                return;
+            }
+
             var data = await KontaktyService.GetByPodmiotIdAsync(_selectedPodmiotId.Value);
             _items = (data ?? new List<KontaktDto>()).ToList();
             await InvokeAsync(StateHasChanged);
@@ -147,6 +150,10 @@
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania kontaktów: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
         }
     }
 
@@ -194,8 +201,8 @@
                     Wartosc = model.Wartosc
                 };
 
-                var newId = await KontaktyService.CreateAsync(request);
-                Snackbar.Add($"Dodano kontakt (Id={newId}).", Severity.Success);
+                var created = await KontaktyService.CreateAsync(request);
+                Snackbar.Add($"Dodano kontakt (Id={created.IdKontaktu}).", Severity.Success);
                 await ReloadAsync();
             }
             catch (Exception ex)

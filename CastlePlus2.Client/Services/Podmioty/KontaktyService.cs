@@ -41,12 +41,11 @@ namespace CastlePlus2.Client.Services.Podmioty
             return await resp.Content.ReadFromJsonAsync<KontaktDto>(cancellationToken: ct);
         }
 
-        public async Task<long> CreateAsync(CreateKontaktRequest request, CancellationToken ct = default)
+        public async Task<KontaktDto> CreateAsync(CreateKontaktRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PostAsJsonAsync(BaseUrl, request, ct);
             resp.EnsureSuccessStatusCode();
-            var dto = await resp.Content.ReadFromJsonAsync<KontaktDto>(cancellationToken: ct);
-            return dto!.IdKontaktu;
+            return (await resp.Content.ReadFromJsonAsync<KontaktDto>(cancellationToken: ct))!;
         }
 
         public async Task<bool> UpdateAsync(long idKontaktu, UpdateKontaktRequest request, CancellationToken ct = default)
