@@ -68,17 +68,17 @@ namespace CastlePlus2.Client.Services.Media
             }
         }
 
-        public async Task<RodzajMediumDto?> UpdateAsync(string kodRodzaju, UpdateRodzajMediumRequest request, CancellationToken ct = default)
+        public async Task<bool> UpdateAsync(string kodRodzaju, UpdateRodzajMediumRequest request, CancellationToken ct = default)
         {
             var kod = (kodRodzaju ?? string.Empty).Trim();
-            if (kod.Length == 0) return null;
+            if (kod.Length == 0) return false;
 
             try
             {
                 var resp = await _http.PutAsJsonAsync($"{BasePath}/{Uri.EscapeDataString(kod)}", request, ct);
-                if (resp.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
+                if (resp.StatusCode == System.Net.HttpStatusCode.NotFound) return false;
                 resp.EnsureSuccessStatusCode();
-                return await resp.Content.ReadFromJsonAsync<RodzajMediumDto>(cancellationToken: ct);
+                return true;
             }
             catch (Exception ex)
             {

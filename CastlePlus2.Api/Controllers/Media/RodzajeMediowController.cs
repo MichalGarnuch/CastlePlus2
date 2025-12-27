@@ -43,25 +43,35 @@ namespace CastlePlus2.Api.Controllers.Media
 
         [HttpPost]
         [ProducesResponseType(typeof(RodzajMediumDto), StatusCodes.Status201Created)]
-        public async Task<IActionResult> Create([FromBody] CreateRodzajMediumCommand command, CancellationToken ct)
+        public async Task<IActionResult> Create([FromBody] CreateRodzajMediumRequest request, CancellationToken ct)
         {
+            if (request is null) return BadRequest();
+
+            var command = new CreateRodzajMediumCommand
+            {
+                KodRodzaju = request.KodRodzaju,
+                Nazwa = request.Nazwa
+            };
+
             var result = await _mediator.Send(command, ct);
             return CreatedAtAction(nameof(GetById), new { kod = result.KodRodzaju }, result);
         }
 
         [HttpPut("{kod}")]
-        [ProducesResponseType(typeof(RodzajMediumDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] string kod, [FromBody] UpdateRodzajMediumRequest request, CancellationToken ct)
         {
+            if (request is null) return BadRequest();
+
             var cmd = new UpdateRodzajMediumCommand
             {
                 KodRodzaju = kod,
                 Nazwa = request.Nazwa
             };
 
-            var result = await _mediator.Send(cmd, ct);
-            return result is null ? NotFound() : Ok(result);
+            var ok = await _mediator.Send(cmd, ct);
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpDelete("{kod}")]

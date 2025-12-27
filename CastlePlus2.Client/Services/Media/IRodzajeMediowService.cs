@@ -10,7 +10,7 @@ namespace CastlePlus2.Client.Services.Media
         Task<List<RodzajMediumDto>> GetAllAsync(CancellationToken ct = default);
         Task<RodzajMediumDto?> GetByIdAsync(string kodRodzaju, CancellationToken ct = default);
         Task<RodzajMediumDto> CreateAsync(CreateRodzajMediumRequest request, CancellationToken ct = default);
-        Task<RodzajMediumDto?> UpdateAsync(string kodRodzaju, UpdateRodzajMediumRequest request, CancellationToken ct = default);
+        Task<bool> UpdateAsync(string kodRodzaju, UpdateRodzajMediumRequest request, CancellationToken ct = default);
         Task<bool> DeleteAsync(string kodRodzaju, CancellationToken ct = default);
     }
 }
