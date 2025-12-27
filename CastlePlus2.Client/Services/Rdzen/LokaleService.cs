@@ -26,12 +26,11 @@ namespace CastlePlus2.Client.Services.Rdzen
             return await resp.Content.ReadFromJsonAsync<LokalDto>(cancellationToken: ct);
         }
 
-        public async Task<Guid> CreateAsync(CreateLokalRequest request, CancellationToken ct = default)
+        public async Task<LokalDto> CreateAsync(CreateLokalRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PostAsJsonAsync(BaseUrl, request, ct);
             resp.EnsureSuccessStatusCode();
-            var dto = await resp.Content.ReadFromJsonAsync<LokalDto>(cancellationToken: ct);
-            return dto!.Id;
+            return (await resp.Content.ReadFromJsonAsync<LokalDto>(cancellationToken: ct))!;
         }
 
         public async Task<bool> UpdateAsync(Guid id, UpdateLokalRequest request, CancellationToken ct = default)

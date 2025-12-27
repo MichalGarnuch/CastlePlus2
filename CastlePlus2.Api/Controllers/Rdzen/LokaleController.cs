@@ -67,14 +67,22 @@ namespace CastlePlus2.Api.Controllers.Rzden
 
         // PUT: api/Lokale/{id}
         [HttpPut("{id:guid}")]
-        [ProducesResponseType(typeof(LokalDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Put(Guid id, [FromBody] UpdateLokalRequest request, CancellationToken ct)
         {
             if (request is null) return BadRequest();
 
-            var result = await _mediator.Send(new UpdateLokalCommand(id, request), ct);
-            return result is null ? NotFound() : Ok(result);
+            var ok = await _mediator.Send(new UpdateLokalCommand
+            {
+                Id = id,
+                IdBudynku = request.IdBudynku,
+                KodLokalu = request.KodLokalu,
+                Powierzchnia = request.Powierzchnia,
+                Przeznaczenie = request.Przeznaczenie
+            }, ct);
+
+            return ok ? NoContent() : NotFound();
         }
 
         // DELETE: api/Lokale/{id}

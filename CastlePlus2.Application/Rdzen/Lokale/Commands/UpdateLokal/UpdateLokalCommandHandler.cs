@@ -1,33 +1,29 @@
-﻿using AutoMapper;
-using CastlePlus2.Application.Interfaces.Rdzen;
-using CastlePlus2.Contracts.DTOs.Rdzen;
+﻿using CastlePlus2.Application.Interfaces.Rdzen;
 using MediatR;
 
 namespace CastlePlus2.Application.Rdzen.Lokale.Commands.UpdateLokal
 {
-    public sealed class UpdateLokalCommandHandler : IRequestHandler<UpdateLokalCommand, LokalDto?>
+    public sealed class UpdateLokalCommandHandler : IRequestHandler<UpdateLokalCommand, bool>
     {
         private readonly ILokalRepository _repo;
-        private readonly IMapper _mapper;
 
-        public UpdateLokalCommandHandler(ILokalRepository repo, IMapper mapper)
+        public UpdateLokalCommandHandler(ILokalRepository repo)
         {
             _repo = repo;
-            _mapper = mapper;
         }
 
-        public async Task<LokalDto?> Handle(UpdateLokalCommand cmd, CancellationToken ct)
+        public async Task<bool> Handle(UpdateLokalCommand cmd, CancellationToken ct)
         {
             var entity = await _repo.GetForUpdateAsync(cmd.Id, ct);
-            if (entity is null) return null;
+            if (entity is null) return false;
 
-            entity.IdBudynku = cmd.Request.IdBudynku;
-            entity.KodLokalu = cmd.Request.KodLokalu;
-            entity.Powierzchnia = cmd.Request.Powierzchnia;
-            entity.Przeznaczenie = cmd.Request.Przeznaczenie;
+            entity.IdBudynku = cmd.IdBudynku;
+            entity.KodLokalu = cmd.KodLokalu;
+            entity.Powierzchnia = cmd.Powierzchnia;
+            entity.Przeznaczenie = cmd.Przeznaczenie;
 
             await _repo.SaveChangesAsync(ct);
-            return _mapper.Map<LokalDto>(entity);
+            return true;
         }
     }
 }

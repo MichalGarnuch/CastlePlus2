@@ -162,8 +162,8 @@
                     Przeznaczenie = model.Przeznaczenie
                 };
 
-                var newId = await LokaleService.CreateAsync(request);
-                Snackbar.Add($"Dodano lokal (Id={newId}).", Severity.Success);
+                var created = await LokaleService.CreateAsync(request);
+                Snackbar.Add($"Dodano lokal (Id={created.Id}).", Severity.Success);
                 await ReloadAsync();
             }
             catch (Exception ex)
