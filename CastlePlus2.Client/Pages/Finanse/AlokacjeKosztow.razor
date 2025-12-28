@@ -15,10 +15,10 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
-
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudText Typo="Typo.h6">Lista Alokacji</MudText>
             <MudSpacer />
 
             <MudTextField @bind-Value="_search"
@@ -75,6 +75,7 @@
 @code {
     private List<AlokacjaKosztuDto> _items = new();
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ
 
     protected override async Task OnInitializedAsync()
     {
@@ -83,13 +84,21 @@
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
-            _items = (await Service.GetAllAsync()).ToList();
+            var data = await Service.GetAllAsync();
+            _items = (data ?? new List<AlokacjaKosztuDto>()).ToList();
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania alokacji: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
         }
     }
 
