@@ -1,9 +1,8 @@
-﻿using CastlePlus2.Contracts.DTOs.Finanse;
-using MediatR;
+﻿using MediatR;
 
 namespace CastlePlus2.Application.Finanse.RozliczeniaPlatnosci.Commands.UpdateRozliczeniePlatnosci
 {
-    public class UpdateRozliczeniePlatnosciCommand : IRequest<RozliczeniePlatnosciDto?>
+    public class UpdateRozliczeniePlatnosciCommand : IRequest<bool>
     {
         public long IdRozliczenia { get; set; }
         public long IdPlatnosci { get; set; }

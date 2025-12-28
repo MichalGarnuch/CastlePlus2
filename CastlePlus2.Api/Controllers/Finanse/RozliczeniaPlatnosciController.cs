@@ -54,11 +54,11 @@ namespace CastlePlus2.Api.Controllers.Finanse
         }
 
         [HttpPut("{id:long}")]
-        [ProducesResponseType(typeof(RozliczeniePlatnosciDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdateRozliczeniePlatnosciRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(new UpdateRozliczeniePlatnosciCommand
+            var ok = await _mediator.Send(new UpdateRozliczeniePlatnosciCommand
             {
                 IdRozliczenia = id,
                 IdPlatnosci = request.IdPlatnosci,
@@ -66,15 +66,16 @@ namespace CastlePlus2.Api.Controllers.Finanse
                 Kwota = request.Kwota
             }, ct);
 
-            return result is null ? NotFound() : Ok(result);
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:long}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken ct)
         {
-            await _mediator.Send(new DeleteRozliczeniePlatnosciCommand { IdRozliczenia = id }, ct);
-            return NoContent();
+            var ok = await _mediator.Send(new DeleteRozliczeniePlatnosciCommand(id), ct);
+            return ok ? NoContent() : NotFound();
         }
     }
 }
