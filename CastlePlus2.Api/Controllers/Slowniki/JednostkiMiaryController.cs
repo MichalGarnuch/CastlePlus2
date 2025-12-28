@@ -51,19 +51,21 @@ namespace CastlePlus2.Api.Controllers.Slowniki
         [HttpPut("{kodJednostki}")]
         public async Task<IActionResult> Update([FromRoute] string kodJednostki, [FromBody] UpdateJednostkaMiaryRequest request, CancellationToken ct)
         {
-            await _mediator.Send(new UpdateJednostkaMiaryCommand
+            var updated = await _mediator.Send(new UpdateJednostkaMiaryCommand
             {
                 KodJednostki = kodJednostki,
                 Nazwa = request.Nazwa
             }, ct);
 
+            if (!updated) return NotFound();
             return NoContent();
         }
 
         [HttpDelete("{kodJednostki}")]
         public async Task<IActionResult> Delete([FromRoute] string kodJednostki, CancellationToken ct)
         {
-            await _mediator.Send(new DeleteJednostkaMiaryCommand { KodJednostki = kodJednostki }, ct);
+            var deleted = await _mediator.Send(new DeleteJednostkaMiaryCommand(kodJednostki), ct);
+            if (!deleted) return NotFound();
             return NoContent();
         }
     }
