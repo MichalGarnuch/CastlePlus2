@@ -12,7 +12,7 @@ namespace CastlePlus2.Client.Services.Najem
         Task<SkladnikCzynszuDto?> GetByIdAsync(long idSkladnikaCzynszu, CancellationToken ct = default);
 
         Task<SkladnikCzynszuDto> CreateAsync(CreateSkladnikCzynszuRequest request, CancellationToken ct = default);
-        Task<SkladnikCzynszuDto?> UpdateAsync(long idSkladnikaCzynszu, UpdateSkladnikCzynszuRequest request, CancellationToken ct = default);
+        Task<bool> UpdateAsync(long idSkladnikaCzynszu, UpdateSkladnikCzynszuRequest request, CancellationToken ct = default);
 
         Task<bool> DeleteAsync(long idSkladnikaCzynszu, CancellationToken ct = default);
     }

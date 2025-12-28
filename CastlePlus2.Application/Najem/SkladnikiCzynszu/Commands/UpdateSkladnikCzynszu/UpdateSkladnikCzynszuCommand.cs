@@ -1,18 +1,19 @@
-﻿using CastlePlus2.Contracts.DTOs.Najem;
-using CastlePlus2.Contracts.Requests.Najem;
-using MediatR;
+﻿using MediatR;
 
 namespace CastlePlus2.Application.Najem.SkladnikiCzynszu.Commands.UpdateSkladnikCzynszu
 {
-    public class UpdateSkladnikCzynszuCommand : IRequest<SkladnikCzynszuDto?>
+    // Standard: Command płaski, Controller mapuje Request -> Command
+    public sealed class UpdateSkladnikCzynszuCommand : IRequest<bool>
     {
-        public long IdSkladnikaCzynszu { get; }
-        public UpdateSkladnikCzynszuRequest Request { get; }
+        public long IdSkladnikaCzynszu { get; set; }
 
-        public UpdateSkladnikCzynszuCommand(long idSkladnikaCzynszu, UpdateSkladnikCzynszuRequest request)
-        {
-            IdSkladnikaCzynszu = idSkladnikaCzynszu;
-            Request = request;
-        }
+        public Guid IdUmowyNajmu { get; set; }
+        public string Nazwa { get; set; } = string.Empty;
+        public string KodJednostki { get; set; } = string.Empty;
+        public decimal Stawka { get; set; }
+        public decimal? IloscBazowa { get; set; }
+        public string? KodIndeksacji { get; set; }
+        public DateOnly OdDnia { get; set; }
+        public DateOnly? DoDnia { get; set; }
     }
 }

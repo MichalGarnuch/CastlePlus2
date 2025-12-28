@@ -23,6 +23,8 @@ namespace CastlePlus2.Api.Controllers.Najem
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateSkladnikCzynszuRequest request, CancellationToken ct)
         {
+            if (request is null) return BadRequest();
+
             var command = new CreateSkladnikCzynszuCommand
             {
                 IdUmowyNajmu = request.IdUmowyNajmu,
@@ -56,8 +58,22 @@ namespace CastlePlus2.Api.Controllers.Najem
         [HttpPut("{id:long}")]
         public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdateSkladnikCzynszuRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(new UpdateSkladnikCzynszuCommand(id, request), ct);
-            return result == null ? NotFound() : Ok(result);
+            if (request is null) return BadRequest();
+
+            var ok = await _mediator.Send(new UpdateSkladnikCzynszuCommand
+            {
+                IdSkladnikaCzynszu = id,
+                IdUmowyNajmu = request.IdUmowyNajmu,
+                Nazwa = request.Nazwa,
+                KodJednostki = request.KodJednostki,
+                Stawka = request.Stawka,
+                IloscBazowa = request.IloscBazowa,
+                KodIndeksacji = request.KodIndeksacji,
+                OdDnia = request.OdDnia,
+                DoDnia = request.DoDnia
+            }, ct);
+
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:long}")]

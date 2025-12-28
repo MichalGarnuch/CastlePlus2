@@ -43,14 +43,15 @@ namespace CastlePlus2.Client.Services.Najem
             return dto!;
         }
 
-        public async Task<SkladnikCzynszuDto?> UpdateAsync(long idSkladnikaCzynszu, UpdateSkladnikCzynszuRequest request, CancellationToken ct = default)
+        public async Task<bool> UpdateAsync(long idSkladnikaCzynszu, UpdateSkladnikCzynszuRequest request, CancellationToken ct = default)
         {
             var response = await _httpClient.PutAsJsonAsync($"{BaseUrl}/{idSkladnikaCzynszu}", request, ct);
             if (response.StatusCode == HttpStatusCode.NotFound)
-                return null;
+                return false;
 
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<SkladnikCzynszuDto>(cancellationToken: ct);
+            return true;
+
         }
 
         public async Task<bool> DeleteAsync(long idSkladnikaCzynszu, CancellationToken ct = default)

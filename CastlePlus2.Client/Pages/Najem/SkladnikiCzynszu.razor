@@ -20,10 +20,10 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
-
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudText Typo="Typo.h6">Lista Składników</MudText>
             <MudSpacer />
 
             <MudTextField @bind-Value="_search"
@@ -92,6 +92,7 @@
     private List<JednostkaMiaryDto> _jednostki = new();
     private List<IndeksacjaDto> _indeksacje = new();
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ
 
     protected override async Task OnInitializedAsync()
     {
@@ -100,16 +101,23 @@
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
             _umowy = await UmowyNajmuService.GetAllAsync();
             _jednostki = await JednostkiMiaryService.GetAllAsync();
             _indeksacje = await IndeksacjeService.GetAllAsync();
             _items = await SkladnikiCzynszuService.GetAllAsync();
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania danych: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
         }
     }
 
@@ -230,7 +238,7 @@
         {
             try
             {
-                var updated = await SkladnikiCzynszuService.UpdateAsync(dto.IdSkladnikaCzynszu, new UpdateSkladnikCzynszuRequest
+                var ok = await SkladnikiCzynszuService.UpdateAsync(dto.IdSkladnikaCzynszu, new UpdateSkladnikCzynszuRequest
                 {
                     IdUmowyNajmu = dto.IdUmowyNajmu,
                     Nazwa = dto.Nazwa,
@@ -242,7 +250,7 @@
                     DoDnia = dto.DoDnia
                 });
 
-                if (updated is null)
+                if (!ok)
                 {
                     Snackbar.Add("Nie znaleziono rekordu do aktualizacji.", Severity.Warning);
                     return;
@@ -266,8 +274,7 @@
             yesText: "Usuń",
             cancelText: "Anuluj");
 
-        if (confirm != true)
-            return;
+        if (confirm != true) return;
 
         try
         {
