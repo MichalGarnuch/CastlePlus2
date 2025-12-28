@@ -1,36 +1,32 @@
-﻿using AutoMapper;
-using CastlePlus2.Application.Interfaces.Najem;
-using CastlePlus2.Contracts.DTOs.Najem;
+﻿using CastlePlus2.Application.Interfaces.Najem;
 using MediatR;
 
 namespace CastlePlus2.Application.Najem.UmowyNajmu.Commands.UpdateUmowaNajmu
 {
-    public sealed class UpdateUmowaNajmuCommandHandler : IRequestHandler<UpdateUmowaNajmuCommand, UmowaNajmuDto?>
+    public sealed class UpdateUmowaNajmuCommandHandler : IRequestHandler<UpdateUmowaNajmuCommand, bool>
     {
         private readonly IUmowaNajmuRepository _repo;
-        private readonly IMapper _mapper;
 
-        public UpdateUmowaNajmuCommandHandler(IUmowaNajmuRepository repo, IMapper mapper)
+        public UpdateUmowaNajmuCommandHandler(IUmowaNajmuRepository repo)
         {
             _repo = repo;
-            _mapper = mapper;
         }
 
-        public async Task<UmowaNajmuDto?> Handle(UpdateUmowaNajmuCommand cmd, CancellationToken ct)
+        public async Task<bool> Handle(UpdateUmowaNajmuCommand cmd, CancellationToken ct)
         {
             var entity = await _repo.GetForUpdateAsync(cmd.Id, ct);
-            if (entity is null) return null;
+            if (entity is null) return false;
 
-            entity.IdWynajmujacego = cmd.Request.IdWynajmujacego;
-            entity.IdNajemcy = cmd.Request.IdNajemcy;
-            entity.DataZawarcia = cmd.Request.DataZawarcia.Date;
-            entity.DataPoczatku = cmd.Request.DataPoczatku.Date;
-            entity.DataZakonczenia = cmd.Request.DataZakonczenia?.Date;
-            entity.KodWaluty = cmd.Request.KodWaluty;
-            entity.KodIndeksacji = cmd.Request.KodIndeksacji;
+            entity.IdWynajmujacego = cmd.IdWynajmujacego;
+            entity.IdNajemcy = cmd.IdNajemcy;
+            entity.DataZawarcia = cmd.DataZawarcia.Date;
+            entity.DataPoczatku = cmd.DataPoczatku.Date;
+            entity.DataZakonczenia = cmd.DataZakonczenia?.Date;
+            entity.KodWaluty = cmd.KodWaluty;
+            entity.KodIndeksacji = cmd.KodIndeksacji;
 
             await _repo.SaveChangesAsync(ct);
-            return _mapper.Map<UmowaNajmuDto>(entity);
+            return true;
         }
     }
 }

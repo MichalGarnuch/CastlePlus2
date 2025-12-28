@@ -40,13 +40,12 @@ namespace CastlePlus2.Client.Services.Najem
             return await resp.Content.ReadFromJsonAsync<UmowaNajmuDto>(cancellationToken: ct);
         }
 
-        public async Task<Guid> CreateAsync(CreateUmowaNajmuRequest request, CancellationToken ct = default)
+        public async Task<UmowaNajmuDto> CreateAsync(CreateUmowaNajmuRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PostAsJsonAsync(BaseUrl, request, ct);
             resp.EnsureSuccessStatusCode();
 
-            var dto = await resp.Content.ReadFromJsonAsync<UmowaNajmuDto>(cancellationToken: ct);
-            return dto!.Id;
+            return (await resp.Content.ReadFromJsonAsync<UmowaNajmuDto>(cancellationToken: ct))!;
         }
 
         public async Task<bool> UpdateAsync(Guid id, UpdateUmowaNajmuRequest request, CancellationToken ct = default)

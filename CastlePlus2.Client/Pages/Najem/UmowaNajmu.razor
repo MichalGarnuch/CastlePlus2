@@ -22,10 +22,10 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
-
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudText Typo="Typo.h6">Lista Umów</MudText>
             <MudSpacer />
 
             <MudTextField @bind-Value="_search"
@@ -89,6 +89,7 @@
 @code {
     private List<UmowaNajmuDto> _items = new();
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ
 
     private List<PodmiotDto> _podmioty = new();
     private List<WalutaDto> _waluty = new();
@@ -119,14 +120,21 @@
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
             _items = (await UmowyNajmuService.GetAllAsync()) ?? new();
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania umów: {ex.Message}", Severity.Error);
             _items = new();
+        }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
         }
     }
 
@@ -183,8 +191,8 @@
                 KodIndeksacji = model.KodIndeksacji
             };
 
-            var newId = await UmowyNajmuService.CreateAsync(request);
-            Snackbar.Add($"Dodano umowę (Id={newId}).", Severity.Success);
+            var created = await UmowyNajmuService.CreateAsync(request);
+            Snackbar.Add($"Dodano umowę (Id={created.Id}).", Severity.Success);
             await ReloadAsync();
         }
         catch (Exception ex)
@@ -260,8 +268,7 @@
             yesText: "Usuń",
             cancelText: "Anuluj");
 
-        if (confirm != true)
-            return;
+        if (confirm != true) return;
 
         try
         {

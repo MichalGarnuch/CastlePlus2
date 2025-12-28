@@ -59,12 +59,23 @@ namespace CastlePlus2.Api.Controllers.Najem
         }
 
         [HttpPut("{id:guid}")]
-        [ProducesResponseType(typeof(UmowaNajmuDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateUmowaNajmuRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(new UpdateUmowaNajmuCommand(id, request), ct);
-            return result is null ? NotFound() : Ok(result);
+            var ok = await _mediator.Send(new UpdateUmowaNajmuCommand
+            {
+                Id = id,
+                IdWynajmujacego = request.IdWynajmujacego,
+                IdNajemcy = request.IdNajemcy,
+                DataZawarcia = request.DataZawarcia,
+                DataPoczatku = request.DataPoczatku,
+                DataZakonczenia = request.DataZakonczenia,
+                KodWaluty = request.KodWaluty,
+                KodIndeksacji = request.KodIndeksacji
+            }, ct);
+
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:guid}")]
