@@ -1,55 +1,49 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
 using CastlePlus2.Application.Interfaces.Finanse;
-using CastlePlus2.Contracts.DTOs.Finanse;
 using MediatR;
 
 namespace CastlePlus2.Application.Finanse.Platnosci.Commands.UpdatePlatnosc
 {
-    public class UpdatePlatnoscCommandHandler : IRequestHandler<UpdatePlatnoscCommand, PlatnoscDto?>
+    public class UpdatePlatnoscCommandHandler : IRequestHandler<UpdatePlatnoscCommand, bool>
     {
         private readonly IPlatnoscRepository _repo;
-        private readonly IMapper _mapper;
 
-        public UpdatePlatnoscCommandHandler(IPlatnoscRepository repo, IMapper mapper)
+        public UpdatePlatnoscCommandHandler(IPlatnoscRepository repo)
         {
             _repo = repo;
-            _mapper = mapper;
         }
 
-        public async Task<PlatnoscDto?> Handle(UpdatePlatnoscCommand request, CancellationToken ct)
+        public async Task<bool> Handle(UpdatePlatnoscCommand request, CancellationToken ct)
         {
             if (request.IdPlatnosci <= 0)
-                return null;
-
-            var req = request.Request;
+                return false;
 
             var entity = await _repo.GetForUpdateAsync(request.IdPlatnosci, ct);
             if (entity is null)
-                return null;
+                return false;
 
-            if (req.IdPodmiotu <= 0)
+            if (request.IdPodmiotu <= 0)
                 throw new InvalidOperationException("IdPodmiotu musi być dodatni.");
 
-            if (string.IsNullOrWhiteSpace(req.KodWaluty))
+            if (string.IsNullOrWhiteSpace(request.KodWaluty))
                 throw new InvalidOperationException("KodWaluty jest wymagany.");
 
-            if (!await _repo.PodmiotExistsAsync(req.IdPodmiotu, ct))
+            if (!await _repo.PodmiotExistsAsync(request.IdPodmiotu, ct))
                 throw new InvalidOperationException("Nie istnieje Podmiot dla podanego IdPodmiotu.");
 
-            var kod = req.KodWaluty.Trim().ToUpperInvariant();
+            var kod = request.KodWaluty.Trim().ToUpperInvariant();
             if (!await _repo.WalutaExistsAsync(kod, ct))
                 throw new InvalidOperationException("Nie istnieje Waluta dla podanego KodWaluty.");
 
-            entity.IdPodmiotu = req.IdPodmiotu;
-            entity.DataPlatnosci = req.DataPlatnosci.Date;
+            entity.IdPodmiotu = request.IdPodmiotu;
+            entity.DataPlatnosci = request.DataPlatnosci.Date;
             entity.KodWaluty = kod;
-            entity.Kwota = req.Kwota;
+            entity.Kwota = request.Kwota;
 
             await _repo.SaveChangesAsync(ct);
-            return _mapper.Map<PlatnoscDto>(entity);
+            return true;
         }
     }
 }

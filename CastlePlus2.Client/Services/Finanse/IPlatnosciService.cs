@@ -12,7 +12,7 @@ namespace CastlePlus2.Client.Services.Finanse
         Task<PlatnoscDto?> GetByIdAsync(long id, CancellationToken ct = default);
 
         Task<PlatnoscDto> CreateAsync(CreatePlatnoscRequest request, CancellationToken ct = default);
-        Task<PlatnoscDto?> UpdateAsync(long id, UpdatePlatnoscRequest request, CancellationToken ct = default);
+        Task<bool> UpdateAsync(long id, UpdatePlatnoscRequest request, CancellationToken ct = default);
         Task<bool> DeleteAsync(long id, CancellationToken ct = default);
     }
 }

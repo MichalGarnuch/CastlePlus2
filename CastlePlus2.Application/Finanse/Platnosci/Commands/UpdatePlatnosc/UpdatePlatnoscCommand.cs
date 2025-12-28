@@ -1,18 +1,15 @@
-﻿using CastlePlus2.Contracts.DTOs.Finanse;
-using CastlePlus2.Contracts.Requests.Finanse;
+﻿using System;
 using MediatR;
 
 namespace CastlePlus2.Application.Finanse.Platnosci.Commands.UpdatePlatnosc
 {
-    public class UpdatePlatnoscCommand : IRequest<PlatnoscDto?>
+    // Standard: Command płaski, Controller mapuje Request -> Command
+    public sealed class UpdatePlatnoscCommand : IRequest<bool>
     {
-        public long IdPlatnosci { get; }
-        public UpdatePlatnoscRequest Request { get; }
-
-        public UpdatePlatnoscCommand(long idPlatnosci, UpdatePlatnoscRequest request)
-        {
-            IdPlatnosci = idPlatnosci;
-            Request = request;
-        }
+        public long IdPlatnosci { get; set; }
+        public long IdPodmiotu { get; set; }
+        public DateTime DataPlatnosci { get; set; }
+        public string KodWaluty { get; set; } = string.Empty;
+        public decimal Kwota { get; set; }
     }
 }

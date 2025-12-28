@@ -23,10 +23,10 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
-
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudText Typo="Typo.h6">Lista Płatności</MudText>
             <MudSpacer />
 
             <MudTextField @bind-Value="_search"
@@ -86,6 +86,7 @@
     private List<PodmiotDto> _podmioty = new();
     private List<WalutaDto> _waluty = new();
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ
 
     protected override async Task OnInitializedAsync()
     {
@@ -97,24 +98,34 @@
     {
         try
         {
-            _podmioty = await PodmiotyService.GetAllAsync();
-            _waluty = await WalutyService.GetAllAsync();
+            _podmioty = (await PodmiotyService.GetAllAsync()) ?? new();
+            _waluty = (await WalutyService.GetAllAsync()) ?? new();
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd ładowania słowników: {ex.Message}", Severity.Error);
+            _podmioty = new();
+            _waluty = new();
         }
     }
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
-            _items = await PlatnosciService.GetAllAsync();
+            _items = (await PlatnosciService.GetAllAsync()) ?? new();
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania płatności: {ex.Message}", Severity.Error);
+            _items = new();
+        }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
         }
     }
 
@@ -159,9 +170,8 @@
         var dialog = DialogService.Show<PlatnoscDialog>("Nowa płatność", parameters, options);
         var result = await dialog.Result;
 
-        if (result.Canceled) return;
-
-        var dto = (PlatnoscDto)result.Data;
+        if (result.Canceled || result.Data is not PlatnoscDto dto)
+            return;
 
         try
         {
@@ -175,6 +185,7 @@
 
             _items.Insert(0, created);
             Snackbar.Add("Dodano płatność.", Severity.Success);
+            await ReloadAsync();
         }
         catch (Exception ex)
         {
@@ -205,13 +216,12 @@
         var dialog = DialogService.Show<PlatnoscDialog>("Edycja płatności", parameters, options);
         var result = await dialog.Result;
 
-        if (result.Canceled) return;
-
-        var dto = (PlatnoscDto)result.Data;
+        if (result.Canceled || result.Data is not PlatnoscDto dto)
+            return;
 
         try
         {
-            var updated = await PlatnosciService.UpdateAsync(item.IdPlatnosci, new UpdatePlatnoscRequest
+            var ok = await PlatnosciService.UpdateAsync(item.IdPlatnosci, new UpdatePlatnoscRequest
             {
                 IdPodmiotu = dto.IdPodmiotu,
                 DataPlatnosci = dto.DataPlatnosci,
@@ -219,17 +229,31 @@
                 Kwota = dto.Kwota
             });
 
-            if (updated is null)
+            if (!ok)
             {
                 Snackbar.Add("Rekord nie istnieje (404).", Severity.Warning);
                 await ReloadAsync();
                 return;
             }
 
-            var idx = _items.FindIndex(x => x.IdPlatnosci == updated.IdPlatnosci);
-            if (idx >= 0) _items[idx] = updated;
+            var idx = _items.FindIndex(x => x.IdPlatnosci == item.IdPlatnosci);
+            if (idx >= 0)
+            {
+                // Aktualizujemy obiekt w pamięci, żeby uniknąć pełnego przeładowania, jeśli chcemy
+                // Ale ponieważ mamy ReloadAsync() na końcu (opcjonalnie), to i tak się odświeży.
+                // Tutaj dla spójności przypisujemy wartości z dto do listy.
+                _items[idx] = new PlatnoscDto
+                {
+                    IdPlatnosci = item.IdPlatnosci,
+                    IdPodmiotu = dto.IdPodmiotu,
+                    DataPlatnosci = dto.DataPlatnosci,
+                    KodWaluty = dto.KodWaluty,
+                    Kwota = dto.Kwota
+                };
+            }
 
             Snackbar.Add("Zapisano zmiany.", Severity.Success);
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
@@ -260,6 +284,7 @@
 
             _items.RemoveAll(x => x.IdPlatnosci == item.IdPlatnosci);
             Snackbar.Add("Usunięto.", Severity.Success);
+            await ReloadAsync();
         }
         catch (Exception ex)
         {

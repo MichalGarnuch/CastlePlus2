@@ -46,6 +46,8 @@ namespace CastlePlus2.Api.Controllers.Finanse
         [ProducesResponseType(typeof(PlatnoscDto), StatusCodes.Status201Created)]
         public async Task<IActionResult> Create([FromBody] CreatePlatnoscRequest request, CancellationToken ct)
         {
+            if (request is null) return BadRequest();
+
             var cmd = new CreatePlatnoscCommand
             {
                 IdPodmiotu = request.IdPodmiotu,
@@ -59,12 +61,22 @@ namespace CastlePlus2.Api.Controllers.Finanse
         }
 
         [HttpPut("{id:long}")]
-        [ProducesResponseType(typeof(PlatnoscDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdatePlatnoscRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(new UpdatePlatnoscCommand(id, request), ct);
-            return result is null ? NotFound() : Ok(result);
+            if (request is null) return BadRequest();
+
+            var ok = await _mediator.Send(new UpdatePlatnoscCommand
+            {
+                IdPlatnosci = id,
+                IdPodmiotu = request.IdPodmiotu,
+                DataPlatnosci = request.DataPlatnosci,
+                KodWaluty = request.KodWaluty,
+                Kwota = request.Kwota
+            }, ct);
+
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:long}")]
