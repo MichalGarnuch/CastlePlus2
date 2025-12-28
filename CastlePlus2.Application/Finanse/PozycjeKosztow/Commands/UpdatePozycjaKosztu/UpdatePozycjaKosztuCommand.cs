@@ -1,9 +1,8 @@
-﻿using CastlePlus2.Contracts.DTOs.Finanse;
-using MediatR;
+﻿using MediatR;
 
 namespace CastlePlus2.Application.Finanse.PozycjeKosztow.Commands.UpdatePozycjaKosztu
 {
-    public class UpdatePozycjaKosztuCommand : IRequest<PozycjaKosztuDto?>
+    public class UpdatePozycjaKosztuCommand : IRequest<bool>
     {
         public long IdPozycjiKosztu { get; set; }
 

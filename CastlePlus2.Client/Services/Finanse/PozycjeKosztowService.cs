@@ -37,19 +37,21 @@ namespace CastlePlus2.Client.Services.Finanse
             return (await resp.Content.ReadFromJsonAsync<PozycjaKosztuDto>(cancellationToken: ct))!;
         }
 
-        public async Task<PozycjaKosztuDto?> UpdateAsync(long id, UpdatePozycjaKosztuRequest request, CancellationToken ct = default)
+        public async Task<bool> UpdateAsync(long id, UpdatePozycjaKosztuRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PutAsJsonAsync($"{BaseUrl}/{id}", request, ct);
-            if (resp.StatusCode == HttpStatusCode.NotFound) return null;
+            if (resp.StatusCode == HttpStatusCode.NotFound) return false;
 
             resp.EnsureSuccessStatusCode();
-            return await resp.Content.ReadFromJsonAsync<PozycjaKosztuDto>(cancellationToken: ct);
+            return true;
         }
 
-        public async Task DeleteAsync(long id, CancellationToken ct = default)
+        public async Task<bool> DeleteAsync(long id, CancellationToken ct = default)
         {
             var resp = await _http.DeleteAsync($"{BaseUrl}/{id}", ct);
+            if (resp.StatusCode == HttpStatusCode.NotFound) return false;
             resp.EnsureSuccessStatusCode();
+            return true;
         }
     }
 }

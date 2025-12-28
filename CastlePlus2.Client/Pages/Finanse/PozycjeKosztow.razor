@@ -7,14 +7,27 @@
 @inject ISnackbar Snackbar
 @inject IDialogService Dialogs
 
-<MudPaper Class="glass-panel pa-4 pa-sm-6" Elevation="0" Rounded="Rounded.Xl">
-    <MudStack Spacing="3">
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Pozycje kosztów</MudText>
 
-        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-            <MudStack Spacing="0">
-                <MudText Typo="Typo.h5" Class="fw-700">Pozycje kosztów</MudText>
-                <MudText Typo="Typo.body2" Color="Color.Secondary">[finanse].[PozycjaKosztu]</MudText>
-            </MudStack>
+<MudPaper Class="pa-4">
+    <MudTable Items="_items"
+              Dense="true"
+              Hover="true"
+              Bordered="true"
+              Striped="true"
+              Filter="FilterFunc"
+              Loading="_loading">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Lista Pozycji</MudText>
+            <MudSpacer />
+
+            <MudTextField @bind-Value="_search"
+                          Placeholder="Szukaj (Id / IdFaktury / IdKategorii / Opis)..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Class="mr-4"
+                          Margin="Margin.Dense" />
 
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
@@ -22,64 +35,50 @@
                        OnClick="OpenCreateDialog">
                 Dodaj
             </MudButton>
-        </MudStack>
+        </ToolBarContent>
 
-        <MudTextField @bind-Value="_search"
-                      Placeholder="Szukaj (Id / IdFaktury / IdKategorii / Opis)..."
-                      Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.Search"
-                      Immediate="true"
-                      Margin="Margin.Dense" />
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>IdFaktury</MudTh>
+            <MudTh>IdKategorii</MudTh>
+            <MudTh>Opis</MudTh>
+            <MudTh>Netto</MudTh>
+            <MudTh>Brutto</MudTh>
+            <MudTh Class="text-right"></MudTh>
+        </HeaderContent>
 
-        <MudTable Items="_items"
-                  Dense="true"
-                  Hover="true"
-                  Bordered="true"
-                  Striped="true"
-                  Filter="FilterFunc"
-                  Elevation="0">
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.IdPozycjiKosztu</MudTd>
+            <MudTd DataLabel="IdFaktury">@context.IdFaktury</MudTd>
+            <MudTd DataLabel="IdKategorii">@context.IdKategoriiKosztu</MudTd>
+            <MudTd DataLabel="Opis">@context.Opis</MudTd>
+            <MudTd DataLabel="Netto">@context.KwotaNetto</MudTd>
+            <MudTd DataLabel="Brutto">@context.KwotaBrutto</MudTd>
 
-            <HeaderContent>
-                <MudTh>Id</MudTh>
-                <MudTh>IdFaktury</MudTh>
-                <MudTh>IdKategorii</MudTh>
-                <MudTh>Opis</MudTh>
-                <MudTh>Netto</MudTh>
-                <MudTh>Brutto</MudTh>
-                <MudTh Class="text-right"></MudTh>
-            </HeaderContent>
+            <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               OnClick="@(() => OpenEditDialog(context))" />
 
-            <RowTemplate>
-                <MudTd DataLabel="Id">@context.IdPozycjiKosztu</MudTd>
-                <MudTd DataLabel="IdFaktury">@context.IdFaktury</MudTd>
-                <MudTd DataLabel="IdKategorii">@context.IdKategoriiKosztu</MudTd>
-                <MudTd DataLabel="Opis">@context.Opis</MudTd>
-                <MudTd DataLabel="Netto">@context.KwotaNetto</MudTd>
-                <MudTd DataLabel="Brutto">@context.KwotaBrutto</MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="@(() => DeleteAsync(context))" />
+            </MudTd>
+        </RowTemplate>
 
-                <MudTd DataLabel="Akcje" Class="text-right">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                   Color="Color.Primary"
-                                   Size="Size.Small"
-                                   OnClick="@(() => OpenEditDialog(context))" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                   Color="Color.Error"
-                                   Size="Size.Small"
-                                   OnClick="@(() => DeleteAsync(context))" />
-                </MudTd>
-            </RowTemplate>
+        <NoRecordsContent>
+            <MudText Class="pa-4">Brak rekordów.</MudText>
+        </NoRecordsContent>
 
-            <NoRecordsContent>
-                <MudText>Brak rekordów.</MudText>
-            </NoRecordsContent>
-        </MudTable>
-
-    </MudStack>
+    </MudTable>
 </MudPaper>
 
 @code {
     private List<PozycjaKosztuDto> _items = new();
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ
 
     protected override async Task OnInitializedAsync()
     {
@@ -88,13 +87,21 @@
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
-            _items = (await Service.GetAllAsync()).ToList();
+            var data = await Service.GetAllAsync();
+            _items = (data ?? new List<PozycjaKosztuDto>()).ToList();
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
         }
     }
 
@@ -184,7 +191,7 @@
                 KwotaBrutto = dto.KwotaBrutto
             });
 
-            if (updated is null)
+            if (!updated)
             {
                 Snackbar.Add("Nie znaleziono rekordu (404).", Severity.Warning);
                 return;
@@ -212,7 +219,12 @@
 
         try
         {
-            await Service.DeleteAsync(item.IdPozycjiKosztu);
+            var deleted = await Service.DeleteAsync(item.IdPozycjiKosztu);
+            if (!deleted)
+            {
+                Snackbar.Add("Nie znaleziono rekordu (404).", Severity.Warning);
+                return;
+            }
             Snackbar.Add("Usunięto.", Severity.Success);
             await ReloadAsync();
         }

@@ -9,7 +9,7 @@ namespace CastlePlus2.Client.Services.Finanse
         Task<PozycjaKosztuDto?> GetByIdAsync(long id, CancellationToken ct = default);
 
         Task<PozycjaKosztuDto> CreateAsync(CreatePozycjaKosztuRequest request, CancellationToken ct = default);
-        Task<PozycjaKosztuDto?> UpdateAsync(long id, UpdatePozycjaKosztuRequest request, CancellationToken ct = default);
-        Task DeleteAsync(long id, CancellationToken ct = default);
+        Task<bool> UpdateAsync(long id, UpdatePozycjaKosztuRequest request, CancellationToken ct = default);
+        Task<bool> DeleteAsync(long id, CancellationToken ct = default);
     }
 }

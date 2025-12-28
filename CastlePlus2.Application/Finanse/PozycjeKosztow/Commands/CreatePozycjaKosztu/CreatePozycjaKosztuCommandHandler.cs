@@ -20,18 +20,6 @@ namespace CastlePlus2.Application.Finanse.PozycjeKosztow.Commands.CreatePozycjaK
 
         public async Task<PozycjaKosztuDto> Handle(CreatePozycjaKosztuCommand request, CancellationToken ct)
         {
-            if (request.IdFaktury <= 0)
-                throw new InvalidOperationException("IdFaktury musi być > 0.");
-
-            if (request.IdKategoriiKosztu <= 0)
-                throw new InvalidOperationException("IdKategoriiKosztu musi być > 0.");
-
-            if (request.Opis is not null && request.Opis.Length > 200)
-                throw new InvalidOperationException("Opis może mieć maksymalnie 200 znaków.");
-
-            if (request.KwotaNetto < 0 || request.KwotaBrutto < 0)
-                throw new InvalidOperationException("Kwoty nie mogą być ujemne.");
-
             var entity = new PozycjaKosztu
             {
                 IdFaktury = request.IdFaktury,

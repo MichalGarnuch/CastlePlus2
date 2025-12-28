@@ -1,32 +1,22 @@
-﻿using AutoMapper;
-using CastlePlus2.Application.Interfaces.Finanse;
-using CastlePlus2.Contracts.DTOs.Finanse;
+﻿using CastlePlus2.Application.Interfaces.Finanse;
 using MediatR;
 
 namespace CastlePlus2.Application.Finanse.PozycjeKosztow.Commands.UpdatePozycjaKosztu
 {
-    public class UpdatePozycjaKosztuCommandHandler : IRequestHandler<UpdatePozycjaKosztuCommand, PozycjaKosztuDto?>
+    public class UpdatePozycjaKosztuCommandHandler : IRequestHandler<UpdatePozycjaKosztuCommand, bool>
     {
         private readonly IPozycjaKosztuRepository _repo;
-        private readonly IMapper _mapper;
 
-        public UpdatePozycjaKosztuCommandHandler(IPozycjaKosztuRepository repo, IMapper mapper)
+        public UpdatePozycjaKosztuCommandHandler(IPozycjaKosztuRepository repo)
         {
             _repo = repo;
-            _mapper = mapper;
         }
 
-        public async Task<PozycjaKosztuDto?> Handle(UpdatePozycjaKosztuCommand request, CancellationToken ct)
+        public async Task<bool> Handle(UpdatePozycjaKosztuCommand request, CancellationToken ct)
         {
-            if (request.IdFaktury <= 0)
-                throw new InvalidOperationException("IdFaktury musi by > 0.");
-
-            if (request.IdKategoriiKosztu <= 0)
-                throw new InvalidOperationException("IdKategoriiKosztu musi by > 0.");
-
             var entity = await _repo.GetForUpdateAsync(request.IdPozycjiKosztu, ct);
             if (entity is null)
-                return null;
+                return false;
 
             entity.IdFaktury = request.IdFaktury;
             entity.IdKategoriiKosztu = request.IdKategoriiKosztu;
@@ -36,7 +26,7 @@ namespace CastlePlus2.Application.Finanse.PozycjeKosztow.Commands.UpdatePozycjaK
 
             await _repo.SaveChangesAsync(ct);
 
-            return _mapper.Map<PozycjaKosztuDto>(entity);
+            return true;
         }
     }
 }
