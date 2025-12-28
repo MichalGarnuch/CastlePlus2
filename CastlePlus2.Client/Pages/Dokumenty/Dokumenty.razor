@@ -15,10 +15,10 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
-
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudText Typo="Typo.h6">Lista Dokumentów</MudText>
             <MudSpacer />
 
             <MudTextField @bind-Value="_search"
@@ -51,7 +51,7 @@
             <MudTd DataLabel="Nazwa">@context.Nazwa</MudTd>
             <MudTd DataLabel="Ścieżka">@context.SciezkaPliku</MudTd>
             <MudTd DataLabel="Owner">@context.IdEncjiOwner</MudTd>
-            <MudTd DataLabel="Data">@context.DataUtworzenia</MudTd>
+            <MudTd DataLabel="Data">@context.DataUtworzenia.ToString("yyyy-MM-dd HH:mm")</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
@@ -76,6 +76,7 @@
 @code {
     private List<DokumentDto> _items = new();
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ
 
     protected override async Task OnInitializedAsync()
     {
@@ -84,13 +85,21 @@
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
-            _items = (await DokumentyService.GetAllAsync()).ToList();
+            var data = await DokumentyService.GetAllAsync();
+            _items = (data ?? new List<DokumentDto>()).ToList();
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania dokumentów: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
         }
     }
 
@@ -200,8 +209,7 @@
             yesText: "Usuń",
             cancelText: "Anuluj");
 
-        if (confirm != true)
-            return;
+        if (confirm != true) return;
 
         try
         {
