@@ -1,10 +1,9 @@
 ﻿using System;
-using CastlePlus2.Contracts.DTOs.Utrzymanie;
 using MediatR;
 
 namespace CastlePlus2.Application.Utrzymanie.ZleceniaPracy.Commands.UpdateZleceniePracy
 {
-    public class UpdateZleceniePracyCommand : IRequest<ZleceniePracyDto?>
+    public class UpdateZleceniePracyCommand : IRequest<bool>
     {
         public long IdZlecenia { get; set; }
 

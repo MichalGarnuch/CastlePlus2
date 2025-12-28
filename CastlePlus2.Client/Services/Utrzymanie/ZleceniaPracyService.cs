@@ -37,12 +37,12 @@ namespace CastlePlus2.Client.Services.Utrzymanie
             return (await resp.Content.ReadFromJsonAsync<ZleceniePracyDto>(cancellationToken: ct))!;
         }
 
-        public async Task<ZleceniePracyDto?> UpdateAsync(long id, UpdateZleceniePracyRequest request, CancellationToken ct = default)
+        public async Task<bool> UpdateAsync(long id, UpdateZleceniePracyRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PutAsJsonAsync($"{BaseUrl}/{id}", request, ct);
             if (resp.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                return null;
+                return false;
             }
 
             if (!resp.IsSuccessStatusCode)
@@ -52,18 +52,24 @@ namespace CastlePlus2.Client.Services.Utrzymanie
                 resp.EnsureSuccessStatusCode();
             }
 
-            return await resp.Content.ReadFromJsonAsync<ZleceniePracyDto>(cancellationToken: ct);
+            return true;
         }
 
-        public async Task DeleteAsync(long id, CancellationToken ct = default)
+        public async Task<bool> DeleteAsync(long id, CancellationToken ct = default)
         {
             var resp = await _http.DeleteAsync($"{BaseUrl}/{id}", ct);
+
+            if (resp.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return false;
+            }
             if (!resp.IsSuccessStatusCode)
             {
                 var body = await resp.Content.ReadAsStringAsync(ct);
                 _logger.LogError("Delete ZleceniePracy failed: {Status} {Body}", resp.StatusCode, body);
                 resp.EnsureSuccessStatusCode();
             }
+            return true;
         }
     }
 }

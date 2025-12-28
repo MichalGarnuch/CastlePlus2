@@ -20,28 +20,6 @@ namespace CastlePlus2.Application.Utrzymanie.ZleceniaPracy.Commands.CreateZlecen
 
         public async Task<ZleceniePracyDto> Handle(CreateZleceniePracyCommand request, CancellationToken cancellationToken)
         {
-            // Minimalna walidacja „kodowa” (szczegółową walidację można później przenieść do FluentValidation).
-            if (string.IsNullOrWhiteSpace(request.Tytul))
-                throw new InvalidOperationException("Tytuł zlecenia jest wymagany.");
-
-            if (request.IdEncjiGospodarza == Guid.Empty)
-                throw new InvalidOperationException("Id encji gospodarza jest wymagane.");
-
-            if (request.Tytul.Length > 200)
-                throw new InvalidOperationException("Tytuł zlecenia nie może przekraczać 200 znaków.");
-
-            if (!string.IsNullOrWhiteSpace(request.Opis) && request.Opis.Length > 1000)
-                throw new InvalidOperationException("Opis nie może przekraczać 1000 znaków.");
-
-            if (string.IsNullOrWhiteSpace(request.Status))
-                throw new InvalidOperationException("Status jest wymagany.");
-
-            if (request.Status.Length > 20)
-                throw new InvalidOperationException("Status nie może przekraczać 20 znaków.");
-
-            if (request.DataZamkniecia is not null && request.DataZamkniecia.Value.Year < 1900)
-                throw new InvalidOperationException("Data zamknięcia jest nieprawidłowa.");
-
             // Encja prosta (nie TPT). PK to IDENTITY bigint – nie ustawiamy IdZlecenia.
             var entity = new ZleceniePracy
             {

@@ -12,7 +12,7 @@
         <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
             <MudStack Spacing="0">
                 <MudText Typo="Typo.h5" Class="fw-700">Zlecenia pracy</MudText>
-                <MudText Typo="Typo.body2" Color="Color.Secondary">[utrzymanie].[ZleceniePracy]</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary"></MudText>
             </MudStack>
 
             <MudStack Row="true" Spacing="1">
@@ -190,7 +190,7 @@
                 DataZamkniecia = dto.DataZamkniecia
             });
 
-            if (updated is null)
+            if (!updated)
             {
                 Snackbar.Add("Nie znaleziono zlecenia do edycji.", Severity.Warning);
                 return;
@@ -217,7 +217,12 @@
 
         try
         {
-            await Service.DeleteAsync(item.IdZlecenia);
+            var deleted = await Service.DeleteAsync(item.IdZlecenia);
+            if (!deleted)
+            {
+                Snackbar.Add("Nie znaleziono zlecenia do usunięcia.", Severity.Warning);
+                return;
+            }
             Snackbar.Add("Usunięto.", Severity.Success);
             await Reload();
         }

@@ -69,11 +69,11 @@ namespace CastlePlus2.Api.Controllers.Utrzymanie
         }
 
         [HttpPut("{id:long}")]
-        [ProducesResponseType(typeof(ZleceniePracyDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdateZleceniePracyRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(new UpdateZleceniePracyCommand
+            var ok = await _mediator.Send(new UpdateZleceniePracyCommand
             {
                 IdZlecenia = id,
                 IdEncjiGospodarza = request.IdEncjiGospodarza,
@@ -83,15 +83,16 @@ namespace CastlePlus2.Api.Controllers.Utrzymanie
                 DataZamkniecia = request.DataZamkniecia
             }, ct);
 
-            return result is null ? NotFound() : Ok(result);
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:long}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken ct)
         {
-            await _mediator.Send(new DeleteZleceniePracyCommand { IdZlecenia = id }, ct);
-            return NoContent();
+            var ok = await _mediator.Send(new DeleteZleceniePracyCommand { IdZlecenia = id }, ct);
+            return ok ? NoContent() : NotFound();
         }
     }
 }
