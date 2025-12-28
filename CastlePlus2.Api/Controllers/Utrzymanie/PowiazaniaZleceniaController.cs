@@ -60,15 +60,22 @@ namespace CastlePlus2.Api.Controllers.Utrzymanie
         }
 
         [HttpPut("{id:long}")]
-        [ProducesResponseType(typeof(PowiazanieZleceniaDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdatePowiazanieZleceniaRequest request, CancellationToken ct)
         {
             if (request is null) return BadRequest();
 
-            var result = await _mediator.Send(new UpdatePowiazanieZleceniaCommand(id, request), ct);
-            return result is null ? NotFound() : Ok(result);
+            var command = new UpdatePowiazanieZleceniaCommand
+            {
+                IdPowiazania = id,
+                IdZlecenia = request.IdZlecenia,
+                IdEncji = request.IdEncji
+            };
+
+            var ok = await _mediator.Send(command, ct);
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:long}")]

@@ -8,7 +8,7 @@ namespace CastlePlus2.Client.Services.Utrzymanie
         Task<List<PowiazanieZleceniaDto>> GetAllAsync(CancellationToken ct = default);
         Task<PowiazanieZleceniaDto?> GetByIdAsync(long idPowiazania, CancellationToken ct = default);
         Task<PowiazanieZleceniaDto> CreateAsync(CreatePowiazanieZleceniaRequest request, CancellationToken ct = default);
-        Task<PowiazanieZleceniaDto?> UpdateAsync(long idPowiazania, UpdatePowiazanieZleceniaRequest request, CancellationToken ct = default);
+        Task<bool> UpdateAsync(long idPowiazania, UpdatePowiazanieZleceniaRequest request, CancellationToken ct = default);
         Task<bool> DeleteAsync(long idPowiazania, CancellationToken ct = default);
     }
 }

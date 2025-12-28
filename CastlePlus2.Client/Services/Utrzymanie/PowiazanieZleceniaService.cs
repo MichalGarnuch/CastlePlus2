@@ -68,16 +68,16 @@ namespace CastlePlus2.Client.Services.Utrzymanie
             }
         }
 
-        public async Task<PowiazanieZleceniaDto?> UpdateAsync(long idPowiazania, UpdatePowiazanieZleceniaRequest request, CancellationToken ct = default)
+        public async Task<bool> UpdateAsync(long idPowiazania, UpdatePowiazanieZleceniaRequest request, CancellationToken ct = default)
         {
-            if (idPowiazania <= 0) return null;
+            if (idPowiazania <= 0) return false;
 
             try
             {
                 var resp = await _http.PutAsJsonAsync($"{BasePath}/{idPowiazania}", request, ct);
-                if (resp.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
+                if (resp.StatusCode == System.Net.HttpStatusCode.NotFound) return false;
                 resp.EnsureSuccessStatusCode();
-                return await resp.Content.ReadFromJsonAsync<PowiazanieZleceniaDto>(cancellationToken: ct);
+                return true;
             }
             catch (Exception ex)
             {
