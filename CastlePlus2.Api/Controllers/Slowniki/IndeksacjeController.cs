@@ -3,6 +3,7 @@ using CastlePlus2.Application.Slowniki.Indeksacje.Commands.DeleteIndeksacja;
 using CastlePlus2.Application.Slowniki.Indeksacje.Commands.UpdateIndeksacja;
 using CastlePlus2.Application.Slowniki.Indeksacje.Queries.GetAllIndeksacje;
 using CastlePlus2.Application.Slowniki.Indeksacje.Queries.GetIndeksacjaByKod;
+using CastlePlus2.Contracts.Requests.Slownik;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,17 +35,32 @@ namespace CastlePlus2.Api.Controllers.Slowniki
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateIndeksacjaCommand command, CancellationToken ct)
+        public async Task<IActionResult> Create([FromBody] CreateIndeksacjaRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(command, ct);
+            if (request is null) return BadRequest();
+
+            var result = await _mediator.Send(new CreateIndeksacjaCommand
+            {
+                KodIndeksacji = request.KodIndeksacji,
+                Nazwa = request.Nazwa,
+                AdresZrodlaURL = request.AdresZrodlaURL
+            }, ct);
+
             return CreatedAtAction(nameof(GetByKod), new { kod = result.KodIndeksacji }, result);
         }
 
         [HttpPut("{kod}")]
-        public async Task<IActionResult> Update([FromRoute] string kod, [FromBody] UpdateIndeksacjaCommand command, CancellationToken ct)
+        public async Task<IActionResult> Update([FromRoute] string kod, [FromBody] UpdateIndeksacjaRequest request, CancellationToken ct)
         {
-            command.KodIndeksacji = kod;
-            var ok = await _mediator.Send(command, ct);
+            if (request is null) return BadRequest();
+
+            var ok = await _mediator.Send(new UpdateIndeksacjaCommand
+            {
+                KodIndeksacji = kod,
+                Nazwa = request.Nazwa,
+                AdresZrodlaURL = request.AdresZrodlaURL
+            }, ct);
+
             return ok ? NoContent() : NotFound();
         }
 

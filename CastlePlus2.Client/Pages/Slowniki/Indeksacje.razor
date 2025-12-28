@@ -1,112 +1,107 @@
 ﻿@page "/slowniki/indeksacje"
-@using CastlePlus2.Client.Components.Crud
-@using CastlePlus2.Client.Services.Slowniki
+@using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Slowniki
+@using CastlePlus2.Contracts.Requests.Slownik
+@using CastlePlus2.Client.Services.Slowniki
 @inject IIndeksacjeService Service
-@inject ISnackbar Snackbar
 @inject IDialogService Dialogs
+@inject ISnackbar Snackbar
 
-<CrudPageShell Title="Indeksacje"
-               Subtitle=
-               IsLoading="_loading">
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Indeksacje</MudText>
 
-    <Actions>
-        <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="Reload" />
-        <MudButton Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Add"
-                   OnClick="Add">
-            Dodaj
-        </MudButton>
-    </Actions>
+<MudPaper Class="pa-4">
+    <MudTable Items="_items"
+              Dense="true"
+              Hover="true"
+              Bordered="true"
+              Striped="true"
+              Filter="FilterFunc"
+              Loading="_loading">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Lista Indeksacji</MudText>
+            <MudSpacer />
 
-    <ChildContent>
-        <CrudTableCard Title="Lista indeksacji">
-
-            <MudTextField @bind-Value="_q"
-                          Placeholder="Szukaj (kod/nazwa/url)…"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
+            <MudTextField @bind-Value="_search"
+                          Placeholder="Szukaj..."
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Search"
                           Immediate="true"
-                          Class="mb-3" />
+                          Class="mr-4"
+                          Margin="Margin.Dense" />
 
-            <MudTable Items="_filtered"
-                      Dense="true"
-                      Hover="true"
-                      Bordered="true"
-                      Breakpoint="Breakpoint.Sm">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="CreateAsync">
+                Dodaj
+            </MudButton>
+        </ToolBarContent>
 
-                <HeaderContent>
-                    <MudTh>Kod</MudTh>
-                    <MudTh>Nazwa</MudTh>
-                    <MudTh>Źródło URL</MudTh>
-                    <MudTh Align="Align.Right">Akcje</MudTh>
-                </HeaderContent>
+        <HeaderContent>
+            <MudTh>Kod</MudTh>
+            <MudTh>Nazwa</MudTh>
+            <MudTh>Źródło URL</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
 
-                <RowTemplate>
-                    <MudTd DataLabel="Kod">
-                        <MudChip T="string"
-                                 Variant="Variant.Outlined"
-                                 Color="Color.Primary"
-                                 Size="Size.Small">
-                            @context.KodIndeksacji
-                        </MudChip>
-                    </MudTd>
+        <RowTemplate>
+            <MudTd DataLabel="Kod">
+                <MudChip T="string"
+                         Variant="Variant.Outlined"
+                         Color="Color.Primary"
+                         Size="Size.Small">
+                    @context.KodIndeksacji
+                </MudChip>
+            </MudTd>
+            <MudTd DataLabel="Nazwa">@context.Nazwa</MudTd>
+            <MudTd DataLabel="Źródło URL">
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    @(string.IsNullOrWhiteSpace(context.AdresZrodlaURL) ? "-" : context.AdresZrodlaURL)
+                </MudText>
+            </MudTd>
 
-                    <MudTd DataLabel="Nazwa">@context.Nazwa</MudTd>
+            <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               OnClick="@(() => EditAsync(context))" />
 
-                    <MudTd DataLabel="Źródło URL">
-                        <MudText Typo="Typo.body2" Color="Color.Secondary">
-                            @(string.IsNullOrWhiteSpace(context.AdresZrodlaURL) ? "-" : context.AdresZrodlaURL)
-                        </MudText>
-                    </MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="@(() => DeleteAsync(context))" />
+            </MudTd>
+        </RowTemplate>
 
-                    <MudTd DataLabel="Akcje" Align="Align.Right">
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                       OnClick="@(() => Edit(context))" />
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                       Color="Color.Error"
-                                       OnClick="@(() => Delete(context))" />
-                    </MudTd>
-                </RowTemplate>
+        <NoRecordsContent>
+            <MudText Class="pa-4">Brak rekordów.</MudText>
+        </NoRecordsContent>
 
-            </MudTable>
-        </CrudTableCard>
-    </ChildContent>
-
-</CrudPageShell>
+    </MudTable>
+</MudPaper>
 
 @code {
-    private bool _loading = true;
-    private string _q = string.Empty;
     private List<IndeksacjaDto> _items = new();
-
-    private IEnumerable<IndeksacjaDto> _filtered =>
-        string.IsNullOrWhiteSpace(_q)
-            ? _items
-            : _items.Where(x =>
-                (x.KodIndeksacji?.Contains(_q, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (x.Nazwa?.Contains(_q, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (x.AdresZrodlaURL?.Contains(_q, StringComparison.OrdinalIgnoreCase) ?? false));
+    private string _search = string.Empty;
+    private bool _loading = true; // Standardowa obsługa loadingu
 
     protected override async Task OnInitializedAsync()
     {
-        await Reload();
+        await ReloadAsync();
     }
 
-    private async Task Reload()
+    private async Task ReloadAsync()
     {
         _loading = true;
-
         try
         {
-            _items = await Service.GetAllAsync() ?? new();
+            var result = await Service.GetAllAsync();
+            _items = (result ?? new List<IndeksacjaDto>()).ToList();
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Błąd pobierania: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Błąd pobierania danych: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -114,88 +109,74 @@
         }
     }
 
-    private async Task Add()
+    private bool FilterFunc(IndeksacjaDto item)
     {
-        var dlg = await Dialogs.ShowAsync<IndeksacjaDialog>(
-            "Dodaj indeksację",
-            options: new DialogOptions
-            {
-                CloseButton = true,
-                MaxWidth = MaxWidth.Small,
-                FullWidth = true
-            });
+        if (string.IsNullOrWhiteSpace(_search))
+            return true;
 
-        var res = await dlg.Result;
-        if (res is null || res.Canceled) return;
+        var s = _search.Trim();
 
-        Snackbar.Add("Dodano.", Severity.Success);
-        await Reload();
+        return (item.KodIndeksacji?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || (item.Nazwa?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || (item.AdresZrodlaURL?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false);
     }
 
-    private async Task Edit(IndeksacjaDto item)
+    private async Task CreateAsync()
     {
-        if (string.IsNullOrWhiteSpace(item.KodIndeksacji))
+        var parameters = new DialogParameters
         {
-            Snackbar.Add("Brak kodu indeksacji – nie można edytować.", Severity.Error);
-            return;
-        }
+            ["KodIndeksacji"] = string.Empty,
+            ["Nazwa"] = string.Empty,
+            ["AdresZrodlaURL"] = string.Empty
+        };
 
-        var p = new DialogParameters
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await Dialogs.ShowAsync<IndeksacjaDialog>("Dodaj indeksację", parameters, options);
+        var result = await dialog.Result;
+
+        // Jeśli okno dialogowe zwróciło true (sukces zapisu), przeładuj listę
+        if (!result.Canceled && result.Data is true)
+        {
+            Snackbar.Add("Dodano indeksację.", Severity.Success);
+            await ReloadAsync();
+        }
+    }
+
+    private async Task EditAsync(IndeksacjaDto item)
+    {
+        var parameters = new DialogParameters
         {
             ["KodIndeksacji"] = item.KodIndeksacji,
-            ["Nazwa"] = item.Nazwa ?? string.Empty,
+            ["Nazwa"] = item.Nazwa,
             ["AdresZrodlaURL"] = item.AdresZrodlaURL
         };
 
-        var dlg = await Dialogs.ShowAsync<IndeksacjaDialog>(
-            "Edytuj indeksację",
-            p,
-            new DialogOptions
-            {
-                CloseButton = true,
-                MaxWidth = MaxWidth.Small,
-                FullWidth = true
-            });
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await Dialogs.ShowAsync<IndeksacjaDialog>("Edytuj indeksację", parameters, options);
+        var result = await dialog.Result;
 
-        var res = await dlg.Result;
-        if (res is null || res.Canceled) return;
-
-        Snackbar.Add("Zapisano zmiany.", Severity.Success);
-        await Reload();
+        if (!result.Canceled && result.Data is true)
+        {
+            Snackbar.Add("Zapisano zmiany.", Severity.Success);
+            await ReloadAsync();
+        }
     }
 
-    private async Task Delete(IndeksacjaDto item)
+    private async Task DeleteAsync(IndeksacjaDto item)
     {
-        if (string.IsNullOrWhiteSpace(item.KodIndeksacji))
-        {
-            Snackbar.Add("Brak kodu indeksacji – nie można usunąć.", Severity.Error);
-            return;
-        }
+        bool? confirm = await Dialogs.ShowMessageBox(
+            "Usuń",
+            $"Czy na pewno usunąć indeksację '{item.KodIndeksacji}'?",
+            yesText: "Usuń",
+            cancelText: "Anuluj");
 
-        var p = new DialogParameters
-        {
-            ["Title"] = "Usuń indeksację",
-            ["Message"] = $"Usunąć '{item.KodIndeksacji}'?"
-        };
-
-        var dlg = await Dialogs.ShowAsync<ConfirmDeleteDialog>(
-            "",
-            p,
-            new DialogOptions
-            {
-                CloseButton = true,
-                MaxWidth = MaxWidth.ExtraSmall,
-                FullWidth = true
-            });
-
-        var res = await dlg.Result;
-        if (res is null || res.Canceled) return;
+        if (confirm != true) return;
 
         try
         {
             await Service.DeleteAsync(item.KodIndeksacji);
             Snackbar.Add("Usunięto.", Severity.Success);
-            await Reload();
+            await ReloadAsync();
         }
         catch (Exception ex)
         {
