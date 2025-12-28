@@ -43,6 +43,8 @@ namespace CastlePlus2.Api.Controllers.Finanse
         [ProducesResponseType(typeof(FakturaDto), StatusCodes.Status201Created)]
         public async Task<IActionResult> Create([FromBody] CreateFakturaRequest request, CancellationToken ct)
         {
+            if (request is null) return BadRequest();
+
             var command = new CreateFakturaCommand
             {
                 NumerFaktury = request.NumerFaktury,
@@ -59,12 +61,25 @@ namespace CastlePlus2.Api.Controllers.Finanse
         }
 
         [HttpPut("{id:long}")]
-        [ProducesResponseType(typeof(FakturaDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdateFakturaRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(new UpdateFakturaCommand(id, request), ct);
-            return result is null ? NotFound() : Ok(result);
+            if (request is null) return BadRequest();
+
+            var ok = await _mediator.Send(new UpdateFakturaCommand
+            {
+                IdFaktury = id,
+                NumerFaktury = request.NumerFaktury,
+                IdPodmiotu = request.IdPodmiotu,
+                DataWystawienia = request.DataWystawienia,
+                DataSprzedazy = request.DataSprzedazy,
+                KodWaluty = request.KodWaluty,
+                KwotaNetto = request.KwotaNetto,
+                KwotaBrutto = request.KwotaBrutto
+            }, ct);
+
+            return ok ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:long}")]

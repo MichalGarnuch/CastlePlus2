@@ -1,64 +1,55 @@
-﻿using AutoMapper;
-using CastlePlus2.Application.Interfaces.Finanse;
-using CastlePlus2.Contracts.DTOs.Finanse;
+﻿using CastlePlus2.Application.Interfaces.Finanse;
 using MediatR;
 
 namespace CastlePlus2.Application.Finanse.Faktury.Commands.UpdateFaktura
 {
-    public class UpdateFakturaCommandHandler : IRequestHandler<UpdateFakturaCommand, FakturaDto?>
+    public class UpdateFakturaCommandHandler : IRequestHandler<UpdateFakturaCommand, bool>
     {
         private readonly IFakturaRepository _repo;
-        private readonly IMapper _mapper;
 
-        public UpdateFakturaCommandHandler(IFakturaRepository repo, IMapper mapper)
+        public UpdateFakturaCommandHandler(IFakturaRepository repo)
         {
             _repo = repo;
-            _mapper = mapper;
         }
 
-        public async Task<FakturaDto?> Handle(UpdateFakturaCommand cmd, CancellationToken ct)
+        public async Task<bool> Handle(UpdateFakturaCommand cmd, CancellationToken ct)
         {
-            if (cmd.IdFaktury <= 0)
-                return null;
+            cmd.NumerFaktury = (cmd.NumerFaktury ?? string.Empty).Trim();
+            cmd.KodWaluty = (cmd.KodWaluty ?? string.Empty).Trim().ToUpperInvariant();
 
-            var req = cmd.Request ?? throw new InvalidOperationException("Brak request body.");
-
-            req.NumerFaktury = (req.NumerFaktury ?? string.Empty).Trim();
-            req.KodWaluty = (req.KodWaluty ?? string.Empty).Trim().ToUpperInvariant();
-
-            if (req.NumerFaktury.Length == 0)
+            if (cmd.NumerFaktury.Length == 0)
                 throw new InvalidOperationException("NumerFaktury jest wymagany.");
 
-            if (req.NumerFaktury.Length > 60)
+            if (cmd.NumerFaktury.Length > 60)
                 throw new InvalidOperationException("NumerFaktury max 60 znaków.");
 
-            if (req.IdPodmiotu <= 0)
+            if (cmd.IdPodmiotu <= 0)
                 throw new InvalidOperationException("IdPodmiotu musi być > 0.");
 
-            if (req.DataWystawienia == default)
+            if (cmd.DataWystawienia == default)
                 throw new InvalidOperationException("DataWystawienia jest wymagana.");
 
-            if (req.KodWaluty.Length != 3)
+            if (cmd.KodWaluty.Length != 3)
                 throw new InvalidOperationException("KodWaluty musi mieć dokładnie 3 znaki.");
 
             // UNIQUE: NumerFaktury
-            if (await _repo.ExistsByNumerAsync(req.NumerFaktury, cmd.IdFaktury, ct))
+            if (await _repo.ExistsByNumerAsync(cmd.NumerFaktury, cmd.IdFaktury, ct))
                 throw new InvalidOperationException("Istnieje już faktura o podanym NumerFaktury.");
 
             var entity = await _repo.GetForUpdateAsync(cmd.IdFaktury, ct);
             if (entity is null)
-                return null;
+                return false;
 
-            entity.NumerFaktury = req.NumerFaktury;
-            entity.IdPodmiotu = req.IdPodmiotu;
-            entity.DataWystawienia = req.DataWystawienia.Date;
-            entity.DataSprzedazy = req.DataSprzedazy?.Date;
-            entity.KodWaluty = req.KodWaluty;
-            entity.KwotaNetto = req.KwotaNetto;
-            entity.KwotaBrutto = req.KwotaBrutto;
+            entity.NumerFaktury = cmd.NumerFaktury;
+            entity.IdPodmiotu = cmd.IdPodmiotu;
+            entity.DataWystawienia = cmd.DataWystawienia.Date;
+            entity.DataSprzedazy = cmd.DataSprzedazy?.Date;
+            entity.KodWaluty = cmd.KodWaluty;
+            entity.KwotaNetto = cmd.KwotaNetto;
+            entity.KwotaBrutto = cmd.KwotaBrutto;
 
             await _repo.SaveChangesAsync(ct);
-            return _mapper.Map<FakturaDto>(entity);
+            return true;
         }
     }
 }

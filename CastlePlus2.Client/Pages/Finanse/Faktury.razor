@@ -23,9 +23,10 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc">
+              Filter="FilterFunc"
+              Loading="_loading">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Lista</MudText>
+            <MudText Typo="Typo.h6">Lista Faktur</MudText>
             <MudSpacer />
 
             <MudTextField @bind-Value="_search"
@@ -91,6 +92,7 @@
     private List<WalutaDto> _waluty = new();
 
     private string _search = string.Empty;
+    private bool _loading = true; // 2. DODANO ZMIENNĄ
 
     protected override async Task OnInitializedAsync()
     {
@@ -99,15 +101,22 @@
 
     private async Task ReloadAsync()
     {
+        // 3. OBSŁUGA STANU ŁADOWANIA
+        _loading = true;
         try
         {
             _podmioty = await PodmiotyService.GetAllAsync();
             _waluty = await WalutyService.GetAllAsync();
             _items = await FakturyService.GetAllAsync();
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd ładowania danych: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false; // Zawsze wyłącz na końcu
         }
     }
 
@@ -164,6 +173,7 @@
 
             _items.Add(created);
             Snackbar.Add("Dodano fakturę.", Severity.Success);
+            await ReloadAsync();
         }
         catch (Exception ex)
         {
@@ -202,7 +212,7 @@
 
         try
         {
-            var updated = await FakturyService.UpdateAsync(dto.IdFaktury, new UpdateFakturaRequest
+            var success = await FakturyService.UpdateAsync(dto.IdFaktury, new UpdateFakturaRequest
             {
                 NumerFaktury = dto.NumerFaktury,
                 IdPodmiotu = dto.IdPodmiotu,
@@ -213,15 +223,13 @@
                 KwotaBrutto = dto.KwotaBrutto
             });
 
-            if (updated is null)
+            if (!success)
             {
                 Snackbar.Add("Nie znaleziono faktury (404).", Severity.Warning);
                 return;
             }
 
-            var idx = _items.FindIndex(x => x.IdFaktury == updated.IdFaktury);
-            if (idx >= 0) _items[idx] = updated;
-
+            await ReloadAsync();
             Snackbar.Add("Zapisano zmiany.", Severity.Success);
         }
         catch (Exception ex)
@@ -252,6 +260,7 @@
 
             _items.RemoveAll(x => x.IdFaktury == item.IdFaktury);
             Snackbar.Add("Usunięto.", Severity.Success);
+            await ReloadAsync();
         }
         catch (Exception ex)
         {

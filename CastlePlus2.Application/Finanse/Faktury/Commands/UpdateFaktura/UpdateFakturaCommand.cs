@@ -1,18 +1,18 @@
-﻿using CastlePlus2.Contracts.DTOs.Finanse;
-using CastlePlus2.Contracts.Requests.Finanse;
+﻿using System;
 using MediatR;
 
 namespace CastlePlus2.Application.Finanse.Faktury.Commands.UpdateFaktura
 {
-    public class UpdateFakturaCommand : IRequest<FakturaDto?>
+    // Standard: Command płaski, Controller mapuje Request -> Command
+    public sealed class UpdateFakturaCommand : IRequest<bool>
     {
-        public long IdFaktury { get; }
-        public UpdateFakturaRequest Request { get; }
-
-        public UpdateFakturaCommand(long idFaktury, UpdateFakturaRequest request)
-        {
-            IdFaktury = idFaktury;
-            Request = request;
-        }
+        public long IdFaktury { get; set; }
+        public string NumerFaktury { get; set; } = string.Empty;
+        public long IdPodmiotu { get; set; }
+        public DateTime DataWystawienia { get; set; }
+        public DateTime? DataSprzedazy { get; set; }
+        public string KodWaluty { get; set; } = string.Empty;
+        public decimal? KwotaNetto { get; set; }
+        public decimal? KwotaBrutto { get; set; }
     }
 }

@@ -46,13 +46,13 @@ namespace CastlePlus2.Client.Services.Finanse
             return dto ?? throw new InvalidOperationException("API zwróciło pustą odpowiedź (FakturaDto = null).");
         }
 
-        public async Task<FakturaDto?> UpdateAsync(long id, UpdateFakturaRequest request, CancellationToken ct = default)
+        public async Task<bool> UpdateAsync(long id, UpdateFakturaRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PutAsJsonAsync($"{BaseUrl}/{id}", request, ct);
-            if (resp.StatusCode == HttpStatusCode.NotFound) return null;
+            if (resp.StatusCode == HttpStatusCode.NotFound) return false;
 
             resp.EnsureSuccessStatusCode();
-            return await resp.Content.ReadFromJsonAsync<FakturaDto>(cancellationToken: ct);
+            return true;
         }
 
         public async Task<bool> DeleteAsync(long id, CancellationToken ct = default)
