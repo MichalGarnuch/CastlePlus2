@@ -3,7 +3,7 @@ using CastlePlus2.Application.Interfaces.Slowniki;
 
 namespace CastlePlus2.Application.Slowniki.Waluty.Commands.DeleteWaluta
 {
-    public class DeleteWalutaCommandHandler : IRequestHandler<DeleteWalutaCommand>
+    public class DeleteWalutaCommandHandler : IRequestHandler<DeleteWalutaCommand, bool>
     {
         private readonly IWalutaRepository _repo;
 
@@ -12,16 +12,17 @@ namespace CastlePlus2.Application.Slowniki.Waluty.Commands.DeleteWaluta
             _repo = repo;
         }
 
-        public async Task Handle(DeleteWalutaCommand request, CancellationToken ct)
+        public async Task<bool> Handle(DeleteWalutaCommand request, CancellationToken ct)
         {
             var kod = (request.KodWaluty ?? string.Empty).Trim().ToUpperInvariant();
 
             var entity = await _repo.GetByKodAsync(kod, ct);
             if (entity is null)
-                return;
+                return false;
 
             _repo.Remove(entity);
             await _repo.SaveChangesAsync(ct);
+            return true;
         }
     }
 }

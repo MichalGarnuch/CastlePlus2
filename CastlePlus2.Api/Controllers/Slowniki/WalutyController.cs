@@ -49,20 +49,20 @@ namespace CastlePlus2.Api.Controllers.Slowniki
         [HttpPut("{kodWaluty}")]
         public async Task<IActionResult> Update([FromRoute] string kodWaluty, [FromBody] UpdateWalutaRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(new UpdateWalutaCommand
+            var updated = await _mediator.Send(new UpdateWalutaCommand
             {
                 KodWaluty = kodWaluty,
                 Nazwa = request.Nazwa
             }, ct);
 
-            return result == null ? NotFound() : Ok(result);
+            return updated ? NoContent() : NotFound();
         }
 
         [HttpDelete("{kodWaluty}")]
         public async Task<IActionResult> Delete([FromRoute] string kodWaluty, CancellationToken ct)
         {
-            await _mediator.Send(new DeleteWalutaCommand { KodWaluty = kodWaluty }, ct);
-            return NoContent();
+            var deleted = await _mediator.Send(new DeleteWalutaCommand { KodWaluty = kodWaluty }, ct);
+            return deleted ? NoContent() : NotFound();
         }
     }
 }
