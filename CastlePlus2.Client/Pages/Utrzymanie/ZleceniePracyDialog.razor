@@ -5,54 +5,70 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(IsEdit ? "Edycja zlecenia pracy" : "Nowe zlecenie pracy")
+                @(_isEdit ? "Edycja zlecenia pracy" : "Nowe zlecenie pracy")
             </MudText>
 
-            @if (IsEdit)
-            {
-                <MudTextField Value="@Model.IdZlecenia.ToString()"
-                              Label="IdZlecenia"
-                              Disabled="true"
-                              Margin="Margin.Dense" />
-            }
+            <MudGrid Spacing="2">
+                @if (_isEdit)
+                {
+                    <MudItem xs="12">
+                        <MudTextField Value="@Model.IdZlecenia.ToString()"
+                                      Label="IdZlecenia"
+                                      Disabled="true"
+                                      Margin="Margin.Dense" />
+                    </MudItem>
+                }
 
-            <MudTextField @bind-Value="_idEncjiText"
-                          Label="IdEncjiGospodarza (GUID)"
-                          Required="true"
-                          RequiredError="IdEncjiGospodarza jest wymagane"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_idEncjiText"
+                                  Label="IdEncjiGospodarza (GUID)"
+                                  Required="true"
+                                  RequiredError="IdEncjiGospodarza jest wymagane"
+                                  Margin="Margin.Dense" />
+                </MudItem>
 
-            <MudTextField @bind-Value="Model.Tytul"
-                          Label="Tytuł"
-                          Required="true"
-                          RequiredError="Tytuł jest wymagany"
-                          MaxLength="200"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Model.Tytul"
+                                  Label="Tytuł"
+                                  Required="true"
+                                  RequiredError="Tytuł jest wymagany"
+                                  MaxLength="200"
+                                  Margin="Margin.Dense" />
+                </MudItem>
 
-            <MudTextField @bind-Value="Model.Status"
-                          Label="Status"
-                          Required="true"
-                          RequiredError="Status jest wymagany"
-                          MaxLength="20"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Model.Status"
+                                  Label="Status"
+                                  Required="true"
+                                  RequiredError="Status jest wymagany"
+                                  MaxLength="20"
+                                  Margin="Margin.Dense" />
+                </MudItem>
 
-            <MudTextField @bind-Value="Model.Opis"
-                          Label="Opis (opcjonalnie)"
-                          MaxLength="1000"
-                          Lines="3"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Data zamknięcia (opcjonalnie)"
+                                   Date="_dataZamkniecia"
+                                   DateChanged="OnDataZamknieciaChanged"
+                                   Margin="Margin.Dense" />
+                </MudItem>
 
-            <MudDatePicker Label="Data zamknięcia (opcjonalnie)"
-                           Date="_dataZamkniecia"
-                           DateChanged="OnDataZamknieciaChanged"
-                           Margin="Margin.Dense" />
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Model.Opis"
+                                  Label="Opis (opcjonalnie)"
+                                  MaxLength="1000"
+                                  Lines="3"
+                                  Margin="Margin.Dense" />
+                </MudItem>
 
-            @if (IsEdit)
-            {
-                <MudText Typo="Typo.caption" Color="Color.Secondary">
-                    Utworzono: @Model.DataUtworzenia.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
-                </MudText>
-            }
+                @if (_isEdit)
+                {
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            Utworzono: @Model.DataUtworzenia.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+                        </MudText>
+                    </MudItem>
+                }
+            </MudGrid>
         </MudForm>
     </DialogContent>
 
@@ -69,6 +85,7 @@
     [Parameter] public bool IsEdit { get; set; }
 
     private MudForm? _form;
+    private bool _isEdit => IsEdit;
     private string _idEncjiText = string.Empty;
     private DateTime? _dataZamkniecia;
 

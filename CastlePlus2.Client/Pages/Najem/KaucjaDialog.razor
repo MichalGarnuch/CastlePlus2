@@ -5,47 +5,61 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(IsEdit ? "Edycja kaucji" : "Nowa kaucja")
+                @(_isEdit ? "Edycja kaucji" : "Nowa kaucja")
             </MudText>
 
-            @if (IsEdit)
-            {
-                <MudTextField Value="@Model.IdOperacjiKaucji.ToString()"
-                              Label="IdOperacjiKaucji"
-                              Disabled="true"
-                              Margin="Margin.Dense" />
-            }
+            <MudGrid Spacing="2">
+                @if (_isEdit)
+                {
+                    <MudItem xs="12">
+                        <MudTextField Value="@Model.IdOperacjiKaucji.ToString()"
+                                      Label="IdOperacjiKaucji"
+                                      Disabled="true"
+                                      Margin="Margin.Dense" />
+                    </MudItem>
+                }
 
-            <MudTextField @bind-Value="_idUmowyText"
-                          Label="IdUmowyNajmu (GUID)"
-                          Required="true"
-                          RequiredError="IdUmowyNajmu jest wymagane"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_idUmowyText"
+                                  Label="IdUmowyNajmu (GUID)"
+                                  Required="true"
+                                  RequiredError="IdUmowyNajmu jest wymagane"
+                                  Margin="Margin.Dense" />
+                </MudItem>
 
-            <MudNumericField T="decimal"
-                             Label="Kwota"
-                             Required="true"
-                             RequiredError="Kwota jest wymagana"
-                             Margin="Margin.Dense"
-                             @bind-Value="Model.Kwota" />
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="decimal"
+                                     Label="Kwota"
+                                     Required="true"
+                                     RequiredError="Kwota jest wymagana"
+                                     Margin="Margin.Dense"
+                                     @bind-Value="Model.Kwota" />
+                </MudItem>
 
-            <MudTextField @bind-Value="Model.RodzajOperacji"
-                          Label="Rodzaj operacji"
-                          Required="true"
-                          RequiredError="Rodzaj operacji jest wymagany"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Model.RodzajOperacji"
+                                  Label="Rodzaj operacji"
+                                  Required="true"
+                                  RequiredError="Rodzaj operacji jest wymagany"
+                                  Margin="Margin.Dense" />
+                </MudItem>
 
-            <MudTextField @bind-Value="Model.KodWaluty"
-                          Label="Kod waluty"
-                          Required="true"
-                          RequiredError="Kod waluty jest wymagany"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Model.KodWaluty"
+                                  Label="Kod waluty"
+                                  Required="true"
+                                  RequiredError="Kod waluty jest wymagany"
+                                  Margin="Margin.Dense" />
+                </MudItem>
 
-            <MudDatePicker Label="Data operacji"
-                           Date="@_dataOperacji"
-                           DateChanged="OnDataOperacjiChanged"
-                           Margin="Margin.Dense"
-                           Required="true" />
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Data operacji"
+                                   Date="@_dataOperacji"
+                                   DateChanged="OnDataOperacjiChanged"
+                                   Margin="Margin.Dense"
+                                   Required="true" />
+                </MudItem>
+            </MudGrid>
         </MudForm>
     </DialogContent>
 
@@ -62,6 +76,7 @@
     [Parameter] public bool IsEdit { get; set; }
 
     private MudForm? _form;
+    private bool _isEdit => IsEdit;
     private string _idUmowyText = string.Empty;
     private DateTime? _dataOperacji;
 

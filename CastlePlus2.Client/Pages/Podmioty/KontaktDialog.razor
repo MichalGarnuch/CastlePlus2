@@ -6,42 +6,52 @@
         <MudForm @ref="_form">
 
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(IsEdit ? "Edycja kontaktu" : "Nowy kontakt")
+                @(_isEdit ? "Edycja kontaktu" : "Nowy kontakt")
             </MudText>
 
-            @if (IsEdit)
-            {
-                <MudTextField Value="@Model.IdKontaktu.ToString()"
-                              Label="IdKontaktu"
-                              Disabled="true"
-                              Margin="Margin.Dense" />
-            }
-
-            <MudSelect T="long"
-                       Label="Podmiot"
-                       @bind-Value="Model.IdPodmiotu"
-                       Required="true"
-                       RequiredError="Podmiot jest wymagany"
-                       Margin="Margin.Dense">
-                @foreach (var podmiot in Podmioty)
+            <MudGrid Spacing="2">
+                @if (_isEdit)
                 {
-                    <MudSelectItem T="long" Value="@podmiot.IdPodmiotu">
-                        @($"Id={podmiot.IdPodmiotu} / {podmiot.Nazwa}")
-                    </MudSelectItem>
+                    <MudItem xs="12">
+                        <MudTextField Value="@Model.IdKontaktu.ToString()"
+                                      Label="IdKontaktu"
+                                      Disabled="true"
+                                      Margin="Margin.Dense" />
+                    </MudItem>
                 }
-            </MudSelect>
 
-            <MudTextField @bind-Value="Model.Rodzaj"
-                          Label="Rodzaj"
-                          Required="true"
-                          RequiredError="Rodzaj jest wymagany"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12">
+                    <MudSelect T="long"
+                               Label="Podmiot"
+                               @bind-Value="Model.IdPodmiotu"
+                               Required="true"
+                               RequiredError="Podmiot jest wymagany"
+                               Margin="Margin.Dense">
+                        @foreach (var podmiot in Podmioty)
+                        {
+                            <MudSelectItem T="long" Value="@podmiot.IdPodmiotu">
+                                @($"Id={podmiot.IdPodmiotu} / {podmiot.Nazwa}")
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
 
-            <MudTextField @bind-Value="Model.Wartosc"
-                          Label="Wartosc"
-                          Required="true"
-                          RequiredError="Wartosc jest wymagana"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Model.Rodzaj"
+                                  Label="Rodzaj"
+                                  Required="true"
+                                  RequiredError="Rodzaj jest wymagany"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Model.Wartosc"
+                                  Label="Wartosc"
+                                  Required="true"
+                                  RequiredError="Wartosc jest wymagana"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+            </MudGrid>
 
         </MudForm>
     </DialogContent>
@@ -60,6 +70,7 @@
     [Parameter] public bool IsEdit { get; set; }
 
     private MudForm? _form;
+    private bool _isEdit => IsEdit;
 
     private void Cancel() => MudDialog.Cancel();
 

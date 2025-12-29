@@ -6,40 +6,54 @@
         <MudForm @ref="_form">
 
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(IsEdit ? "Edycja podmiotu" : "Nowy podmiot")
+                @(_isEdit ? "Edycja podmiotu" : "Nowy podmiot")
             </MudText>
 
-            @if (IsEdit)
-            {
-                <MudTextField Value="@Model.IdPodmiotu.ToString()"
-                              Label="IdPodmiotu"
-                              Disabled="true"
-                              Margin="Margin.Dense" />
-            }
+            <MudGrid Spacing="2">
+                @if (_isEdit)
+                {
+                    <MudItem xs="12">
+                        <MudTextField Value="@Model.IdPodmiotu.ToString()"
+                                      Label="IdPodmiotu"
+                                      Disabled="true"
+                                      Margin="Margin.Dense" />
+                    </MudItem>
+                }
 
-            <MudTextField @bind-Value="Model.Nazwa"
-                          Label="Nazwa"
-                          Required="true"
-                          RequiredError="Nazwa jest wymagana"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Model.Nazwa"
+                                  Label="Nazwa"
+                                  Required="true"
+                                  RequiredError="Nazwa jest wymagana"
+                                  Margin="Margin.Dense" />
+                </MudItem>
 
-            <MudTextField @bind-Value="Model.TypPodmiotu"
-                          Label="TypPodmiotu"
-                          Required="true"
-                          RequiredError="TypPodmiotu jest wymagany"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Model.TypPodmiotu"
+                                  Label="TypPodmiotu"
+                                  Required="true"
+                                  RequiredError="TypPodmiotu jest wymagany"
+                                  Margin="Margin.Dense" />
+                </MudItem>
 
-            <MudTextField @bind-Value="Model.NIP"
-                          Label="NIP"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Model.NIP"
+                                  Label="NIP"
+                                  Margin="Margin.Dense" />
+                </MudItem>
 
-            <MudTextField @bind-Value="Model.REGON"
-                          Label="REGON"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Model.REGON"
+                                  Label="REGON"
+                                  Margin="Margin.Dense" />
+                </MudItem>
 
-            <MudTextField @bind-Value="Model.PESEL"
-                          Label="PESEL"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Model.PESEL"
+                                  Label="PESEL"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+            </MudGrid>
 
         </MudForm>
     </DialogContent>
@@ -57,6 +71,7 @@
     [Parameter] public bool IsEdit { get; set; }
 
     private MudForm? _form;
+    private bool _isEdit => IsEdit;
 
     private void Cancel() => MudDialog.Cancel();
 

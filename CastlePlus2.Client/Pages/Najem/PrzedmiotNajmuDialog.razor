@@ -5,44 +5,58 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(IsEdit ? "Edycja przedmiotu najmu" : "Nowy przedmiot najmu")
+                @(_isEdit ? "Edycja przedmiotu najmu" : "Nowy przedmiot najmu")
             </MudText>
 
-            @if (IsEdit)
-            {
-                <MudTextField Value="@Model.IdPrzedmiotuNajmu.ToString()"
-                              Label="IdPrzedmiotuNajmu"
-                              Disabled="true"
-                              Margin="Margin.Dense" />
-            }
+            <MudGrid Spacing="2">
+                @if (_isEdit)
+                {
+                    <MudItem xs="12">
+                        <MudTextField Value="@Model.IdPrzedmiotuNajmu.ToString()"
+                                      Label="IdPrzedmiotuNajmu"
+                                      Disabled="true"
+                                      Margin="Margin.Dense" />
+                    </MudItem>
+                }
 
-            <MudTextField @bind-Value="_idUmowyNajmuText"
-                          Label="IdUmowyNajmu (GUID)"
-                          Required="true"
-                          RequiredError="IdUmowyNajmu jest wymagane"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_idUmowyNajmuText"
+                                  Label="IdUmowyNajmu (GUID)"
+                                  Required="true"
+                                  RequiredError="IdUmowyNajmu jest wymagane"
+                                  Margin="Margin.Dense" />
+                </MudItem>
 
-            <MudTextField @bind-Value="_idEncjiText"
-                          Label="IdEncji (GUID)"
-                          Required="true"
-                          RequiredError="IdEncji jest wymagane"
-                          Margin="Margin.Dense" />
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_idEncjiText"
+                                  Label="IdEncji (GUID)"
+                                  Required="true"
+                                  RequiredError="IdEncji jest wymagane"
+                                  Margin="Margin.Dense" />
+                </MudItem>
 
-            <MudNumericField T="decimal?"
-                             Label="Udział procent (opcjonalnie)"
-                             Margin="Margin.Dense"
-                             @bind-Value="Model.UdzialProcent" />
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="decimal?"
+                                     Label="Udział procent (opcjonalnie)"
+                                     Margin="Margin.Dense"
+                                     @bind-Value="Model.UdzialProcent" />
+                </MudItem>
 
-            <MudDatePicker Label="Od dnia"
-                           Date="@_odDnia"
-                           DateChanged="OnOdDniaChanged"
-                           Margin="Margin.Dense"
-                           Required="true" />
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Od dnia"
+                                   Date="@_odDnia"
+                                   DateChanged="OnOdDniaChanged"
+                                   Margin="Margin.Dense"
+                                   Required="true" />
+                </MudItem>
 
-            <MudDatePicker Label="Do dnia (opcjonalnie)"
-                           Date="@_doDnia"
-                           DateChanged="OnDoDniaChanged"
-                           Margin="Margin.Dense" />
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Do dnia (opcjonalnie)"
+                                   Date="@_doDnia"
+                                   DateChanged="OnDoDniaChanged"
+                                   Margin="Margin.Dense" />
+                </MudItem>
+            </MudGrid>
         </MudForm>
     </DialogContent>
 
@@ -59,6 +73,7 @@
     [Parameter] public bool IsEdit { get; set; }
 
     private MudForm? _form;
+    private bool _isEdit => IsEdit;
 
     private string _idUmowyNajmuText = string.Empty;
     private string _idEncjiText = string.Empty;

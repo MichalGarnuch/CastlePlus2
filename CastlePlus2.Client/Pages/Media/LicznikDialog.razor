@@ -1,59 +1,75 @@
-﻿@using MudBlazor
+﻿﻿@using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Media
 @using CastlePlus2.Contracts.DTOs.Slowniki
 
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(_isEdit ? "Edycja licznika" : "Nowy licznik")
+            </MudText>
 
-            <MudSelect T="long"
-                       Label="Przyłącze (IdPrzylacza)"
-                       Dense="true"
-                       Required="true"
-                       @bind-Value="_model.IdPrzylacza">
-                @foreach (var p in _przylacza)
-                {
-                    <MudSelectItem T="long" Value="@p.IdPrzylacza">@($"Id={p.IdPrzylacza} / Rodzaj={p.KodRodzaju}")</MudSelectItem>
-                }
-            </MudSelect>
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="long"
+                               Label="Przyłącze (IdPrzylacza)"
+                               Dense="true"
+                               Required="true"
+                               @bind-Value="_model.IdPrzylacza">
+                        @foreach (var p in _przylacza)
+                        {
+                            <MudSelectItem T="long" Value="@p.IdPrzylacza">@($"Id={p.IdPrzylacza} / Rodzaj={p.KodRodzaju}")</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
 
-            <MudSelect T="long?"
-                       Label="Licznik nadrzędny (opcjonalnie)"
-                       Dense="true"
-                       @bind-Value="_model.IdLicznikaNadrzednego">
-                <MudSelectItem T="long?" Value="@(null)">Brak</MudSelectItem>
-                @foreach (var l in _liczniki.Where(x => x.IdLicznika != _model.IdLicznika))
-                {
-                    <MudSelectItem T="long?" Value="@l.IdLicznika">@($"Id={l.IdLicznika} / {l.NumerNV}")</MudSelectItem>
-                }
-            </MudSelect>
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="long?"
+                               Label="Licznik nadrzędny (opcjonalnie)"
+                               Dense="true"
+                               @bind-Value="_model.IdLicznikaNadrzednego">
+                        <MudSelectItem T="long?" Value="@(null)">Brak</MudSelectItem>
+                        @foreach (var l in _liczniki.Where(x => x.IdLicznika != _model.IdLicznika))
+                        {
+                            <MudSelectItem T="long?" Value="@l.IdLicznika">@($"Id={l.IdLicznika} / {l.NumerNV}")</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
 
-            <MudTextField Label="NumerNV"
-                          Dense="true"
-                          Required="true"
-                          @bind-Value="_model.NumerNV" />
+                <MudItem xs="12" sm="6">
+                    <MudTextField Label="NumerNV"
+                                  Dense="true"
+                                  Required="true"
+                                  @bind-Value="_model.NumerNV" />
+                </MudItem>
 
-            <MudSelect T="string"
-                       Label="KodJednostki"
-                       Dense="true"
-                       Required="true"
-                       @bind-Value="_model.KodJednostki">
-                @foreach (var j in _jednostki)
-                {
-                    <MudSelectItem T="string" Value="@j.KodJednostki">@($"{j.Nazwa} ({j.KodJednostki})")</MudSelectItem>
-                }
-            </MudSelect>
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="string"
+                               Label="KodJednostki"
+                               Dense="true"
+                               Required="true"
+                               @bind-Value="_model.KodJednostki">
+                        @foreach (var j in _jednostki)
+                        {
+                            <MudSelectItem T="string" Value="@j.KodJednostki">@($"{j.Nazwa} ({j.KodJednostki})")</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
 
-            <MudNumericField T="decimal?"
-                             Label="Współczynnik przeliczeniowy (decimal(12,6))"
-                             Dense="true"
-                             @bind-Value="_model.WspolczynnikPrzeliczeniowy" />
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="decimal?"
+                                     Label="Współczynnik przeliczeniowy (decimal(12,6))"
+                                     Dense="true"
+                                     @bind-Value="_model.WspolczynnikPrzeliczeniowy" />
+                </MudItem>
 
-            
-            <MudSwitch T="bool"
-                       Label="Aktywny"
-                       Color="Color.Primary"
-                       @bind-Checked="_model.Aktywny" />
+                <MudItem xs="12" sm="6">
+                    <MudSwitch T="bool"
+                               Label="Aktywny"
+                               Color="Color.Primary"
+                               @bind-Checked="_model.Aktywny" />
+                </MudItem>
+            </MudGrid>
         </MudForm>
     </DialogContent>
 
@@ -76,6 +92,7 @@
     [Parameter] public List<LicznikDto> Liczniki { get; set; } = new();
 
     private MudForm? _form;
+    private bool _isEdit => IsEdit;
     private LicznikDto _model = new();
 
     private List<PrzylaczeDto> _przylacza = new();

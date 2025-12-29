@@ -5,31 +5,39 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(IsCreate ? "Nowe powiązanie" : "Edycja powiązania")
+                @(_isCreate ? "Nowe powiązanie" : "Edycja powiązania")
             </MudText>
 
-            @if (!IsCreate)
-            {
-                <MudTextField Value="@IdPowiazania.ToString()"
-                              Label="IdPowiazania"
-                              Disabled="true"
-                              Margin="Margin.Dense" />
-            }
+            <MudGrid Spacing="2">
+                @if (!_isCreate)
+                {
+                    <MudItem xs="12">
+                        <MudTextField Value="@IdPowiazania.ToString()"
+                                      Label="IdPowiazania"
+                                      Disabled="true"
+                                      Margin="Margin.Dense" />
+                    </MudItem>
+                }
 
-            <MudNumericField T="long"
-                             Label="IdZlecenia"
-                             Required="true"
-                             RequiredError="IdZlecenia jest wymagane"
-                             Margin="Margin.Dense"
-                             @bind-Value="_idZlecenia" />
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="long"
+                                     Label="IdZlecenia"
+                                     Required="true"
+                                     RequiredError="IdZlecenia jest wymagane"
+                                     Margin="Margin.Dense"
+                                     @bind-Value="_idZlecenia" />
+                </MudItem>
 
-            <MudTextField @bind-Value="_idEncjiText"
-                          Label="IdEncji (GUID)"
-                          Required="true"
-                          RequiredError="IdEncji jest wymagane"
-                          Margin="Margin.Dense"
-                          Error="_guidInvalid"
-                          ErrorText="Podaj poprawny GUID" />
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_idEncjiText"
+                                  Label="IdEncji (GUID)"
+                                  Required="true"
+                                  RequiredError="IdEncji jest wymagane"
+                                  Margin="Margin.Dense"
+                                  Error="_guidInvalid"
+                                  ErrorText="Podaj poprawny GUID" />
+                </MudItem>
+            </MudGrid>
         </MudForm>
     </DialogContent>
 
@@ -48,6 +56,7 @@
     [Parameter] public Guid IdEncji { get; set; }
 
     private MudForm? _form;
+    private bool _isCreate => IsCreate;
     private long _idZlecenia;
     private string _idEncjiText = string.Empty;
     private bool _guidInvalid;

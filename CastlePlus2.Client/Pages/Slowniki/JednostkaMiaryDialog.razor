@@ -13,26 +13,36 @@
             </MudAlert>
 
             <MudForm @ref="_form">
-                <MudTextField @bind-Value="_kod"
-                              Label="Kod"
-                              HelperText="np. kWh, m3, szt"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense"
-                              Required="true"
-                              RequiredError="Kod jest wymagany"
-                              Disabled="@IsEdit"
-                              MaxLength="20"
-                              Immediate="true" />
+                <MudText Typo="Typo.h6" Class="mb-3">
+                    @(_isEdit ? "Edycja jednostki miary" : "Nowa jednostka miary")
+                </MudText>
 
-                <MudTextField @bind-Value="_nazwa"
-                              Label="Nazwa"
-                              HelperText="Pełna nazwa jednostki"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense"
-                              Required="true"
-                              RequiredError="Nazwa jest wymagana"
-                              MaxLength="100"
-                              Immediate="true" />
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_kod"
+                                      Label="Kod"
+                                      HelperText="np. kWh, m3, szt"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Required="true"
+                                      RequiredError="Kod jest wymagany"
+                                      Disabled="@_isEdit"
+                                      MaxLength="20"
+                                      Immediate="true" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_nazwa"
+                                      Label="Nazwa"
+                                      HelperText="Pełna nazwa jednostki"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Required="true"
+                                      RequiredError="Nazwa jest wymagana"
+                                      MaxLength="100"
+                                      Immediate="true" />
+                    </MudItem>
+                </MudGrid>
             </MudForm>
         </MudStack>
     </DialogContent>
@@ -65,11 +75,11 @@
 
     private bool _saving;
     private string _savingText => _saving ? "Zapisywanie..." : "Zapisz";
-    private bool IsEdit => !string.IsNullOrWhiteSpace(KodJednostki);
+    private bool _isEdit => !string.IsNullOrWhiteSpace(KodJednostki);
 
     protected override void OnInitialized()
     {
-        if (IsEdit)
+        if (_isEdit)
         {
             _kod = KodJednostki!;
             _nazwa = Nazwa ?? string.Empty;
@@ -87,7 +97,7 @@
 
         try
         {
-            if (IsEdit)
+            if (_isEdit)
             {
                 await Service.UpdateAsync(_kod, new UpdateJednostkaMiaryRequest { Nazwa = _nazwa });
             }

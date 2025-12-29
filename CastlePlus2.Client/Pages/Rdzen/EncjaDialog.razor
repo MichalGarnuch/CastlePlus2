@@ -5,19 +5,25 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(IsEdit ? "Edycja encji" : "Nowa encja")
+                @(_isEdit ? "Edycja encji" : "Nowa encja")
             </MudText>
 
-            <MudTextField Label="Typ encji"
-                          Dense="true"
-                          Margin="Margin.Dense"
-                          Required="true"
-                          @bind-Value="Model.TypEncji" />
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6">
+                    <MudTextField Label="Typ encji"
+                                  Dense="true"
+                                  Margin="Margin.Dense"
+                                  Required="true"
+                                  @bind-Value="Model.TypEncji" />
+                </MudItem>
 
-            <MudTextField Label="Kod encji"
-                          Dense="true"
-                          Margin="Margin.Dense"
-                          @bind-Value="Model.KodEncji" />
+                <MudItem xs="12" sm="6">
+                    <MudTextField Label="Kod encji"
+                                  Dense="true"
+                                  Margin="Margin.Dense"
+                                  @bind-Value="Model.KodEncji" />
+                </MudItem>
+            </MudGrid>
         </MudForm>
     </DialogContent>
 
@@ -34,6 +40,7 @@
     [Parameter] public bool IsEdit { get; set; }
 
     private MudForm? _form;
+    private bool _isEdit => IsEdit;
 
     private void Cancel() => MudDialog.Cancel();
 

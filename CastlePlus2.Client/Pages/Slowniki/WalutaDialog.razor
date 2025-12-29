@@ -4,32 +4,42 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-            @if (IsCreate)
-            {
-                <MudTextField @bind-Value="KodWaluty"
-                              Label="Kod waluty"
-                              Required="true"
-                              Immediate="true"
-                              MaxLength="3"
-                              HelperText="Dokładnie 3 znaki (np. PLN, EUR)" />
-            }
-            else
-            {
-                <MudTextField Value="@KodWaluty"
-                              Label="Kod waluty"
-                              Disabled="true" />
-            }
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(_isCreate ? "Nowa waluta" : "Edycja waluty")
+            </MudText>
 
-            <MudTextField @bind-Value="Nazwa"
-                          Label="Nazwa"
-                          Required="true"
-                          Immediate="true"
-                          MaxLength="50" />
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6">
+                    @if (_isCreate)
+                    {
+                        <MudTextField @bind-Value="KodWaluty"
+                                      Label="Kod waluty"
+                                      Required="true"
+                                      Immediate="true"
+                                      MaxLength="3"
+                                      HelperText="Dokładnie 3 znaki (np. PLN, EUR)" />
+                    }
+                    else
+                    {
+                        <MudTextField Value="@KodWaluty"
+                                      Label="Kod waluty"
+                                      Disabled="true" />
+                    }
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Nazwa"
+                                  Label="Nazwa"
+                                  Required="true"
+                                  Immediate="true"
+                                  MaxLength="50" />
+                </MudItem>
+            </MudGrid>
         </MudForm>
     </DialogContent>
 
     <DialogActions>
-        <MudButton OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
         <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save">Zapisz</MudButton>
     </DialogActions>
 </MudDialog>
@@ -43,6 +53,7 @@
     [Parameter] public string Nazwa { get; set; } = string.Empty;
 
     private MudForm _form = default!;
+    private bool _isCreate => IsCreate;
 
     private void Cancel() => MudDialog.Cancel();
 
@@ -54,13 +65,12 @@
         KodWaluty = (KodWaluty ?? string.Empty).Trim().ToUpperInvariant();
         Nazwa = (Nazwa ?? string.Empty).Trim();
 
-        if (IsCreate && KodWaluty.Length != 3)
+        if (_isCreate && KodWaluty.Length != 3)
             return; // Required + MaxLength już łapią, to jest dodatkowy bezpiecznik.
 
         MudDialog.Close(DialogResult.Ok(new WalutaDto
         {
             KodWaluty = KodWaluty,
             Nazwa = Nazwa
-        }));
-    }
+        }));    }
 }

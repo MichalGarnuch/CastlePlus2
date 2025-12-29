@@ -6,26 +6,38 @@
 <MudDialog Class="glass-panel">
     <DialogContent>
         <MudForm @ref="_form">
-            <MudTextField @bind-Value="_kod"
-                          Label="Kod indeksacji"
-                          Required="true"
-                          Disabled="@IsEdit"
-                          MaxLength="20" />
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(_isEdit ? "Edycja indeksacji" : "Nowa indeksacja")
+            </MudText>
 
-            <MudTextField @bind-Value="_nazwa"
-                          Label="Nazwa"
-                          Required="true"
-                          MaxLength="100" />
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_kod"
+                                  Label="Kod indeksacji"
+                                  Required="true"
+                                  Disabled="@_isEdit"
+                                  MaxLength="20" />
+                </MudItem>
 
-            <MudTextField @bind-Value="_url"
-                          Label="Adres źródła URL"
-                          Required="false"
-                          MaxLength="400" />
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_nazwa"
+                                  Label="Nazwa"
+                                  Required="true"
+                                  MaxLength="100" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_url"
+                                  Label="Adres źródła URL"
+                                  Required="false"
+                                  MaxLength="400" />
+                </MudItem>
+            </MudGrid>
         </MudForm>
     </DialogContent>
 
     <DialogActions>
-        <MudButton OnClick="Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
         <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save">Zapisz</MudButton>
     </DialogActions>
 </MudDialog>
@@ -42,11 +54,11 @@
     private string _nazwa = string.Empty;
     private string? _url;
 
-    private bool IsEdit => !string.IsNullOrWhiteSpace(KodIndeksacji);
+    private bool _isEdit => !string.IsNullOrWhiteSpace(KodIndeksacji);
 
     protected override void OnInitialized()
     {
-        if (IsEdit)
+        if (_isEdit)
         {
             _kod = KodIndeksacji!;
             _nazwa = Nazwa ?? string.Empty;
@@ -61,7 +73,7 @@
         await _form.Validate();
         if (!_form.IsValid) return;
 
-        if (IsEdit)
+        if (_isEdit)
         {
             await Service.UpdateAsync(_kod, new UpdateIndeksacjaRequest
             {

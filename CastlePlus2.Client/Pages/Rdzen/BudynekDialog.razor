@@ -4,6 +4,9 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
+            <MudText Typo="Typo.h6" Class="mb-3">
+                @(_isEdit ? "Edycja budynku" : "Nowy budynek")
+            </MudText>
             <MudGrid Spacing="2">
                 <MudItem xs="12">
                     <MudTextField @bind-Value="Model.KodBudynku"
@@ -49,7 +52,7 @@
                                      Margin="Margin.Dense" />
                 </MudItem>
 
-                @if (IsEdit)
+                @if (_isEdit)
                 {
                     <MudItem xs="12">
                         <MudText Typo="Typo.caption" Color="Color.Secondary">
@@ -74,6 +77,7 @@
     [Parameter] public bool IsEdit { get; set; }
 
     private MudForm? _form;
+    private bool _isEdit => IsEdit;
     private string _idNieruchomosciString = string.Empty;
 
     protected override void OnInitialized()
