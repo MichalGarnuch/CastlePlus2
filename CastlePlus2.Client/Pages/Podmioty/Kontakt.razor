@@ -32,12 +32,11 @@
             }
         </MudSelect>
 
-        <MudButton Variant="Variant.Outlined"
-                   Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Refresh"
-                   OnClick="ReloadAsync">
-            Odśwież
-        </MudButton>
+        <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                       Color="Color.Info"
+                       AriaLabel="Odśwież"
+                       Title="Odśwież"
+                       OnClick="ReloadAsync" />
     </MudStack>
 </MudPaper>
 
@@ -52,7 +51,7 @@
               Filter="FilterFunc"
               Loading="_loading">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Lista Kontaktów</MudText>
+            <MudText Typo="Typo.h6">Lista kontaktów</MudText>
             <MudSpacer />
 
             <MudTextField @bind-Value="_search"
@@ -62,6 +61,12 @@
                           Immediate="true"
                           Class="mr-4"
                           Margin="Margin.Dense" />
+            <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                           Color="Color.Info"
+                           AriaLabel="Odśwież"
+                           Title="Odśwież"
+                           OnClick="ReloadAsync"
+                           Class="mr-2" />
 
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
@@ -76,7 +81,7 @@
             <MudTh>Id</MudTh>
             <MudTh>IdPodmiotu</MudTh>
             <MudTh>Rodzaj</MudTh>
-            <MudTh>Wartosc</MudTh>
+            <MudTh>Wartość</MudTh>
             <MudTh></MudTh>
         </HeaderContent>
 
@@ -84,7 +89,7 @@
             <MudTd DataLabel="Id">@context.IdKontaktu</MudTd>
             <MudTd DataLabel="IdPodmiotu">@context.IdPodmiotu</MudTd>
             <MudTd DataLabel="Rodzaj">@context.Rodzaj</MudTd>
-            <MudTd DataLabel="Wartosc">@context.Wartosc</MudTd>
+            <MudTd DataLabel="Wartość">@context.Wartosc</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
@@ -115,7 +120,7 @@
     private List<KontaktDto> _items = new();
     private long? _selectedPodmiotId;
     private string _search = string.Empty;
-    private bool _loading = true; // 2. DODANO ZMIENNĄ (startuje jako true)
+    private bool _loading = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -127,7 +132,8 @@
     {
         try
         {
-            _podmioty = (await PodmiotyService.GetAllAsync()).ToList();
+            var list = await PodmiotyService.GetAllAsync();
+            _podmioty = (list ?? new List<PodmiotDto>()).ToList();
             _selectedPodmiotId ??= _podmioty.FirstOrDefault()?.IdPodmiotu;
         }
         catch (Exception ex)
@@ -138,7 +144,6 @@
 
     private async Task ReloadAsync()
     {
-        // 3. OBSŁUGA STANU ŁADOWANIA
         _loading = true;
         try
         {
@@ -159,7 +164,7 @@
         }
         finally
         {
-            _loading = false; // Zawsze wyłącz na końcu
+            _loading = false;
         }
     }
 
@@ -172,8 +177,8 @@
 
         return item.IdKontaktu.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
                || item.IdPodmiotu.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
-               || item.Rodzaj.Contains(s, StringComparison.OrdinalIgnoreCase)
-               || item.Wartosc.Contains(s, StringComparison.OrdinalIgnoreCase);
+               || (item.Rodzaj?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || (item.Wartosc?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false);
     }
 
     private async Task CreateAsync()
@@ -257,10 +262,6 @@
                     Snackbar.Add("Nie znaleziono rekordu do edycji (404).", Severity.Warning);
                     return;
                 }
-
-                var idx = _items.FindIndex(x => x.IdKontaktu == model.IdKontaktu);
-                if (idx >= 0) _items[idx] = model;
-                await InvokeAsync(StateHasChanged);
 
                 Snackbar.Add("Zapisano zmiany.", Severity.Success);
                 await ReloadAsync();

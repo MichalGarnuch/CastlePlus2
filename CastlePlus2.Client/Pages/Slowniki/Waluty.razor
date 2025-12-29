@@ -5,93 +5,97 @@
 @using CastlePlus2.Contracts.Requests.Slownik
 @inject IWalutyService Service
 @inject ISnackbar Snackbar
-@inject IDialogService Dialogs
+@inject IDialogService DialogService
 
-<MudPaper Class="glass-panel pa-4 pa-sm-6" Elevation="0" Rounded="Rounded.Xl">
-    <MudStack Spacing="3">
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Waluty</MudText>
 
-        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-            <MudStack Spacing="0">
-                <MudText Typo="Typo.h5" Class="fw-700">Waluty</MudText>
-                <MudText Typo="Typo.body2" Color="Color.Secondary"></MudText>
-            </MudStack>
+<MudPaper Class="pa-4">
+    <MudTable Items="_items"
+              RowsPerPage="20"
+              RowsPerPageOptions="new int[] { 20, 50, 100 }"
+              Dense="true"
+              Hover="true"
+              Bordered="true"
+              Striped="true"
+              Filter="FilterFunc"
+              Loading="_loading">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Lista walut</MudText>
+            <MudSpacer />
 
-            <MudStack Row="true" Spacing="1">
-                <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="Reload" />
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.Add"
-                           OnClick="OpenCreate">
-                    Dodaj
-                </MudButton>
-            </MudStack>
-        </MudStack>
+            <MudTextField @bind-Value="_search"
+                          Placeholder="Szukaj (kod, nazwa)..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Class="mr-4"
+                          Margin="Margin.Dense" />
 
-        <MudTextField @bind-Value="_q"
-                      Placeholder="Szukaj po kodzie lub nazwie"
-                      Variant="Variant.Outlined"
-                      Margin="Margin.Dense"
-                      Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.Search"
-                      Immediate="true"
-                      Class="mt-1" />
+            <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                           Color="Color.Info"
+                           AriaLabel="Odśwież"
+                           Title="Odśwież"
+                           OnClick="ReloadAsync"
+                           Class="mr-2" />
 
-        <MudTable Items="_filtered"
-                  RowsPerPage="20"
-                  RowsPerPageOptions="new int[] { 20, 50, 100 }"
-                  Dense="true"
-                  Hover="true"
-                  Bordered="true"
-                  Loading="_loading">
-            <HeaderContent>
-                <MudTh>Kod</MudTh>
-                <MudTh>Nazwa</MudTh>
-                <MudTh Class="text-right"></MudTh>
-            </HeaderContent>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="CreateAsync">
+                Dodaj
+            </MudButton>
+        </ToolBarContent>
 
-            <RowTemplate>
-                <MudTd DataLabel="Kod">@context.KodWaluty</MudTd>
-                <MudTd DataLabel="Nazwa">@context.Nazwa</MudTd>
-                <MudTd DataLabel="Akcje" Class="text-right">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                   OnClick="@(() => OpenEdit(context))" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                   Color="Color.Error"
-                                   OnClick="@(() => ConfirmDelete(context))" />
-                </MudTd>
-            </RowTemplate>
+        <HeaderContent>
+            <MudTh>Kod</MudTh>
+            <MudTh>Nazwa</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
 
-            <PagerContent>
-                <MudTablePager />
-            </PagerContent>
+        <RowTemplate>
+            <MudTd DataLabel="Kod">@context.KodWaluty</MudTd>
+            <MudTd DataLabel="Nazwa">@context.Nazwa</MudTd>
+            <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               OnClick="@(() => EditAsync(context))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               Size="Size.Small"
+                               OnClick="@(() => DeleteAsync(context))" />
+            </MudTd>
+        </RowTemplate>
 
-        </MudTable>
-    </MudStack>
+        <NoRecordsContent>
+            <MudText Class="pa-4">Brak rekordów.</MudText>
+        </NoRecordsContent>
+
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+
+    </MudTable>
 </MudPaper>
 
 @code {
     private bool _loading = true;
-    private string _q = string.Empty;
+    private string _search = string.Empty;
     private List<WalutaDto> _items = new();
-
-    private IEnumerable<WalutaDto> _filtered =>
-        string.IsNullOrWhiteSpace(_q)
-            ? _items
-            : _items.Where(x =>
-                (x.KodWaluty?.Contains(_q, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (x.Nazwa?.Contains(_q, StringComparison.OrdinalIgnoreCase) ?? false));
 
     protected override async Task OnInitializedAsync()
     {
-        await Reload();
+        await ReloadAsync();
     }
 
-    private async Task Reload()
+    private async Task ReloadAsync()
     {
         _loading = true;
         try
         {
-            _items = await Service.GetAllAsync();
+            var data = await Service.GetAllAsync();
+            _items = (data ?? new List<WalutaDto>()).ToList();
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
@@ -103,17 +107,29 @@
         }
     }
 
-    private async Task OpenCreate()
+    private bool FilterFunc(WalutaDto item)
     {
-        var p = new DialogParameters
+        if (string.IsNullOrWhiteSpace(_search))
+            return true;
+
+        var s = _search.Trim();
+
+        return (item.KodWaluty?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || (item.Nazwa?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false);
+    }
+
+    private async Task CreateAsync()
+    {
+        var parameters = new DialogParameters
         {
             ["IsCreate"] = true,
             ["KodWaluty"] = string.Empty,
             ["Nazwa"] = string.Empty
         };
 
-        var dlg = await Dialogs.ShowAsync<WalutaDialog>("Dodaj walutę", p);
-        var result = await dlg.Result;
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<WalutaDialog>("Dodaj walutę", parameters, options);
+        var result = await dialog.Result;
         if (result.Canceled) return;
 
         var dto = (WalutaDto)result.Data!;
@@ -126,7 +142,7 @@
             });
 
             Snackbar.Add("Dodano.", Severity.Success);
-            await Reload();
+            await ReloadAsync();
         }
         catch (Exception ex)
         {
@@ -134,7 +150,7 @@
         }
     }
 
-    private async Task OpenEdit(WalutaDto item)
+    private async Task EditAsync(WalutaDto item)
     {
         if (string.IsNullOrWhiteSpace(item.KodWaluty))
         {
@@ -142,15 +158,16 @@
             return;
         }
 
-        var p = new DialogParameters
+        var parameters = new DialogParameters
         {
             ["IsCreate"] = false,
             ["KodWaluty"] = item.KodWaluty,
             ["Nazwa"] = item.Nazwa ?? string.Empty
         };
 
-        var dlg = await Dialogs.ShowAsync<WalutaDialog>("Edytuj walutę", p);
-        var result = await dlg.Result;
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<WalutaDialog>("Edytuj walutę", parameters, options);
+        var result = await dialog.Result;
         if (result.Canceled) return;
 
         var dto = (WalutaDto)result.Data!;
@@ -162,7 +179,7 @@
             });
 
             Snackbar.Add("Zapisano.", Severity.Success);
-            await Reload();
+            await ReloadAsync();
         }
         catch (Exception ex)
         {
@@ -170,7 +187,7 @@
         }
     }
 
-    private async Task ConfirmDelete(WalutaDto item)
+    private async Task DeleteAsync(WalutaDto item)
     {
         if (string.IsNullOrWhiteSpace(item.KodWaluty))
         {
@@ -178,7 +195,7 @@
             return;
         }
 
-        var ok = await Dialogs.ShowMessageBox(
+        var ok = await DialogService.ShowMessageBox(
             "Usuń",
             $"Czy na pewno usunąć walutę: {item.KodWaluty} – {item.Nazwa}?",
             yesText: "Usuń",
@@ -190,7 +207,7 @@
         {
             await Service.DeleteAsync(item.KodWaluty);
             Snackbar.Add("Usunięto.", Severity.Success);
-            await Reload();
+            await ReloadAsync();
         }
         catch (Exception ex)
         {
