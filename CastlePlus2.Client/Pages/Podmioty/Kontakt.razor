@@ -43,6 +43,8 @@
 
 <MudPaper Class="pa-4">
     <MudTable Items="_items"
+              RowsPerPage="20"
+              RowsPerPageOptions="new int[] { 20, 50, 100 }"
               Dense="true"
               Hover="true"
               Bordered="true"
@@ -100,6 +102,10 @@
         <NoRecordsContent>
             <MudText Class="pa-4">Brak rekordów.</MudText>
         </NoRecordsContent>
+
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
 
     </MudTable>
 </MudPaper>

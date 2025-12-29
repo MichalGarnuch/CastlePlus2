@@ -41,6 +41,8 @@
 
         <!-- Table -->
         <MudTable Items="_filtered"
+                  RowsPerPage="20"
+                  RowsPerPageOptions="new int[] { 20, 50, 100 }"
                   Dense="true"
                   Hover="true"
                   Bordered="true"
@@ -79,6 +81,10 @@
                     Brak rekordów (albo filtr nic nie znalazł).
                 </MudText>
             </NoRecordsContent>
+
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
 
         </MudTable>
 

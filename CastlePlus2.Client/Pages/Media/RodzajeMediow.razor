@@ -15,12 +15,19 @@
         <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h5" Class="fw-700">Rodzaje Mediów</MudText>
 
-            <MudButton StartIcon="@Icons.Material.Filled.Add"
-                       Color="Color.Primary"
-                       Variant="Variant.Filled"
-                       OnClick="OpenCreate">
-                Dodaj
-            </MudButton>
+            <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                               Color="Color.Info"
+                               AriaLabel="Odśwież"
+                               Title="Odśwież"
+                               OnClick="Reload" />
+                <MudButton StartIcon="@Icons.Material.Filled.Add"
+                           Color="Color.Primary"
+                           Variant="Variant.Filled"
+                           OnClick="OpenCreate">
+                    Dodaj
+                </MudButton>
+            </MudStack>
         </MudStack>
 
         <MudTextField @bind-Value="_q"
@@ -29,7 +36,13 @@
                       AdornmentIcon="@Icons.Material.Filled.Search"
                       Immediate="true" />
 
-        <MudTable Items="_filtered" Dense Hover Bordered Loading="_loading">
+        <MudTable Items="_filtered"
+                  RowsPerPage="20"
+                  RowsPerPageOptions="new int[] { 20, 50, 100 }"
+                  Dense
+                  Hover
+                  Bordered
+                  Loading="_loading">
             <HeaderContent>
                 <MudTh>Kod</MudTh>
                 <MudTh>Nazwa</MudTh>
@@ -47,6 +60,11 @@
                                    OnClick="@(() => Delete(context))" />
                 </MudTd>
             </RowTemplate>
+
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+
         </MudTable>
 
     </MudStack>

@@ -11,6 +11,8 @@
 
 <MudPaper Class="pa-4">
     <MudTable Items="_items"
+              RowsPerPage="20"
+              RowsPerPageOptions="new int[] { 20, 50, 100 }"
               Dense="true"
               Hover="true"
               Bordered="true"
@@ -28,6 +30,13 @@
                           Immediate="true"
                           Class="mr-4"
                           Margin="Margin.Dense" />
+
+            <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                           Color="Color.Info"
+                           AriaLabel="Odśwież"
+                           Title="Odśwież"
+                           OnClick="ReloadAsync"
+                           Class="mr-2" />
 
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
@@ -67,6 +76,10 @@
         <NoRecordsContent>
             <MudText Class="pa-4">Brak rekordów.</MudText>
         </NoRecordsContent>
+
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
 
     </MudTable>
 </MudPaper>

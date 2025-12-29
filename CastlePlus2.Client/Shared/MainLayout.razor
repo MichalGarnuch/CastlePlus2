@@ -38,170 +38,160 @@
 
         <MudNavMenu Class="pt-8">
 
-            <MudText Typo="Typo.overline" Class="px-4 mb-2" Color="Color.Secondary">
-                Core
-            </MudText>
-            <MudNavLink Href="/dashboard"
-                        Match="NavLinkMatch.All"
-                        Icon="@Icons.Material.Filled.Dashboard">
-                Dashboard
-            </MudNavLink>
+            <MudNavGroup Title="Core" Expanded="true">
+                <MudNavLink Href="/dashboard"
+                            Match="NavLinkMatch.All"
+                            Icon="@Icons.Material.Filled.Dashboard">
+                    Dashboard
+                </MudNavLink>
+            </MudNavGroup>
 
-            <MudText Typo="Typo.overline" Class="px-4 mt-6 mb-2" Color="Color.Secondary">
-                Rdzeń
-            </MudText>
-            <MudNavLink Href="/rdzen/nieruchomosci"
-                        Icon="@Icons.Material.Filled.HomeWork">
-                Nieruchomości
-            </MudNavLink>
-            <MudNavLink Href="/rdzen/budynki" 
-                        Icon="@Icons.Material.Filled.Apartment">
-                Budynki
-            </MudNavLink>
-            <MudNavLink Href="/rdzen/lokale" 
-                        Icon="@Icons.Material.Filled.MeetingRoom">
-                Lokale
-            </MudNavLink>
-            <MudNavLink Href="/rdzen/adresy"
-                        Icon="@Icons.Material.Filled.Place">
-                Adresy
-            </MudNavLink>
-            <MudNavLink Href="/rdzen/przypisania-adresow"
-                        Icon="@Icons.Material.Filled.Link">
-                Przypisania adresów
-            </MudNavLink>
-            <MudNavLink Href="/rdzen/pomieszczenia"
-                        Icon="@Icons.Material.Filled.MeetingRoom">
-                Pomieszczenia
-            </MudNavLink>
-            <MudNavLink Href="/rdzen/encje"
-                        Icon="@Icons.Material.Filled.Layers">
-                Encje
-            </MudNavLink>
+            <MudNavGroup Title="Rdzeń" Expanded="true">
+                <MudNavLink Href="/rdzen/nieruchomosci"
+                            Icon="@Icons.Material.Filled.HomeWork">
+                    Nieruchomości
+                </MudNavLink>
+                <MudNavLink Href="/rdzen/budynki"
+                            Icon="@Icons.Material.Filled.Apartment">
+                    Budynki
+                </MudNavLink>
+                <MudNavLink Href="/rdzen/lokale"
+                            Icon="@Icons.Material.Filled.MeetingRoom">
+                    Lokale
+                </MudNavLink>
+                <MudNavLink Href="/rdzen/adresy"
+                            Icon="@Icons.Material.Filled.Place">
+                    Adresy
+                </MudNavLink>
+                <MudNavLink Href="/rdzen/przypisania-adresow"
+                            Icon="@Icons.Material.Filled.Link">
+                    Przypisania adresów
+                </MudNavLink>
+                <MudNavLink Href="/rdzen/pomieszczenia"
+                            Icon="@Icons.Material.Filled.MeetingRoom">
+                    Pomieszczenia
+                </MudNavLink>
+                <MudNavLink Href="/rdzen/encje"
+                            Icon="@Icons.Material.Filled.Layers">
+                    Encje
+                </MudNavLink>
+            </MudNavGroup>
 
-            <MudText Typo="Typo.overline" Class="px-4 mt-6 mb-2" Color="Color.Secondary">
-                Podmioty
-            </MudText>
-            <MudNavLink Href="/podmioty/podmioty"
-                        Icon="@Icons.Material.Filled.Business">
-                Podmioty
-            </MudNavLink>
-            <MudNavLink Href="/podmioty/wlasnosci"
-                        Icon="@Icons.Material.Filled.Assignment">
-                Własności
-            </MudNavLink>
-            <MudNavLink Href="/podmioty/kontakty"
-                        Icon="@Icons.Material.Filled.Contacts">
-                Kontakty
-            </MudNavLink>
+            <MudNavGroup Title="Podmioty" Expanded="true">
+                <MudNavLink Href="/podmioty/podmioty"
+                            Icon="@Icons.Material.Filled.Business">
+                    Podmioty
+                </MudNavLink>
+                <MudNavLink Href="/podmioty/wlasnosci"
+                            Icon="@Icons.Material.Filled.Assignment">
+                    Własności
+                </MudNavLink>
+                <MudNavLink Href="/podmioty/kontakty"
+                            Icon="@Icons.Material.Filled.Contacts">
+                    Kontakty
+                </MudNavLink>
+            </MudNavGroup>
 
-            <MudText Typo="Typo.overline" Class="px-4 mt-6 mb-2" Color="Color.Secondary">
-                Finanse
-            </MudText>
-            <MudNavLink Href="/finanse/faktury"
-                        Icon="@Icons.Material.Filled.ReceiptLong">
-                Faktury
-            </MudNavLink>
-            <MudNavLink Href="/finanse/platnosci"
-                        Icon="@Icons.Material.Filled.Payment">
-                Płatności
-            </MudNavLink>
-            <MudNavLink Href="/finanse/alokacje-kosztow"
-                        Icon="@Icons.Material.Filled.PieChart">
-                Alokacje Kosztów
-            </MudNavLink>
-            <MudNavLink Href="/finanse/kategorie-kosztow"
-                        Icon="@Icons.Material.Filled.Category">
-                Kategorie kosztów
-            </MudNavLink>
-            <MudNavLink Href="/finanse/pozycje-kosztow"
-                        Icon="@Icons.Material.Filled.ReceiptLong">
-                Pozycje kosztów
-            </MudNavLink>
-            <MudNavLink Href="/finanse/rozliczenia-platnosci"
-                        Icon="@Icons.Material.Filled.SyncAlt">
-                Rozliczenia płatności
-            </MudNavLink>
+            <MudNavGroup Title="Finanse" Expanded="true">
+                <MudNavLink Href="/finanse/faktury"
+                            Icon="@Icons.Material.Filled.ReceiptLong">
+                    Faktury
+                </MudNavLink>
+                <MudNavLink Href="/finanse/platnosci"
+                            Icon="@Icons.Material.Filled.Payment">
+                    Płatności
+                </MudNavLink>
+                <MudNavLink Href="/finanse/alokacje-kosztow"
+                            Icon="@Icons.Material.Filled.PieChart">
+                    Alokacje Kosztów
+                </MudNavLink>
+                <MudNavLink Href="/finanse/kategorie-kosztow"
+                            Icon="@Icons.Material.Filled.Category">
+                    Kategorie kosztów
+                </MudNavLink>
+                <MudNavLink Href="/finanse/pozycje-kosztow"
+                            Icon="@Icons.Material.Filled.ReceiptLong">
+                    Pozycje kosztów
+                </MudNavLink>
+                <MudNavLink Href="/finanse/rozliczenia-platnosci"
+                            Icon="@Icons.Material.Filled.SyncAlt">
+                    Rozliczenia płatności
+                </MudNavLink>
+            </MudNavGroup>
 
+            <MudNavGroup Title="Najem" Expanded="true">
+                <MudNavLink Href="/najem/przedmioty-najmu"
+                            Icon="@Icons.Material.Filled.Description">
+                    Przedmioty najmu
+                </MudNavLink>
+                <MudNavLink Href="/najem/kaucje"
+                            Icon="@Icons.Material.Filled.Savings">
+                    Kaucje
+                </MudNavLink>
+                <MudNavLink Href="/najem/skladniki-czynszu"
+                            Icon="@Icons.Material.Filled.RequestQuote">
+                    Składniki czynszu
+                </MudNavLink>
+                <MudNavLink Href="/najem/umowy"
+                            Icon="@Icons.Material.Filled.Assignment">
+                    Umowy najmu
+                </MudNavLink>
+            </MudNavGroup>
 
-            <MudText Typo="Typo.overline" Class="px-4 mt-6 mb-2" Color="Color.Secondary">
-                Najem
-            </MudText>
-            <MudNavLink Href="/najem/przedmioty-najmu"
-                        Icon="@Icons.Material.Filled.Description">
-                Przedmioty najmu
-            </MudNavLink>
-            <MudNavLink Href="/najem/kaucje"
-                        Icon="@Icons.Material.Filled.Savings">
-                Kaucje
-            </MudNavLink>
-            <MudNavLink Href="/najem/skladniki-czynszu"
-                        Icon="@Icons.Material.Filled.RequestQuote">
-                Składniki czynszu
-            </MudNavLink>
-            <MudNavLink Href="/najem/umowy"
-                        Icon="@Icons.Material.Filled.Assignment">
-                Umowy najmu
-            </MudNavLink>
+            <MudNavGroup Title="Słowniki" Expanded="true">
+                <MudNavLink Href="/slowniki/jednostki-miary"
+                            Icon="@Icons.Material.Filled.Scale">
+                    Jednostki Miary
+                </MudNavLink>
+                <MudNavLink Href="/slowniki/indeksacje"
+                            Icon="@Icons.Material.Filled.Timeline">
+                    Indeksacje
+                </MudNavLink>
+                <MudNavLink Href="/slowniki/waluty" Icon="@Icons.Material.Filled.AttachMoney">
+                    Waluty
+                </MudNavLink>
+            </MudNavGroup>
 
-            <MudText Typo="Typo.overline" Class="px-4 mt-6 mb-2" Color="Color.Secondary">
-                Słowniki
-            </MudText>
-            <MudNavLink Href="/slowniki/jednostki-miary"
-                        Icon="@Icons.Material.Filled.Scale">
-                Jednostki Miary
-            </MudNavLink>
-            <MudNavLink Href="/slowniki/indeksacje" 
-                        Icon="@Icons.Material.Filled.Timeline">
-                Indeksacje
-            </MudNavLink>
-            <MudNavLink Href="/slowniki/waluty" Icon="@Icons.Material.Filled.AttachMoney">
-                Waluty
-            </MudNavLink>
+            <MudNavGroup Title="Media" Expanded="true">
+                <MudNavLink Href="/media/rodzaje-mediow"
+                            Icon="@Icons.Material.Filled.WaterDrop">
+                    Rodzaje Mediów
+                </MudNavLink>
+                <MudNavLink Href="/media/przylacza"
+                            Icon="@Icons.Material.Filled.SettingsInputComposite">
+                    Przyłącza
+                </MudNavLink>
+                <MudNavLink Href="/media/liczniki"
+                            Icon="@Icons.Material.Filled.ElectricMeter">
+                    Liczniki
+                </MudNavLink>
+                <MudNavLink Href="/media/odczyty"
+                            Icon="@Icons.Material.Filled.FactCheck">
+                    Odczyty
+                </MudNavLink>
+            </MudNavGroup>
 
-            <MudText Typo="Typo.overline" Class="px-4 mt-6 mb-2" Color="Color.Secondary">
-                Media
-            </MudText>
-            <MudNavLink Href="/media/rodzaje-mediow"
-                        Icon="@Icons.Material.Filled.WaterDrop">
-                Rodzaje Mediów
-            </MudNavLink>
-            <MudNavLink Href="/media/przylacza"
-                        Icon="@Icons.Material.Filled.SettingsInputComposite">
-                Przyłącza
-            </MudNavLink>
-            <MudNavLink Href="/media/liczniki"
-                        Icon="@Icons.Material.Filled.ElectricMeter">
-                Liczniki
-            </MudNavLink>
-            <MudNavLink Href="/media/odczyty"
-                        Icon="@Icons.Material.Filled.FactCheck">
-                Odczyty
-            </MudNavLink>
+            <MudNavGroup Title="Utrzymanie" Expanded="true">
+                <MudNavLink Href="/utrzymanie/zlecenia-pracy"
+                            Icon="@Icons.Material.Filled.Build">
+                    Zlecenia pracy
+                </MudNavLink>
+                <MudNavLink Href="/utrzymanie/powiazania-zlecenia"
+                            Icon="@Icons.Material.Filled.Link">
+                    Powiązania zleceń
+                </MudNavLink>
+            </MudNavGroup>
 
-            <MudText Typo="Typo.overline" Class="px-4 mt-6 mb-2" Color="Color.Secondary">
-                Utrzymanie
-            </MudText>
-            <MudNavLink Href="/utrzymanie/zlecenia-pracy"
-                        Icon="@Icons.Material.Filled.Build">
-                Zlecenia pracy
-            </MudNavLink>
-            <MudNavLink Href="/utrzymanie/powiazania-zlecenia"
-                        Icon="@Icons.Material.Filled.Link">
-                Powiązania zleceń
-            </MudNavLink>
-
-            <MudText Typo="Typo.overline" Class="px-4 mt-6 mb-2" Color="Color.Secondary">
-                Dokumenty
-            </MudText>
-            <MudNavLink Href="/dokumenty"
-                        Icon="@Icons.Material.Filled.Description">
-                Dokumenty
-            </MudNavLink>
-            <MudNavLink Href="/dokumenty/powiazania"
-                        Icon="@Icons.Material.Filled.Link">
-                Powiązania dokumentu
-            </MudNavLink>
+            <MudNavGroup Title="Dokumenty" Expanded="true">
+                <MudNavLink Href="/dokumenty"
+                            Icon="@Icons.Material.Filled.Description">
+                    Dokumenty
+                </MudNavLink>
+                <MudNavLink Href="/dokumenty/powiazania"
+                            Icon="@Icons.Material.Filled.Link">
+                    Powiązania dokumentu
+                </MudNavLink>
+            </MudNavGroup>
 
         </MudNavMenu>
     </MudDrawer>
