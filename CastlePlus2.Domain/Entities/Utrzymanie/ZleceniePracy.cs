@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CastlePlus2.Domain.Entities.Utrzymanie
 {
@@ -20,5 +21,7 @@ namespace CastlePlus2.Domain.Entities.Utrzymanie
         public DateTime DataUtworzenia { get; set; }
 
         public DateTime? DataZamkniecia { get; set; }
+
+        public ICollection<PowiazanieZlecenia> Powiazania { get; set; } = new List<PowiazanieZlecenia>();
     }
 }

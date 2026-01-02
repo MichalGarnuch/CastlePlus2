@@ -69,3 +69,26 @@ Content-Type: application/json
   "kwotaKaucji": 2000.00,
   "udzialProcent": 50.0000
 }
+### [UTRZYMANIE] GET context
+GET {{CastlePlus2.Api_HostAddress}}/api/utrzymanie/zgloszenia/context
+Accept: application/json
+
+### [UTRZYMANIE] POST zgloszenie (bez opisu)
+POST {{CastlePlus2.Api_HostAddress}}/api/utrzymanie/zgloszenia
+Content-Type: application/json
+
+{
+  "idEncjiGospodarza": "00000000-0000-0000-0000-000000000000",
+  "tytul": "Usterka w lokalu",
+  "opis": null
+}
+
+### [UTRZYMANIE] POST zgloszenie (z opisem)
+POST {{CastlePlus2.Api_HostAddress}}/api/utrzymanie/zgloszenia
+Content-Type: application/json
+
+{
+  "idEncjiGospodarza": "00000000-0000-0000-0000-000000000000",
+  "tytul": "Usterka w budynku",
+  "opis": "Przeciek w pomieszczeniu technicznym"
+}

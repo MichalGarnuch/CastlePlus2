@@ -1,0 +1,158 @@
+﻿@page "/utrzymanie/zgloszenia/nowe"
+@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Utrzymanie
+@using CastlePlus2.Contracts.Requests.Utrzymanie
+@using CastlePlus2.Client.Services.Utrzymanie
+@inject IZgloszeniaService ZgloszeniaService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Zgłoszenie usterki</MudText>
+
+<MudPaper Class="pa-4">
+    @if (_loading)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else
+    {
+        <MudForm @ref="_form" @bind-IsValid="_isFormValid">
+            <MudGrid Spacing="2">
+                <MudItem xs="12">
+                    <MudRadioGroup T="string"
+                                   Row="true"
+                                   SelectedOption="@_gospodarzTyp"
+                                   SelectedOptionChanged="OnGospodarzTypChanged">
+                        <MudRadio T="string" Option="@GospodarzTypLokal">Lokal</MudRadio>
+                        <MudRadio T="string" Option="@GospodarzTypBudynek">Budynek</MudRadio>
+                    </MudRadioGroup>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    @if (_gospodarzTyp == GospodarzTypLokal)
+                    {
+                        <MudSelect T="Guid"
+                                   Label="Lokal gospodarza"
+                                   Required="true"
+                                   RequiredError="Lokal jest wymagany"
+                                   @bind-Value="_model.IdEncjiGospodarza"
+                                   Margin="Margin.Dense">
+                            @foreach (var lokal in _context.LokaleLookup)
+                            {
+                                <MudSelectItem Value="@lokal.IdEncji">@lokal.Label</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
+                    else
+                    {
+                        <MudSelect T="Guid"
+                                   Label="Budynek gospodarza"
+                                   Required="true"
+                                   RequiredError="Budynek jest wymagany"
+                                   @bind-Value="_model.IdEncjiGospodarza"
+                                   Margin="Margin.Dense">
+                            @foreach (var budynek in _context.BudynkiLookup)
+                            {
+                                <MudSelectItem Value="@budynek.IdEncji">@budynek.Label</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_model.Tytul"
+                                  Label="Tytuł"
+                                  Required="true"
+                                  RequiredError="Tytuł jest wymagany"
+                                  MaxLength="200"
+                                  Counter="200"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_model.Opis"
+                                  Label="Opis"
+                                  MaxLength="1000"
+                                  Counter="1000"
+                                  Lines="4"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+
+        <MudDivider Class="my-4" />
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="SubmitAsync"
+                   Disabled="@(!_isFormValid || _saving)">
+            Zgłoś usterkę
+        </MudButton>
+    }
+</MudPaper>
+
+@code {
+    private const string GospodarzTypLokal = "Lokal";
+    private const string GospodarzTypBudynek = "Budynek";
+
+    private MudForm? _form;
+    private bool _loading = true;
+    private bool _saving;
+    private bool _isFormValid;
+    private string _gospodarzTyp = GospodarzTypLokal;
+    private ZglosUsterkeContextDto _context = new();
+    private ZglosUsterkeRequest _model = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _context = await ZgloszeniaService.GetContextAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się pobrać danych kontekstu: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private Task OnGospodarzTypChanged(string selected)
+    {
+        _gospodarzTyp = selected;
+        _model.IdEncjiGospodarza = Guid.Empty;
+        return Task.CompletedTask;
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (_form is null)
+        {
+            return;
+        }
+
+        await _form.Validate();
+        if (!_isFormValid)
+        {
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            var result = await ZgloszeniaService.CreateAsync(_model);
+            Snackbar.Add($"Zgłoszenie zostało zapisane (Id: {result.IdZlecenia}).", Severity.Success);
+            _model = new ZglosUsterkeRequest();
+            _gospodarzTyp = GospodarzTypLokal;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się zapisać zgłoszenia: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

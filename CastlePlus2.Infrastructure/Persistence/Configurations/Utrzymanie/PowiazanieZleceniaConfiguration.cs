@@ -1,4 +1,5 @@
-﻿using CastlePlus2.Domain.Entities.Utrzymanie;
+﻿using CastlePlus2.Domain.Entities.Rdzen;          // <= DODAJ TO
+using CastlePlus2.Domain.Entities.Utrzymanie;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -28,23 +29,25 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Utrzymanie
                    .HasColumnName("IdEncji")
                    .IsRequired();
 
-            // FK -> rdzen.Encja
+            // FK -> rdzen.Encja (IdEncji)
             builder.HasOne(x => x.Encja)
                    .WithMany()
                    .HasForeignKey(x => x.IdEncji)
-                   .HasConstraintName("FK_ut_Powiazanie_Encja")
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .HasConstraintName("FK_ut_PowiazanieZlecenia_Encja")
+                   .OnDelete(DeleteBehavior.NoAction);
 
-            // FK -> utrzymanie.ZleceniePracy
+            // FK -> utrzymanie.ZleceniePracy (IdZlecenia)
             builder.HasOne(x => x.ZleceniePracy)
-                   .WithMany()
+                   .WithMany(x => x.Powiazania)
                    .HasForeignKey(x => x.IdZlecenia)
-                   .HasConstraintName("FK_ut_Powiazanie_Zlecenie")
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .HasConstraintName("FK_ut_PowiazanieZlecenia_ZleceniePracy")
+                   .OnDelete(DeleteBehavior.NoAction);
 
-            // Indeksy (jeżeli istnieją w SQL – warto je odzwierciedlić)
-            builder.HasIndex(x => x.IdEncji).HasDatabaseName("IX_ut_Powiazanie_Encja");
-            builder.HasIndex(x => x.IdZlecenia).HasDatabaseName("IX_ut_Powiazanie_Zlecenie");
+            builder.HasIndex(x => x.IdEncji)
+                   .HasDatabaseName("IX_ut_PowiazanieZlecenia_IdEncji");
+
+            builder.HasIndex(x => x.IdZlecenia)
+                   .HasDatabaseName("IX_ut_PowiazanieZlecenia_IdZlecenia");
         }
     }
 }

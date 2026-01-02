@@ -1,4 +1,5 @@
-﻿using CastlePlus2.Domain.Entities.Utrzymanie;
+﻿using CastlePlus2.Domain.Entities.Rdzen;
+using CastlePlus2.Domain.Entities.Utrzymanie;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -24,6 +25,11 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Utrzymanie
                    .HasColumnName("IdEncjiGospodarza")
                    .IsRequired();
 
+            builder.HasOne<Encja>()
+                   .WithMany()
+                   .HasForeignKey(x => x.IdEncjiGospodarza)
+                   .OnDelete(DeleteBehavior.NoAction);
+
             builder.Property(x => x.Tytul)
                    .HasColumnName("Tytul")
                    .HasMaxLength(200)
@@ -39,11 +45,11 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Utrzymanie
                    .HasMaxLength(20)
                    .IsRequired();
 
+            // ZMIANA: DataUtworzenia nie jest generowana przez DB.
+            // Ustawiasz ją w kodzie (handler: DateTime.UtcNow), więc nie deklarujemy defaulta i ValueGeneratedOnAdd.
             builder.Property(x => x.DataUtworzenia)
                    .HasColumnName("DataUtworzenia")
                    .HasColumnType("datetime2(0)")
-                   .HasDefaultValueSql("sysutcdatetime()")
-                   .ValueGeneratedOnAdd()
                    .IsRequired();
 
             builder.Property(x => x.DataZamkniecia)
