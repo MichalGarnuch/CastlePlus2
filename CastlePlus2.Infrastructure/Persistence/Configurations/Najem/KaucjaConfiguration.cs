@@ -1,4 +1,5 @@
 ﻿using CastlePlus2.Domain.Entities.Najem;
+using CastlePlus2.Domain.Entities.Slowniki;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -43,6 +44,18 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Najem
                    .HasColumnName("DataOperacji")
                    .HasColumnType("date")
                    .IsRequired();
+
+            // FK from SQL: FK_nj_Kaucja_Umowa (IdUmowyNajmu -> najem.UmowaNajmu.IdEncji)
+            builder.HasOne<UmowaNajmu>()
+                .WithMany()
+                .HasForeignKey(x => x.IdUmowyNajmu)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // FK from SQL: FK_nj_Kaucja_Waluta (KodWaluty -> slowniki.Waluta.KodWaluty)
+            builder.HasOne<Waluta>()
+                .WithMany()
+                .HasForeignKey(x => x.KodWaluty)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

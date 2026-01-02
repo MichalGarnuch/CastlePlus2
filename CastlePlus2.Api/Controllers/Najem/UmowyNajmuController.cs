@@ -1,7 +1,10 @@
-﻿using CastlePlus2.Application.Najem.UmowyNajmu.Commands.CreateUmowaNajmu;
+﻿using CastlePlus2.Application.Common.Exceptions;
+using CastlePlus2.Application.Najem.UmowyNajmu.Commands.CreateUmowaNajmu;
 using CastlePlus2.Application.Najem.UmowyNajmu.Commands.DeleteUmowaNajmu;
 using CastlePlus2.Application.Najem.UmowyNajmu.Commands.UpdateUmowaNajmu;
+using CastlePlus2.Application.Najem.UmowyNajmu.Commands.ZawrzUmoweNajmu;
 using CastlePlus2.Application.Najem.UmowyNajmu.Queries.GetAllUmowyNajmu;
+using CastlePlus2.Application.Najem.UmowyNajmu.Queries.GetUmowaNajmuContext;
 using CastlePlus2.Application.Najem.UmowyNajmu.Queries.GetUmowaNajmuById;
 using CastlePlus2.Contracts.DTOs.Najem;
 using CastlePlus2.Contracts.Requests.Najem;
@@ -39,6 +42,51 @@ namespace CastlePlus2.Api.Controllers.Najem
 
             var result = await _mediator.Send(command, ct);
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        }
+
+        [HttpPost("zawrz")]
+        [ProducesResponseType(typeof(ZawrzUmoweNajmuResult), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> Zawrz([FromBody] ZawrzUmoweNajmuRequest request, CancellationToken ct)
+        {
+            try
+            {
+                var command = new ZawrzUmoweNajmuCommand
+                {
+                    IdLokalu = request.IdLokalu,
+                    IdWynajmujacego = request.IdWynajmujacego,
+                    IdNajemcy = request.IdNajemcy,
+                    DataZawarcia = request.DataZawarcia,
+                    DataPoczatku = request.DataPoczatku,
+                    DataZakonczenia = request.DataZakonczenia,
+                    KodWaluty = request.KodWaluty,
+                    KodIndeksacji = request.KodIndeksacji,
+                    NazwaCzynszu = request.NazwaCzynszu,
+                    KodJednostki = request.KodJednostki,
+                    Stawka = request.Stawka,
+                    IloscBazowa = request.IloscBazowa,
+                    KwotaKaucji = request.KwotaKaucji
+                };
+
+                var result = await _mediator.Send(command, ct);
+                return CreatedAtAction(nameof(GetById), new { id = result.IdEncjiUmowy }, result);
+            }
+            catch (BusinessConflictException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("context")]
+        [ProducesResponseType(typeof(UmowaNajmuContextDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetContext(CancellationToken ct)
+        {
+            var result = await _mediator.Send(new GetUmowaNajmuContextQuery(), ct);
+            return Ok(result);
         }
 
         [HttpGet]

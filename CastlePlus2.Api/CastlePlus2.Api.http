@@ -4,3 +4,27 @@ GET {{CastlePlus2.Api_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+### [NAJEM] GET context
+GET {{CastlePlus2.Api_HostAddress}}/api/najem/UmowyNajmu/context
+Accept: application/json
+
+### [NAJEM] POST zawrz
+POST {{CastlePlus2.Api_HostAddress}}/api/najem/UmowyNajmu/zawrz
+Content-Type: application/json
+
+{
+  "idLokalu": "00000000-0000-0000-0000-000000000000",
+  "idWynajmujacego": 1,
+  "idNajemcy": 2,
+  "dataZawarcia": "2024-01-15",
+  "dataPoczatku": "2024-02-01",
+  "dataZakonczenia": "2025-01-31",
+  "kodWaluty": "PLN",
+  "kodIndeksacji": null,
+  "nazwaCzynszu": "Czynsz bazowy",
+  "kodJednostki": "M2",
+  "stawka": 120.5000,
+  "iloscBazowa": 50.0000,
+  "kwotaKaucji": 2000.00
+}

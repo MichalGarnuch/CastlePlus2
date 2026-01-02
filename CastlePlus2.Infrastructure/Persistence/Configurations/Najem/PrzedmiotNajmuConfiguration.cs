@@ -1,6 +1,8 @@
 ﻿using CastlePlus2.Domain.Entities.Najem;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using CastlePlus2.Domain.Entities.Rdzen;
+
 
 namespace CastlePlus2.Infrastructure.Persistence.Configurations.Najem
 {
@@ -42,6 +44,18 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Najem
                    .HasColumnName("DoDnia")
                    .HasColumnType("date")
                    .IsRequired(false);
+
+            // FK from SQL: FK_nj_Przedmiot_Umowa (IdUmowyNajmu -> najem.UmowaNajmu.IdEncji)
+            builder.HasOne<UmowaNajmu>()
+                .WithMany()
+                .HasForeignKey(x => x.IdUmowyNajmu)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // FK from SQL: FK_nj_Przedmiot_Encja (IdEncji -> rdzen.Encja.IdEncji)
+            builder.HasOne<Encja>()
+                .WithMany()
+                .HasForeignKey(x => x.IdEncji)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

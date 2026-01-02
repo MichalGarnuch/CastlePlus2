@@ -8,10 +8,12 @@ namespace CastlePlus2.Client.Services.Najem
 {
     public interface IUmowyNajmuService
     {
+        Task<UmowaNajmuContextDto> GetContextAsync(CancellationToken ct = default);
         Task<List<UmowaNajmuDto>> GetAllAsync(CancellationToken ct = default);
         Task<UmowaNajmuDto?> GetByIdAsync(Guid id, CancellationToken ct = default);
         Task<UmowaNajmuDto> CreateAsync(CreateUmowaNajmuRequest request, CancellationToken ct = default);
         Task<bool> UpdateAsync(Guid id, UpdateUmowaNajmuRequest request, CancellationToken ct = default);
         Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
+        Task<ZawrzUmoweNajmuResult> ZawrzAsync(ZawrzUmoweNajmuRequest request, CancellationToken ct = default);
     }
 }

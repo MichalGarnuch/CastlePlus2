@@ -1,0 +1,307 @@
+﻿@page "/najem/umowy/zawrz"
+@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Najem
+@using CastlePlus2.Contracts.DTOs.Podmioty
+@using CastlePlus2.Contracts.DTOs.Rdzen
+@using CastlePlus2.Contracts.DTOs.Slowniki
+@using CastlePlus2.Contracts.Requests.Najem
+@using CastlePlus2.Client.Services.Najem
+@inject IUmowyNajmuService UmowyNajmuService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Zawarcie umowy najmu</MudText>
+
+<MudPaper Class="pa-4">
+    @if (_loading)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else
+    {
+        <MudForm @ref="_form">
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="Guid"
+                               Label="Lokal"
+                               Required="true"
+                               RequiredError="Lokal jest wymagany"
+                               @bind-Value="_model.IdLokalu"
+                               Margin="Margin.Dense">
+                        @foreach (var lokal in _context.Lokale)
+                        {
+                            <MudSelectItem Value="@lokal.Id">@GetLokalLabel(lokal)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="long"
+                               Label="Wynajmujący"
+                               Required="true"
+                               RequiredError="Wynajmujący jest wymagany"
+                               @bind-Value="_model.IdWynajmujacego"
+                               Margin="Margin.Dense">
+                        @foreach (var podmiot in _context.Podmioty)
+                        {
+                            <MudSelectItem Value="@podmiot.IdPodmiotu">@GetPodmiotLabel(podmiot)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="long"
+                               Label="Najemca"
+                               Required="true"
+                               RequiredError="Najemca jest wymagany"
+                               @bind-Value="_model.IdNajemcy"
+                               Margin="Margin.Dense">
+                        @foreach (var podmiot in _context.Podmioty)
+                        {
+                            <MudSelectItem Value="@podmiot.IdPodmiotu">@GetPodmiotLabel(podmiot)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="string"
+                               Label="Waluta"
+                               Required="true"
+                               RequiredError="Waluta jest wymagana"
+                               @bind-Value="_model.KodWaluty"
+                               Margin="Margin.Dense">
+                        @foreach (var waluta in _context.Waluty)
+                        {
+                            <MudSelectItem Value="@waluta.KodWaluty">@GetWalutaLabel(waluta)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="string"
+                               Label="Indeksacja"
+                               Clearable="true"
+                               @bind-Value="_model.KodIndeksacji"
+                               Margin="Margin.Dense">
+                        <MudSelectItem Value="@string.Empty">Brak</MudSelectItem>
+                        @foreach (var indeksacja in _context.Indeksacje)
+                        {
+                            <MudSelectItem Value="@indeksacja.KodIndeksacji">@GetIndeksacjaLabel(indeksacja)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Data zawarcia"
+                                   Date="@_dataZawarcia"
+                                   DateChanged="OnDataZawarciaChanged"
+                                   Required="true"
+                                   RequiredError="Data zawarcia jest wymagana"
+                                   Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Data początku"
+                                   Date="@_dataPoczatku"
+                                   DateChanged="OnDataPoczatkuChanged"
+                                   Required="true"
+                                   RequiredError="Data początku jest wymagana"
+                                   Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Data zakończenia"
+                                   Date="@_dataZakonczenia"
+                                   DateChanged="OnDataZakonczeniaChanged"
+                                   Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_model.NazwaCzynszu"
+                                  Label="Nazwa czynszu"
+                                  Required="true"
+                                  RequiredError="Nazwa czynszu jest wymagana"
+                                  MaxLength="100"
+                                  Counter="100"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="string"
+                               Label="Jednostka miary"
+                               Required="true"
+                               RequiredError="Jednostka miary jest wymagana"
+                               @bind-Value="_model.KodJednostki"
+                               Margin="Margin.Dense">
+                        @foreach (var jednostka in _context.JednostkiMiary)
+                        {
+                            <MudSelectItem Value="@jednostka.KodJednostki">@GetJednostkaLabel(jednostka)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="decimal"
+                                     Label="Stawka"
+                                     Required="true"
+                                     RequiredError="Stawka jest wymagana"
+                                     @bind-Value="_model.Stawka"
+                                     Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="decimal?"
+                                     Label="Ilość bazowa"
+                                     @bind-Value="_model.IloscBazowa"
+                                     Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="decimal?"
+                                     Label="Kwota kaucji"
+                                     @bind-Value="_model.KwotaKaucji"
+                                     Margin="Margin.Dense" />
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+
+        <MudDivider Class="my-4" />
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="SubmitAsync"
+                   Disabled="_loading">
+            Zawrzyj umowę
+        </MudButton>
+    }
+</MudPaper>
+
+@code {
+    private MudForm? _form;
+    private bool _loading = true;
+    private UmowaNajmuContextDto _context = new();
+    private ZawrzUmoweNajmuRequest _model = new();
+
+    private DateTime? _dataZawarcia;
+    private DateTime? _dataPoczatku;
+    private DateTime? _dataZakonczenia;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var today = DateTime.Today;
+        _model = new ZawrzUmoweNajmuRequest
+        {
+            DataZawarcia = DateOnly.FromDateTime(today),
+            DataPoczatku = DateOnly.FromDateTime(today)
+        };
+        _dataZawarcia = today;
+        _dataPoczatku = today;
+
+        await LoadContextAsync();
+    }
+
+    private async Task LoadContextAsync()
+    {
+        _loading = true;
+        try
+        {
+            _context = await UmowyNajmuService.GetContextAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd ładowania danych: {ex.Message}", Severity.Error);
+            _context = new UmowaNajmuContextDto();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void OnDataZawarciaChanged(DateTime? value)
+    {
+        _dataZawarcia = value;
+        if (value.HasValue)
+        {
+            _model.DataZawarcia = DateOnly.FromDateTime(value.Value);
+        }
+    }
+
+    private void OnDataPoczatkuChanged(DateTime? value)
+    {
+        _dataPoczatku = value;
+        if (value.HasValue)
+        {
+            _model.DataPoczatku = DateOnly.FromDateTime(value.Value);
+        }
+    }
+
+    private void OnDataZakonczeniaChanged(DateTime? value)
+    {
+        _dataZakonczenia = value;
+        _model.DataZakonczenia = value is null ? null : DateOnly.FromDateTime(value.Value);
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (_form is null)
+        {
+            return;
+        }
+
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            return;
+        }
+
+        _model.KodWaluty = (_model.KodWaluty ?? string.Empty).Trim().ToUpperInvariant();
+        _model.KodJednostki = (_model.KodJednostki ?? string.Empty).Trim().ToUpperInvariant();
+        _model.NazwaCzynszu = (_model.NazwaCzynszu ?? string.Empty).Trim();
+        _model.KodIndeksacji = string.IsNullOrWhiteSpace(_model.KodIndeksacji)
+            ? null
+            : _model.KodIndeksacji.Trim().ToUpperInvariant();
+
+        try
+        {
+            var result = await UmowyNajmuService.ZawrzAsync(_model);
+            if (result.IdEncjiUmowy != Guid.Empty)
+            {
+                Snackbar.Add($"Zawarto umowę (Id={result.IdEncjiUmowy}).", Severity.Success);
+                NavigationManager.NavigateTo("/najem/umowy");
+                return;
+            }
+
+            Snackbar.Add(result.Message ?? "Nie udało się zawrzeć umowy.", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private static string GetLokalLabel(LokalDto lokal)
+    {
+        return $"{lokal.KodLokalu} (Id={lokal.Id})";
+    }
+
+    private static string GetPodmiotLabel(PodmiotDto podmiot)
+    {
+        return string.IsNullOrWhiteSpace(podmiot.Nazwa) ? podmiot.IdPodmiotu.ToString() : podmiot.Nazwa;
+    }
+
+    private static string GetWalutaLabel(WalutaDto waluta)
+    {
+        return $"{waluta.KodWaluty} - {waluta.Nazwa}";
+    }
+
+    private static string GetIndeksacjaLabel(IndeksacjaDto indeksacja)
+    {
+        return $"{indeksacja.KodIndeksacji} - {indeksacja.Nazwa}";
+    }
+
+    private static string GetJednostkaLabel(JednostkaMiaryDto jednostka)
+    {
+        return $"{jednostka.KodJednostki} - {jednostka.Nazwa}";
+    }
+}
