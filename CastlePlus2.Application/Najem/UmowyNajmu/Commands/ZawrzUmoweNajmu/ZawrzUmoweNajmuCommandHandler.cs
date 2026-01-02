@@ -17,19 +17,22 @@ namespace CastlePlus2.Application.Najem.UmowyNajmu.Commands.ZawrzUmoweNajmu
         private readonly IPrzedmiotNajmuRepository _przedmiotRepository;
         private readonly ISkladnikCzynszuRepository _skladnikRepository;
         private readonly IKaucjaRepository _kaucjaRepository;
+        private readonly IUmowaNajmuKodGenerator _kodGenerator;
 
         public ZawrzUmoweNajmuCommandHandler(
             ILokalRepository lokalRepository,
             IUmowaNajmuRepository umowaRepository,
             IPrzedmiotNajmuRepository przedmiotRepository,
             ISkladnikCzynszuRepository skladnikRepository,
-            IKaucjaRepository kaucjaRepository)
+            IKaucjaRepository kaucjaRepository,
+            IUmowaNajmuKodGenerator kodGenerator)
         {
             _lokalRepository = lokalRepository;
             _umowaRepository = umowaRepository;
             _przedmiotRepository = przedmiotRepository;
             _skladnikRepository = skladnikRepository;
             _kaucjaRepository = kaucjaRepository;
+            _kodGenerator = kodGenerator;
         }
 
         public async Task<ZawrzUmoweNajmuResult> Handle(ZawrzUmoweNajmuCommand request, CancellationToken ct)
@@ -49,12 +52,16 @@ namespace CastlePlus2.Application.Najem.UmowyNajmu.Commands.ZawrzUmoweNajmu
 
             var encjaId = Guid.NewGuid();
             var nowUtc = DateTime.UtcNow;
+            var kodEncji = string.IsNullOrWhiteSpace(request.KodEncji)
+                ? await _kodGenerator.GenerateUmowaNajmuKodAsync(request.DataZawarcia, ct)
+                : request.KodEncji.Trim();
+            var udzialProcent = request.UdzialProcent ?? 100.0000m;
 
             var umowa = new UmowaNajmu
             {
                 Id = encjaId,
                 TypEncji = TypEncjiUmowy,
-                KodEncji = null,
+                KodEncji = kodEncji,
                 UtworzonoUtc = nowUtc,
                 ZmienionoUtc = nowUtc,
 
@@ -71,6 +78,7 @@ namespace CastlePlus2.Application.Najem.UmowyNajmu.Commands.ZawrzUmoweNajmu
             {
                 IdUmowyNajmu = encjaId,
                 IdEncji = lokal.Id,
+                UdzialProcent = udzialProcent,
                 OdDnia = request.DataPoczatku,
                 DoDnia = request.DataZakonczenia
             };

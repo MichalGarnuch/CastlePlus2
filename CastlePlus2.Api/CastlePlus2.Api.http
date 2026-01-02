@@ -28,3 +28,44 @@ Content-Type: application/json
   "iloscBazowa": 50.0000,
   "kwotaKaucji": 2000.00
 }
+### [NAJEM] POST zawrz bez kodu i udzia³u (auto-kod + 100%)
+POST {{CastlePlus2.Api_HostAddress}}/api/najem/UmowyNajmu/zawrz
+Content-Type: application/json
+
+{
+  "idLokalu": "00000000-0000-0000-0000-000000000000",
+  "idWynajmujacego": 1,
+  "idNajemcy": 2,
+  "dataZawarcia": "2026-01-15",
+  "dataPoczatku": "2026-02-01",
+  "dataZakonczenia": "2027-01-31",
+  "kodWaluty": "PLN",
+  "kodIndeksacji": null,
+  "nazwaCzynszu": "Czynsz bazowy",
+  "kodJednostki": "M2",
+  "stawka": 120.5000,
+  "iloscBazowa": 50.0000,
+  "kwotaKaucji": 2000.00
+}
+
+### [NAJEM] POST zawrz z kodem i udzia³em
+POST {{CastlePlus2.Api_HostAddress}}/api/najem/UmowyNajmu/zawrz
+Content-Type: application/json
+
+{
+  "idLokalu": "00000000-0000-0000-0000-000000000000",
+  "idWynajmujacego": 1,
+  "idNajemcy": 2,
+  "dataZawarcia": "2026-01-15",
+  "dataPoczatku": "2026-02-01",
+  "dataZakonczenia": "2027-01-31",
+  "kodEncji": "UN/2026/0001",
+  "kodWaluty": "PLN",
+  "kodIndeksacji": null,
+  "nazwaCzynszu": "Czynsz bazowy",
+  "kodJednostki": "M2",
+  "stawka": 120.5000,
+  "iloscBazowa": 50.0000,
+  "kwotaKaucji": 2000.00,
+  "udzialProcent": 50.0000
+}

@@ -25,6 +25,9 @@ namespace CastlePlus2.Application.Najem.UmowyNajmu.Commands.ZawrzUmoweNajmu
                 .Must((cmd, data) => data is null || data > cmd.DataPoczatku)
                 .WithMessage("Data zakończenia musi być późniejsza niż data początku.");
 
+            RuleFor(x => x.KodEncji)
+                .MaximumLength(40);
+
             RuleFor(x => x.KodWaluty)
                 .NotEmpty()
                 .Length(3);
@@ -46,6 +49,11 @@ namespace CastlePlus2.Application.Najem.UmowyNajmu.Commands.ZawrzUmoweNajmu
             RuleFor(x => x.KwotaKaucji)
                 .GreaterThanOrEqualTo(0)
                 .When(x => x.KwotaKaucji.HasValue);
+
+            RuleFor(x => x.UdzialProcent)
+                .GreaterThan(0)
+                .LessThanOrEqualTo(100)
+                .When(x => x.UdzialProcent.HasValue);
         }
     }
 }

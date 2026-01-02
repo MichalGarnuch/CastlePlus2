@@ -12,6 +12,8 @@ namespace CastlePlus2.Application.Najem.UmowyNajmu.Commands.ZawrzUmoweNajmu
         public DateOnly DataZawarcia { get; set; }
         public DateOnly DataPoczatku { get; set; }
         public DateOnly? DataZakonczenia { get; set; }
+        public decimal? UdzialProcent { get; set; }
+        public string? KodEncji { get; set; }
         public string KodWaluty { get; set; } = string.Empty;
         public string? KodIndeksacji { get; set; }
         public string NazwaCzynszu { get; set; } = string.Empty;

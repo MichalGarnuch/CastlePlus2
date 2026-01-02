@@ -20,6 +20,7 @@ using CastlePlus2.Infrastructure.Repositories.Podmioty;
 using CastlePlus2.Infrastructure.Repositories.Rdzen;
 using CastlePlus2.Infrastructure.Repositories.Slowniki;
 using CastlePlus2.Infrastructure.Repositories.Utrzymanie;
+using CastlePlus2.Infrastructure.Services.Najem;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models; // <--- WAŻNE: Ten using jest potrzebny do konfiguracji
@@ -109,6 +110,7 @@ builder.Services.AddScoped<IUmowaNajmuRepository, UmowaNajmuRepository>();
 builder.Services.AddScoped<IPrzedmiotNajmuRepository, PrzedmiotNajmuRepository>();
 builder.Services.AddScoped<ISkladnikCzynszuRepository, SkladnikCzynszuRepository>();
 builder.Services.AddScoped<IKaucjaRepository, KaucjaRepository>();
+builder.Services.AddScoped<IUmowaNajmuKodGenerator, UmowaNajmuKodGenerator>();
 builder.Services.AddScoped<IWlasnoscRepository, WlasnoscRepository>();
 //MEDIA
 builder.Services.AddScoped<IRodzajMediumRepository, RodzajMediumRepository>();

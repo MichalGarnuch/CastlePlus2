@@ -59,13 +59,15 @@ namespace CastlePlus2.Api.Controllers.Najem
                     DataZawarcia = request.DataZawarcia,
                     DataPoczatku = request.DataPoczatku,
                     DataZakonczenia = request.DataZakonczenia,
+                    KodEncji = request.KodEncji,
                     KodWaluty = request.KodWaluty,
                     KodIndeksacji = request.KodIndeksacji,
                     NazwaCzynszu = request.NazwaCzynszu,
                     KodJednostki = request.KodJednostki,
                     Stawka = request.Stawka,
                     IloscBazowa = request.IloscBazowa,
-                    KwotaKaucji = request.KwotaKaucji
+                    KwotaKaucji = request.KwotaKaucji,
+                    UdzialProcent = request.UdzialProcent
                 };
 
                 var result = await _mediator.Send(command, ct);

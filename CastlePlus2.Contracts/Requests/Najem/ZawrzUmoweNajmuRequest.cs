@@ -10,6 +10,7 @@ namespace CastlePlus2.Contracts.Requests.Najem
         public DateOnly DataZawarcia { get; set; }
         public DateOnly DataPoczatku { get; set; }
         public DateOnly? DataZakonczenia { get; set; }
+        public string? KodEncji { get; set; }
         public string KodWaluty { get; set; } = string.Empty;
         public string? KodIndeksacji { get; set; }
         public string NazwaCzynszu { get; set; } = string.Empty;
@@ -17,5 +18,6 @@ namespace CastlePlus2.Contracts.Requests.Najem
         public decimal Stawka { get; set; }
         public decimal? IloscBazowa { get; set; }
         public decimal? KwotaKaucji { get; set; }
+        public decimal? UdzialProcent { get; set; }
     }
 }
