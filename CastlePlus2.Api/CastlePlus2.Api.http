@@ -92,3 +92,28 @@ Content-Type: application/json
   "tytul": "Usterka w budynku",
   "opis": "Przeciek w pomieszczeniu technicznym"
 }
+
+### [DOKUMENTY] GET rejestracja context
+GET {{CastlePlus2.Api_HostAddress}}/api/dokumenty/procesy/rejestracja/context
+Accept: application/json
+
+### [DOKUMENTY] POST rejestruj dokument (bez sciezki -> mock)
+POST {{CastlePlus2.Api_HostAddress}}/api/dokumenty/procesy/rejestracja
+Content-Type: application/json
+
+{
+  "idEncji": "00000000-0000-0000-0000-000000000000",
+  "nazwa": "Protokó³ odbioru",
+  "opis": "Dokument wstêpny"
+}
+
+### [DOKUMENTY] POST rejestruj dokument (ze sciezka)
+POST {{CastlePlus2.Api_HostAddress}}/api/dokumenty/procesy/rejestracja
+Content-Type: application/json
+
+{
+  "idEncji": "00000000-0000-0000-0000-000000000000",
+  "nazwa": "Instrukcja u¿ytkowania",
+  "opis": null,
+  "sciezkaPliku": "storage/manuals/instrukcja.pdf"
+}

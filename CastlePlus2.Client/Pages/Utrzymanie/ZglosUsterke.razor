@@ -31,9 +31,9 @@
                     @if (_gospodarzTyp == GospodarzTypLokal)
                     {
                         <MudSelect T="Guid"
-                                   Label="Lokal gospodarza"
+                                   Label="Przedmiot zgłoszenia"
                                    Required="true"
-                                   RequiredError="Lokal jest wymagany"
+                                   RequiredError="Wybór jest wymagany"
                                    @bind-Value="_model.IdEncjiGospodarza"
                                    Margin="Margin.Dense">
                             @foreach (var lokal in _context.LokaleLookup)
@@ -45,9 +45,9 @@
                     else
                     {
                         <MudSelect T="Guid"
-                                   Label="Budynek gospodarza"
+                                   Label="Przedmiot zgłoszenia"
                                    Required="true"
-                                   RequiredError="Budynek jest wymagany"
+                                   RequiredError="Wybór jest wymagany"
                                    @bind-Value="_model.IdEncjiGospodarza"
                                    Margin="Margin.Dense">
                             @foreach (var budynek in _context.BudynkiLookup)

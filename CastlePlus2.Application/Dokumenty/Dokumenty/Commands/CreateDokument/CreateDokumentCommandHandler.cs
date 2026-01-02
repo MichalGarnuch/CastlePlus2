@@ -35,8 +35,8 @@ namespace CastlePlus2.Application.Dokumenty.Dokumenty.Commands.CreateDokument
                 IdEncjiOwner = request.IdEncjiOwner,
                 Nazwa = request.Nazwa,
                 Opis = request.Opis,
-                SciezkaPliku = request.SciezkaPliku
-                // DataUtworzenia – ustawiane przez SQL DEFAULT
+                SciezkaPliku = request.SciezkaPliku,
+                DataUtworzenia = DateTime.UtcNow
             };
 
             await _repo.AddAsync(entity, cancellationToken);

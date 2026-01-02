@@ -14,7 +14,7 @@ namespace CastlePlus2.Domain.Entities.Dokumenty
         public Guid IdEncji { get; set; }        // FK -> [rdzen].[Encja]
 
         // Nawigacje (opcjonalne, nie tworzą kolumn)
-        public Dokument? Dokument { get; set; }
+        public Dokument Dokument { get; set; } = null!;
         public Encja? Encja { get; set; }
     }
 }

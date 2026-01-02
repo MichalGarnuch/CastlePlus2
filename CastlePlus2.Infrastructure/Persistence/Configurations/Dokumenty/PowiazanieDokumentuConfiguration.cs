@@ -37,17 +37,17 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Dokumenty
 
             // FK -> dokumenty.Dokument
             builder.HasOne(x => x.Dokument)
-                   .WithMany()
+                   .WithMany(x => x.Powiazania)
                    .HasForeignKey(x => x.IdDokumentu)
                    .HasConstraintName("FK_dok_Powiazanie_Dokument")
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.NoAction);
 
             // FK -> rdzen.Encja
             builder.HasOne(x => x.Encja)
                    .WithMany()
                    .HasForeignKey(x => x.IdEncji)
                    .HasConstraintName("FK_dok_Powiazanie_Encja")
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

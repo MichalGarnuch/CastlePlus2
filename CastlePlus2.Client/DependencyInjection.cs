@@ -65,6 +65,7 @@ public static class DependencyInjection
         //DOKUMENTY
         services.AddScoped<IDokumentyService, DokumentyService>();
         services.AddScoped<IPowiazaniaDokumentuService, PowiazaniaDokumentuService>();
+        services.AddScoped<IProcesyDokumentowService, ProcesyDokumentowService>();
 
         return services;
     }

@@ -1,0 +1,127 @@
+﻿@page "/dokumenty/rejestruj"
+@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Dokumenty
+@using CastlePlus2.Contracts.Requests.Dokumenty
+@using CastlePlus2.Client.Services.Dokumenty
+@inject IProcesyDokumentowService ProcesyDokumentowService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Rejestracja dokumentu</MudText>
+
+<MudPaper Class="pa-4">
+    @if (_loading)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else
+    {
+        <MudForm @ref="_form" @bind-IsValid="_isFormValid">
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="Guid"
+                               Label="Encja"
+                               Required="true"
+                               RequiredError="Encja jest wymagana"
+                               @bind-Value="_model.IdEncji"
+                               Margin="Margin.Dense">
+                        @foreach (var encja in _context.EncjeLookup)
+                        {
+                            <MudSelectItem Value="@encja.IdEncji">@encja.Label</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_model.Nazwa"
+                                  Label="Nazwa"
+                                  Required="true"
+                                  RequiredError="Nazwa jest wymagana"
+                                  MaxLength="200"
+                                  Counter="200"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_model.Opis"
+                                  Label="Opis"
+                                  MaxLength="500"
+                                  Counter="500"
+                                  Lines="3"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_model.SciezkaPliku"
+                                  Label="Ścieżka pliku"
+                                  MaxLength="400"
+                                  Counter="400"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+
+        <MudDivider Class="my-4" />
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="SubmitAsync"
+                   Disabled="@(!_isFormValid || _saving)">
+            Zarejestruj dokument
+        </MudButton>
+    }
+</MudPaper>
+
+@code {
+    private MudForm? _form;
+    private bool _loading = true;
+    private bool _saving;
+    private bool _isFormValid;
+    private RegisterDokumentContextDto _context = new();
+    private RegisterDokumentRequest _model = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _context = await ProcesyDokumentowService.GetRegisterContextAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się pobrać danych kontekstu: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (_form is null)
+        {
+            return;
+        }
+
+        await _form.Validate();
+        if (!_isFormValid)
+        {
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            var result = await ProcesyDokumentowService.RegisterAsync(_model);
+            Snackbar.Add($"Zarejestrowano dokument (Id: {result.IdDokumentu}).", Severity.Success);
+            _model = new RegisterDokumentRequest();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się zarejestrować dokumentu: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

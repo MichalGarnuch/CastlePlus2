@@ -31,7 +31,7 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Dokumenty
 
             builder.Property(x => x.Opis)
                    .HasColumnName("Opis")
-                   .HasMaxLength(1000)
+                   .HasMaxLength(500)
                    .IsRequired(false);
 
             builder.Property(x => x.SciezkaPliku)
@@ -42,8 +42,6 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Dokumenty
             builder.Property(x => x.DataUtworzenia)
                    .HasColumnName("DataUtworzenia")
                    .HasColumnType("datetime2(0)")
-                   .HasDefaultValueSql("sysutcdatetime()")
-                   .ValueGeneratedOnAdd()
                    .IsRequired();
 
             // Index z SQL: IX_dok_Dokument_EncjaOwner
@@ -54,8 +52,13 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Dokumenty
             builder.HasOne<CastlePlus2.Domain.Entities.Rdzen.Encja>()
                    .WithMany()
                    .HasForeignKey(x => x.IdEncjiOwner)
-                   .OnDelete(DeleteBehavior.Restrict)
+                   .OnDelete(DeleteBehavior.NoAction)
                    .HasConstraintName("FK_dok_Dokument_EncjaOwner");
+
+            builder.HasMany(x => x.Powiazania)
+                   .WithOne(x => x.Dokument)
+                   .HasForeignKey(x => x.IdDokumentu)
+                   .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }
