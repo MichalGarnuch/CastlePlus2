@@ -10,6 +10,7 @@ namespace CastlePlus2.Application.Interfaces.Najem
         Task<List<PrzedmiotNajmu>> GetAllAsync(CancellationToken ct);
         Task<PrzedmiotNajmu?> GetForUpdateAsync(long id, CancellationToken ct);
         Task<bool> ExistsOverlapAsync(Guid idEncji, DateOnly odDnia, DateOnly? doDnia, CancellationToken ct);
+        Task<List<PrzedmiotNajmu>> GetOpenForUpdateByUmowaIdAsync(Guid idUmowyNajmu, DateOnly dataZakonczenia, CancellationToken ct);
         void Remove(PrzedmiotNajmu entity);
         Task<int> SaveChangesAsync(CancellationToken ct);
     }

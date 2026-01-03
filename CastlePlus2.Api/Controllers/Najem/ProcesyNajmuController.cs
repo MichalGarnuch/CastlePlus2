@@ -1,4 +1,5 @@
 ﻿using CastlePlus2.Application.Najem.ProcesyNajmu.Commands.AneksujCzynsz;
+using CastlePlus2.Application.Najem.ProcesyNajmu.Commands.ZakonczUmoweNajmu;
 using CastlePlus2.Contracts.DTOs.Najem;
 using CastlePlus2.Contracts.Requests.Najem;
 using MediatR;
@@ -36,6 +37,23 @@ namespace CastlePlus2.Api.Controllers.Najem
             }, ct);
 
             return StatusCode(StatusCodes.Status201Created, result);
+        }
+
+        [HttpPost("umowy/{idUmowy:guid}/zakoncz")]
+        [ProducesResponseType(typeof(ZakonczUmoweNajmuResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ZakonczUmowe([FromRoute] Guid idUmowy, [FromBody] ZakonczUmoweNajmuRequest request, CancellationToken ct)
+        {
+            if (request is null) return BadRequest();
+
+            var result = await _mediator.Send(new ZakonczUmoweNajmuCommand
+            {
+                IdUmowyNajmu = idUmowy,
+                DataZakonczenia = request.DataZakonczenia,
+                KwotaZwrotuKaucji = request.KwotaZwrotuKaucji
+            }, ct);
+
+            return Ok(result);
         }
     }
 }

@@ -38,6 +38,14 @@ namespace CastlePlus2.Infrastructure.Repositories.Najem
         {
             return _db.PrzedmiotyNajmu.FirstOrDefaultAsync(x => x.IdPrzedmiotuNajmu == id, ct);
         }
+
+        public Task<List<PrzedmiotNajmu>> GetOpenForUpdateByUmowaIdAsync(Guid idUmowyNajmu, DateOnly dataZakonczenia, CancellationToken ct)
+        {
+            return _db.PrzedmiotyNajmu
+                .Where(x => x.IdUmowyNajmu == idUmowyNajmu
+                            && (x.DoDnia == null || x.DoDnia > dataZakonczenia))
+                .ToListAsync(ct);
+        }
         public Task<bool> ExistsOverlapAsync(Guid idEncji, DateOnly odDnia, DateOnly? doDnia, CancellationToken ct)
         {
             var koniec = doDnia ?? DateOnly.MaxValue;

@@ -1,0 +1,242 @@
+﻿@page "/najem/umowy/{IdUmowy:guid}/zakoncz"
+@page "/najem/umowy/zakoncz"
+@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Najem
+@using CastlePlus2.Contracts.Requests.Najem
+@using CastlePlus2.Client.Services.Najem
+@inject IProcesyNajmuService ProcesyNajmuService
+@inject IUmowyNajmuService UmowyNajmuService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Zakończenie umowy najmu</MudText>
+
+<MudPaper Class="pa-4">
+    @if (_loading)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else
+    {
+        @if (_idUmowy is null)
+        {
+            <MudText Class="mb-4">Wybierz umowę najmu do zakończenia.</MudText>
+
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="8">
+                    <MudSelect T="Guid"
+                               Label="Wybierz umowę"
+                               @bind-Value="_selectedUmowaId"
+                               Dense="true"
+                               Margin="Margin.Dense">
+                        <MudSelectItem T="Guid" Value="@Guid.Empty">— wybierz —</MudSelectItem>
+
+                        @foreach (var u in _umowy)
+                        {
+                            <MudSelectItem T="Guid" Value="@u.Id">@GetUmowaLabel(u)</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    @if (_umowy.Count == 0)
+                    {
+                        <MudText Class="mt-2" Color="Color.Warning">Brak umów w bazie</MudText>
+                    }
+                </MudItem>
+
+                <MudItem xs="12" sm="4" Class="d-flex align-center">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Disabled="@(_selectedUmowaId == Guid.Empty)"
+                               OnClick="NavigateToSelectedAsync">
+                        Przejdź
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        }
+        else
+        {
+            <MudText Class="mb-4">Umowa: @_umowaLabel</MudText>
+
+            <MudForm @ref="_form">
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" sm="6">
+                        <MudDatePicker Label="Data zakończenia"
+                                       Date="@_dataZakonczenia"
+                                       DateChanged="OnDataZakonczeniaChanged"
+                                       Required="true"
+                                       RequiredError="Data zakończenia jest wymagana"
+                                       Margin="Margin.Dense" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" Class="d-flex align-center">
+                        <!-- FIX RZ10001: dopisz T="bool" -->
+                        <MudSwitch T="bool"
+                                   @bind-Checked="_zwrocKaucje"
+                                   Color="Color.Primary"
+                                   Label="Zwrot kaucji" />
+                    </MudItem>
+
+                    @if (_zwrocKaucje)
+                    {
+                        <MudItem xs="12" sm="6">
+                            <!-- FIX RZ9986: Label jako wyrażenie -->
+                            <MudNumericField T="decimal?"
+                                             Label="@($"Kwota zwrotu ({_kodWaluty})")"
+                                             Required="true"
+                                             RequiredError="Kwota zwrotu jest wymagana"
+                                             @bind-Value="_model.KwotaZwrotuKaucji"
+                                             Margin="Margin.Dense" />
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudForm>
+
+            <MudDivider Class="my-4" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Disabled="_saving"
+                       OnClick="SubmitAsync">
+                Zakończ umowę
+            </MudButton>
+        }
+    }
+</MudPaper>
+
+@code {
+    [Parameter] public Guid? IdUmowy { get; set; }
+
+    private MudForm? _form;
+    private bool _loading = true;
+    private bool _saving = false;
+
+    private Guid? _idUmowy;
+    private Guid _selectedUmowaId = Guid.Empty;
+
+    private string _umowaLabel = "-";
+    private string _kodWaluty = "PLN";
+
+    private bool _zwrocKaucje;
+    private ZakonczUmoweNajmuRequest _model = new();
+    private DateTime? _dataZakonczenia;
+
+    private List<UmowaNajmuDto> _umowy = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading = true;
+        try
+        {
+            _umowy = (await UmowyNajmuService.GetAllAsync()) ?? new();
+
+            if (IdUmowy.HasValue && IdUmowy.Value != Guid.Empty)
+            {
+                _idUmowy = IdUmowy.Value;
+                _selectedUmowaId = IdUmowy.Value;
+                await LoadUmowaAsync(IdUmowy.Value);
+            }
+            else
+            {
+                _idUmowy = null;
+                _selectedUmowaId = Guid.Empty;
+                _umowaLabel = "-";
+            }
+
+            if (_model.DataZakonczenia == default)
+            {
+                _model.DataZakonczenia = DateOnly.FromDateTime(DateTime.Today);
+                _dataZakonczenia = _model.DataZakonczenia.ToDateTime(TimeOnly.MinValue);
+            }
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadUmowaAsync(Guid idUmowy)
+    {
+        var umowa = await UmowyNajmuService.GetByIdAsync(idUmowy);
+        if (umowa is null)
+        {
+            _umowaLabel = $"Nie znaleziono umowy: {idUmowy}";
+            Snackbar.Add("Nie znaleziono umowy najmu o podanym identyfikatorze.", Severity.Error);
+            _idUmowy = null;
+            return;
+        }
+
+        _umowaLabel = GetUmowaLabel(umowa);
+        _kodWaluty = string.IsNullOrWhiteSpace(umowa.KodWaluty) ? "PLN" : umowa.KodWaluty;
+    }
+
+    private string GetUmowaLabel(UmowaNajmuDto u)
+        => $"{u.NumerUmowy} ({u.DataPoczatku:yyyy-MM-dd} → {(u.DataZakonczenia is null ? "bezterminowo" : u.DataZakonczenia.Value.ToString("yyyy-MM-dd"))})";
+
+    private Task OnDataZakonczeniaChanged(DateTime? value)
+    {
+        _dataZakonczenia = value;
+        if (value.HasValue)
+            _model.DataZakonczenia = DateOnly.FromDateTime(value.Value);
+
+        return Task.CompletedTask;
+    }
+
+    private Task NavigateToSelectedAsync()
+    {
+        if (_selectedUmowaId == Guid.Empty)
+        {
+            Snackbar.Add("Wybierz umowę.", Severity.Warning);
+            return Task.CompletedTask;
+        }
+
+        NavigationManager.NavigateTo($"/najem/umowy/{_selectedUmowaId}/zakoncz");
+        return Task.CompletedTask;
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (_idUmowy is null)
+        {
+            Snackbar.Add("Brak identyfikatora umowy.", Severity.Error);
+            return;
+        }
+
+        if (_form is null)
+            return;
+
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            Snackbar.Add("Uzupełnij wymagane pola formularza.", Severity.Warning);
+            return;
+        }
+
+        if (!_zwrocKaucje)
+        {
+            _model.KwotaZwrotuKaucji = null;
+        }
+        else if (!_model.KwotaZwrotuKaucji.HasValue || _model.KwotaZwrotuKaucji <= 0)
+        {
+            Snackbar.Add("Podaj dodatnią kwotę zwrotu kaucji.", Severity.Warning);
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            var result = await ProcesyNajmuService.ZakonczUmoweAsync(_idUmowy.Value, _model);
+
+            if (result.IdUmowyNajmu != Guid.Empty)
+            {
+                Snackbar.Add(result.Message ?? "Zakończono umowę najmu.", Severity.Success);
+                return;
+            }
+
+            Snackbar.Add(result.Message ?? "Nie udało się zakończyć umowy najmu.", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

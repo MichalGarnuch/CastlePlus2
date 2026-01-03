@@ -42,6 +42,30 @@ namespace CastlePlus2.Client.Services.Najem
             };
         }
 
+        public async Task<ZakonczUmoweNajmuResult> ZakonczUmoweAsync(Guid idUmowyNajmu, ZakonczUmoweNajmuRequest request, CancellationToken ct = default)
+        {
+            var resp = await _http.PostAsJsonAsync($"{BaseUrl}/umowy/{idUmowyNajmu}/zakoncz", request, ct);
+            if (resp.IsSuccessStatusCode)
+            {
+                return (await resp.Content.ReadFromJsonAsync<ZakonczUmoweNajmuResult>(cancellationToken: ct))!;
+            }
+
+            var msg =
+                await TryReadValidationMessageAsync(resp, ct)
+                ?? await TryReadMessageAsync(resp, ct)
+                ?? await TryReadRawBodyAsync(resp, ct)
+                ?? $"{(int)resp.StatusCode} {resp.ReasonPhrase}";
+
+            _logger.LogWarning("Zakończenie umowy nie powiodło się: {Status} {Message}", resp.StatusCode, msg);
+
+            return new ZakonczUmoweNajmuResult
+            {
+                IdUmowyNajmu = idUmowyNajmu,
+                DataZakonczenia = request.DataZakonczenia,
+                Message = msg
+            };
+        }
+
         private static async Task<string?> TryReadValidationMessageAsync(HttpResponseMessage response, CancellationToken ct)
         {
             try

@@ -132,3 +132,11 @@ Content-Type: application/json
   "kodIndeksacji": null,
   "odDnia": "2024-01-01"
 }
+### [NAJEM] POST zakoncz umowe
+POST {{CastlePlus2.Api_HostAddress}}/api/najem/procesy/umowy/00000000-0000-0000-0000-000000000000/zakoncz
+Content-Type: application/json
+
+{
+  "dataZakonczenia": "2024-12-31",
+  "kwotaZwrotuKaucji": 2000.00
+}

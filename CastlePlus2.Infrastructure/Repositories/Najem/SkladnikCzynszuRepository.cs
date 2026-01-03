@@ -47,6 +47,14 @@ namespace CastlePlus2.Infrastructure.Repositories.Najem
                 && (!excludeId.HasValue || x.IdSkladnikaCzynszu != excludeId.Value)
                 && (x.DoDnia == null || x.DoDnia >= odDnia), ct);
         }
+
+        public Task<List<SkladnikCzynszu>> GetOpenForUpdateByUmowaIdAsync(Guid idUmowyNajmu, DateOnly dataZakonczenia, CancellationToken ct)
+        {
+            return _db.SkladnikiCzynszu
+                .Where(x => x.IdUmowyNajmu == idUmowyNajmu
+                            && (x.DoDnia == null || x.DoDnia > dataZakonczenia))
+                .ToListAsync(ct);
+        }
         public void Remove(SkladnikCzynszu entity)
         {
             _db.SkladnikiCzynszu.Remove(entity);
