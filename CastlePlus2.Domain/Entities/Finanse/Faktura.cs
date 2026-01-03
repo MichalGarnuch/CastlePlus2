@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using CastlePlus2.Domain.Entities.Podmioty;
 using CastlePlus2.Domain.Entities.Slowniki;
 
@@ -22,5 +23,6 @@ namespace CastlePlus2.Domain.Entities.Finanse
         // Nawigacje (opcjonalne)
         public Podmiot? Podmiot { get; set; }
         public Waluta? Waluta { get; set; }
+        public List<PozycjaKosztu> PozycjeKosztu { get; set; } = new();
     }
 }

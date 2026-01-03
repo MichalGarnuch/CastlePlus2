@@ -131,6 +131,7 @@ builder.Services.AddEndpointsApiExplorer();
 // POPRAWKA: Jawna konfiguracja dokumentu Swaggera
 builder.Services.AddSwaggerGen(c =>
 {
+    c.CustomSchemaIds(t => t.FullName ?? t.Name);
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "CastlePlus2 API", Version = "v1" });
 });
 

@@ -54,6 +54,7 @@ public static class DependencyInjection
         services.AddScoped<IKategorieKosztowService, KategorieKosztowService>();
         services.AddScoped<IPozycjeKosztowService, PozycjeKosztowService>();
         services.AddScoped<IRozliczeniaPlatnosciService, RozliczeniaPlatnosciService>();
+        services.AddScoped<IProcesyFinanseService, ProcesyFinanseService>();
 
         //NAJEM
         services.AddScoped<IPrzedmiotyNajmuService, PrzedmiotyNajmuService>();

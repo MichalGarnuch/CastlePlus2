@@ -140,3 +140,34 @@ Content-Type: application/json
   "dataZakonczenia": "2024-12-31",
   "kwotaZwrotuKaucji": 2000.00
 }
+
+### [FINANSE] GET faktury context
+GET {{CastlePlus2.Api_HostAddress}}/api/finanse/procesy/faktury/context
+Accept: application/json
+
+### [FINANSE] POST wystaw fakture
+POST {{CastlePlus2.Api_HostAddress}}/api/finanse/procesy/faktury/wystaw
+Content-Type: application/json
+
+{
+  "numerFaktury": "FVK/2024/001",
+  "idPodmiotu": 1,
+  "dataWystawienia": "2024-12-01",
+  "dataSprzedazy": "2024-12-01",
+  "kodWaluty": "PLN",
+  "pozycje": [
+    {
+      "idKategoriiKosztu": 1,
+      "opis": "Op³ata eksploatacyjna",
+      "kwotaNetto": 1000.00,
+      "kwotaBrutto": 1230.00,
+      "alokacje": [
+        {
+          "idEncji": "00000000-0000-0000-0000-000000000000",
+          "kwotaNetto": 1000.00,
+          "kwotaBrutto": 1230.00
+        }
+      ]
+    }
+  ]
+}

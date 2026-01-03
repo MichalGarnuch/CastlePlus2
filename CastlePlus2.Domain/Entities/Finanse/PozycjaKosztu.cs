@@ -1,4 +1,5 @@
-﻿namespace CastlePlus2.Domain.Entities.Finanse
+﻿using System.Collections.Generic;
+namespace CastlePlus2.Domain.Entities.Finanse
 {
     /// <summary>
     /// Encja 1:1 z tabelą [finanse].[PozycjaKosztu].
@@ -16,5 +17,6 @@
         // Nawigacje (opcjonalne)
         public Faktura? Faktura { get; set; }
         public KategoriaKosztu? KategoriaKosztu { get; set; }
+        public List<AlokacjaKosztu> AlokacjeKosztu { get; set; } = new();
     }
 }

@@ -1,0 +1,342 @@
+﻿@page "/finanse/faktury/wystaw"
+@using MudBlazor
+@using CastlePlus2.Client.Services.Finanse
+@using CastlePlus2.Contracts.DTOs.Finanse
+@using CastlePlus2.Contracts.DTOs.Podmioty
+@using CastlePlus2.Contracts.DTOs.Slowniki
+@using CastlePlus2.Contracts.Requests.Finanse
+@inject IProcesyFinanseService ProcesyFinanseService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Wystawienie faktury kosztowej</MudText>
+
+<MudPaper Class="pa-4">
+    @if (_loading)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else
+    {
+        <MudForm @ref="_form" @bind-IsValid="_isFormValid">
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_model.NumerFaktury"
+                                  Label="Numer faktury"
+                                  Required="true"
+                                  RequiredError="Numer faktury jest wymagany"
+                                  MaxLength="60"
+                                  Counter="60"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="long"
+                               Label="Podmiot"
+                               Required="true"
+                               RequiredError="Podmiot jest wymagany"
+                               @bind-Value="_model.IdPodmiotu"
+                               Margin="Margin.Dense">
+                        @foreach (var podmiot in _context.Podmioty)
+                        {
+                            <MudSelectItem T="long" Value="@podmiot.IdPodmiotu">@GetPodmiotLabel(podmiot)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Data wystawienia"
+                                   Required="true"
+                                   RequiredError="Data wystawienia jest wymagana"
+                                   @bind-Date="_dataWystawienia" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Data sprzedaży (opcjonalnie)"
+                                   @bind-Date="_dataSprzedazy" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="string"
+                               Label="Waluta"
+                               Required="true"
+                               RequiredError="Waluta jest wymagana"
+                               @bind-Value="_model.KodWaluty"
+                               Margin="Margin.Dense">
+                        @foreach (var waluta in _context.Waluty)
+                        {
+                            <MudSelectItem T="string" Value="@waluta.KodWaluty">@($"{waluta.KodWaluty} / {waluta.Nazwa}")</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+
+            <MudDivider Class="my-4" />
+
+            <MudText Typo="Typo.h6" Class="mb-2">Pozycje kosztów</MudText>
+
+            @for (var i = 0; i < _model.Pozycje.Count; i++)
+            {
+                var pozycja = _model.Pozycje[i];
+                <MudPaper Class="pa-4 mb-4" Elevation="0" Style="border:1px solid rgba(255,255,255,0.08);">
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.subtitle2">Pozycja #@(i + 1)</MudText>
+                        <MudButton Variant="Variant.Text"
+                                   Color="Color.Error"
+                                   Disabled="@(_model.Pozycje.Count == 1)"
+                                   OnClick="@(() => RemovePozycja(pozycja))">
+                            Usuń pozycję
+                        </MudButton>
+                    </MudStack>
+
+                    <MudGrid Spacing="2" Class="mt-2">
+                        <MudItem xs="12" sm="6">
+                            <MudSelect T="long"
+                                       Label="Kategoria kosztu"
+                                       Required="true"
+                                       RequiredError="Kategoria kosztu jest wymagana"
+                                       @bind-Value="pozycja.IdKategoriiKosztu"
+                                       Margin="Margin.Dense">
+                                @foreach (var kategoria in _context.KategorieKosztow)
+                                {
+                                    <MudSelectItem T="long" Value="@kategoria.IdKategoriiKosztu">
+                                        @($"{kategoria.Kod} / {kategoria.Nazwa}")
+                                    </MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+
+                        <MudItem xs="12" sm="6">
+                            <MudTextField @bind-Value="pozycja.Opis"
+                                          Label="Opis (opcjonalnie)"
+                                          MaxLength="200"
+                                          Counter="200"
+                                          Margin="Margin.Dense" />
+                        </MudItem>
+
+                        <MudItem xs="12" sm="6">
+                            <MudNumericField T="decimal"
+                                             Label="Kwota netto"
+                                             Required="true"
+                                             RequiredError="Kwota netto jest wymagana"
+                                             @bind-Value="pozycja.KwotaNetto" />
+                        </MudItem>
+
+                        <MudItem xs="12" sm="6">
+                            <MudNumericField T="decimal"
+                                             Label="Kwota brutto"
+                                             Required="true"
+                                             RequiredError="Kwota brutto jest wymagana"
+                                             @bind-Value="pozycja.KwotaBrutto" />
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudDivider Class="my-3" />
+
+                    <MudText Typo="Typo.subtitle2" Class="mb-2">Alokacje kosztu</MudText>
+
+                    @for (var j = 0; j < pozycja.Alokacje.Count; j++)
+                    {
+                        var alokacja = pozycja.Alokacje[j];
+                        <MudPaper Class="pa-3 mb-3" Elevation="0" Style="border:1px dashed rgba(255,255,255,0.12);">
+                            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.subtitle2">Alokacja #@(j + 1)</MudText>
+                                <MudButton Variant="Variant.Text"
+                                           Color="Color.Error"
+                                           Disabled="@(pozycja.Alokacje.Count == 1)"
+                                           OnClick="@(() => RemoveAlokacja(pozycja, alokacja))">
+                                    Usuń alokację
+                                </MudButton>
+                            </MudStack>
+
+                            <MudGrid Spacing="2" Class="mt-2">
+                                <MudItem xs="12" sm="6">
+                                    <MudSelect T="Guid"
+                                               Label="Encja"
+                                               Required="true"
+                                               RequiredError="Encja jest wymagana"
+                                               @bind-Value="alokacja.IdEncji"
+                                               Margin="Margin.Dense">
+                                        @foreach (var encja in _context.Encje)
+                                        {
+                                            <MudSelectItem T="Guid" Value="@encja.IdEncji">@encja.Label</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+
+                                <MudItem xs="12" sm="3">
+                                    <MudNumericField T="decimal"
+                                                     Label="Kwota netto"
+                                                     Required="true"
+                                                     RequiredError="Kwota netto jest wymagana"
+                                                     @bind-Value="alokacja.KwotaNetto" />
+                                </MudItem>
+
+                                <MudItem xs="12" sm="3">
+                                    <MudNumericField T="decimal"
+                                                     Label="Kwota brutto"
+                                                     Required="true"
+                                                     RequiredError="Kwota brutto jest wymagana"
+                                                     @bind-Value="alokacja.KwotaBrutto" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+                    }
+
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Secondary"
+                               OnClick="@(() => AddAlokacja(pozycja))">
+                        Dodaj alokację
+                    </MudButton>
+                </MudPaper>
+            }
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       OnClick="AddPozycja">
+                Dodaj pozycję
+            </MudButton>
+        </MudForm>
+
+        <MudDivider Class="my-4" />
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="SubmitAsync"
+                   Disabled="@(!_isFormValid || _saving)">
+            Wystaw fakturę
+        </MudButton>
+    }
+</MudPaper>
+
+@code {
+    private MudForm? _form;
+    private bool _loading = true;
+    private bool _saving;
+    private bool _isFormValid;
+    private DateTime? _dataWystawienia;
+    private DateTime? _dataSprzedazy;
+    private WystawFaktureContextDto _context = new();
+    private WystawFaktureRequest _model = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _context = await ProcesyFinanseService.GetWystawFaktureContextAsync();
+            ResetModel();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się pobrać danych kontekstu: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void ResetModel()
+    {
+        _model = new WystawFaktureRequest
+        {
+            DataWystawienia = DateTime.Today,
+            Pozycje = new List<WystawFakturePozycjaRequest>
+            {
+                CreatePozycja()
+            }
+        };
+
+        _dataWystawienia = _model.DataWystawienia;
+        _dataSprzedazy = _model.DataSprzedazy;
+    }
+
+    private static WystawFakturePozycjaRequest CreatePozycja()
+    {
+        return new WystawFakturePozycjaRequest
+        {
+            Alokacje = new List<WystawFaktureAlokacjaRequest>
+            {
+                CreateAlokacja()
+            }
+        };
+    }
+
+    private static WystawFaktureAlokacjaRequest CreateAlokacja()
+        => new();
+
+    private void AddPozycja()
+    {
+        _model.Pozycje.Add(CreatePozycja());
+    }
+
+    private void RemovePozycja(WystawFakturePozycjaRequest pozycja)
+    {
+        if (_model.Pozycje.Count <= 1)
+        {
+            return;
+        }
+
+        _model.Pozycje.Remove(pozycja);
+    }
+
+    private void AddAlokacja(WystawFakturePozycjaRequest pozycja)
+    {
+        pozycja.Alokacje.Add(CreateAlokacja());
+    }
+
+    private void RemoveAlokacja(WystawFakturePozycjaRequest pozycja, WystawFaktureAlokacjaRequest alokacja)
+    {
+        if (pozycja.Alokacje.Count <= 1)
+        {
+            return;
+        }
+
+        pozycja.Alokacje.Remove(alokacja);
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (_form is null)
+        {
+            return;
+        }
+
+        await _form.Validate();
+        if (!_isFormValid)
+        {
+            return;
+        }
+
+        if (_dataWystawienia is null)
+        {
+            Snackbar.Add("Data wystawienia jest wymagana.", Severity.Warning);
+            return;
+        }
+
+        _model.DataWystawienia = _dataWystawienia.Value;
+        _model.DataSprzedazy = _dataSprzedazy;
+
+        _saving = true;
+        try
+        {
+            var result = await ProcesyFinanseService.WystawFaktureAsync(_model);
+            Snackbar.Add($"Wystawiono fakturę (Id: {result.IdFaktury}).", Severity.Success);
+            ResetModel();
+            await _form.ResetAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się wystawić faktury: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private static string GetPodmiotLabel(PodmiotDto podmiot)
+    {
+        var nip = string.IsNullOrWhiteSpace(podmiot.NIP) ? string.Empty : $" (NIP {podmiot.NIP})";
+        return $"{podmiot.Nazwa}{nip}";
+    }
+}

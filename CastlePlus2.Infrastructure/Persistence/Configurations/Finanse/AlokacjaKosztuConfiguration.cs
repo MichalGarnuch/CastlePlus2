@@ -47,7 +47,7 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Finanse
 
             // FK -> finanse.PozycjaKosztu
             builder.HasOne(x => x.PozycjaKosztu)
-                   .WithMany()
+                   .WithMany(x => x.AlokacjeKosztu)
                    .HasForeignKey(x => x.IdPozycjiKosztu)
                    .HasConstraintName("FK_fi_Alokacja_Pozycja")
                    .OnDelete(DeleteBehavior.Restrict);
