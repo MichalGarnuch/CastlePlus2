@@ -7,6 +7,8 @@ namespace CastlePlus2.Application.Interfaces.Najem
         Task AddAsync(SkladnikCzynszu entity, CancellationToken ct);
         Task<SkladnikCzynszu?> GetByIdAsync(long id, CancellationToken ct);
         Task<List<SkladnikCzynszu>> GetAllAsync(CancellationToken ct);
+        Task<SkladnikCzynszu?> GetActiveByNameAsync(Guid idUmowyNajmu, string nazwa, DateOnly odDnia, CancellationToken ct);
+        Task<bool> ExistsOverlapAsync(Guid idUmowyNajmu, string nazwa, DateOnly odDnia, long? excludeId, CancellationToken ct);
         void Remove(SkladnikCzynszu entity);
         Task<int> SaveChangesAsync(CancellationToken ct);
     }

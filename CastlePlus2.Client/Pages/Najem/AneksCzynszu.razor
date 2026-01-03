@@ -1,0 +1,280 @@
+﻿@page "/najem/umowy/{IdUmowy:guid}/czynsz/aneks"
+@page "/najem/umowy/czynsz/aneks"
+@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Najem
+@using CastlePlus2.Contracts.DTOs.Slowniki
+@using CastlePlus2.Contracts.Requests.Najem
+@using CastlePlus2.Client.Services.Najem
+@using CastlePlus2.Client.Services.Slowniki
+@inject IProcesyNajmuService ProcesyNajmuService
+@inject IUmowyNajmuService UmowyNajmuService
+@inject IJednostkiMiaryService JednostkiMiaryService
+@inject IIndeksacjeService IndeksacjeService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Aneks czynszu</MudText>
+
+<MudPaper Class="pa-4">
+    @if (_loading)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else
+    {
+        @if (_idUmowy is null)
+        {
+            <MudText Class="mb-4">Wybierz umowę najmu, aby przygotować aneks czynszu.</MudText>
+
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="8">
+                    <MudSelect T="Guid"
+                               Label="Wybierz umowę"
+                               @bind-Value="_selectedUmowaId"
+                               Dense="true"
+                               Margin="Margin.Dense">
+                        <MudSelectItem T="Guid" Value="@Guid.Empty">— wybierz —</MudSelectItem>
+
+                        @foreach (var u in _umowy)
+                        {
+                            <MudSelectItem T="Guid" Value="@u.Id">@GetUmowaLabel(u)</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    @if (_umowy.Count == 0)
+                    {
+                        <MudText Class="mt-2" Color="Color.Warning">Brak umów w bazie</MudText>
+                    }
+                </MudItem>
+
+                <MudItem xs="12" sm="4" Class="d-flex align-center">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Disabled="@(_selectedUmowaId == Guid.Empty)"
+                               OnClick="NavigateToSelectedAsync">
+                        Przejdź
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        }
+        else
+        {
+            <MudText Class="mb-4">Umowa: @_umowaLabel</MudText>
+
+            <MudForm @ref="_form">
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_model.Nazwa"
+                                      Label="Nazwa czynszu"
+                                      Required="true"
+                                      RequiredError="Nazwa jest wymagana"
+                                      MaxLength="100"
+                                      Counter="100"
+                                      Margin="Margin.Dense" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="string"
+                                   Label="Jednostka miary"
+                                   Required="true"
+                                   RequiredError="Jednostka miary jest wymagana"
+                                   @bind-Value="_model.KodJednostki"
+                                   Margin="Margin.Dense">
+                            @foreach (var jednostka in _jednostki)
+                            {
+                                <MudSelectItem Value="@jednostka.KodJednostki">@GetJednostkaLabel(jednostka)</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField T="decimal"
+                                         Label="Stawka"
+                                         Required="true"
+                                         RequiredError="Stawka jest wymagana"
+                                         @bind-Value="_model.Stawka"
+                                         Margin="Margin.Dense" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField T="decimal?"
+                                         Label="Ilość bazowa"
+                                         @bind-Value="_model.IloscBazowa"
+                                         Margin="Margin.Dense" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="string"
+                                   Label="Indeksacja"
+                                   @bind-Value="_model.KodIndeksacji"
+                                   Margin="Margin.Dense">
+                            <MudSelectItem Value="@string.Empty">Brak</MudSelectItem>
+                            @foreach (var indeksacja in _indeksacje)
+                            {
+                                <MudSelectItem Value="@indeksacja.KodIndeksacji">@GetIndeksacjaLabel(indeksacja)</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudDatePicker Label="Od dnia"
+                                       Date="@_odDnia"
+                                       DateChanged="OnOdDniaChanged"
+                                       Required="true"
+                                       RequiredError="Data obowiązywania jest wymagana"
+                                       Margin="Margin.Dense" />
+                    </MudItem>
+                </MudGrid>
+            </MudForm>
+
+            <MudDivider Class="my-4" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Disabled="_saving"
+                       OnClick="SubmitAsync">
+                Zapisz aneks
+            </MudButton>
+        }
+    }
+</MudPaper>
+
+@code {
+    [Parameter] public Guid? IdUmowy { get; set; }
+
+    private MudForm? _form;
+    private bool _loading = true;
+    private bool _saving = false;
+
+    private Guid? _idUmowy;
+    private Guid _selectedUmowaId = Guid.Empty;
+
+    private string _umowaLabel = "-";
+    private AneksujCzynszRequest _model = new();
+    private DateTime? _odDnia;
+
+    private List<UmowaNajmuDto> _umowy = new();
+    private List<JednostkaMiaryDto> _jednostki = new();
+    private List<IndeksacjaDto> _indeksacje = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading = true;
+        try
+        {
+            _jednostki = await JednostkiMiaryService.GetAllAsync();
+            _indeksacje = await IndeksacjeService.GetAllAsync();
+
+            // lista umów do dropdowna
+            _umowy = (await UmowyNajmuService.GetAllAsync()) ?? new();
+
+            if (IdUmowy.HasValue && IdUmowy.Value != Guid.Empty)
+            {
+                _idUmowy = IdUmowy.Value;
+                _selectedUmowaId = IdUmowy.Value;
+                await LoadUmowaAsync(IdUmowy.Value);
+            }
+            else
+            {
+                _idUmowy = null;
+                _selectedUmowaId = Guid.Empty;
+                _umowaLabel = "-";
+            }
+
+            if (_model.OdDnia == default)
+            {
+                _model.OdDnia = DateOnly.FromDateTime(DateTime.Today);
+                _odDnia = _model.OdDnia.ToDateTime(TimeOnly.MinValue);
+            }
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadUmowaAsync(Guid idUmowy)
+    {
+        var umowa = await UmowyNajmuService.GetByIdAsync(idUmowy);
+        if (umowa is null)
+        {
+            _umowaLabel = $"Nie znaleziono umowy: {idUmowy}";
+            Snackbar.Add("Nie znaleziono umowy najmu o podanym identyfikatorze.", Severity.Error);
+            _idUmowy = null;
+            return;
+        }
+
+        _umowaLabel = GetUmowaLabel(umowa);
+    }
+
+    private string GetUmowaLabel(UmowaNajmuDto u)
+        => $"{u.NumerUmowy} ({u.DataPoczatku:yyyy-MM-dd} → {(u.DataZakonczenia is null ? "bezterminowo" : u.DataZakonczenia.Value.ToString("yyyy-MM-dd"))})";
+
+    private string GetJednostkaLabel(JednostkaMiaryDto jednostka)
+        => $"{jednostka.Nazwa} ({jednostka.KodJednostki})";
+
+    private string GetIndeksacjaLabel(IndeksacjaDto indeksacja)
+        => $"{indeksacja.Nazwa} ({indeksacja.KodIndeksacji})";
+
+    private Task OnOdDniaChanged(DateTime? value)
+    {
+        _odDnia = value;
+        if (value.HasValue)
+            _model.OdDnia = DateOnly.FromDateTime(value.Value);
+
+        return Task.CompletedTask;
+    }
+
+    private Task NavigateToSelectedAsync()
+    {
+        if (_selectedUmowaId == Guid.Empty)
+        {
+            Snackbar.Add("Wybierz umowę.", Severity.Warning);
+            return Task.CompletedTask;
+        }
+
+        NavigationManager.NavigateTo($"/najem/umowy/{_selectedUmowaId}/czynsz/aneks");
+        return Task.CompletedTask;
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (_idUmowy is null)
+        {
+            Snackbar.Add("Brak identyfikatora umowy.", Severity.Error);
+            return;
+        }
+
+        if (_form is null)
+            return;
+
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            Snackbar.Add("Uzupełnij wymagane pola formularza.", Severity.Warning);
+            return;
+        }
+
+        // porządek danych: pusty string traktujemy jako brak
+        if (string.IsNullOrWhiteSpace(_model.KodIndeksacji))
+            _model.KodIndeksacji = null;
+
+        _saving = true;
+        try
+        {
+            var result = await ProcesyNajmuService.AneksujCzynszAsync(_idUmowy.Value, _model);
+
+            if (result.IdSkladnikaCzynszu > 0)
+            {
+                Snackbar.Add(result.Message ?? "Zapisano aneks czynszu.", Severity.Success);
+                return;
+            }
+
+            Snackbar.Add(result.Message ?? "Nie udało się zapisać aneksu czynszu.", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

@@ -120,3 +120,15 @@ Content-Type: application/json
 ### [DASHBOARD] GET najem dashboard
 GET {{CastlePlus2.Api_HostAddress}}/api/dashboard/najem
 Accept: application/json
+### [NAJEM] POST aneks czynszu
+POST {{CastlePlus2.Api_HostAddress}}/api/najem/procesy/umowy/00000000-0000-0000-0000-000000000000/czynsz/aneks
+Content-Type: application/json
+
+{
+  "nazwa": "Czynsz bazowy",
+  "kodJednostki": "M2",
+  "stawka": 120.50,
+  "iloscBazowa": 50,
+  "kodIndeksacji": null,
+  "odDnia": "2024-01-01"
+}
