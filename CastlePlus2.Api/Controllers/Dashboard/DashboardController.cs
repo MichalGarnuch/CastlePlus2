@@ -19,9 +19,10 @@ namespace CastlePlus2.Api.Controllers.Dashboard
 
         [HttpGet("najem")]
         [ProducesResponseType(typeof(NajemDashboardDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetNajemDashboard(CancellationToken ct)
+        public async Task<IActionResult> GetNajemDashboard([FromQuery] int? zakresDni, CancellationToken ct)
         {
-            var result = await _mediator.Send(new GetNajemDashboardQuery(), ct);
+            var days = zakresDni ?? 30;
+            var result = await _mediator.Send(new GetNajemDashboardQuery(days), ct);
             return Ok(result);
         }
     }

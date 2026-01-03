@@ -4,6 +4,8 @@ namespace CastlePlus2.Client.Services.Dashboard
 {
     public interface IDashboardService
     {
-        Task<NajemDashboardDto> GetNajemDashboardAsync(CancellationToken ct = default);
+        Task<NajemDashboardDto> GetNajemDashboardAsync(
+            int zakresDni = 30,
+            CancellationToken ct = default);
     }
 }

@@ -1,0 +1,201 @@
+﻿@page "/"
+@page "/dashboard/najem"
+
+@using CastlePlus2.Client.Services.Dashboard
+@using CastlePlus2.Contracts.DTOs.Dashboard
+@using MudBlazor
+@inject IDashboardService DashboardService
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-6">Dashboard najmu</MudText>
+
+@if (_loading)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (!string.IsNullOrWhiteSpace(_error))
+{
+    <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">@_error</MudAlert>
+}
+else
+{
+    <MudGrid Spacing="4">
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Class="pa-4 glass-panel">
+                <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Lokale razem</MudText>
+                <MudText Typo="Typo.h4" Class="fw-700">@_dashboard.LokaleRazem</MudText>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Class="pa-4 glass-panel">
+                <MudText Typo="Typo.subtitle2" Color="Color.Warning">Lokale zajęte</MudText>
+                <MudText Typo="Typo.h4" Class="fw-700">@_dashboard.LokaleZajete</MudText>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Class="pa-4 glass-panel">
+                <MudText Typo="Typo.subtitle2" Color="Color.Success">Lokale wolne</MudText>
+                <MudText Typo="Typo.h4" Class="fw-700">@_dashboard.LokaleWolne</MudText>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <MudText Typo="Typo.h6" Class="fw-700 mt-8 mb-2">
+        Wygasające umowy
+    </MudText>
+
+    <MudTable Items="_dashboard.WygasajaceUmowy"
+              Dense="true"
+              Hover="true"
+              Filter="TableFilter"
+              RowsPerPage="20"
+              RowsPerPageOptions="new int[] { 20, 50, 100 }">
+
+        <ToolBarContent>
+            <MudSelect T="int"
+                       Label="Zakres wygasania"
+                       Dense="true"
+                       Value="_zakresDni"
+                       ValueChanged="OnZakresChanged"
+                       Style="min-width:220px;">
+                <MudSelectItem Value="30">30 dni</MudSelectItem>
+                <MudSelectItem Value="60">60 dni</MudSelectItem>
+                <MudSelectItem Value="90">3 miesiące</MudSelectItem>
+                <MudSelectItem Value="365">1 rok</MudSelectItem>
+                <MudSelectItem Value="1825">5 lat</MudSelectItem>
+            </MudSelect>
+
+            <MudSpacer />
+
+            <MudTextField T="string"
+                          Value="_search"
+                          ValueChanged="OnSearchChanged"
+                          Placeholder="Szukaj..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Margin="Margin.Dense"
+                          Variant="Variant.Outlined"
+                          Style="max-width:360px;" />
+
+            <MudButton Variant="Variant.Outlined" OnClick="Reload" Disabled="_loading">
+                Odśwież
+            </MudButton>
+        </ToolBarContent>
+
+        <HeaderContent>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<WygasajacaUmowaDto, object>(x => x.KodUmowy ?? string.Empty)">
+                    Umowa
+                </MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<WygasajacaUmowaDto, object>(x => x.PrzedmiotNajmu ?? string.Empty)">
+                    Przedmiot najmu
+                </MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<WygasajacaUmowaDto, object>(x => x.Najemca ?? string.Empty)">
+                    Najemca
+                </MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<WygasajacaUmowaDto, object>(x => x.Wynajmujacy ?? string.Empty)">
+                    Wynajmujący
+                </MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<WygasajacaUmowaDto, object>(x => x.DataZakonczenia ?? DateOnly.MinValue)">
+                    Data zakończenia
+                </MudTableSortLabel>
+            </MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Umowa">
+                @(!string.IsNullOrWhiteSpace(context.KodUmowy)
+                            ? context.KodUmowy
+                            : context.IdUmowy.ToString()[..8])
+        </MudTd>
+
+            <MudTd DataLabel="Przedmiot najmu">
+                @(string.IsNullOrWhiteSpace(context.PrzedmiotNajmu) ? "-" : context.PrzedmiotNajmu)
+            </MudTd>
+
+            <MudTd DataLabel="Najemca">@context.Najemca</MudTd>
+            <MudTd DataLabel="Wynajmujący">@context.Wynajmujacy</MudTd>
+            <MudTd DataLabel="Data zakończenia">
+                @(context.DataZakonczenia.HasValue
+                            ? context.DataZakonczenia.Value.ToString("yyyy-MM-dd")
+                            : "-")
+        </MudTd>
+        </RowTemplate>
+
+        <NoRecordsContent>
+            <MudText>Brak wyników.</MudText>
+        </NoRecordsContent>
+
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+}
+
+@code {
+    private NajemDashboardDto _dashboard = new();
+    private bool _loading = true;
+    private string? _error;
+
+    private int _zakresDni = 30; // domyślnie 30
+    private string _search = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Reload();
+    }
+
+    private async Task OnZakresChanged(int value)
+    {
+        _zakresDni = value < 1 ? 30 : value;
+        await Reload();
+    }
+
+    private Task OnSearchChanged(string value)
+    {
+        _search = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private bool TableFilter(WygasajacaUmowaDto row)
+    {
+        if (string.IsNullOrWhiteSpace(_search))
+            return true;
+
+        var s = _search.Trim();
+
+        return (row.KodUmowy?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || row.IdUmowy.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || (row.Najemca?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || (row.Wynajmujacy?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || (row.PrzedmiotNajmu?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false);
+    }
+
+    private async Task Reload()
+    {
+        _loading = true;
+        _error = null;
+
+        try
+        {
+            _dashboard = await DashboardService.GetNajemDashboardAsync(_zakresDni);
+        }
+        catch
+        {
+            _error = "Nie udało się wczytać danych dashboardu.";
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+}

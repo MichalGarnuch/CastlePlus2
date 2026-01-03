@@ -13,9 +13,13 @@ namespace CastlePlus2.Client.Services.Dashboard
             _http = http;
         }
 
-        public async Task<NajemDashboardDto> GetNajemDashboardAsync(CancellationToken ct = default)
+        public async Task<NajemDashboardDto> GetNajemDashboardAsync(
+            int zakresDni = 30,
+            CancellationToken ct = default)
         {
-            return await _http.GetFromJsonAsync<NajemDashboardDto>(BaseUrl, ct)
+            var url = $"{BaseUrl}?zakresDni={zakresDni}";
+
+            return await _http.GetFromJsonAsync<NajemDashboardDto>(url, ct)
                    ?? new NajemDashboardDto();
         }
     }
