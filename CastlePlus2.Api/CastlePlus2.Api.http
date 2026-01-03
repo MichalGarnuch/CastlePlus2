@@ -117,3 +117,6 @@ Content-Type: application/json
   "opis": null,
   "sciezkaPliku": "storage/manuals/instrukcja.pdf"
 }
+### [DASHBOARD] GET najem dashboard
+GET {{CastlePlus2.Api_HostAddress}}/api/dashboard/najem
+Accept: application/json

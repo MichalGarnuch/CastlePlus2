@@ -1,4 +1,5 @@
-﻿using CastlePlus2.Client.Services.Dokumenty;
+﻿using CastlePlus2.Client.Services.Dashboard;
+using CastlePlus2.Client.Services.Dokumenty;
 using CastlePlus2.Client.Services.Finanse;
 using CastlePlus2.Client.Services.Media;
 using CastlePlus2.Client.Services.Najem;
@@ -17,6 +18,9 @@ public static class DependencyInjection
     {
         services.AddMudServices();
         // tutaj dopniemy serwisy modułów
+
+        //DASHBOARD
+        services.AddScoped<IDashboardService, DashboardService>();
 
         //MEDIA
         services.AddScoped<IRodzajeMediowService, RodzajeMediowService>();
