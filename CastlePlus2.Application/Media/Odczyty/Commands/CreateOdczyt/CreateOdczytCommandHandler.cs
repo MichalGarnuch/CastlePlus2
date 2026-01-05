@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using CastlePlus2.Application.Common.Exceptions;
 using CastlePlus2.Application.Interfaces.Media;
 using CastlePlus2.Contracts.DTOs.Media;
 using CastlePlus2.Domain.Entities.Media;
@@ -46,7 +47,7 @@ namespace CastlePlus2.Application.Media.Odczyty.Commands.CreateOdczyt
 
             // UX -> (IdLicznika, DataOdczytu) unikalne
             if (await _repo.ExistsForLicznikAndDateAsync(request.IdLicznika, data, ct))
-                throw new InvalidOperationException("Istnieje już odczyt dla tego licznika w tej dacie (unikalne: IdLicznika+DataOdczytu).");
+                throw new BusinessConflictException("Istnieje już odczyt dla tego licznika w tej dacie (unikalne: IdLicznika+DataOdczytu).");
 
             var entity = new Odczyt
             {

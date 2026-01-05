@@ -29,6 +29,15 @@ namespace CastlePlus2.Infrastructure.Repositories.Media
                 .ToListAsync(ct);
         }
 
+        public async Task<List<Licznik>> GetActiveAsync(CancellationToken ct)
+        {
+            return await _db.Liczniki
+                .AsNoTracking()
+                .Where(x => x.Aktywny)
+                .OrderBy(x => x.NumerNV)
+                .ToListAsync(ct);
+        }
+
         public async Task<Licznik?> GetByIdAsync(long idLicznika, CancellationToken ct)
         {
             return await _db.Liczniki

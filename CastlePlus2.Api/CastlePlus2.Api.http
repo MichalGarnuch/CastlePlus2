@@ -191,3 +191,18 @@ Content-Type: application/json
     }
   ]
 }
+
+### [MEDIA] GET odczyty context
+GET {{CastlePlus2.Api_HostAddress}}/api/media/odczyty/context
+Accept: application/json
+
+### [MEDIA] POST dodaj odczyt
+POST {{CastlePlus2.Api_HostAddress}}/api/media/odczyty
+Content-Type: application/json
+
+{
+  "idLicznika": 1,
+  "dataOdczytu": "2025-01-15",
+  "wskazanie": 123.456,
+  "zrodlo": "manual"
+}

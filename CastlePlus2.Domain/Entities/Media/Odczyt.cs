@@ -12,5 +12,8 @@ namespace CastlePlus2.Domain.Entities.Media
         public DateTime DataOdczytu { get; set; } // SQL: date (w .NET trzymamy DateTime, bez czasu)
         public decimal Wskazanie { get; set; }   // decimal(18,6) NOT NULL
         public string? Zrodlo { get; set; }      // nvarchar(20) NULL
+
+        // Nawigacja (jawne FK -> Licznik)
+        public Licznik? Licznik { get; set; }
     }
 }

@@ -8,6 +8,7 @@ namespace CastlePlus2.Client.Services.Media
 {
     public interface IOdczytyService
     {
+        Task<OdczytContextDto> GetContextAsync(CancellationToken ct = default);
         Task<List<OdczytDto>> GetAllAsync(CancellationToken ct = default);
         Task<OdczytDto?> GetByIdAsync(long idOdczytu, CancellationToken ct = default);
 

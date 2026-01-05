@@ -11,6 +11,7 @@ namespace CastlePlus2.Application.Interfaces.Media
     public interface ILicznikRepository
     {
         Task<List<Licznik>> GetAllAsync(CancellationToken ct);
+        Task<List<Licznik>> GetActiveAsync(CancellationToken ct);
         Task<Licznik?> GetByIdAsync(long idLicznika, CancellationToken ct);
         Task<Licznik?> GetForUpdateAsync(long idLicznika, CancellationToken ct);
 

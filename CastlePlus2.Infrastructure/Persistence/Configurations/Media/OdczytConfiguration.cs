@@ -44,7 +44,7 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Media
                    .HasDatabaseName("UX_me_Odczyt_LicznikData");
 
             // FK do Licznika
-            builder.HasOne<Licznik>()
+            builder.HasOne(x => x.Licznik)
                    .WithMany()
                    .HasForeignKey(x => x.IdLicznika)
                    .HasConstraintName("FK_me_Odczyt_Licznik")

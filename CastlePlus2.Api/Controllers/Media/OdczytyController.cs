@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CastlePlus2.Application.Common.Exceptions;
 using CastlePlus2.Application.Media.Odczyty.Commands.CreateOdczyt;
 using CastlePlus2.Application.Media.Odczyty.Commands.DeleteOdczyt;
 using CastlePlus2.Application.Media.Odczyty.Commands.UpdateOdczyt;
 using CastlePlus2.Application.Media.Odczyty.Queries.GetAllOdczyty;
 using CastlePlus2.Application.Media.Odczyty.Queries.GetOdczytById;
+using CastlePlus2.Application.Media.Odczyty.Queries.GetOdczytContext;
 using CastlePlus2.Contracts.DTOs.Media;
 using CastlePlus2.Contracts.Requests.Media;
 using MediatR;
@@ -23,6 +25,14 @@ namespace CastlePlus2.Api.Controllers.Media
         public OdczytyController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        [HttpGet("context")]
+        [ProducesResponseType(typeof(OdczytContextDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetContext(CancellationToken ct)
+        {
+            var context = await _mediator.Send(new GetOdczytContextQuery(), ct);
+            return Ok(context);
         }
 
         [HttpGet]
@@ -44,6 +54,7 @@ namespace CastlePlus2.Api.Controllers.Media
 
         [HttpPost]
         [ProducesResponseType(typeof(OdczytDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Create([FromBody] CreateOdczytRequest request, CancellationToken ct)
         {
             var cmd = new CreateOdczytCommand
@@ -54,8 +65,15 @@ namespace CastlePlus2.Api.Controllers.Media
                 Zrodlo = request.Zrodlo
             };
 
-            var dto = await _mediator.Send(cmd, ct);
-            return CreatedAtAction(nameof(GetById), new { id = dto.IdOdczytu }, dto);
+            try
+            {
+                var dto = await _mediator.Send(cmd, ct);
+                return CreatedAtAction(nameof(GetById), new { id = dto.IdOdczytu }, dto);
+            }
+            catch (BusinessConflictException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id:long}")]

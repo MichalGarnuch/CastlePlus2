@@ -1,0 +1,139 @@
+﻿@page "/media/odczyty/dodaj"
+@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Media
+@using CastlePlus2.Contracts.Requests.Media
+@using CastlePlus2.Client.Services.Media
+@inject IOdczytyService OdczytyService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Dodaj odczyt licznika</MudText>
+
+<MudPaper Class="pa-4">
+    @if (_loading)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else
+    {
+        <MudForm @ref="_form" @bind-IsValid="_isFormValid">
+            <MudGrid Spacing="2">
+                <MudItem xs="12">
+                    <MudSelect T="long"
+                               Label="Licznik"
+                               Required="true"
+                               RequiredError="Licznik jest wymagany"
+                               @bind-Value="_model.IdLicznika"
+                               Margin="Margin.Dense">
+                        @foreach (var licznik in _context.Liczniki)
+                        {
+                            <MudSelectItem T="long" Value="@licznik.IdLicznika">
+                                @($"{licznik.NumerNV} ({licznik.KodJednostki}) [Id={licznik.IdLicznika}]")
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Data odczytu"
+                                   Date="_dataOdczytu"
+                                   DateChanged="OnDataChanged"
+                                   Required="true"
+                                   RequiredError="Data odczytu jest wymagana"
+                                   Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="decimal"
+                                     @bind-Value="_model.Wskazanie"
+                                     Label="Wskazanie"
+                                     Required="true"
+                                     RequiredError="Wskazanie jest wymagane"
+                                     Margin="Margin.Dense" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_model.Zrodlo"
+                                  Label="Źródło (max 20)"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+
+        <MudDivider Class="my-4" />
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="SubmitAsync"
+                   Disabled="@(!_isFormValid || _saving)">
+            Dodaj odczyt
+        </MudButton>
+    }
+</MudPaper>
+
+@code {
+    private MudForm? _form;
+    private bool _loading = true;
+    private bool _saving;
+    private bool _isFormValid;
+    private OdczytContextDto _context = new();
+    private CreateOdczytRequest _model = new();
+    private DateTime? _dataOdczytu = DateTime.Today;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _context = await OdczytyService.GetContextAsync();
+            _model.DataOdczytu = DateTime.Today;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się pobrać danych kontekstu: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void OnDataChanged(DateTime? value)
+    {
+        _dataOdczytu = value;
+        _model.DataOdczytu = (value ?? DateTime.Today).Date;
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (_form is null)
+        {
+            return;
+        }
+
+        await _form.Validate();
+        if (!_isFormValid)
+        {
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            _model.DataOdczytu = (_dataOdczytu ?? DateTime.Today).Date;
+            _model.Zrodlo = _model.Zrodlo?.Trim();
+
+            var result = await OdczytyService.CreateAsync(_model);
+            Snackbar.Add($"Dodano odczyt (Id: {result.IdOdczytu}).", Severity.Success);
+
+            _model = new CreateOdczytRequest { DataOdczytu = DateTime.Today };
+            _dataOdczytu = DateTime.Today;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się dodać odczytu: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}
