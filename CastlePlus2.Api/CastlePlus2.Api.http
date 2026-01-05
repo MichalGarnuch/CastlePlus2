@@ -171,3 +171,23 @@ Content-Type: application/json
     }
   ]
 }
+### [FINANSE] GET platnosci context
+GET {{CastlePlus2.Api_HostAddress}}/api/finanse/procesy/platnosci/context
+Accept: application/json
+
+### [FINANSE] POST zarejestruj platnosc
+POST {{CastlePlus2.Api_HostAddress}}/api/finanse/procesy/platnosci/zarejestruj
+Content-Type: application/json
+
+{
+  "idPodmiotu": 1,
+  "dataPlatnosci": "2024-12-15",
+  "kodWaluty": "PLN",
+  "kwota": 1500.00,
+  "rozliczenia": [
+    {
+      "idFaktury": 1,
+      "kwota": 1500.00
+    }
+  ]
+}

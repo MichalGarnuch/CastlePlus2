@@ -9,7 +9,8 @@ namespace CastlePlus2.Client.Services.Finanse
     {
         private readonly HttpClient _http;
         private readonly ILogger<ProcesyFinanseService> _logger;
-        private const string BaseUrl = "api/finanse/procesy/faktury";
+        private const string FakturyBaseUrl = "api/finanse/procesy/faktury";
+        private const string PlatnosciBaseUrl = "api/finanse/procesy/platnosci";
 
         public ProcesyFinanseService(HttpClient http, ILogger<ProcesyFinanseService> logger)
         {
@@ -18,11 +19,11 @@ namespace CastlePlus2.Client.Services.Finanse
         }
 
         public async Task<WystawFaktureContextDto> GetWystawFaktureContextAsync(CancellationToken ct = default)
-            => await _http.GetFromJsonAsync<WystawFaktureContextDto>($"{BaseUrl}/context", ct) ?? new();
+            => await _http.GetFromJsonAsync<WystawFaktureContextDto>($"{FakturyBaseUrl}/context", ct) ?? new();
 
         public async Task<WystawFaktureResultDto> WystawFaktureAsync(WystawFaktureRequest request, CancellationToken ct = default)
         {
-            var resp = await _http.PostAsJsonAsync($"{BaseUrl}/wystaw", request, ct);
+            var resp = await _http.PostAsJsonAsync($"{FakturyBaseUrl}/wystaw", request, ct);
             if (!resp.IsSuccessStatusCode)
             {
                 var body = await resp.Content.ReadAsStringAsync(ct);
@@ -31,6 +32,22 @@ namespace CastlePlus2.Client.Services.Finanse
             }
 
             return (await resp.Content.ReadFromJsonAsync<WystawFaktureResultDto>(cancellationToken: ct))!;
+        }
+
+        public async Task<PlatnoscContextDto> GetPlatnoscContextAsync(CancellationToken ct = default)
+            => await _http.GetFromJsonAsync<PlatnoscContextDto>($"{PlatnosciBaseUrl}/context", ct) ?? new();
+
+        public async Task<ZarejestrujPlatnoscResultDto> ZarejestrujPlatnoscAsync(ZarejestrujPlatnoscRequest request, CancellationToken ct = default)
+        {
+            var resp = await _http.PostAsJsonAsync($"{PlatnosciBaseUrl}/zarejestruj", request, ct);
+            if (!resp.IsSuccessStatusCode)
+            {
+                var body = await resp.Content.ReadAsStringAsync(ct);
+                _logger.LogError("Rejestracja płatności nie powiodła się: {Status} {Body}", resp.StatusCode, body);
+                resp.EnsureSuccessStatusCode();
+            }
+
+            return (await resp.Content.ReadFromJsonAsync<ZarejestrujPlatnoscResultDto>(cancellationToken: ct))!;
         }
     }
 }
