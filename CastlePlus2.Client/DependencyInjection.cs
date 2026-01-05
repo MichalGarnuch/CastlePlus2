@@ -41,6 +41,7 @@ public static class DependencyInjection
         services.AddScoped<ILokaleService, LokaleService>();
         services.AddScoped<IPomieszczeniaService, PomieszczeniaService>();
         services.AddScoped<IEncjeService, EncjeService>();
+        services.AddScoped<IProcesyRdzenService, ProcesyRdzenService>();
 
         //PODMIOTY
         services.AddScoped<IPodmiotyService, PodmiotyService>();

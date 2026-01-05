@@ -27,6 +27,18 @@ namespace CastlePlus2.Infrastructure.Repositories.Rdzen
                 .FirstOrDefaultAsync(x => x.IdEncji == idEncji && x.DoDnia == null, cancellationToken);
         }
 
+        public Task<bool> ExistsOverlapAsync(Guid idEncji, DateOnly odDnia, DateOnly? doDnia, CancellationToken cancellationToken)
+        {
+            var maxDate = new DateOnly(9999, 12, 31);
+            var rangeEnd = doDnia ?? maxDate;
+
+            return _db.PrzypisaniaAdresow
+                .AsNoTracking()
+                .AnyAsync(x => x.IdEncji == idEncji
+                               && x.OdDnia <= rangeEnd
+                               && (x.DoDnia ?? maxDate) >= odDnia, cancellationToken);
+        }
+
         public Task AddAsync(PrzypisanieAdresu entity, CancellationToken cancellationToken)
         {
             return _db.PrzypisaniaAdresow.AddAsync(entity, cancellationToken).AsTask();

@@ -206,3 +206,18 @@ Content-Type: application/json
   "wskazanie": 123.456,
   "zrodlo": "manual"
 }
+
+### [RDZEN] GET adresy-przypisania context
+GET {{CastlePlus2.Api_HostAddress}}/api/rdzen/procesy/adresy-przypisania/context
+Accept: application/json
+
+### [RDZEN] POST przypisz adres
+POST {{CastlePlus2.Api_HostAddress}}/api/rdzen/procesy/adresy-przypisania/przypisz
+Content-Type: application/json
+
+{
+  "idEncji": "00000000-0000-0000-0000-000000000000",
+  "idAdresu": 1,
+  "odDnia": "2025-01-01",
+  "doDnia": null
+}

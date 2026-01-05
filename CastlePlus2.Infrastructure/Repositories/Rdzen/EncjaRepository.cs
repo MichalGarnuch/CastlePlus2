@@ -49,5 +49,31 @@ namespace CastlePlus2.Infrastructure.Repositories.Rdzen
         {
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
+        public async Task<List<Encja>> SearchAsync(string? typEncji, string? q, int take, CancellationToken cancellationToken = default)
+        {
+            take = take <= 0 ? 50 : Math.Min(take, 200);
+
+            var query = _dbContext.Encje.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(typEncji))
+            {
+                var t = typEncji.Trim();
+                query = query.Where(e => e.TypEncji == t);
+            }
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var s = q.Trim();
+                query = query.Where(e =>
+                    e.TypEncji.Contains(s) ||
+                    (e.KodEncji != null && e.KodEncji.Contains(s)));
+            }
+
+            return await query
+                .OrderBy(e => e.TypEncji)
+                .ThenBy(e => e.KodEncji)
+                .Take(take)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

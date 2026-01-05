@@ -17,5 +17,7 @@ namespace CastlePlus2.Application.Interfaces.Rdzen
         Task<Encja?> GetForUpdateAsync(Guid id, CancellationToken cancellationToken = default);
         void Remove(Encja entity);
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task<List<Encja>> SearchAsync(string? typEncji, string? q, int take, CancellationToken cancellationToken = default);
+
     }
 }

@@ -1,0 +1,221 @@
+﻿@page "/rdzen/adresy/przypisz"
+@using MudBlazor
+@using CastlePlus2.Client.Services.Rdzen
+@using CastlePlus2.Contracts.DTOs.Rdzen
+@using CastlePlus2.Contracts.Requests.Rdzen
+@inject IProcesyRdzenService ProcesyRdzenService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Przypisz adres do encji</MudText>
+
+<MudPaper Class="pa-4">
+    @if (_loading)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else
+    {
+        <MudForm @ref="_form" @bind-IsValid="_isFormValid">
+            <MudGrid Spacing="2">
+
+                <!-- Typ encji -->
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="string"
+                               Label="Typ encji"
+                               Value="_typEncji"
+                               ValueChanged="OnTypEncjiChanged"
+                               Margin="Margin.Dense">
+                        <MudSelectItem T="string" Value="@("BUDYNEK")">BUDYNEK</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("NIERUCHOMOSC")">NIERUCHOMOSC</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("LOKAL")">LOKAL</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("POMIESZCZENIE")">POMIESZCZENIE</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+
+                <!-- Encja: wybór przez modal -->
+                <MudItem xs="12" sm="6">
+                    <MudTextField Label="Encja"
+                                  ReadOnly="true"
+                                  Value="@(_selectedEncja?.Label ?? string.Empty)"
+                                  Required="true"
+                                  RequiredError="Encja jest wymagana"
+                                  Margin="Margin.Dense"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  OnAdornmentClick="OpenEncjaDialogAsync" />
+
+                    <MudButton Variant="Variant.Outlined"
+                               StartIcon="@Icons.Material.Filled.Search"
+                               Class="mt-2"
+                               OnClick="OpenEncjaDialogAsync">
+                        Wybierz encję
+                    </MudButton>
+                </MudItem>
+
+                <!-- Adres -->
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="long"
+                               Label="Adres"
+                               Required="true"
+                               RequiredError="Adres jest wymagany"
+                               @bind-Value="_model.IdAdresu"
+                               Margin="Margin.Dense">
+                        @foreach (var adres in _context.Adresy)
+                        {
+                            <MudSelectItem T="long" Value="@adres.IdAdresu">@adres.Label</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <!-- Od / Do -->
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Od dnia"
+                                   Required="true"
+                                   RequiredError="Data od jest wymagana"
+                                   @bind-Date="_odDnia" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Do dnia (opcjonalnie)"
+                                   @bind-Date="_doDnia" />
+                </MudItem>
+
+            </MudGrid>
+        </MudForm>
+
+        <MudDivider Class="my-4" />
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Disabled="@(!_isFormValid)"
+                   OnClick="SubmitAsync">
+            Przypisz adres
+        </MudButton>
+    }
+</MudPaper>
+
+@code {
+    private readonly PrzypisanieAdresuContextDto _context = new();
+    private readonly PrzypiszAdresRequest _model = new();
+
+    private MudForm? _form;
+    private bool _isFormValid;
+    private bool _loading = true;
+
+    private DateTime? _odDnia;
+    private DateTime? _doDnia;
+
+    private EncjaLookupDto? _selectedEncja;
+    private string _typEncji = "BUDYNEK";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+        try
+        {
+            var context = await ProcesyRdzenService.GetPrzypisanieAdresuContextAsync();
+            _context.Adresy = context.Adresy;
+
+            _odDnia = DateTime.Today;
+            _model.OdDnia = DateOnly.FromDateTime(_odDnia.Value);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania kontekstu: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void OnTypEncjiChanged(string value)
+    {
+        _typEncji = value;
+        _selectedEncja = null;
+        _model.IdEncji = Guid.Empty;
+    }
+
+
+    private async Task OpenEncjaDialogAsync()
+    {
+        var parameters = new DialogParameters
+        {
+            ["InitialTypEncji"] = _typEncji
+        };
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.Large
+        };
+
+        var dialog = await DialogService.ShowAsync<CastlePlus2.Client.Pages.Rdzen.EncjaLookupDialog>(
+            "Wybierz encję",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+        if (result.Canceled)
+            return;
+
+        if (result.Data is EncjaLookupDto encja)
+        {
+            _selectedEncja = encja;
+            _model.IdEncji = encja.IdEncji;
+
+            // opcjonalnie: dopasuj typ w formularzu do zwróconego
+            if (!string.IsNullOrWhiteSpace(encja.TypEncji))
+                _typEncji = encja.TypEncji;
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (_form is null)
+            return;
+
+        await _form.Validate();
+        if (!_form.IsValid)
+            return;
+
+        if (_selectedEncja is null || _model.IdEncji == Guid.Empty)
+        {
+            Snackbar.Add("Wybierz encję.", Severity.Warning);
+            return;
+        }
+
+        if (_odDnia is null)
+        {
+            Snackbar.Add("Data od jest wymagana.", Severity.Warning);
+            return;
+        }
+
+        _model.OdDnia = DateOnly.FromDateTime(_odDnia.Value);
+        _model.DoDnia = _doDnia is null ? null : DateOnly.FromDateTime(_doDnia.Value);
+
+        try
+        {
+            var result = await ProcesyRdzenService.PrzypiszAdresAsync(_model);
+            Snackbar.Add($"Przypisano adres (Id={result.IdPrzypisaniaAdresu}).", Severity.Success);
+
+            _selectedEncja = null;
+            _model.IdEncji = Guid.Empty;
+            _model.IdAdresu = 0;
+
+            _odDnia = DateTime.Today;
+            _doDnia = null;
+
+            _model.OdDnia = DateOnly.FromDateTime(_odDnia.Value);
+            _model.DoDnia = null;
+
+            await _form.ResetAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd przypisania adresu: {ex.Message}", Severity.Error);
+        }
+    }
+}

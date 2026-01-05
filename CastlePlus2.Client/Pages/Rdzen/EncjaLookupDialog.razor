@@ -1,0 +1,183 @@
+﻿@using MudBlazor
+@using CastlePlus2.Client.Services.Rdzen
+@using CastlePlus2.Contracts.DTOs.Rdzen
+@using Microsoft.AspNetCore.Components
+@inject IEncjeService EncjeService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="2">
+
+            <MudText Typo="Typo.h6">Wybierz encję</MudText>
+
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="4">
+                    <MudSelect T="string"
+                               Label="Typ encji"
+                               Value="_typEncji"
+                               ValueChanged="@(async (string v) => await OnTypEncjiChanged(v))"
+                               Margin="Margin.Dense">
+                        @foreach (var t in _typyEncji)
+                        {
+                            <MudSelectItem T="string" Value="@t">@t</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="8">
+                    <MudTextField @bind-Value="_search"
+                                  Label="Szukaj (kod / typ / id)"
+                                  Placeholder="np. UN/2026/0001"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  Immediate="true"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+            </MudGrid>
+
+            <MudTable Items="_items"
+                      Dense="true"
+                      Hover="true"
+                      Bordered="true"
+                      Striped="true"
+                      Loading="_loading"
+                      Filter="FilterFunc"
+                      RowClassFunc="RowClassFunc"
+                      RowsPerPage="@_rowsPerPage"
+                      RowsPerPageOptions="new int[] { 20, 50, 100, 400 }"
+                      OnRowClick="@(EventCallback.Factory.Create<TableRowClickEventArgs<EncjaLookupDto>>(this, HandleRowClick))">
+
+                <HeaderContent>
+                    <MudTh>Id</MudTh>
+                    <MudTh>Typ</MudTh>
+                    <MudTh>Kod</MudTh>
+                    <MudTh>Label</MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="Id">@context.IdEncji</MudTd>
+                    <MudTd DataLabel="Typ">@context.TypEncji</MudTd>
+                    <MudTd DataLabel="Kod">@context.KodEncji</MudTd>
+                    <MudTd DataLabel="Label">@context.Label</MudTd>
+                </RowTemplate>
+
+                <NoRecordsContent>
+                    <MudText Class="pa-4">Brak wyników.</MudText>
+                </NoRecordsContent>
+
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+            </MudTable>
+
+        </MudStack>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="@(() => Cancel())">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Disabled="@(_selected is null)"
+                   OnClick="@(() => Choose())">
+            Wybierz
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public string InitialTypEncji { get; set; } = "BUDYNEK";
+
+    private readonly List<string> _typyEncji = new() { "BUDYNEK", "NIERUCHOMOSC", "LOKAL", "POMIESZCZENIE" };
+
+    private List<EncjaLookupDto> _items = new();
+    private bool _loading = true;
+
+    private string _typEncji = "BUDYNEK";
+    private string _search = string.Empty;
+
+    private EncjaLookupDto? _selected;
+    private int _rowsPerPage = 50;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _typEncji = string.IsNullOrWhiteSpace(InitialTypEncji) ? "BUDYNEK" : InitialTypEncji;
+
+        _loading = true;
+        try
+        {
+            var data = await EncjeService.GetAllAsync();
+            var list = data ?? new List<CastlePlus2.Contracts.DTOs.Rdzen.EncjaDto>();
+
+            _items = list
+                .OrderBy(x => x.TypEncji)
+                .ThenBy(x => x.KodEncji)
+                .Select(x => new EncjaLookupDto
+                {
+                    IdEncji = x.Id,
+                    TypEncji = x.TypEncji ?? string.Empty,
+                    KodEncji = x.KodEncji,
+                    Label = string.IsNullOrWhiteSpace(x.KodEncji)
+                        ? (x.TypEncji ?? string.Empty)
+                        : $"{x.TypEncji} / {x.KodEncji}"
+                })
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania encji: {ex.Message}", Severity.Error);
+            _items = new();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private Task OnTypEncjiChanged(string value)
+    {
+        _typEncji = value;
+        _selected = null;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private bool FilterFunc(EncjaLookupDto item)
+    {
+        if (!string.Equals(item.TypEncji, _typEncji, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (string.IsNullOrWhiteSpace(_search))
+            return true;
+
+        var s = _search.Trim();
+
+        return item.IdEncji.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+               || (item.TypEncji?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || (item.KodEncji?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+               || (item.Label?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false);
+    }
+
+    private void HandleRowClick(TableRowClickEventArgs<EncjaLookupDto> args)
+    {
+        _selected = args.Item;
+    }
+
+    private string RowClassFunc(EncjaLookupDto item, int rowNumber)
+    {
+        if (_selected is null) return string.Empty;
+        return item.IdEncji == _selected.IdEncji ? "mud-theme-primary" : string.Empty;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void Choose()
+    {
+        if (_selected is null)
+            return;
+
+        MudDialog.Close(DialogResult.Ok(_selected));
+    }
+}
