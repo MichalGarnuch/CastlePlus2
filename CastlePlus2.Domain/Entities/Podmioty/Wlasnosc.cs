@@ -17,5 +17,8 @@ namespace CastlePlus2.Domain.Entities.Podmioty
         public DateOnly? DoDnia { get; set; }                 // date NULL
 
         public byte[] RowVersion { get; set; } = Array.Empty<byte>(); // timestamp (concurrency)
+
+        public CastlePlus2.Domain.Entities.Rdzen.Encja? Encja { get; set; }
+        public Podmiot? Podmiot { get; set; }
     }
 }

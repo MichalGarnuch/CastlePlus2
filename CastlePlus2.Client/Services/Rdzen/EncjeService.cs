@@ -36,9 +36,7 @@ namespace CastlePlus2.Client.Services.Rdzen
 
             var resp = await _http.SendAsync(req, ct);
             if (resp.StatusCode == HttpStatusCode.NotFound)
-            {
                 return null;
-            }
 
             resp.EnsureSuccessStatusCode();
             return await resp.Content.ReadFromJsonAsync<EncjaDto>(cancellationToken: ct);
@@ -56,9 +54,7 @@ namespace CastlePlus2.Client.Services.Rdzen
         {
             var resp = await _http.PutAsJsonAsync($"{BaseUrl}/{id}", request, ct);
             if (resp.StatusCode == HttpStatusCode.NotFound)
-            {
                 return false;
-            }
 
             resp.EnsureSuccessStatusCode();
             return true;
@@ -68,12 +64,25 @@ namespace CastlePlus2.Client.Services.Rdzen
         {
             var resp = await _http.DeleteAsync($"{BaseUrl}/{id}", ct);
             if (resp.StatusCode == HttpStatusCode.NotFound)
-            {
                 return false;
-            }
 
             resp.EnsureSuccessStatusCode();
             return true;
+        }
+
+        public async Task<List<EncjaLookupDto>> SearchLookupAsync(string? typEncji, string? q, int take = 50, CancellationToken ct = default)
+        {
+            take = take <= 0 ? 50 : Math.Min(take, 200);
+
+            var url = $"{BaseUrl}/lookup?take={take}";
+
+            if (!string.IsNullOrWhiteSpace(typEncji))
+                url += $"&typEncji={Uri.EscapeDataString(typEncji)}";
+
+            if (!string.IsNullOrWhiteSpace(q))
+                url += $"&q={Uri.EscapeDataString(q)}";
+
+            return await _http.GetFromJsonAsync<List<EncjaLookupDto>>(url, ct) ?? new List<EncjaLookupDto>();
         }
     }
 }

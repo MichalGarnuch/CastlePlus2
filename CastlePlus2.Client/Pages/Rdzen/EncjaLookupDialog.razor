@@ -26,7 +26,8 @@
                 </MudItem>
 
                 <MudItem xs="12" sm="8">
-                    <MudTextField @bind-Value="_search"
+                    <MudTextField Value="_search"
+                                  ValueChanged="@(async (string v) => await OnSearchChanged(v))"
                                   Label="Szukaj (kod / typ / id)"
                                   Placeholder="np. UN/2026/0001"
                                   Adornment="Adornment.Start"
@@ -42,10 +43,10 @@
                       Bordered="true"
                       Striped="true"
                       Loading="_loading"
-                      Filter="FilterFunc"
                       RowClassFunc="RowClassFunc"
                       RowsPerPage="@_rowsPerPage"
-                      RowsPerPageOptions="new int[] { 20, 50, 100, 400 }"
+                      RowsPerPageOptions="new int[] { 20, 50, 100, 200 }"
+                      RowsPerPageChanged="@(async (int v) => await OnRowsPerPageChanged(v))"
                       OnRowClick="@(EventCallback.Factory.Create<TableRowClickEventArgs<EncjaLookupDto>>(this, HandleRowClick))">
 
                 <HeaderContent>
@@ -71,15 +72,24 @@
                 </PagerContent>
             </MudTable>
 
+            <MudStack Row="true" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.caption">Wyników: @_items.Count (limit: @_take)</MudText>
+                <MudButton Variant="Variant.Outlined"
+                           Disabled="@(_take >= 200)"
+                           OnClick="@(async () => await LoadMore())">
+                    Pokaż więcej
+                </MudButton>
+            </MudStack>
+
         </MudStack>
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="@(() => Cancel())">Anuluj</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="@Cancel">Anuluj</MudButton>
         <MudButton Variant="Variant.Filled"
                    Color="Color.Primary"
                    Disabled="@(_selected is null)"
-                   OnClick="@(() => Choose())">
+                   OnClick="@Choose">
             Wybierz
         </MudButton>
     </DialogActions>
@@ -93,71 +103,87 @@
     private readonly List<string> _typyEncji = new() { "BUDYNEK", "NIERUCHOMOSC", "LOKAL", "POMIESZCZENIE" };
 
     private List<EncjaLookupDto> _items = new();
-    private bool _loading = true;
+    private bool _loading;
 
     private string _typEncji = "BUDYNEK";
     private string _search = string.Empty;
 
     private EncjaLookupDto? _selected;
+
     private int _rowsPerPage = 50;
+    private int _take = 50;
+
+    private CancellationTokenSource? _searchCts;
 
     protected override async Task OnInitializedAsync()
     {
         _typEncji = string.IsNullOrWhiteSpace(InitialTypEncji) ? "BUDYNEK" : InitialTypEncji;
+        _take = Math.Min(200, _rowsPerPage);
 
+        await ReloadAsync();
+    }
+
+    private async Task OnTypEncjiChanged(string value)
+    {
+        _typEncji = value;
+        _selected = null;
+        await ReloadAsync();
+    }
+
+    private async Task OnRowsPerPageChanged(int value)
+    {
+        _rowsPerPage = value;
+        _take = Math.Min(200, value);
+        _selected = null;
+        await ReloadAsync();
+    }
+
+    private async Task OnSearchChanged(string value)
+    {
+        _search = value;
+
+        // debounce
+        _searchCts?.Cancel();
+        _searchCts = new CancellationTokenSource();
+        var token = _searchCts.Token;
+
+        try
+        {
+            await Task.Delay(250, token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
+        _selected = null;
+        await ReloadAsync();
+    }
+
+    private async Task LoadMore()
+    {
+        _take = Math.Min(200, _take + 50);
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
         _loading = true;
         try
         {
-            var data = await EncjeService.GetAllAsync();
-            var list = data ?? new List<CastlePlus2.Contracts.DTOs.Rdzen.EncjaDto>();
-
-            _items = list
-                .OrderBy(x => x.TypEncji)
-                .ThenBy(x => x.KodEncji)
-                .Select(x => new EncjaLookupDto
-                {
-                    IdEncji = x.Id,
-                    TypEncji = x.TypEncji ?? string.Empty,
-                    KodEncji = x.KodEncji,
-                    Label = string.IsNullOrWhiteSpace(x.KodEncji)
-                        ? (x.TypEncji ?? string.Empty)
-                        : $"{x.TypEncji} / {x.KodEncji}"
-                })
-                .ToList();
+            var q = string.IsNullOrWhiteSpace(_search) ? null : _search.Trim();
+            _items = await EncjeService.SearchLookupAsync(_typEncji, q, _take);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Błąd pobierania encji: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Błąd pobierania encji (lookup): {ex.Message}", Severity.Error);
             _items = new();
         }
         finally
         {
             _loading = false;
+            StateHasChanged();
         }
-    }
-
-    private Task OnTypEncjiChanged(string value)
-    {
-        _typEncji = value;
-        _selected = null;
-        StateHasChanged();
-        return Task.CompletedTask;
-    }
-
-    private bool FilterFunc(EncjaLookupDto item)
-    {
-        if (!string.Equals(item.TypEncji, _typEncji, StringComparison.OrdinalIgnoreCase))
-            return false;
-
-        if (string.IsNullOrWhiteSpace(_search))
-            return true;
-
-        var s = _search.Trim();
-
-        return item.IdEncji.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
-               || (item.TypEncji?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
-               || (item.KodEncji?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
-               || (item.Label?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false);
     }
 
     private void HandleRowClick(TableRowClickEventArgs<EncjaLookupDto> args)

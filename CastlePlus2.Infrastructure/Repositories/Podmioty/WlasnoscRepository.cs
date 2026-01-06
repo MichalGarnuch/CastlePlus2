@@ -49,6 +49,14 @@ namespace CastlePlus2.Infrastructure.Repositories.Podmioty
                 .FirstOrDefaultAsync(x => x.IdWlasnosci == idWlasnosci, ct);
         }
 
+        public async Task<List<Wlasnosc>> GetForUpdateByEncjaIdAsync(Guid idEncji, CancellationToken ct)
+        {
+            return await _db.Wlasnosci
+                .Where(x => x.IdEncji == idEncji)
+                .OrderByDescending(x => x.OdDnia)
+                .ToListAsync(ct);
+        }
+
         public async Task AddAsync(Wlasnosc entity, CancellationToken ct)
         {
             await _db.Wlasnosci.AddAsync(entity, ct);

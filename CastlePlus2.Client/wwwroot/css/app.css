@@ -90,7 +90,6 @@ body {
     box-shadow: 0 12px 40px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.08) !important;
 }
 
-
 .castle-appbar {
     border-bottom: 1px solid rgba(255,255,255,0.06) !important;
 }
@@ -233,4 +232,85 @@ body {
     margin-top: 12px;
     color: rgba(226,232,240,0.75);
     font-size: 12px;
+}
+
+/* =========================================================
+   OPAQUE OVERLAYS (MudSelect dropdown, MudDatePicker calendar, menus)
+   ========================================================= */
+
+/* UWAGA: masz globalnie .mud-paper { transparent }, więc TU musimy "odbić"
+   dla wszystkich popoverów – ale z lepszymi selektorami, żeby trafić w dropdowny. */
+
+.mud-popover .mud-paper,
+.mud-popover-cascading-value .mud-paper,
+.mud-popover-provider .mud-paper,
+.mud-select-popover .mud-paper,
+.mud-autocomplete-popover .mud-paper,
+.mud-menu .mud-paper {
+    background-color: rgba(18, 24, 38, 0.98) !important; /* fallback zawsze nieprzezroczysty */
+    background-image: none !important;
+    opacity: 1 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 18px 60px rgba(0,0,0,0.55) !important;
+}
+
+/* Wnętrza pickerów */
+.mud-popover .mud-picker-content,
+.mud-popover .mud-picker-calendar,
+.mud-popover .mud-picker,
+.mud-popover-cascading-value .mud-picker-content,
+.mud-popover-cascading-value .mud-picker-calendar,
+.mud-popover-cascading-value .mud-picker {
+    background-color: rgba(18, 24, 38, 0.98) !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+    /* Czytelność tekstu w pickerach */
+    .mud-popover .mud-picker *,
+    .mud-popover-cascading-value .mud-picker * {
+        color: var(--mud-palette-text-primary) !important;
+    }
+
+/* Dropdown listy – mają być przezroczyste, bo tło robi PAPER */
+.mud-popover .mud-list,
+.mud-popover-cascading-value .mud-list,
+.mud-select-popover .mud-list,
+.mud-autocomplete-popover .mud-list,
+.mud-menu .mud-list {
+    background-color: transparent !important;
+}
+
+/* Hover / selected w dropdownach */
+.mud-popover .mud-list-item:hover,
+.mud-popover-cascading-value .mud-list-item:hover,
+.mud-select-popover .mud-list-item:hover,
+.mud-autocomplete-popover .mud-list-item:hover,
+.mud-menu .mud-list-item:hover {
+    background-color: rgba(255,255,255,0.06) !important;
+}
+
+.mud-popover .mud-selected-item,
+.mud-popover-cascading-value .mud-selected-item,
+.mud-select-popover .mud-selected-item,
+.mud-autocomplete-popover .mud-selected-item,
+.mud-menu .mud-selected-item {
+    background-color: rgba(0, 210, 255, 0.14) !important;
+}
+
+/* =========================================================
+   OPAQUE DIALOG (MudDialog też jest MudPaper -> inaczej będzie prześwitywał)
+   ========================================================= */
+.mud-dialog,
+.mud-dialog .mud-paper {
+    background-color: rgba(18, 24, 38, 0.98) !important;
+    background-image: none !important;
+    opacity: 1 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
 }

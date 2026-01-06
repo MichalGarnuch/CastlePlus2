@@ -10,5 +10,8 @@ namespace CastlePlus2.Client.Services.Rdzen
         Task<EncjaDto> CreateAsync(CreateEncjaRequest request, CancellationToken ct = default);
         Task<bool> UpdateAsync(Guid id, UpdateEncjaRequest request, CancellationToken ct = default);
         Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
+
+        // Lookup (duże zbiory: 14k+)
+        Task<List<EncjaLookupDto>> SearchLookupAsync(string? typEncji, string? q, int take = 50, CancellationToken ct = default);
     }
 }

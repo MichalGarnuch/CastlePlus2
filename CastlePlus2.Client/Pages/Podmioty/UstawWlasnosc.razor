@@ -1,0 +1,249 @@
+﻿@page "/podmioty/wlasnosc/ustaw"
+@using System.Linq
+@using MudBlazor
+@using CastlePlus2.Client.Services.Podmioty
+@using CastlePlus2.Client.Pages.Rdzen
+@using CastlePlus2.Contracts.DTOs.Podmioty
+@using CastlePlus2.Contracts.DTOs.Rdzen
+@using CastlePlus2.Contracts.Requests.Podmioty
+@inject IProcesyPodmiotyService ProcesyPodmiotyService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Ustaw udziały właścicielskie</MudText>
+
+<MudPaper Class="pa-4">
+    @if (_loading)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else
+    {
+        <MudGrid Spacing="2">
+            <MudItem xs="12" sm="8">
+                <MudTextField Label="Encja"
+                              ReadOnly="true"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Value="@_encjaLabel" />
+            </MudItem>
+
+            <MudItem xs="12" sm="4" Class="d-flex align-center justify-end">
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Search"
+                           OnClick="OpenEncjaLookupDialog">
+                    Wybierz encję
+                </MudButton>
+            </MudItem>
+
+            <MudItem xs="12" sm="12" Class="d-flex align-center justify-end">
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Secondary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="AddRow">
+                    Dodaj udział
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+
+        <MudTable Items="_udzialy"
+                  Dense="true"
+                  Hover="true"
+                  Bordered="true"
+                  Class="mt-4">
+            <HeaderContent>
+                <MudTh>Podmiot</MudTh>
+                <MudTh>Udział %</MudTh>
+                <MudTh>Od dnia</MudTh>
+                <MudTh>Do dnia</MudTh>
+                <MudTh></MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd DataLabel="Podmiot">
+                    <MudSelect T="long"
+                               Dense="true"
+                               @bind-Value="context.IdPodmiotu"
+                               Margin="Margin.Dense">
+                        @foreach (var podmiot in _context.Podmioty)
+                        {
+                            <MudSelectItem T="long" Value="@podmiot.IdPodmiotu">@GetPodmiotLabel(podmiot)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+
+                <MudTd DataLabel="Udział %">
+                    <MudNumericField T="decimal"
+                                     Dense="true"
+                                     @bind-Value="context.UdzialProcent" />
+                </MudTd>
+
+                <MudTd DataLabel="Od dnia">
+                    <MudDatePicker Date="@GetDateTime(context.OdDnia)"
+                                   DateChanged="@(date => OnOdDniaChanged(context, date))"
+                                   Margin="Margin.Dense" />
+                </MudTd>
+
+                <MudTd DataLabel="Do dnia">
+                    <MudDatePicker Date="@GetDateTime(context.DoDnia)"
+                                   DateChanged="@(date => OnDoDniaChanged(context, date))"
+                                   Margin="Margin.Dense" />
+                </MudTd>
+
+                <MudTd DataLabel="Akcje" Class="text-right">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   Size="Size.Small"
+                                   OnClick="@(() => RemoveRow(context))" />
+                </MudTd>
+            </RowTemplate>
+
+            <NoRecordsContent>
+                <MudText Class="pa-4">Brak udziałów do ustawienia.</MudText>
+            </NoRecordsContent>
+        </MudTable>
+
+        <MudDivider Class="my-4" />
+
+        <MudText Typo="Typo.subtitle2">Suma udziałów: @SumaUdzialow.ToString("F2")%</MudText>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Disabled="@(_saving)"
+                   OnClick="SubmitAsync">
+            Zapisz udziały
+        </MudButton>
+    }
+</MudPaper>
+
+@code {
+    private bool _loading = true;
+    private bool _saving;
+
+    private Guid _idEncji;
+    private string _encjaLabel = string.Empty;
+
+    private WlasnoscContextDto _context = new();
+    private List<UstawWlasnoscItemRequest> _udzialy = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _context = await ProcesyPodmiotyService.GetWlasnoscContextAsync();
+            AddRow();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się pobrać danych kontekstu: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task OpenEncjaLookupDialog()
+    {
+        var parameters = new DialogParameters
+        {
+            ["InitialTypEncji"] = "BUDYNEK"
+        };
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<EncjaLookupDialog>("Wybierz encję", parameters, options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not EncjaLookupDto selected)
+            return;
+
+        _idEncji = selected.IdEncji;
+        _encjaLabel = $"{selected.Label} ({selected.IdEncji})";
+
+        StateHasChanged();
+    }
+
+    private void AddRow()
+    {
+        _udzialy.Add(new UstawWlasnoscItemRequest
+        {
+            OdDnia = DateOnly.FromDateTime(DateTime.Today)
+        });
+    }
+
+    private void RemoveRow(UstawWlasnoscItemRequest row) => _udzialy.Remove(row);
+
+    private decimal SumaUdzialow => _udzialy.Sum(x => x.UdzialProcent);
+
+    private static string GetPodmiotLabel(PodmiotDto podmiot)
+    {
+        var nip = string.IsNullOrWhiteSpace(podmiot.NIP) ? "-" : podmiot.NIP;
+        return $"{podmiot.Nazwa} (NIP: {nip})";
+    }
+
+    private static DateTime? GetDateTime(DateOnly? value)
+        => value is null ? null : new DateTime(value.Value.Year, value.Value.Month, value.Value.Day);
+
+    private void OnOdDniaChanged(UstawWlasnoscItemRequest row, DateTime? value)
+    {
+        if (value is null) return;
+        row.OdDnia = DateOnly.FromDateTime(value.Value);
+    }
+
+    private void OnDoDniaChanged(UstawWlasnoscItemRequest row, DateTime? value)
+    {
+        row.DoDnia = value is null ? null : DateOnly.FromDateTime(value.Value);
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (_idEncji == Guid.Empty)
+        {
+            Snackbar.Add("Wybierz encję.", Severity.Warning);
+            return;
+        }
+
+        if (_udzialy.Count == 0)
+        {
+            Snackbar.Add("Dodaj przynajmniej jeden udział.", Severity.Warning);
+            return;
+        }
+
+        if (_udzialy.Any(x => x.IdPodmiotu <= 0))
+        {
+            Snackbar.Add("Uzupełnij podmioty we wszystkich udziałach.", Severity.Warning);
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            var request = new UstawWlasnoscRequest
+            {
+                IdEncji = _idEncji,
+                Udzialy = _udzialy
+            };
+
+            await ProcesyPodmiotyService.UstawWlasnoscAsync(request);
+            Snackbar.Add("Zapisano udziały właścicielskie.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się zapisać udziałów: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

@@ -221,3 +221,29 @@ Content-Type: application/json
   "odDnia": "2025-01-01",
   "doDnia": null
 }
+
+### [PODMIOTY] GET wlasnosc context
+GET {{CastlePlus2.Api_HostAddress}}/api/podmioty/procesy/wlasnosc/context
+Accept: application/json
+
+### [PODMIOTY] POST ustaw wlasnosc
+POST {{CastlePlus2.Api_HostAddress}}/api/podmioty/procesy/wlasnosc/ustaw
+Content-Type: application/json
+
+{
+  "idEncji": "00000000-0000-0000-0000-000000000000",
+  "udzialy": [
+    {
+      "idPodmiotu": 1,
+      "udzialProcent": 60.00,
+      "odDnia": "2024-01-01",
+      "doDnia": null
+    },
+    {
+      "idPodmiotu": 2,
+      "udzialProcent": 40.00,
+      "odDnia": "2024-01-01",
+      "doDnia": null
+    }
+  ]
+}

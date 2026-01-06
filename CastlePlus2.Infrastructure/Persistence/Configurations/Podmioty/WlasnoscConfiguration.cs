@@ -47,6 +47,18 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Podmioty
                    .HasColumnName("RowVersion")
                    .IsRowVersion()
                    .IsConcurrencyToken();
+
+            builder.HasOne(x => x.Encja)
+                   .WithMany()
+                   .HasForeignKey(x => x.IdEncji)
+                   .HasConstraintName("FK_po_Wlasnosc_Encja")
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(x => x.Podmiot)
+                   .WithMany()
+                   .HasForeignKey(x => x.IdPodmiotu)
+                   .HasConstraintName("FK_po_Wlasnosc_Podmiot")
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

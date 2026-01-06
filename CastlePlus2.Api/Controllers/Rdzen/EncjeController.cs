@@ -3,13 +3,13 @@ using CastlePlus2.Application.Rdzen.Encje.Commands.DeleteEncja;
 using CastlePlus2.Application.Rdzen.Encje.Commands.UpdateEncja;
 using CastlePlus2.Application.Rdzen.Encje.Queries.GetAllEncje;
 using CastlePlus2.Application.Rdzen.Encje.Queries.GetEncjaById;
+using CastlePlus2.Application.Rdzen.ProcesyRdzen.Queries.SearchEncjeLookup;
 using CastlePlus2.Contracts.DTOs.Rdzen;
 using CastlePlus2.Contracts.Requests.Rdzen;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CastlePlus2.Api.Controllers.Rzden
+namespace CastlePlus2.Api.Controllers.Rdzen
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -39,6 +39,19 @@ namespace CastlePlus2.Api.Controllers.Rzden
         {
             var result = await _mediator.Send(new GetEncjaByIdQuery(id), ct);
             return result is null ? NotFound() : Ok(result);
+        }
+
+        // GET: api/Encje/lookup?typEncji=...&q=...&take=50
+        [HttpGet("lookup")]
+        [ProducesResponseType(typeof(List<EncjaLookupDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<EncjaLookupDto>>> Lookup(
+            [FromQuery] string? typEncji,
+            [FromQuery] string? q,
+            [FromQuery] int take = 50,
+            CancellationToken ct = default)
+        {
+            var result = await _mediator.Send(new SearchEncjeLookupQuery(typEncji, q, take), ct);
+            return Ok(result);
         }
 
         // POST: api/Encje
