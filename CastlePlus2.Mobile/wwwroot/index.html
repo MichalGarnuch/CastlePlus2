@@ -1,34 +1,42 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>CastlePlus2.Mobile</title>
+    <title>CastlePlus2</title>
     <base href="/" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+
     <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+
+    <!-- mobile host-only (jeśli chcesz, zostaw minimalny) -->
     <link rel="stylesheet" href="css/app.css" />
+
+    <!-- WSPÓLNY CSS z CastlePlus2.Client (NA KOŃCU, żeby miał priorytet) -->
+    <link rel="stylesheet" href="/_content/CastlePlus2.Client/css/app.css" />
+
     <link rel="stylesheet" href="CastlePlus2.Mobile.styles.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
 </head>
 
 <body>
-
     <div class="status-bar-safe-area"></div>
 
-    <div id="app">Loading...</div>
+    <div id="app">
+        <div class="castle-boot">
+            <div class="castle-boot__card">
+                <img class="castle-boot__logo" src="/_content/CastlePlus2.Client/assets/brand/logo.png" alt="CastlePlus2" />
+                <div class="castle-boot__title">CastlePlus2</div>
+                <div class="castle-boot__subtitle">Wczytywanie środowiska…</div>
 
-    <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
+                <div class="castle-boot__bar">
+                    <div class="castle-boot__barFill"></div>
+                </div>
+
+                <div class="castle-boot__hint">Uruchamianie interfejsu. Proszę czekać.</div>
+            </div>
+        </div>
     </div>
 
     <script src="_framework/blazor.webview.js" autostart="false"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
-
 </body>
-
 </html>

@@ -9,13 +9,13 @@ namespace CastlePlus2.Client.Theme
             PaletteDark = new PaletteDark
             {
                 Background = "#0b0f19",
-                Surface = "#161b22",
-                AppbarBackground = "rgba(11, 15, 25, 0.8)",
-                DrawerBackground = "#0b0f19",
+                Surface = "#121826",
+                AppbarBackground = "rgba(22, 27, 34, 0.68)",
+                DrawerBackground = "rgba(22, 27, 34, 0.68)",
 
-                Primary = "#00d2ff",    // Neon Cyan
-                Secondary = "#d946ef",  // Neon Pink
-                Tertiary = "#8b5cf6",   // Neon Purple
+                Primary = "#00d2ff",
+                Secondary = "#d946ef",
+                Tertiary = "#8b5cf6",
                 Success = "#22c55e",
                 Error = "#ef4444",
                 Warning = "#eab308",
@@ -26,8 +26,15 @@ namespace CastlePlus2.Client.Theme
             },
             LayoutProperties = new LayoutProperties
             {
-                DefaultBorderRadius = "12px",
+                DefaultBorderRadius = "18px",
                 DrawerWidthLeft = "280px"
+            },
+            Typography = new Typography
+            {
+                Default = new DefaultTypography
+                {
+                    FontFamily = new[] { "Montserrat", "Roboto", "Helvetica", "Arial", "sans-serif" }
+                }
             }
         };
     }

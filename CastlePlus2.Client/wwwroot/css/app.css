@@ -1,23 +1,128 @@
 ﻿@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
 
+:root {
+    --castle-bg: #0b0f19;
+    /* Glass */
+    --castle-surface: rgba(30, 40, 52, 0.42); /* jaśniejsze szkło (appbar/drawer) */
+    --castle-surface-2: rgba(22, 30, 42, 0.38); /* jaśniejsze szkło (karty) */
+    --castle-stroke: rgba(255,255,255,0.12);
+    --castle-stroke-soft: rgba(255,255,255,0.08);
+    --castle-radius: 18px;
+    /* Wallpaper + overlay tuning */
+    --castle-wallpaper-opacity: 0.38; /* <<< realna widoczność tapety */
+    --castle-overlay-opacity: 0.62; /* <<< „ściemnienie” całości */
+    --castle-cyan: rgba(0, 210, 255, 0.18);
+    --castle-purple: rgba(217, 70, 239, 0.10);
+    --castle-dark-top: rgba(11,15,25,0.22);
+    --castle-dark-bottom: rgba(11,15,25,0.72);
+    --castle-appbar-h: 64px;
+}
+
+@media (max-width: 600px) {
+    :root {
+        --castle-appbar-h: 56px;
+    }
+}
+
 html, body {
-    background-color: #0b0f19;
-    background-image: radial-gradient(circle at 50% 0%, #1a2332 0%, #0b0f19 80%);
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    background-color: var(--castle-bg);
     font-family: 'Montserrat', sans-serif !important;
-    height: 100vh;
-    overflow: hidden; /* scrolluje tylko content */
+    overflow: hidden; /* scrolluje tylko main content */
 }
 
-/* ===== GLASS PANEL (reusable) ===== */
+    /* Wallpaper layer (UWAGA: ścieżka RELATYWNA do /_content/.../css/app.css) */
+    body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: url("../assets/wallpaper/wallpaper.jpg"); /* <<< TO JEST KLUCZ */
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: var(--castle-wallpaper-opacity);
+        filter: saturate(1.06) contrast(1.04);
+        pointer-events: none;
+        z-index: -2;
+    }
+
+    /* Dark + neon overlay */
+    body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle at 18% 12%, var(--castle-cyan) 0%, rgba(0,0,0,0) 48%), radial-gradient(circle at 82% 28%, var(--castle-purple) 0%, rgba(0,0,0,0) 52%), linear-gradient(180deg, var(--castle-dark-top) 0%, var(--castle-dark-bottom) 70%, rgba(11,15,25,0.84) 100%);
+        opacity: var(--castle-overlay-opacity);
+        pointer-events: none;
+        z-index: -1;
+    }
+
+/* ===== WAŻNE: MudBlazor nie może kłaść pełnego tła na layout ===== */
+.mud-layout,
+.mud-layout-content,
+.mud-main-content,
+.mud-container,
+.mud-drawer-content,
+.mud-paper {
+    background-color: transparent !important;
+}
+
+/* ===== GLASS (reusable) ===== */
 .glass-panel {
-    background: rgba(22, 27, 34, 0.7) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 60%), var(--castle-surface) !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
+    border: 1px solid var(--castle-stroke) !important;
+    border-radius: var(--castle-radius) !important;
+    box-shadow: 0 14px 46px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.10) !important;
 }
 
-/* ===== MudBlazor – poprawki pod Glass ===== */
+.glass-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.015) 60%), var(--castle-surface-2) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid var(--castle-stroke-soft) !important;
+    border-radius: var(--castle-radius) !important;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+}
+
+
+.castle-appbar {
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+}
+
+.castle-drawer {
+    border-right: 1px solid rgba(255,255,255,0.06) !important;
+}
+
+.castle-main {
+    height: calc(100vh - var(--castle-appbar-h));
+    overflow: auto;
+}
+
+/* Logo in AppBar */
+.castle-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .castle-brand img {
+        width: 28px;
+        height: 28px;
+        object-fit: contain;
+        filter: drop-shadow(0 0 10px rgba(0,210,255,0.22));
+    }
+
+.fw-700 {
+    font-weight: 700;
+}
+
+/* ===== MudBlazor table polish ===== */
 .mud-table-root,
 .mud-table-container {
     background: transparent !important;
@@ -28,7 +133,7 @@ html, body {
     font-weight: 700 !important;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.10) !important;
 }
 
 .mud-table-body .mud-table-cell {
@@ -47,7 +152,7 @@ html, body {
 }
 
 ::-webkit-scrollbar-track {
-    background: #0b0f19;
+    background: rgba(11,15,25,0.45);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -55,7 +160,77 @@ html, body {
     border-radius: 4px;
 }
 
-/* ===== Utils ===== */
-.fw-700 {
+/* ===== MAUI/WebView boot loader ===== */
+.castle-boot {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+
+.castle-boot__card {
+    width: min(520px, 92vw);
+    border-radius: 22px;
+    padding: 28px 24px;
+    text-align: center;
+    background: rgba(11, 15, 25, 0.55);
+    border: 1px solid rgba(255,255,255,0.10);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 12px 50px rgba(0,0,0,0.45);
+}
+
+.castle-boot__logo {
+    width: 84px;
+    height: 84px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 18px rgba(0,210,255,0.22));
+}
+
+.castle-boot__title {
+    font-size: 28px;
     font-weight: 700;
+    letter-spacing: 0.6px;
+    color: #e2e8f0;
+}
+
+.castle-boot__subtitle {
+    margin-top: 8px;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.castle-boot__bar {
+    margin: 18px auto 0;
+    width: min(360px, 80%);
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.10);
+}
+
+.castle-boot__barFill {
+    height: 100%;
+    width: 40%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(0,210,255,0.25), rgba(0,210,255,0.75), rgba(217,70,239,0.55));
+    animation: castleBoot 1.1s infinite ease-in-out;
+}
+
+@keyframes castleBoot {
+    0% {
+        transform: translateX(-110%);
+    }
+
+    100% {
+        transform: translateX(260%);
+    }
+}
+
+.castle-boot__hint {
+    margin-top: 12px;
+    color: rgba(226,232,240,0.75);
+    font-size: 12px;
 }
