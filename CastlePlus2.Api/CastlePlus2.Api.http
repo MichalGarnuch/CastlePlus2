@@ -250,3 +250,8 @@ Content-Type: application/json
 ### [DASHBOARD] GET v1 najem
 GET {{CastlePlus2.Api_HostAddress}}/api/dashboard/v1/najem
 Accept: application/json
+
+### [RAPORTY] (placeholder) – pobranie pliku po URL
+# Przyk³ad: GET {{CastlePlus2.Api_HostAddress}}/api/raporty/eksport?reportKey=podsumowanie&format=Csv
+GET {{CastlePlus2.Api_HostAddress}}/api/raporty/eksport?reportKey=podsumowanie&format=Csv
+Accept: application/octet-stream

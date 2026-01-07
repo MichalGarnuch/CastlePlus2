@@ -10,6 +10,7 @@ using CastlePlus2.Application.Interfaces.Podmioty;
 using CastlePlus2.Application.Interfaces.Rdzen;
 using CastlePlus2.Application.Interfaces.Slowniki;
 using CastlePlus2.Application.Interfaces.Utrzymanie;
+using CastlePlus2.Application.Interfaces.Exports;
 using CastlePlus2.Application.Mappings.Rdzen;
 using CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomosc;
 using CastlePlus2.Infrastructure.Persistence;
@@ -23,6 +24,7 @@ using CastlePlus2.Infrastructure.Repositories.Slowniki;
 using CastlePlus2.Infrastructure.Repositories.Utrzymanie;
 using CastlePlus2.Infrastructure.Services.Dashboard;
 using CastlePlus2.Infrastructure.Services.Najem;
+using CastlePlus2.Infrastructure.Services.Exports;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models; // <--- WAŻNE: Ten using jest potrzebny do konfiguracji
@@ -121,6 +123,8 @@ builder.Services.AddScoped<IRodzajMediumRepository, RodzajMediumRepository>();
 builder.Services.AddScoped<IPrzylaczeRepository, PrzylaczeRepository>();
 builder.Services.AddScoped<ILicznikRepository, LicznikRepository>();
 builder.Services.AddScoped<IOdczytRepository, OdczytRepository>();
+//EXPORT
+builder.Services.AddScoped<IReportExportService, ReportExportService>();
 
 
 // -------------------------------------------------------------------------

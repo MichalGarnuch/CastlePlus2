@@ -1,0 +1,74 @@
+﻿@page "/raporty/eksporty"
+
+@using CastlePlus2.Client.Services.Exports
+@using CastlePlus2.Contracts.Exports
+@using MudBlazor
+@using System.Linq
+@inject IReportExportUrlService ReportExportUrlService
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Eksporty raportów</MudText>
+
+<MudPaper Class="pa-4 glass-panel">
+    <MudGrid Spacing="3">
+        <MudItem xs="12" md="6">
+            <MudSelect T="string" Label="Raport" Dense="true" @bind-Value="_selectedReportKey">
+                @foreach (var option in _reportOptions)
+                {
+                    <MudSelectItem Value="@option.Key">@option.Label</MudSelectItem>
+                }
+            </MudSelect>
+            <MudText Typo="Typo.caption" Class="mt-1">@_selectedDescription</MudText>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudSelect T="ExportFormat" Label="Format eksportu" Dense="true" @bind-Value="_selectedFormat">
+                <MudSelectItem Value="ExportFormat.Csv">CSV</MudSelectItem>
+                <MudSelectItem Value="ExportFormat.Pdf">PDF</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="StartExport"
+                       Disabled="@string.IsNullOrWhiteSpace(_selectedReportKey)">
+                Pobierz raport
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+    private readonly IReadOnlyList<ReportOption> _reportOptions = new List<ReportOption>
+    {
+        new("podsumowanie", "Podsumowanie operacyjne", "Podstawowe wskaźniki demonstracyjne."),
+        new("faktury", "Statystyki faktur", "Zestawienie przykładowych danych finansowych.")
+    };
+
+    private string? _selectedReportKey;
+    private ExportFormat _selectedFormat = ExportFormat.Csv;
+
+    private string _selectedDescription =>
+        _reportOptions.FirstOrDefault(option => option.Key == _selectedReportKey)?.Description ?? string.Empty;
+
+    protected override void OnInitialized()
+    {
+        _selectedReportKey ??= _reportOptions.FirstOrDefault()?.Key;
+    }
+
+    private void StartExport()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedReportKey))
+        {
+            return;
+        }
+
+        var parameters = new Dictionary<string, string?>
+        {
+            ["reportKey"] = _selectedReportKey,
+            ["format"] = _selectedFormat.ToString()
+        };
+
+        ReportExportUrlService.OpenExportUrl("/api/raporty/eksport", parameters);
+    }
+
+    private sealed record ReportOption(string Key, string Label, string Description);
+}
