@@ -1,4 +1,5 @@
-﻿using CastlePlus2.Application.Dashboard.Najem.Queries.GetNajemDashboard;
+﻿using CastlePlus2.Application.Dashboard.Najem.Queries.GetDashboardV1Najem;
+using CastlePlus2.Application.Dashboard.Najem.Queries.GetNajemDashboard;
 using CastlePlus2.Contracts.DTOs.Dashboard;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -23,6 +24,14 @@ namespace CastlePlus2.Api.Controllers.Dashboard
         {
             var days = zakresDni ?? 30;
             var result = await _mediator.Send(new GetNajemDashboardQuery(days), ct);
+            return Ok(result);
+        }
+
+        [HttpGet("v1/najem")]
+        [ProducesResponseType(typeof(DashboardV1NajemDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetDashboardV1Najem(CancellationToken ct)
+        {
+            var result = await _mediator.Send(new GetDashboardV1NajemQuery(), ct);
             return Ok(result);
         }
     }

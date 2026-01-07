@@ -115,6 +115,7 @@ builder.Services.AddScoped<IKaucjaRepository, KaucjaRepository>();
 builder.Services.AddScoped<IUmowaNajmuKodGenerator, UmowaNajmuKodGenerator>();
 builder.Services.AddScoped<IWlasnoscRepository, WlasnoscRepository>();
 builder.Services.AddScoped<INajemDashboardQueryService, NajemDashboardQueryService>();
+builder.Services.AddScoped<IDashboardV1NajemQueryService, DashboardV1NajemQueryService>();
 //MEDIA
 builder.Services.AddScoped<IRodzajMediumRepository, RodzajMediumRepository>();
 builder.Services.AddScoped<IPrzylaczeRepository, PrzylaczeRepository>();
