@@ -126,6 +126,13 @@ builder.Services.AddScoped<IOdczytRepository, OdczytRepository>();
 //EXPORT
 builder.Services.AddScoped<IReportExportService, ReportExportService>();
 
+builder.Services.AddScoped<CsvReportExporter>();
+builder.Services.AddScoped<XlsxReportExporter>();
+builder.Services.AddScoped<PdfReportExporter>();
+builder.Services.AddScoped<DocxReportExporter>();
+builder.Services.AddScoped<IReportExportService, ReportExportService>();
+
+
 
 // -------------------------------------------------------------------------
 // 4. Konfiguracja API i Swaggera (TU BYŁ PROBLEM)

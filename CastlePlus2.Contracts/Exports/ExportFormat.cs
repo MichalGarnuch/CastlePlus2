@@ -3,5 +3,7 @@
 public enum ExportFormat
 {
     Csv = 1,
-    Pdf = 2
+    Pdf = 2,
+    Xlsx = 3,
+    Docx = 4
 }

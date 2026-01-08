@@ -79,6 +79,9 @@ public static class DependencyInjection
         //EXPORT
         services.AddScoped<IReportExportUrlService, ReportExportUrlService>();
 
+        //z infrastructure
+
+
         return services;
     }
 }

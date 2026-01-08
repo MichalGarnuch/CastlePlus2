@@ -25,17 +25,26 @@ namespace CastlePlus2.Api.Controllers.Raporty
             }
 
             var fileNameBase = $"{reportKey}_{DateTime.UtcNow:yyyyMMdd_HHmm}";
+            var title = $"Raport: {reportKey}";
 
             return format switch
             {
                 ExportFormat.Csv => File(
                     _reportExportService.ExportCsv(rows, fileNameBase),
-                    "text/csv",
-                    $"{fileNameBase}.csv"),
+                    format.GetContentType(),
+                    $"{fileNameBase}{format.GetFileExtension()}"),
                 ExportFormat.Pdf => File(
-                    _reportExportService.ExportPdf(rows, $"Raport: {reportKey}", fileNameBase),
-                    "application/pdf",
-                    $"{fileNameBase}.pdf"),
+                    _reportExportService.ExportPdf(rows, title, fileNameBase),
+                    format.GetContentType(),
+                    $"{fileNameBase}{format.GetFileExtension()}"),
+                ExportFormat.Xlsx => File(
+                    _reportExportService.ExportXlsx(rows, title, fileNameBase),
+                    format.GetContentType(),
+                    $"{fileNameBase}{format.GetFileExtension()}"),
+                ExportFormat.Docx => File(
+                    _reportExportService.ExportDocx(rows, title, fileNameBase),
+                    format.GetContentType(),
+                    $"{fileNameBase}{format.GetFileExtension()}"),
                 _ => BadRequest("Nieobsługiwany format eksportu.")
             };
         }

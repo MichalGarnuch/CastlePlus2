@@ -255,3 +255,15 @@ Accept: application/json
 # Przyk³ad: GET {{CastlePlus2.Api_HostAddress}}/api/raporty/eksport?reportKey=podsumowanie&format=Csv
 GET {{CastlePlus2.Api_HostAddress}}/api/raporty/eksport?reportKey=podsumowanie&format=Csv
 Accept: application/octet-stream
+
+### [RAPORTY][DEMO] eksport CSV
+GET {{baseUrl}}/api/raporty/eksport?reportKey=podsumowanie&format=Csv
+
+### [RAPORTY][DEMO] eksport XLSX
+GET {{baseUrl}}/api/raporty/eksport?reportKey=podsumowanie&format=Xlsx
+
+### [RAPORTY][DEMO] eksport PDF
+GET {{baseUrl}}/api/raporty/eksport?reportKey=podsumowanie&format=Pdf
+
+### [RAPORTY][DEMO] eksport DOCX
+GET {{baseUrl}}/api/raporty/eksport?reportKey=podsumowanie&format=Docx

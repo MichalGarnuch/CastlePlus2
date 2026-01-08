@@ -1,121 +1,103 @@
 ﻿using System.Globalization;
 using System.Reflection;
-using System.Text;
-using System.Linq;
 using CastlePlus2.Application.Interfaces.Exports;
-using CsvHelper;
-using CsvHelper.Configuration;
-using QuestPDF.Fluent;
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
 
 namespace CastlePlus2.Infrastructure.Services.Exports;
 
 public sealed class ReportExportService : IReportExportService
 {
-    private static readonly CultureInfo ExportCulture = new("pl-PL");
+    private readonly CsvReportExporter _csv;
+    private readonly XlsxReportExporter _xlsx;
+    private readonly PdfReportExporter _pdf;
+    private readonly DocxReportExporter _docx;
 
-    static ReportExportService()
+    public ReportExportService(
+        CsvReportExporter csv,
+        XlsxReportExporter xlsx,
+        PdfReportExporter pdf,
+        DocxReportExporter docx)
     {
-        QuestPDF.Settings.License = LicenseType.Community;
+        _csv = csv;
+        _xlsx = xlsx;
+        _pdf = pdf;
+        _docx = docx;
     }
 
     public byte[] ExportCsv<T>(IReadOnlyList<T> rows, string fileNameBase)
-    {
-        var configuration = new CsvConfiguration(ExportCulture)
-        {
-            Delimiter = ";",
-            HasHeaderRecord = true
-        };
+        => _csv.Export(rows);
 
-        using var memory = new MemoryStream();
-        using var writer = new StreamWriter(memory, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), leaveOpen: true);
-        using var csv = new CsvWriter(writer, configuration);
-
-        csv.WriteRecords(rows);
-        writer.Flush();
-
-        return memory.ToArray();
-    }
+    public byte[] ExportXlsx<T>(IReadOnlyList<T> rows, string title, string fileNameBase)
+        => _xlsx.Export(rows, title);
 
     public byte[] ExportPdf<T>(IReadOnlyList<T> rows, string title, string fileNameBase)
+        => _pdf.Export(rows, title);
+
+    public byte[] ExportDocx<T>(IReadOnlyList<T> rows, string title, string fileNameBase)
+        => _docx.Export(rows, title);
+}
+
+internal static class ExportCommon
+{
+    internal static readonly CultureInfo ExportCulture = new("pl-PL");
+    internal const string DateFormat = "yyyy-MM-dd";
+    internal const string DateTimeFormat = "yyyy-MM-dd HH:mm";
+    internal const string TimeFormat = "HH:mm";
+
+    internal static PropertyInfo[] GetExportableProperties<T>()
     {
-        var properties = typeof(T)
+        return typeof(T)
             .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-            .Where(property => property.GetMethod is not null && property.GetMethod.IsPublic)
+            .Where(p => p.GetMethod is not null && p.GetMethod.IsPublic)
+            .Where(p => IsSimpleType(p.PropertyType))
+            .OrderBy(p => p.Name)
             .ToArray();
-
-        var document = Document.Create(container =>
-        {
-            container.Page(page =>
-            {
-                page.Margin(20);
-                page.Size(PageSizes.A4);
-                page.DefaultTextStyle(text => text.FontSize(10));
-
-                page.Content().Column(column =>
-                {
-                    column.Item().Text(title).FontSize(16).SemiBold();
-                    column.Item().PaddingTop(10).Element(content => BuildTable(content, properties, rows));
-                });
-            });
-        });
-
-        return document.GeneratePdf();
     }
 
-    private static void BuildTable<T>(IContainer container, PropertyInfo[] properties, IReadOnlyList<T> rows)
+    internal static bool IsSimpleType(Type type)
     {
-        if (properties.Length == 0)
+        var actualType = Nullable.GetUnderlyingType(type) ?? type;
+
+        if (actualType.IsEnum) return true;
+
+        if (actualType == typeof(string)
+            || actualType == typeof(Guid)
+            || actualType == typeof(bool)
+            || actualType == typeof(DateTime)
+            || actualType == typeof(DateOnly)
+            || actualType == typeof(TimeOnly))
         {
-            container.Text("Brak danych do wyświetlenia.");
-            return;
+            return true;
         }
 
-        container.Table(table =>
+        return actualType == typeof(byte)
+            || actualType == typeof(sbyte)
+            || actualType == typeof(short)
+            || actualType == typeof(ushort)
+            || actualType == typeof(int)
+            || actualType == typeof(uint)
+            || actualType == typeof(long)
+            || actualType == typeof(ulong)
+            || actualType == typeof(float)
+            || actualType == typeof(double)
+            || actualType == typeof(decimal);
+    }
+
+    internal static string FormatValue(object? value)
+    {
+        if (value is null) return string.Empty;
+
+        return value switch
         {
-            table.ColumnsDefinition(columns =>
-            {
-                foreach (var _ in properties)
-                {
-                    columns.RelativeColumn();
-                }
-            });
+            DateTime dt => dt.TimeOfDay == TimeSpan.Zero
+                ? dt.ToString(DateFormat, ExportCulture)
+                : dt.ToString(DateTimeFormat, ExportCulture),
 
-            table.Header(header =>
-            {
-                foreach (var property in properties)
-                {
-                    header.Cell().Element(HeaderStyle).Text(property.Name);
-                }
-            });
+            DateOnly d => d.ToString(DateFormat, ExportCulture),
+            TimeOnly t => t.ToString(TimeFormat, ExportCulture),
 
-            foreach (var row in rows)
-            {
-                foreach (var property in properties)
-                {
-                    var value = property.GetValue(row);
-                    table.Cell().Element(BodyStyle).Text(value?.ToString() ?? string.Empty);
-                }
-            }
-        });
-    }
+            IFormattable f => f.ToString(null, ExportCulture),
 
-    private static IContainer HeaderStyle(IContainer container)
-    {
-        return container
-            .DefaultTextStyle(text => text.SemiBold())
-            .Background(Colors.Grey.Lighten3)
-            .Padding(4)
-            .BorderBottom(1)
-            .BorderColor(Colors.Grey.Lighten1);
-    }
-
-    private static IContainer BodyStyle(IContainer container)
-    {
-        return container
-            .Padding(4)
-            .BorderBottom(1)
-            .BorderColor(Colors.Grey.Lighten3);
+            _ => value.ToString() ?? string.Empty
+        };
     }
 }
