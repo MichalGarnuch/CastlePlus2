@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Http;
+using System.Text;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Configuration;
 
@@ -9,10 +10,10 @@ public sealed class ReportExportUrlService : IReportExportUrlService
     private readonly NavigationManager _navigationManager;
     private readonly string? _apiBaseUrl;
 
-    public ReportExportUrlService(NavigationManager navigationManager, IConfiguration configuration)
+    public ReportExportUrlService(NavigationManager navigationManager, HttpClient httpClient, IConfiguration configuration)
     {
         _navigationManager = navigationManager;
-        _apiBaseUrl = configuration["Api:BaseUrl"];
+        _apiBaseUrl = httpClient.BaseAddress?.ToString() ?? configuration["Api:BaseUrl"];
     }
 
     public string BuildExportUrl(string basePath, IReadOnlyDictionary<string, string?>? queryParameters = null)

@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using System.Reflection;
 
 namespace CastlePlus2.Infrastructure.Services.Exports;
 
@@ -11,67 +12,126 @@ public sealed class DocxReportExporter
         var properties = ExportCommon.GetExportableProperties<T>();
 
         using var stream = new MemoryStream();
-        using var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document, true);
-
-        var mainPart = document.AddMainDocumentPart();
-        mainPart.Document = new Document(new Body());
-
-        var body = mainPart.Document.Body!;
-        body.Append(CreateParagraph(title, bold: true, fontSize: "28"));
-
-        var table = new Table();
-
-        var tableProperties = new TableProperties(
-            new TableBorders(
-                new TopBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4 },
-                new BottomBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4 },
-                new LeftBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4 },
-                new RightBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4 },
-                new InsideHorizontalBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4 },
-                new InsideVerticalBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4 }
-            )
-        );
-
-        table.AppendChild(tableProperties);
-
-        var headerRow = new TableRow();
-        foreach (var p in properties)
-            headerRow.Append(CreateCell(p.Name, bold: true));
-
-        table.Append(headerRow);
-
-        foreach (var row in rows)
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document, true))
         {
-            var dataRow = new TableRow();
+            var mainPart = document.AddMainDocumentPart();
+            mainPart.Document = new Document();
 
-            foreach (var p in properties)
-                dataRow.Append(CreateCell(ExportCommon.FormatValue(p.GetValue(row))));
+            var body = new Body();
 
-            table.Append(dataRow);
+            // Tytuł
+            body.Append(CreateTitleParagraph(title));
+
+            // Tabela
+            body.Append(CreateTable(properties, rows));
+
+            // Sekcja (Word lubi mieć SectionProperties na końcu Body)
+            body.Append(new SectionProperties());
+
+            mainPart.Document.Append(body);
+            mainPart.Document.Save();
         }
-
-        body.Append(table);
-        mainPart.Document.Save();
 
         return stream.ToArray();
     }
 
-    private static Paragraph CreateParagraph(string text, bool bold, string fontSize)
+    private static Paragraph CreateTitleParagraph(string text)
     {
-        var runProperties = new RunProperties();
+        var runProps = new RunProperties(
+            new Bold(),
+            new FontSize { Val = "28" } // 14pt
+        );
 
-        if (bold)
-            runProperties.AppendChild(new Bold());
+        var run = new Run(runProps, new Text(text) { Space = SpaceProcessingModeValues.Preserve });
 
-        runProperties.AppendChild(new FontSize { Val = fontSize });
+        var p = new Paragraph(run);
+        p.ParagraphProperties = new ParagraphProperties(
+            new SpacingBetweenLines { After = "240" } // odstęp po tytule
+        );
 
-        var run = new Run(runProperties, new Text(text));
-        return new Paragraph(run);
+        return p;
     }
 
-    private static TableCell CreateCell(string text, bool bold = false)
+    private static Table CreateTable(PropertyInfo[] properties, IReadOnlyList<object> rowsBoxed)
+        => throw new NotSupportedException("Use generic overload.");
+
+    private static Table CreateTable<T>(PropertyInfo[] properties, IReadOnlyList<T> rows)
     {
-        var paragraph = CreateParagraph(text, bold, "22");
-        return new TableCell(paragraph);
+        var table = new Table();
+
+        // TableProperties + width + borders (żeby było pewne, że renderer to pokaże)
+        var borders = new TableBorders(
+            new TopBorder { Val = BorderValues.Single, Size = 6 },
+            new BottomBorder { Val = BorderValues.Single, Size = 6 },
+            new LeftBorder { Val = BorderValues.Single, Size = 6 },
+            new RightBorder { Val = BorderValues.Single, Size = 6 },
+            new InsideHorizontalBorder { Val = BorderValues.Single, Size = 6 },
+            new InsideVerticalBorder { Val = BorderValues.Single, Size = 6 }
+        );
+
+        var tableProps = new TableProperties(
+            new TableWidth { Type = TableWidthUnitValues.Pct, Width = "5000" }, // 100%
+            borders
+        );
+
+        table.AppendChild(tableProps);
+
+        // Grid (często pomaga, gdy Word/preview “gubi” tabelę)
+        var grid = new TableGrid();
+        for (var i = 0; i < properties.Length; i++)
+            grid.Append(new GridColumn());
+        table.Append(grid);
+
+        // Header
+        var headerRow = new TableRow();
+        foreach (var p in properties)
+            headerRow.Append(CreateCell(p.Name, bold: true, isHeader: true));
+        table.Append(headerRow);
+
+        // Data
+        foreach (var row in rows)
+        {
+            var dataRow = new TableRow();
+            foreach (var p in properties)
+            {
+                var val = p.GetValue(row);
+                dataRow.Append(CreateCell(ExportCommon.FormatValue(val)));
+            }
+            table.Append(dataRow);
+        }
+
+        return table;
+    }
+
+    private static TableCell CreateCell(string text, bool bold = false, bool isHeader = false)
+    {
+        var runProps = new RunProperties(
+            new FontSize { Val = "22" } // 11pt
+        );
+
+        if (bold)
+            runProps.InsertAt(new Bold(), 0);
+
+        var run = new Run(runProps, new Text(text ?? string.Empty) { Space = SpaceProcessingModeValues.Preserve });
+
+        var paragraph = new Paragraph(run);
+
+        var cellProps = new TableCellProperties(
+            new TableCellWidth { Type = TableWidthUnitValues.Auto }
+        );
+
+        if (isHeader)
+        {
+            cellProps.Append(new Shading
+            {
+                Val = ShadingPatternValues.Clear,
+                Color = "auto",
+                Fill = "D9D9D9"
+            });
+        }
+
+        var cell = new TableCell(cellProps, paragraph);
+
+        return cell;
     }
 }

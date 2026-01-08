@@ -1,18 +1,20 @@
-using CastlePlus2.Application;
-using CastlePlus2.Api.Middleware;
 using AutoMapper;
-using CastlePlus2.Application.Interfaces.Dokumenty;
+using CastlePlus2.Api.Middleware;
+using CastlePlus2.Application;
 using CastlePlus2.Application.Interfaces.Dashboard;
+using CastlePlus2.Application.Interfaces.Dokumenty;
+using CastlePlus2.Application.Interfaces.Exports;
 using CastlePlus2.Application.Interfaces.Finanse;
 using CastlePlus2.Application.Interfaces.Media;
 using CastlePlus2.Application.Interfaces.Najem;
 using CastlePlus2.Application.Interfaces.Podmioty;
 using CastlePlus2.Application.Interfaces.Rdzen;
+using CastlePlus2.Application.Interfaces.Reports;
 using CastlePlus2.Application.Interfaces.Slowniki;
 using CastlePlus2.Application.Interfaces.Utrzymanie;
-using CastlePlus2.Application.Interfaces.Exports;
 using CastlePlus2.Application.Mappings.Rdzen;
 using CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomosc;
+using CastlePlus2.Application.Reports;
 using CastlePlus2.Infrastructure.Persistence;
 using CastlePlus2.Infrastructure.Repositories.Dokumenty;
 using CastlePlus2.Infrastructure.Repositories.Finanse;
@@ -23,8 +25,10 @@ using CastlePlus2.Infrastructure.Repositories.Rdzen;
 using CastlePlus2.Infrastructure.Repositories.Slowniki;
 using CastlePlus2.Infrastructure.Repositories.Utrzymanie;
 using CastlePlus2.Infrastructure.Services.Dashboard;
-using CastlePlus2.Infrastructure.Services.Najem;
 using CastlePlus2.Infrastructure.Services.Exports;
+using CastlePlus2.Infrastructure.Services.Najem;
+using CastlePlus2.Infrastructure.Services.Reports;
+using CastlePlus2.Infrastructure.Services.Reports.Definitions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models; // <--- WAŻNE: Ten using jest potrzebny do konfiguracji
@@ -125,6 +129,10 @@ builder.Services.AddScoped<ILicznikRepository, LicznikRepository>();
 builder.Services.AddScoped<IOdczytRepository, OdczytRepository>();
 //EXPORT
 builder.Services.AddScoped<IReportExportService, ReportExportService>();
+builder.Services.AddScoped<IReportsReadService, ReportsReadService>();
+builder.Services.AddScoped<IReportDefinition, PodsumowanieOperacyjneReportDefinition>();
+builder.Services.AddScoped<IReportDefinition, FakturyReportDefinition>();
+builder.Services.AddScoped<IReportRegistry, ReportRegistry>();
 
 builder.Services.AddScoped<CsvReportExporter>();
 builder.Services.AddScoped<XlsxReportExporter>();
