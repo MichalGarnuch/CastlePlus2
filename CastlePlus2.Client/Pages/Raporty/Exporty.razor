@@ -1,10 +1,15 @@
 ﻿@page "/raporty/eksporty"
 
 @using CastlePlus2.Client.Services.Exports
+@using CastlePlus2.Client.Services.Reports
 @using CastlePlus2.Contracts.Exports
+@using CastlePlus2.Contracts.Reports
 @using MudBlazor
 @using System.Linq
 @inject IReportExportUrlService ReportExportUrlService
+@inject IReportDataPreviewService ReportDataPreviewService
+@inject HttpClient Http
+@inject ISnackbar Snackbar
 @inject NavigationManager Nav
 
 <MudText Typo="Typo.h4" Class="fw-700 mb-4">Eksporty raportów</MudText>
@@ -57,8 +62,83 @@
             </MudButton>
         </MudItem>
 
+        <MudItem xs="12" md="6">
+            <MudSelect T="int"
+                       Label="Liczba wierszy podglądu"
+                       Dense="true"
+                       @bind-Value="_previewTake">
+                <MudSelectItem Value="20">20</MudSelectItem>
+                <MudSelectItem Value="50">50</MudSelectItem>
+                <MudSelectItem Value="100">100</MudSelectItem>
+                <MudSelectItem Value="200">200</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       OnClick="LoadPreviewAsync"
+                       Disabled="@string.IsNullOrWhiteSpace(_selectedReportKey)">
+                Podgląd danych
+            </MudButton>
+        </MudItem>
+
     </MudGrid>
 </MudPaper>
+
+@if (_previewLoading)
+{
+    <MudPaper Class="pa-4 mt-4">
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+        <MudText Typo="Typo.body2" Class="mt-2">Ładowanie podglądu danych...</MudText>
+    </MudPaper>
+}
+else if (_previewResponse is not null)
+{
+    <MudPaper Class="pa-4 mt-4">
+        <MudText Typo="Typo.h6">@_previewResponse.Title</MudText>
+        <MudText Typo="Typo.caption" Class="mb-4">
+            Wygenerowano: @_previewResponse.GeneratedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+        </MudText>
+
+        @if (_previewResponse.Summary is not null)
+        {
+            <MudGrid Spacing="2" Class="mb-4">
+                @foreach (var entry in _previewResponse.Summary)
+                {
+                    <MudItem xs="12" sm="6" md="4" lg="3">
+                        <MudPaper Class="pa-3">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">@entry.Key</MudText>
+                            <MudText Typo="Typo.subtitle2">@entry.Value</MudText>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
+        }
+
+        <MudTable Items="_previewResponse.Rows"
+                  Dense="true"
+                  Hover="true"
+                  Bordered="true"
+                  Striped="true">
+            <HeaderContent>
+                @foreach (var column in _previewResponse.Columns)
+                {
+                    <MudTh>@column</MudTh>
+                }
+            </HeaderContent>
+            <RowTemplate>
+                @foreach (var cell in context)
+                {
+                    <MudTd>@cell</MudTd>
+                }
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText Class="pa-4">Brak danych do wyświetlenia.</MudText>
+            </NoRecordsContent>
+        </MudTable>
+    </MudPaper>
+}
 
 @code {
     private readonly IReadOnlyList<ReportOption> _reportOptions = new List<ReportOption>
@@ -71,6 +151,9 @@
     private ExportFormat _selectedFormat = ExportFormat.Csv;
 
     private bool _archive;
+    private int _previewTake = 50;
+    private bool _previewLoading;
+    private ReportDataPreviewResponse? _previewResponse;
 
     private string _selectedDescription =>
         _reportOptions.FirstOrDefault(option => option.Key == _selectedReportKey)?.Description ?? string.Empty;
@@ -106,6 +189,25 @@
         };
 
         ReportExportUrlService.OpenExportUrl("/api/raporty/eksport", parameters);
+    }
+    private async Task LoadPreviewAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedReportKey))
+            return;
+
+        _previewLoading = true;
+        try
+        {
+            _previewResponse = await ReportDataPreviewService.GetPreviewAsync(_selectedReportKey, _previewTake);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd podglądu danych: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _previewLoading = false;
+        }
     }
 
     private bool ReadBoolQuery(string key)

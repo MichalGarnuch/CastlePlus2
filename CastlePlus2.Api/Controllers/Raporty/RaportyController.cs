@@ -21,17 +21,20 @@ namespace CastlePlus2.Api.Controllers.Raporty
         private readonly IReportExportService _reportExportService;
         private readonly IReportRegistry _reportRegistry;
         private readonly IExportArchiveService _exportArchiveService;
+        private readonly IReportDataPreviewService _reportDataPreviewService;
         private readonly IConfiguration _configuration;
 
         public RaportyController(
             IReportExportService reportExportService,
             IReportRegistry reportRegistry,
             IExportArchiveService exportArchiveService,
+            IReportDataPreviewService reportDataPreviewService,
             IConfiguration configuration)
         {
             _reportExportService = reportExportService;
             _reportRegistry = reportRegistry;
             _exportArchiveService = exportArchiveService;
+            _reportDataPreviewService = reportDataPreviewService;
             _configuration = configuration;
         }
 
@@ -92,6 +95,39 @@ namespace CastlePlus2.Api.Controllers.Raporty
             }
 
             return File(fileBytes, contentType, fileName);
+        }
+
+        [HttpGet("podglad-danych")]
+        public async Task<IActionResult> DataPreview(
+            [FromQuery] string reportKey,
+            [FromQuery] int take = 50,
+            CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(reportKey))
+            {
+                return BadRequest("Brak klucza raportu.");
+            }
+
+            if (take < 1)
+            {
+                take = 1;
+            }
+            else if (take > 200)
+            {
+                take = 200;
+            }
+
+            try
+            {
+                _ = _reportRegistry.GetByKey(reportKey);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            var response = await _reportDataPreviewService.BuildAsync(reportKey, take, ct);
+            return Ok(response);
         }
 
         private byte[] InvokeExport(string methodName, Type rowType, params object[] parameters)

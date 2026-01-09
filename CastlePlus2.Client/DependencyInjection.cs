@@ -6,6 +6,7 @@ using CastlePlus2.Client.Services.Media;
 using CastlePlus2.Client.Services.Najem;
 using CastlePlus2.Client.Services.Podmioty;
 using CastlePlus2.Client.Services.Rdzen;
+using CastlePlus2.Client.Services.Reports;
 using CastlePlus2.Client.Services.Slowniki;
 using CastlePlus2.Client.Services.Utrzymanie;
 using Microsoft.Extensions.DependencyInjection;
@@ -78,6 +79,7 @@ public static class DependencyInjection
 
         //EXPORT
         services.AddScoped<IReportExportUrlService, ReportExportUrlService>();
+        services.AddScoped<IReportDataPreviewService, ReportDataPreviewService>();
 
         //z infrastructure
 

@@ -15,7 +15,6 @@ using CastlePlus2.Application.Interfaces.Slowniki;
 using CastlePlus2.Application.Interfaces.Utrzymanie;
 using CastlePlus2.Application.Mappings.Rdzen;
 using CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomosc;
-using CastlePlus2.Application.Reports;
 using CastlePlus2.Infrastructure.Persistence;
 using CastlePlus2.Infrastructure.Repositories.Dokumenty;
 using CastlePlus2.Infrastructure.Repositories.Finanse;
@@ -29,7 +28,6 @@ using CastlePlus2.Infrastructure.Services.Dashboard;
 using CastlePlus2.Infrastructure.Services.Exports;
 using CastlePlus2.Infrastructure.Services.Najem;
 using CastlePlus2.Infrastructure.Services.Reports;
-using CastlePlus2.Infrastructure.Services.Reports.Definitions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models; // <--- WAŻNE: Ten using jest potrzebny do konfiguracji
@@ -139,9 +137,21 @@ builder.Services.AddScoped<IOdczytRepository, OdczytRepository>();
 builder.Services.AddScoped<IReportExportService, ReportExportService>();
 builder.Services.AddScoped<IExportArchiveService, ExportArchiveService>();
 builder.Services.AddScoped<IReportsReadService, ReportsReadService>();
-builder.Services.AddScoped<IReportDefinition, PodsumowanieOperacyjneReportDefinition>();
-builder.Services.AddScoped<IReportDefinition, FakturyReportDefinition>();
-builder.Services.AddScoped<IReportRegistry, ReportRegistry>();
+builder.Services.AddScoped<
+    CastlePlus2.Application.Interfaces.Reports.IReportDefinition,
+    CastlePlus2.Infrastructure.Services.Reports.Definitions.PodsumowanieOperacyjneReportDefinition>();
+builder.Services.AddScoped<
+    CastlePlus2.Application.Interfaces.Reports.IReportDefinition,
+    CastlePlus2.Infrastructure.Services.Reports.Definitions.FakturyReportDefinition>();
+builder.Services.AddScoped<
+    CastlePlus2.Application.Interfaces.Reports.IReportDataPreviewService,
+    CastlePlus2.Infrastructure.Services.Reports.ReportDataPreviewService>();
+builder.Services.AddScoped<
+    CastlePlus2.Application.Interfaces.Reports.IReportRegistry,
+    CastlePlus2.Application.Reports.ReportRegistry>();
+builder.Services.AddScoped<
+    CastlePlus2.Application.Interfaces.Reports.IReportDataPreviewService,
+    CastlePlus2.Infrastructure.Services.Reports.ReportDataPreviewService>();
 
 builder.Services.AddScoped<CsvReportExporter>();
 builder.Services.AddScoped<XlsxReportExporter>();
