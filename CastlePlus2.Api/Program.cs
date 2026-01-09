@@ -1,5 +1,6 @@
 using AutoMapper;
 using CastlePlus2.Api.Middleware;
+using CastlePlus2.Api.Services;
 using CastlePlus2.Application;
 using CastlePlus2.Application.Interfaces.Dashboard;
 using CastlePlus2.Application.Interfaces.Dokumenty;
@@ -35,6 +36,13 @@ using Microsoft.OpenApi.Models; // <--- WAŻNE: Ten using jest potrzebny do konf
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+var exportStorageSection = builder.Configuration.GetSection("ExportStorage");
+var exportStorageOptions = exportStorageSection.Get<ExportStorageOptions>() ?? new ExportStorageOptions();
+if (!string.IsNullOrWhiteSpace(exportStorageOptions.RootPath) && !Path.IsPathRooted(exportStorageOptions.RootPath))
+{
+    exportStorageOptions.RootPath = Path.Combine(builder.Environment.ContentRootPath, exportStorageOptions.RootPath);
+}
 
 // -------------------------------------------------------------------------
 // 1. Konfiguracja Bazy Danych (EF Core)
@@ -129,6 +137,7 @@ builder.Services.AddScoped<ILicznikRepository, LicznikRepository>();
 builder.Services.AddScoped<IOdczytRepository, OdczytRepository>();
 //EXPORT
 builder.Services.AddScoped<IReportExportService, ReportExportService>();
+builder.Services.AddScoped<IExportArchiveService, ExportArchiveService>();
 builder.Services.AddScoped<IReportsReadService, ReportsReadService>();
 builder.Services.AddScoped<IReportDefinition, PodsumowanieOperacyjneReportDefinition>();
 builder.Services.AddScoped<IReportDefinition, FakturyReportDefinition>();
@@ -138,8 +147,8 @@ builder.Services.AddScoped<CsvReportExporter>();
 builder.Services.AddScoped<XlsxReportExporter>();
 builder.Services.AddScoped<PdfReportExporter>();
 builder.Services.AddScoped<DocxReportExporter>();
-builder.Services.AddScoped<IReportExportService, ReportExportService>();
-
+builder.Services.AddHostedService<ExportArchiveRetentionService>();
+builder.Services.AddSingleton(exportStorageOptions);
 
 
 // -------------------------------------------------------------------------

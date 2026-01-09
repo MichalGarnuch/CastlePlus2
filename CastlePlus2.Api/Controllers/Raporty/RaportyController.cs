@@ -3,6 +3,7 @@ using CastlePlus2.Application.Interfaces.Reports;
 using CastlePlus2.Contracts.Exports;
 using CastlePlus2.Infrastructure.Services.Reports.Definitions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,17 +20,26 @@ namespace CastlePlus2.Api.Controllers.Raporty
     {
         private readonly IReportExportService _reportExportService;
         private readonly IReportRegistry _reportRegistry;
+        private readonly IExportArchiveService _exportArchiveService;
+        private readonly IConfiguration _configuration;
 
-        public RaportyController(IReportExportService reportExportService, IReportRegistry reportRegistry)
+        public RaportyController(
+            IReportExportService reportExportService,
+            IReportRegistry reportRegistry,
+            IExportArchiveService exportArchiveService,
+            IConfiguration configuration)
         {
             _reportExportService = reportExportService;
             _reportRegistry = reportRegistry;
+            _exportArchiveService = exportArchiveService;
+            _configuration = configuration;
         }
 
         [HttpGet("eksport")]
         public async Task<IActionResult> Export(
             [FromQuery] string reportKey,
             [FromQuery] ExportFormat format,
+            [FromQuery] bool archive = false,
             [FromQuery] int take = 50,
             CancellationToken ct = default)
         {
@@ -72,6 +82,14 @@ namespace CastlePlus2.Api.Controllers.Raporty
                 ExportFormat.Docx => InvokeExport(nameof(IReportExportService.ExportDocx), definition.RowType, typedRows, title, fileNameBase),
                 _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Nieobsługiwany format eksportu.")
             };
+
+            var storageMode = _configuration.GetValue<ExportStorageMode>("ExportStorage:Mode");
+            if (archive || storageMode == ExportStorageMode.Archive)
+            {
+                var now = DateTime.UtcNow;
+                var relativePath = $"Exports/{now:yyyy}/{now:MM}/{now:dd}/raporty/{reportKey}/{fileName}";
+                await _exportArchiveService.SaveAsync(fileBytes, relativePath, ct);
+            }
 
             return File(fileBytes, contentType, fileName);
         }

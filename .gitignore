@@ -341,6 +341,10 @@ ASALocalRun/
 # MSBuild Binary and Structured Log
 *.binlog
 
+# Export archives
+CastlePlus2.Api/App_Data/
+**/App_Data/
+
 # NVidia Nsight GPU debugger configuration file
 *.nvuser
 

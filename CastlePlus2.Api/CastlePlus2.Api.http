@@ -273,3 +273,9 @@ GET {{CastlePlus2.Api_HostAddress}}/api/raporty/eksport?reportKey=podsumowanie&f
 
 ### [RAPORTY] faktury CSV
 GET {{CastlePlus2.Api_HostAddress}}/api/raporty/eksport?reportKey=faktury&format=Csv&take=50
+
+### [RAPORTY][DEMO] eksport PDF + archiwum
+GET {{baseUrl}}/api/raporty/eksport?reportKey=podsumowanie&format=Pdf&archive=true
+
+### [RAPORTY][DEMO] eksport XLSX bez archiwum
+GET {{baseUrl}}/api/raporty/eksport?reportKey=faktury&format=Xlsx&archive=false

@@ -5,11 +5,13 @@
 @using MudBlazor
 @using System.Linq
 @inject IReportExportUrlService ReportExportUrlService
+@inject NavigationManager Nav
 
 <MudText Typo="Typo.h4" Class="fw-700 mb-4">Eksporty raportów</MudText>
 
 <MudPaper Class="pa-4 glass-panel">
     <MudGrid Spacing="3">
+
         <MudItem xs="12" md="6">
             <MudSelect T="string" Label="Raport" Dense="true" @bind-Value="_selectedReportKey">
                 @foreach (var option in _reportOptions)
@@ -19,6 +21,7 @@
             </MudSelect>
             <MudText Typo="Typo.caption" Class="mt-1">@_selectedDescription</MudText>
         </MudItem>
+
         <MudItem xs="12" md="6">
             <MudSelect T="ExportFormat" Label="Format eksportu" Dense="true" @bind-Value="_selectedFormat">
                 <MudSelectItem Value="ExportFormat.Csv">CSV</MudSelectItem>
@@ -27,6 +30,24 @@
                 <MudSelectItem Value="ExportFormat.Docx">DOCX</MudSelectItem>
             </MudSelect>
         </MudItem>
+
+        <!-- ARCHIWIZACJA: sterowanie ręczne, nie przez @bind -->
+        <MudItem xs="12" md="6">
+            <MudSwitch T="bool"
+                       Color="Color.Secondary"
+                       Label="Archiwizuj na serwerze (retencja 30 dni)"
+                       Checked="@_archive"
+                       @onclick="ToggleArchive" />
+            <MudText Typo="Typo.caption" Class="mt-1">
+                Gdy włączone: API zapisze kopię w App_Data/Exports/... i nadal pobierzesz plik normalnie.
+            </MudText>
+
+            <!-- DEBUG: to MUSI zmieniać się na true/false -->
+            <MudText Typo="Typo.caption" Class="mt-1">
+                DEBUG: archive=@(_archive ? "true" : "false")
+            </MudText>
+        </MudItem>
+
         <MudItem xs="12">
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
@@ -35,6 +56,7 @@
                 Pobierz raport
             </MudButton>
         </MudItem>
+
     </MudGrid>
 </MudPaper>
 
@@ -48,28 +70,67 @@
     private string? _selectedReportKey;
     private ExportFormat _selectedFormat = ExportFormat.Csv;
 
+    private bool _archive;
+
     private string _selectedDescription =>
         _reportOptions.FirstOrDefault(option => option.Key == _selectedReportKey)?.Description ?? string.Empty;
 
     protected override void OnInitialized()
     {
         _selectedReportKey ??= _reportOptions.FirstOrDefault()?.Key;
+        _archive = ReadBoolQuery("archive");
+    }
+
+    private void ToggleArchive()
+    {
+        _archive = !_archive;
+
+        // utrwalenie stanu w URL strony (bez pełnego przeładowania)
+        var target = _archive ? "/raporty/eksporty?archive=true" : "/raporty/eksporty";
+        Nav.NavigateTo(target, replace: true);
+
+        StateHasChanged();
     }
 
     private void StartExport()
     {
         if (string.IsNullOrWhiteSpace(_selectedReportKey))
-        {
             return;
-        }
 
         var parameters = new Dictionary<string, string?>
         {
             ["reportKey"] = _selectedReportKey,
-            ["format"] = _selectedFormat.ToString()
+            ["format"] = _selectedFormat.ToString(),
+            // ZAWSZE wysyłamy, żebyś widział w Network:
+            ["archive"] = _archive ? "true" : "false"
         };
 
         ReportExportUrlService.OpenExportUrl("/api/raporty/eksport", parameters);
+    }
+
+    private bool ReadBoolQuery(string key)
+    {
+        var uri = new Uri(Nav.Uri);
+        var q = uri.Query;
+        if (string.IsNullOrWhiteSpace(q)) return false;
+
+        var parts = q.TrimStart('?')
+            .Split('&', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        foreach (var part in parts)
+        {
+            var kv = part.Split('=', 2);
+            if (kv.Length != 2) continue;
+
+            var k = Uri.UnescapeDataString(kv[0]);
+            if (!string.Equals(k, key, StringComparison.OrdinalIgnoreCase)) continue;
+
+            var v = Uri.UnescapeDataString(kv[1]);
+            return string.Equals(v, "true", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(v, "1", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return false;
     }
 
     private sealed record ReportOption(string Key, string Label, string Description);
