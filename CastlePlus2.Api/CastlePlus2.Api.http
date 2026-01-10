@@ -285,3 +285,10 @@ GET {{baseUrl}}/api/raporty/podglad-danych?reportKey=podsumowanie&take=50
 
 ### [RAPORTY] Podgl¹d danych – faktury
 GET {{baseUrl}}/api/raporty/podglad-danych?reportKey=faktury&take=50
+
+### [RAPORTY] Podgl¹d dokumentu (create)
+GET {{CastlePlus2.Api_HostAddress}}/api/raporty/podglad-dokumentu?reportKey=podsumowanie&take=50
+
+# Nastêpnie weŸ PreviewId z odpowiedzi i wklej:
+### [RAPORTY] Podgl¹d dokumentu (stream)
+GET {{CastlePlus2.Api_HostAddress}}/api/raporty/podglad-dokumentu/{{previewId}}

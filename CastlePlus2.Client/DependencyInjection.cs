@@ -80,8 +80,8 @@ public static class DependencyInjection
         //EXPORT
         services.AddScoped<IReportExportUrlService, ReportExportUrlService>();
         services.AddScoped<IReportDataPreviewService, ReportDataPreviewService>();
+        services.AddScoped<IReportDocumentPreviewService, ReportDocumentPreviewService>();
 
-        //z infrastructure
 
 
         return services;

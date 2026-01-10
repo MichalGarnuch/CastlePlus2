@@ -152,6 +152,9 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     CastlePlus2.Application.Interfaces.Reports.IReportDataPreviewService,
     CastlePlus2.Infrastructure.Services.Reports.ReportDataPreviewService>();
+builder.Services.AddScoped<
+    CastlePlus2.Application.Interfaces.Reports.IReportDocumentPreviewService,
+    CastlePlus2.Infrastructure.Services.Reports.ReportDocumentPreviewService>();
 
 builder.Services.AddScoped<CsvReportExporter>();
 builder.Services.AddScoped<XlsxReportExporter>();
@@ -159,6 +162,7 @@ builder.Services.AddScoped<PdfReportExporter>();
 builder.Services.AddScoped<DocxReportExporter>();
 builder.Services.AddHostedService<ExportArchiveRetentionService>();
 builder.Services.AddSingleton(exportStorageOptions);
+builder.Services.AddMemoryCache();
 
 
 // -------------------------------------------------------------------------

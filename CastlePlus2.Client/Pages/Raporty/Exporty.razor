@@ -8,6 +8,7 @@
 @using System.Linq
 @inject IReportExportUrlService ReportExportUrlService
 @inject IReportDataPreviewService ReportDataPreviewService
+@inject IReportDocumentPreviewService ReportDocumentPreviewService
 @inject HttpClient Http
 @inject ISnackbar Snackbar
 @inject NavigationManager Nav
@@ -83,6 +84,22 @@
             </MudButton>
         </MudItem>
 
+        <MudItem xs="12">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       OnClick="LoadPdfPreviewAsync"
+                       Disabled="@string.IsNullOrWhiteSpace(_selectedReportKey)">
+                Podgląd dokumentu (PDF)
+            </MudButton>
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Secondary"
+                       Class="ml-2"
+                       OnClick="ClosePdfPreview"
+                       Disabled="@string.IsNullOrWhiteSpace(_pdfPreviewUrl)">
+                Zamknij podgląd dokumentu
+            </MudButton>
+        </MudItem>
+
     </MudGrid>
 </MudPaper>
 
@@ -140,6 +157,27 @@ else if (_previewResponse is not null)
     </MudPaper>
 }
 
+@if (_pdfPreviewLoading)
+{
+    <MudPaper Class="pa-4 mt-4">
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+        <MudText Typo="Typo.body2" Class="mt-2">Ładowanie podglądu dokumentu...</MudText>
+    </MudPaper>
+}
+else if (!string.IsNullOrWhiteSpace(_pdfPreviewUrl))
+{
+    <MudPaper Class="pa-4 mt-4">
+        <MudText Typo="Typo.h6">Podgląd dokumentu (PDF)</MudText>
+        @if (_pdfPreviewExpiresAtUtc.HasValue)
+        {
+            <MudText Typo="Typo.caption" Class="mb-3">
+                Ważne do: @_pdfPreviewExpiresAtUtc.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+            </MudText>
+        }
+        <iframe src="@_pdfPreviewUrl" style="width:100%;height:70vh;border:0;"></iframe>
+    </MudPaper>
+}
+
 @code {
     private readonly IReadOnlyList<ReportOption> _reportOptions = new List<ReportOption>
     {
@@ -154,6 +192,10 @@ else if (_previewResponse is not null)
     private int _previewTake = 50;
     private bool _previewLoading;
     private ReportDataPreviewResponse? _previewResponse;
+
+    private bool _pdfPreviewLoading;
+    private string? _pdfPreviewUrl;
+    private DateTime? _pdfPreviewExpiresAtUtc;
 
     private string _selectedDescription =>
         _reportOptions.FirstOrDefault(option => option.Key == _selectedReportKey)?.Description ?? string.Empty;
@@ -188,8 +230,11 @@ else if (_previewResponse is not null)
             ["archive"] = _archive ? "true" : "false"
         };
 
+        // Tu NIC nie kombinujemy – Twoja usługa już umie budować ABSOLUTE URL do API
+        // (wykorzystuje HttpClient.BaseAddress albo konfigurację Api:BaseUrl).
         ReportExportUrlService.OpenExportUrl("/api/raporty/eksport", parameters);
     }
+
     private async Task LoadPreviewAsync()
     {
         if (string.IsNullOrWhiteSpace(_selectedReportKey))
@@ -208,6 +253,57 @@ else if (_previewResponse is not null)
         {
             _previewLoading = false;
         }
+    }
+
+    private async Task LoadPdfPreviewAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedReportKey))
+            return;
+
+        _pdfPreviewLoading = true;
+        try
+        {
+            var response = await ReportDocumentPreviewService.CreatePdfPreviewAsync(_selectedReportKey, _previewTake);
+
+            // KLUCZOWA POPRAWKA:
+            // IFRAME musi uderzać w host API (Http.BaseAddress), a nie w host UI (Nav.BaseUri).
+            _pdfPreviewUrl = BuildApiAbsoluteUrl(response.StreamUrl);
+
+            _pdfPreviewExpiresAtUtc = response.ExpiresAtUtc;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd podglądu dokumentu: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _pdfPreviewLoading = false;
+        }
+    }
+
+    private void ClosePdfPreview()
+    {
+        _pdfPreviewUrl = null;
+        _pdfPreviewExpiresAtUtc = null;
+    }
+
+    private string BuildApiAbsoluteUrl(string urlOrPath)
+    {
+        if (string.IsNullOrWhiteSpace(urlOrPath))
+            return urlOrPath;
+
+        // Jeżeli API kiedyś zwróci absolutny URL – nie psujemy.
+        if (Uri.TryCreate(urlOrPath, UriKind.Absolute, out var abs))
+            return abs.ToString();
+
+        // Oczekujemy, że BaseAddress jest ustawione w hostach (Web.App i Mobile),
+        // bo rejestrujesz "ApiClient" jako HttpClient.
+        if (Http?.BaseAddress is null)
+            return urlOrPath;
+
+        // Wymuś ścieżkę od root (żeby new Uri(base,"api/...") działało tak samo)
+        var normalized = urlOrPath.StartsWith('/') ? urlOrPath : "/" + urlOrPath;
+        return new Uri(Http.BaseAddress, normalized).ToString();
     }
 
     private bool ReadBoolQuery(string key)
