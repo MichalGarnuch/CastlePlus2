@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CastlePlus2.Contracts", "Ca
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "database", "database", "{6AC00F83-0432-4F60-B203-7C0132F2B672}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\DB_Schema_SQL.txt = ..\..\..\Users\Lenovo\My drive (marycha998@gmail.com) (1)\10. NAUKA\1. WSB\0.SEMESTR 7 2025-2026\GEMINI GEM\DB_Schema_SQL.txt
+		docs\database\DB_Schema_SQL.txt = docs\database\DB_Schema_SQL.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "requirements", "requirements", "{6F0F0F49-5444-401B-81E1-7C4DB2179BE8}"
