@@ -292,3 +292,26 @@ GET {{CastlePlus2.Api_HostAddress}}/api/raporty/podglad-dokumentu?reportKey=pods
 # Nastêpnie weŸ PreviewId z odpowiedzi i wklej:
 ### [RAPORTY] Podgl¹d dokumentu (stream)
 GET {{CastlePlus2.Api_HostAddress}}/api/raporty/podglad-dokumentu/{{previewId}}
+
+### [AUTH] login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "loginOrEmail": "admin",
+  "password": "admin123",
+  "deviceInfo": "api.http"
+}
+
+### [AUTH] me
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{accessToken}}
+
+### [AUTH] refresh
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}",
+  "deviceInfo": "api.http"
+}

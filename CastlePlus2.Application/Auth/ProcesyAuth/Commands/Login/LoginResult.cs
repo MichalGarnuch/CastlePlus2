@@ -2,8 +2,8 @@
 
 namespace CastlePlus2.Application.Auth.ProcesyAuth.Commands.Login
 {
-    public class LoginResult
+    public sealed class LoginResult
     {
-        public AuthTokensDto Tokens { get; set; } = new AuthTokensDto();
+        public AuthTokensDto Tokens { get; init; } = new();
     }
 }

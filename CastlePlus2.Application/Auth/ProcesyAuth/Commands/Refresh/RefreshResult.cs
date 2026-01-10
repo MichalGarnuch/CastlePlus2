@@ -2,8 +2,8 @@
 
 namespace CastlePlus2.Application.Auth.ProcesyAuth.Commands.Refresh
 {
-    public class RefreshResult
+    public sealed class RefreshResult
     {
-        public AuthTokensDto Tokens { get; set; } = new AuthTokensDto();
+        public AuthTokensDto Tokens { get; init; } = new();
     }
 }

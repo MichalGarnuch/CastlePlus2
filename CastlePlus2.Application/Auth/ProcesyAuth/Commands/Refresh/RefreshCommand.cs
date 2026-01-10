@@ -2,9 +2,9 @@
 
 namespace CastlePlus2.Application.Auth.ProcesyAuth.Commands.Refresh
 {
-    public class RefreshCommand : IRequest<RefreshResult>
+    public sealed class RefreshCommand : IRequest<RefreshResult>
     {
-        public string RefreshToken { get; set; } = string.Empty;
-        public string? DeviceInfo { get; set; }
+        public string RefreshToken { get; init; } = string.Empty;
+        public string? DeviceInfo { get; init; }
     }
 }

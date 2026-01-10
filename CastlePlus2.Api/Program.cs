@@ -33,6 +33,15 @@ using CastlePlus2.Infrastructure.Services.Reports;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models; // <--- WAŻNE: Ten using jest potrzebny do konfiguracji
+using FluentValidation;
+using MediatR;
+using CastlePlus2.Application.Common.Behaviors;
+using System.Reflection;
+using CastlePlus2.Infrastructure.Services.Auth;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -73,6 +82,9 @@ builder.Services.AddDbContext<CastlePlus2DbContext>(options =>
 
 builder.Services.AddApplication();
 
+builder.Services.AddValidatorsFromAssembly(typeof(CastlePlus2.Application.Auth.ProcesyAuth.Commands.Login.LoginCommand).Assembly);
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
 // RĘCZNA konfiguracja AutoMapper – bez pakietu DI
 var mapperConfig = new MapperConfiguration(cfg =>
 {
@@ -104,6 +116,10 @@ builder.Services.AddScoped<IEncjaRepository, EncjaRepository>();
 //AUTH
 builder.Services.AddScoped<IUzytkownikAuthRepository, UzytkownikAuthRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IAuthTokenService, AuthTokenService>();
+builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
+
+
 //UTRZYMANIE
 builder.Services.AddScoped<IZleceniePracyRepository, ZleceniePracyRepository>();
 builder.Services.AddScoped<IPowiazanieZleceniaRepository, PowiazanieZleceniaRepository>();
@@ -183,6 +199,33 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "CastlePlus2 API", Version = "v1" });
 });
 
+var jwtSection = builder.Configuration.GetSection("Jwt");
+var signingKey = jwtSection["SigningKey"];
+if (string.IsNullOrWhiteSpace(signingKey))
+    throw new InvalidOperationException("Brak konfiguracji Jwt:SigningKey.");
+
+var issuer = jwtSection["Issuer"];
+var audience = jwtSection["Audience"];
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey)),
+            ValidateIssuer = !string.IsNullOrWhiteSpace(issuer),
+            ValidIssuer = issuer,
+            ValidateAudience = !string.IsNullOrWhiteSpace(audience),
+            ValidAudience = audience,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(1)
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -207,6 +250,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

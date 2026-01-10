@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using CastlePlus2.Application.Interfaces.Auth;
 using CastlePlus2.Domain.Entities.Auth;
 using CastlePlus2.Infrastructure.Persistence;
@@ -6,10 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CastlePlus2.Infrastructure.Repositories.Auth
 {
-    /// <summary>
-    /// Repozytorium EF Core dla operacji autoryzacyjnych użytkownika.
-    /// </summary>
-    public class UzytkownikAuthRepository : IUzytkownikAuthRepository
+    public sealed class UzytkownikAuthRepository : IUzytkownikAuthRepository
     {
         private readonly CastlePlus2DbContext _dbContext;
 
@@ -18,16 +18,23 @@ namespace CastlePlus2.Infrastructure.Repositories.Auth
             _dbContext = dbContext;
         }
 
-        public async Task<Uzytkownik?> FindByLoginOrEmailAsync(string loginOrEmail, CancellationToken ct)
+        public Task<Uzytkownik?> FindByLoginOrEmailAsync(string loginOrEmail, CancellationToken ct)
         {
-            return await _dbContext.Uzytkownicy
+            return _dbContext.Uzytkownicy
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Login == loginOrEmail || x.Email == loginOrEmail, ct);
         }
 
-        public async Task<string[]> GetRoleCodesAsync(int idUzytkownika, CancellationToken ct)
+        public Task<Uzytkownik?> FindByIdAsync(int idUzytkownika, CancellationToken ct)
         {
-            return await _dbContext.UzytkownikRole
+            return _dbContext.Uzytkownicy
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.IdUzytkownika == idUzytkownika, ct);
+        }
+
+        public Task<string[]> GetRoleCodesAsync(int idUzytkownika, CancellationToken ct)
+        {
+            return _dbContext.UzytkownikRole
                 .AsNoTracking()
                 .Where(x => x.IdUzytkownika == idUzytkownika)
                 .Select(x => x.Rola.Kod)
@@ -41,12 +48,9 @@ namespace CastlePlus2.Infrastructure.Repositories.Auth
                 .FirstOrDefaultAsync(x => x.IdUzytkownika == idUzytkownika, ct);
 
             if (uzytkownik == null)
-            {
                 return;
-            }
 
             uzytkownik.OstatnieLogowanieUtc = utcNow;
-
             await _dbContext.SaveChangesAsync(ct);
         }
     }
