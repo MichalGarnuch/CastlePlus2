@@ -1,4 +1,5 @@
-﻿using CastlePlus2.Domain.Entities.Dokumenty;
+﻿using CastlePlus2.Domain.Entities.Auth;
+using CastlePlus2.Domain.Entities.Dokumenty;
 using CastlePlus2.Domain.Entities.Finanse;
 using CastlePlus2.Domain.Entities.Media;
 using CastlePlus2.Domain.Entities.Najem;
@@ -84,6 +85,12 @@ namespace CastlePlus2.Infrastructure.Persistence
         public DbSet<Przylacze> Przylacza { get; set; } = null!;
         public DbSet<Licznik> Liczniki { get; set; } = null!;
         public DbSet<Odczyt> Odczyty { get; set; } = null!;
+
+        // AUTH
+        public DbSet<Uzytkownik> Uzytkownicy { get; set; } = null!;
+        public DbSet<Rola> Role { get; set; } = null!;
+        public DbSet<UzytkownikRola> UzytkownikRole { get; set; } = null!;
+        public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
 
         /// <summary>
         /// Metoda wywoływana przy tworzeniu modelu EF Core.

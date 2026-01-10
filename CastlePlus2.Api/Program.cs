@@ -2,6 +2,7 @@ using AutoMapper;
 using CastlePlus2.Api.Middleware;
 using CastlePlus2.Api.Services;
 using CastlePlus2.Application;
+using CastlePlus2.Application.Interfaces.Auth;
 using CastlePlus2.Application.Interfaces.Dashboard;
 using CastlePlus2.Application.Interfaces.Dokumenty;
 using CastlePlus2.Application.Interfaces.Exports;
@@ -16,6 +17,7 @@ using CastlePlus2.Application.Interfaces.Utrzymanie;
 using CastlePlus2.Application.Mappings.Rdzen;
 using CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomosc;
 using CastlePlus2.Infrastructure.Persistence;
+using CastlePlus2.Infrastructure.Repositories.Auth;
 using CastlePlus2.Infrastructure.Repositories.Dokumenty;
 using CastlePlus2.Infrastructure.Repositories.Finanse;
 using CastlePlus2.Infrastructure.Repositories.Media;
@@ -99,6 +101,9 @@ builder.Services.AddScoped<ILokalRepository, LokalRepository>();
 builder.Services.AddScoped<IPomieszczenieRepository, PomieszczenieRepository>();
 builder.Services.AddScoped<IPrzypisanieAdresuRepository, PrzypisanieAdresuRepository>();
 builder.Services.AddScoped<IEncjaRepository, EncjaRepository>();
+//AUTH
+builder.Services.AddScoped<IUzytkownikAuthRepository, UzytkownikAuthRepository>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 //UTRZYMANIE
 builder.Services.AddScoped<IZleceniePracyRepository, ZleceniePracyRepository>();
 builder.Services.AddScoped<IPowiazanieZleceniaRepository, PowiazanieZleceniaRepository>();
