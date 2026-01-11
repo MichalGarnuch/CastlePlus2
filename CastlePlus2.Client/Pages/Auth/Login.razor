@@ -24,6 +24,13 @@
                    Disabled="_isSubmitting">
             Zaloguj
         </MudButton>
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Inherit"
+                   Disabled="_isSubmitting"
+                   OnClick="@(() => Nav.NavigateTo("/auth/register"))">
+            Nie masz konta? Zarejestruj się
+        </MudButton>
+
     </MudStack>
 </MudPaper>
 

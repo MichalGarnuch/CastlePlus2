@@ -1,7 +1,9 @@
 ﻿using System.Security.Claims;
 using CastlePlus2.Application.Auth.ProcesyAuth.Commands.Login;
 using CastlePlus2.Application.Auth.ProcesyAuth.Commands.Refresh;
+using CastlePlus2.Application.Auth.ProcesyAuth.Commands.Register;
 using CastlePlus2.Application.Auth.ProcesyAuth.Queries.GetMe;
+using CastlePlus2.Application.Auth.ProcesyAuth.Commands.Register;
 using CastlePlus2.Contracts.DTOs.Auth;
 using CastlePlus2.Contracts.Requests.Auth;
 using MediatR;
@@ -64,6 +66,22 @@ namespace CastlePlus2.Api.Controllers.Auth
             {
                 return Unauthorized();
             }
+        }
+
+        [HttpPost("register")]
+        [ProducesResponseType(typeof(AuthTokensDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken ct)
+        {
+            var result = await _mediator.Send(new RegisterCommand
+            {
+                Login = request.Login,
+                Email = request.Email,
+                Password = request.Password,
+                DeviceInfo = request.DeviceInfo
+            }, ct);
+
+            return Ok(result.Tokens);
         }
 
         [Authorize]

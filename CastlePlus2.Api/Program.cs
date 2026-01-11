@@ -41,6 +41,8 @@ using CastlePlus2.Infrastructure.Services.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using CastlePlus2.Application.Interfaces.Auth;
+using CastlePlus2.Domain.Entities.Auth;
 
 
 
@@ -253,5 +255,85 @@ if (!app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// --- AUTH: Ensure Admin (DEV only) ---
+if (app.Environment.IsDevelopment() &&
+    builder.Configuration.GetValue<bool>("Auth:SeedAdmin:Enabled"))
+{
+    using var scope = app.Services.CreateScope();
+
+    var db = scope.ServiceProvider.GetRequiredService<CastlePlus2DbContext>();
+    var uzytkownikRepository = scope.ServiceProvider.GetRequiredService<IUzytkownikAuthRepository>();
+    var passwordHashService = scope.ServiceProvider.GetRequiredService<IPasswordHashService>();
+
+    var seedSection = builder.Configuration.GetSection("Auth:SeedAdmin");
+
+    var login = seedSection["Login"] ?? string.Empty;
+    var email = seedSection["Email"];
+    var password = seedSection["Password"] ?? string.Empty;
+    var roleCode = seedSection["RoleCode"] ?? "Admin";
+    var resetPassword = seedSection.GetValue<bool>("ResetPasswordOnStartup");
+
+    if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(password))
+        throw new InvalidOperationException("Auth:SeedAdmin:Login i Auth:SeedAdmin:Password muszą być ustawione.");
+
+    // Rola
+    var roleId = await uzytkownikRepository.GetRoleIdByCodeAsync(roleCode, CancellationToken.None)
+        ?? await uzytkownikRepository.GetRoleIdByCodeAsync("Admin", CancellationToken.None);
+
+    if (!roleId.HasValue)
+        throw new InvalidOperationException($"Brak roli '{roleCode}' w bazie (auth.Rola).");
+
+    var utcNow = DateTime.UtcNow;
+
+    // Szukamy po loginie (pewniejsze niż 'AnyUsers')
+    var existing = await db.Uzytkownicy
+        .FirstOrDefaultAsync(x => x.Login == login, CancellationToken.None);
+
+    if (existing is null)
+    {
+        var user = new Uzytkownik
+        {
+            Login = login,
+            Email = string.IsNullOrWhiteSpace(email) ? null : email,
+            HasloHash = passwordHashService.Hash(password),
+            CzyAktywny = true,
+            DataUtworzeniaUtc = utcNow,
+            DataModyfikacjiUtc = utcNow
+        };
+
+        db.Uzytkownicy.Add(user);
+        await db.SaveChangesAsync(CancellationToken.None);
+
+        await uzytkownikRepository.AssignRoleAsync(user.IdUzytkownika, roleId.Value, CancellationToken.None);
+    }
+    else
+    {
+        // opcjonalnie reset hasła w DEV
+        if (resetPassword)
+        {
+            existing.HasloHash = passwordHashService.Hash(password);
+            existing.DataModyfikacjiUtc = utcNow;
+        }
+
+        if (!existing.CzyAktywny)
+        {
+            existing.CzyAktywny = true;
+            existing.DataModyfikacjiUtc = utcNow;
+        }
+
+        await db.SaveChangesAsync(CancellationToken.None);
+
+        // Ensure roli
+        var roles = await uzytkownikRepository.GetRoleCodesAsync(existing.IdUzytkownika, CancellationToken.None);
+        if (!roles.Contains(roleCode, StringComparer.OrdinalIgnoreCase))
+        {
+            await uzytkownikRepository.AssignRoleAsync(existing.IdUzytkownika, roleId.Value, CancellationToken.None);
+        }
+    }
+}
+
+
+
 
 app.Run();

@@ -303,6 +303,17 @@ Content-Type: application/json
   "deviceInfo": "api.http"
 }
 
+### [AUTH] register
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "login": "nowy.user",
+  "email": "nowy.user@local",
+  "password": "haslo123",
+  "deviceInfo": "api.http"
+}
+
 ### [AUTH] me
 GET {{baseUrl}}/api/auth/me
 Authorization: Bearer {{accessToken}}

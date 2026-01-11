@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Security.Claims
+@inherits LayoutComponentBase
 @inject IAuthService AuthService
 @inject CustomAuthStateProvider AuthStateProvider
 @inject NavigationManager Nav
@@ -32,17 +33,39 @@
             DEV ENV
         </MudChip>
 
-        <AuthorizeView>
+        <AuthorizeView Context="ctx">
             <Authorized>
-                <MudButton Variant="Variant.Text"
-                           Color="Color.Inherit"
-                           OnClick="LogoutAsync">
-                    Wyloguj
-                </MudButton>
+                @{
+                    var user = ctx.User;
+                    var displayName = GetDisplayName(user);
+                }
+
+                <MudMenu AnchorOrigin="Origin.BottomRight"
+                         TransformOrigin="Origin.TopRight"
+                         Dense="true"
+                         Class="ml-3">
+                    <ActivatorContent>
+                        <MudChip T="string"
+                                 Variant="Variant.Outlined"
+                                 Size="Size.Small"
+                                 Color="Color.Inherit"
+                                 StartIcon="@Icons.Material.Filled.AccountCircle">
+                            @displayName
+                        </MudChip>
+                    </ActivatorContent>
+
+                    <ChildContent>
+                        <MudMenuItem OnClick="LogoutAsync" Icon="@Icons.Material.Filled.Logout">
+                            Wyloguj
+                        </MudMenuItem>
+                    </ChildContent>
+                </MudMenu>
             </Authorized>
+
             <NotAuthorized>
                 <MudButton Variant="Variant.Text"
                            Color="Color.Inherit"
+                           Class="ml-3"
                            OnClick="@(() => Nav.NavigateTo("/auth/login"))">
                     Zaloguj
                 </MudButton>
@@ -160,10 +183,31 @@
     private async Task LogoutAsync()
     {
         await AuthService.LogoutAsync();
-
-        // zakładam, że ta metoda istnieje u Ciebie (z promptów)
         await AuthStateProvider.MarkUserAsLoggedOutAsync();
 
-        Nav.NavigateTo("/auth/login");
+        // forceLoad: true -> resetuje stan auth po stronie hosta
+        Nav.NavigateTo("/auth/login", forceLoad: true);
+    }
+
+    private static string GetDisplayName(ClaimsPrincipal user)
+    {
+        // 1) standard: Identity.Name (najczęściej login)
+        var name = user.Identity?.Name;
+        if (!string.IsNullOrWhiteSpace(name))
+            return name;
+
+        // 2) claim z loginem (jeśli ktoś tak nazwał)
+        name = user.FindFirst("login")?.Value
+               ?? user.FindFirst("Login")?.Value;
+        if (!string.IsNullOrWhiteSpace(name))
+            return name;
+
+        // 3) email
+        name = user.FindFirst(ClaimTypes.Email)?.Value
+               ?? user.FindFirst("email")?.Value;
+        if (!string.IsNullOrWhiteSpace(name))
+            return name;
+
+        return "Użytkownik";
     }
 }

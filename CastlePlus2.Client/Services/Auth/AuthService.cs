@@ -1,4 +1,5 @@
-﻿using System;
+﻿// CastlePlus2.Client/Services/Auth/AuthService.cs
+using System;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -29,6 +30,27 @@ public class AuthService : IAuthService
         };
 
         var response = await _http.PostAsJsonAsync("api/auth/login", request);
+        response.EnsureSuccessStatusCode();
+
+        var tokens = await response.Content.ReadFromJsonAsync<AuthTokensDto>()
+                     ?? throw new InvalidOperationException("Brak tokenów w odpowiedzi.");
+
+        await _tokenStore.SetAsync(ToAccessTokenPair(tokens));
+        return tokens;
+    }
+
+    // ✅ DODANE
+    public async Task<AuthTokensDto> RegisterAsync(string login, string? email, string password, string? deviceInfo)
+    {
+        var request = new RegisterRequest
+        {
+            Login = login,
+            Email = string.IsNullOrWhiteSpace(email) ? null : email,
+            Password = password,
+            DeviceInfo = deviceInfo
+        };
+
+        var response = await _http.PostAsJsonAsync("api/auth/register", request);
         response.EnsureSuccessStatusCode();
 
         var tokens = await response.Content.ReadFromJsonAsync<AuthTokensDto>()
