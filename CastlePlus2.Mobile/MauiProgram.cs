@@ -1,6 +1,9 @@
-﻿using MudBlazor.Services;
-using CastlePlus2.Client; // To musi być widoczne
+﻿using CastlePlus2.Client; // To musi być widoczne
+using CastlePlus2.Client.Services.Auth.Http;
+using CastlePlus2.Client.Services.Auth.Storage;
+using CastlePlus2.Mobile.Services.Auth;
 using Microsoft.Extensions.Logging;
+using MudBlazor.Services;
 
 namespace CastlePlus2.Mobile
 {
@@ -27,11 +30,13 @@ namespace CastlePlus2.Mobile
                 ? "http://10.0.2.2:5072/" 
                 : "http://localhost:5072/";
 
-            builder.Services.AddHttpClient("ApiClient", client => client.BaseAddress = new Uri(apiBaseUrl));
+            builder.Services.AddHttpClient("ApiClient", client => client.BaseAddress = new Uri(apiBaseUrl))
+                .AddHttpMessageHandler<BearerTokenHandler>();
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ApiClient"));
 
             // 3. Rejestracja Clienta
             builder.Services.AddCastlePlus2Client();
+            builder.Services.AddScoped<IAccessTokenStore, SecureStorageTokenStore>();
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();

@@ -1,0 +1,58 @@
+﻿@page "/login"
+@page "/auth/login"
+
+@inject IAuthService AuthService
+@inject CustomAuthStateProvider AuthStateProvider
+@inject NavigationManager Nav
+@inject ISnackbar Snackbar
+
+<MudPaper Class="pa-6" Elevation="0">
+    <MudStack Spacing="3">
+        <MudText Typo="Typo.h5">Logowanie</MudText>
+        <MudTextField @bind-Value="_loginOrEmail"
+                      Label="Login lub email"
+                      Variant="Variant.Outlined"
+                      Required="true" />
+        <MudTextField @bind-Value="_password"
+                      Label="Hasło"
+                      Variant="Variant.Outlined"
+                      InputType="InputType.Password"
+                      Required="true" />
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="HandleLoginAsync"
+                   Disabled="_isSubmitting">
+            Zaloguj
+        </MudButton>
+    </MudStack>
+</MudPaper>
+
+@code {
+    private string _loginOrEmail = string.Empty;
+    private string _password = string.Empty;
+    private bool _isSubmitting;
+
+    private async Task HandleLoginAsync()
+    {
+        if (_isSubmitting)
+        {
+            return;
+        }
+
+        _isSubmitting = true;
+        try
+        {
+            await AuthService.LoginAsync(_loginOrEmail, _password, "client");
+            await AuthStateProvider.MarkUserAsAuthenticatedFromTokenAsync();
+            Nav.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się zalogować: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}

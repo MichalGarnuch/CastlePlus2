@@ -1,4 +1,7 @@
 ﻿@inherits LayoutComponentBase
+@inject IAuthService AuthService
+@inject CustomAuthStateProvider AuthStateProvider
+@inject NavigationManager Nav
 
 <MudThemeProvider Theme="CastleTheme.Neon" IsDarkMode="true" />
 <MudPopoverProvider />
@@ -28,6 +31,24 @@
                  Color="Color.Primary">
             DEV ENV
         </MudChip>
+
+        <AuthorizeView>
+            <Authorized>
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Inherit"
+                           OnClick="LogoutAsync">
+                    Wyloguj
+                </MudButton>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Inherit"
+                           OnClick="@(() => Nav.NavigateTo("/auth/login"))">
+                    Zaloguj
+                </MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen"
@@ -135,4 +156,14 @@
 @code {
     private bool _drawerOpen = true;
     private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
+
+    private async Task LogoutAsync()
+    {
+        await AuthService.LogoutAsync();
+
+        // zakładam, że ta metoda istnieje u Ciebie (z promptów)
+        await AuthStateProvider.MarkUserAsLoggedOutAsync();
+
+        Nav.NavigateTo("/auth/login");
+    }
 }
