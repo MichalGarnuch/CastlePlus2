@@ -6,13 +6,20 @@ namespace CastlePlus2.Api.Middleware;
 
 public class ExceptionHandlingMiddleware
 {
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+    private readonly IWebHostEnvironment _env;
 
-    public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
+    public ExceptionHandlingMiddleware(
+        RequestDelegate next,
+        ILogger<ExceptionHandlingMiddleware> logger,
+        IWebHostEnvironment env)
     {
         _next = next;
         _logger = logger;
+        _env = env;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -23,14 +30,14 @@ public class ExceptionHandlingMiddleware
         }
         catch (ValidationException ex)
         {
-            // Obsługa błędów walidacji (FluentValidation) -> 400 Bad Request
+            _logger.LogWarning(ex, "Błąd walidacji: {Message}", ex.Message);
             await HandleValidationExceptionAsync(context, ex);
         }
         catch (Exception ex)
         {
-            // Obsługa innych błędów (np. baza padła) -> 500 Internal Server Error
-            _logger.LogError(ex, "Wystąpił nieoczekiwany błąd.");
-            await HandleGenericExceptionAsync(context, ex);
+            // 500 – log z pełnym wyjątkiem + traceId
+            _logger.LogError(ex, "Unhandled exception. TraceId={TraceId}", context.TraceIdentifier);
+            await HandleGenericExceptionAsync(context, ex, _env);
         }
     }
 
@@ -40,31 +47,53 @@ public class ExceptionHandlingMiddleware
         context.Response.ContentType = "application/problem+json";
 
         var errors = ex.Errors
-            .GroupBy(e => e.PropertyName)
-            .ToDictionary(g => g.Key, g => g.Select(x => x.ErrorMessage).ToArray());
+            .GroupBy(e => string.IsNullOrWhiteSpace(e.PropertyName) ? "Request" : e.PropertyName)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(x => string.IsNullOrWhiteSpace(x.ErrorMessage) ? "Niepoprawna wartość." : x.ErrorMessage)
+                      .Distinct()
+                      .ToArray());
 
         var problem = new ValidationProblemDetails(errors)
         {
             Status = StatusCodes.Status400BadRequest,
             Title = "Błąd walidacji",
-            Detail = "Jeden lub więcej błędów walidacji wystąpiło."
+            Detail = "Dane wejściowe nie spełniają wymagań."
         };
 
-        await context.Response.WriteAsync(JsonSerializer.Serialize(problem));
+        problem.Extensions["traceId"] = context.TraceIdentifier;
+
+        await context.Response.WriteAsync(JsonSerializer.Serialize(problem, JsonOptions));
     }
 
-    private static async Task HandleGenericExceptionAsync(HttpContext context, Exception ex)
+    private static async Task HandleGenericExceptionAsync(HttpContext context, Exception ex, IWebHostEnvironment env)
     {
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-        context.Response.ContentType = "application/json";
+        context.Response.ContentType = "application/problem+json";
 
         var problem = new ProblemDetails
         {
             Status = StatusCodes.Status500InternalServerError,
             Title = "Wystąpił błąd serwera",
-            Detail = ex.Message // Na produkcji ukryj to!
+            // DEV: pokaż dokładny błąd (wraz z InnerException)
+            // PROD: tylko ogólny tekst
+            Detail = env.IsDevelopment()
+                ? BuildDevError(ex)
+                : "Wystąpił nieoczekiwany błąd."
         };
 
-        await context.Response.WriteAsync(JsonSerializer.Serialize(problem));
+        problem.Extensions["traceId"] = context.TraceIdentifier;
+
+        await context.Response.WriteAsync(JsonSerializer.Serialize(problem, JsonOptions));
+    }
+
+    private static string BuildDevError(Exception ex)
+    {
+        var msg = ex.Message;
+        if (ex.InnerException?.Message is { Length: > 0 } inner)
+        {
+            msg += $" | Inner: {inner}";
+        }
+        return msg;
     }
 }

@@ -1,7 +1,12 @@
 ﻿using CastlePlus2.Application.Interfaces.Auth;
+using CastlePlus2.Contracts.DTOs.Auth;
 using CastlePlus2.Domain.Entities.Auth;
 using CastlePlus2.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CastlePlus2.Infrastructure.Repositories.Auth
 {
@@ -14,16 +19,16 @@ namespace CastlePlus2.Infrastructure.Repositories.Auth
             _dbContext = dbContext;
         }
 
-        public async Task<Uzytkownik?> FindByLoginOrEmailAsync(string loginOrEmail, CancellationToken ct)
+        public Task<Uzytkownik?> FindByLoginOrEmailAsync(string loginOrEmail, CancellationToken ct)
         {
-            return await _dbContext.Uzytkownicy
+            return _dbContext.Uzytkownicy
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Login == loginOrEmail || x.Email == loginOrEmail, ct);
         }
 
-        public async Task<Uzytkownik?> FindByIdAsync(int idUzytkownika, CancellationToken ct)
+        public Task<Uzytkownik?> FindByIdAsync(int idUzytkownika, CancellationToken ct)
         {
-            return await _dbContext.Uzytkownicy
+            return _dbContext.Uzytkownicy
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IdUzytkownika == idUzytkownika, ct);
         }
@@ -43,7 +48,7 @@ namespace CastlePlus2.Infrastructure.Repositories.Auth
             var uzytkownik = await _dbContext.Uzytkownicy
                 .FirstOrDefaultAsync(x => x.IdUzytkownika == idUzytkownika, ct);
 
-            if (uzytkownik == null)
+            if (uzytkownik is null)
                 return;
 
             uzytkownik.OstatnieLogowanieUtc = utcNow;
@@ -51,19 +56,13 @@ namespace CastlePlus2.Infrastructure.Repositories.Auth
         }
 
         public Task<bool> AnyUsersAsync(CancellationToken ct)
-        {
-            return _dbContext.Uzytkownicy.AnyAsync(ct);
-        }
+            => _dbContext.Uzytkownicy.AnyAsync(ct);
 
         public Task<bool> LoginExistsAsync(string login, CancellationToken ct)
-        {
-            return _dbContext.Uzytkownicy.AnyAsync(x => x.Login == login, ct);
-        }
+            => _dbContext.Uzytkownicy.AnyAsync(x => x.Login == login, ct);
 
         public Task<bool> EmailExistsAsync(string email, CancellationToken ct)
-        {
-            return _dbContext.Uzytkownicy.AnyAsync(x => x.Email == email, ct);
-        }
+            => _dbContext.Uzytkownicy.AnyAsync(x => x.Email == email, ct);
 
         public async Task<int> CreateUserAsync(Uzytkownik user, CancellationToken ct)
         {
@@ -90,6 +89,79 @@ namespace CastlePlus2.Infrastructure.Repositories.Auth
             });
 
             await _dbContext.SaveChangesAsync(ct);
+        }
+
+        public async Task<AdminUserDto[]> GetUsersWithRolesAsync(CancellationToken ct)
+        {
+            var users = await _dbContext.Uzytkownicy
+                .AsNoTracking()
+                .Select(u => new
+                {
+                    u.IdUzytkownika,
+                    u.Login,
+                    u.Email,
+                    u.CzyAktywny,
+                    RoleCodes = u.UzytkownikRole.Select(ur => ur.Rola.Kod)
+                })
+                .ToListAsync(ct);
+
+            return users
+                .Select(u => new AdminUserDto
+                {
+                    IdUzytkownika = u.IdUzytkownika,
+                    Login = u.Login,
+                    Email = u.Email,
+                    CzyAktywny = u.CzyAktywny,
+                    RoleCodes = u.RoleCodes.Distinct(StringComparer.OrdinalIgnoreCase).ToArray()
+                })
+                .ToArray();
+        }
+
+        public Task<RoleDto[]> GetRolesAsync(CancellationToken ct)
+        {
+            return _dbContext.Role
+                .AsNoTracking()
+                .Select(r => new RoleDto
+                {
+                    IdRoli = r.IdRoli,
+                    Kod = r.Kod,
+                    Nazwa = r.Nazwa
+                })
+                .ToArrayAsync(ct);
+        }
+
+        public Task<bool> RoleExistsByCodeAsync(string code, CancellationToken ct)
+            => _dbContext.Role.AnyAsync(r => r.Kod == code, ct);
+
+        public async Task ReplaceUserRolesAsync(int userId, string[] roleCodes, CancellationToken ct)
+        {
+            var distinctRoleCodes = (roleCodes ?? Array.Empty<string>())
+                .Where(code => !string.IsNullOrWhiteSpace(code))
+                .Select(code => code.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            var roles = await _dbContext.Role
+                .Where(r => distinctRoleCodes.Contains(r.Kod))
+                .Select(r => r.IdRoli)
+                .ToListAsync(ct);
+
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(ct);
+
+            var existing = _dbContext.UzytkownikRole.Where(x => x.IdUzytkownika == userId);
+            _dbContext.UzytkownikRole.RemoveRange(existing);
+
+            foreach (var roleId in roles)
+            {
+                _dbContext.UzytkownikRole.Add(new UzytkownikRola
+                {
+                    IdUzytkownika = userId,
+                    IdRoli = roleId
+                });
+            }
+
+            await _dbContext.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
         }
     }
 }

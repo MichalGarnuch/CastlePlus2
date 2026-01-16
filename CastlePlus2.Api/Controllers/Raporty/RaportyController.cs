@@ -2,6 +2,7 @@
 using CastlePlus2.Application.Interfaces.Reports;
 using CastlePlus2.Contracts.Exports;
 using CastlePlus2.Infrastructure.Services.Reports.Definitions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +18,7 @@ namespace CastlePlus2.Api.Controllers.Raporty
 {
     [ApiController]
     [Route("api/raporty")]
+    [Authorize(Policy = "Authenticated")]
     public class RaportyController : ControllerBase
     {
         private readonly IReportExportService _reportExportService;
@@ -26,6 +28,7 @@ namespace CastlePlus2.Api.Controllers.Raporty
         private readonly IReportDocumentPreviewService _reportDocumentPreviewService;
         private readonly IMemoryCache _cache;
         private readonly IConfiguration _configuration;
+        private readonly IAuthorizationService _authorizationService;
 
         public RaportyController(
             IReportExportService reportExportService,
@@ -34,7 +37,8 @@ namespace CastlePlus2.Api.Controllers.Raporty
             IReportDataPreviewService reportDataPreviewService,
             IReportDocumentPreviewService reportDocumentPreviewService,
             IMemoryCache cache,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IAuthorizationService authorizationService)
         {
             _reportExportService = reportExportService;
             _reportRegistry = reportRegistry;
@@ -43,6 +47,7 @@ namespace CastlePlus2.Api.Controllers.Raporty
             _reportDocumentPreviewService = reportDocumentPreviewService;
             _cache = cache;
             _configuration = configuration;
+            _authorizationService = authorizationService;
         }
 
         [HttpGet("eksport")]
@@ -94,6 +99,14 @@ namespace CastlePlus2.Api.Controllers.Raporty
             };
 
             var storageMode = _configuration.GetValue<ExportStorageMode>("ExportStorage:Mode");
+            if (archive)
+            {
+                var authResult = await _authorizationService.AuthorizeAsync(User, "AdminOnly");
+                if (!authResult.Succeeded)
+                {
+                    return Forbid();
+                }
+            }
             if (archive || storageMode == ExportStorageMode.Archive)
             {
                 var now = DateTime.UtcNow;

@@ -1,4 +1,5 @@
-﻿using CastlePlus2.Domain.Entities.Auth;
+﻿using CastlePlus2.Contracts.DTOs.Auth;
+using CastlePlus2.Domain.Entities.Auth;
 
 namespace CastlePlus2.Application.Interfaces.Auth
 {
@@ -16,5 +17,10 @@ namespace CastlePlus2.Application.Interfaces.Auth
         Task<int> CreateUserAsync(Uzytkownik user, CancellationToken ct);
         Task<int?> GetRoleIdByCodeAsync(string roleCode, CancellationToken ct);
         Task AssignRoleAsync(int userId, int roleId, CancellationToken ct);
+
+        Task<AdminUserDto[]> GetUsersWithRolesAsync(CancellationToken ct);
+        Task<RoleDto[]> GetRolesAsync(CancellationToken ct);
+        Task<bool> RoleExistsByCodeAsync(string code, CancellationToken ct);
+        Task ReplaceUserRolesAsync(int userId, string[] roleCodes, CancellationToken ct);
     }
 }

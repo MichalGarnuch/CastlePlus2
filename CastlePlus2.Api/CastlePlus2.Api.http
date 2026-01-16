@@ -326,3 +326,22 @@ Content-Type: application/json
   "refreshToken": "{{refreshToken}}",
   "deviceInfo": "api.http"
 }
+
+### [AUTH][ADMIN] users
+GET {{baseUrl}}/api/auth/admin/users
+Authorization: Bearer {{accessToken}}
+
+### [AUTH][ADMIN] roles
+GET {{baseUrl}}/api/auth/admin/roles
+Authorization: Bearer {{accessToken}}
+
+### [AUTH][ADMIN] set roles
+PUT {{baseUrl}}/api/auth/admin/users/1/roles
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "roleCodes": [
+    "Admin"
+  ]
+}

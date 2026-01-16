@@ -1,4 +1,5 @@
 ﻿using CastlePlus2.Client.Services.Auth;
+using CastlePlus2.Client.Services.Auth.Admin;
 using CastlePlus2.Client.Services.Auth.Http;
 using CastlePlus2.Client.Services.Auth.State;
 using CastlePlus2.Client.Services.Dashboard;
@@ -34,6 +35,7 @@ public static class DependencyInjection
             sp.GetRequiredService<CustomAuthStateProvider>());
 
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IAuthAdminService, AuthAdminService>();
         services.AddTransient<BearerTokenHandler>();
 
         // DASHBOARD

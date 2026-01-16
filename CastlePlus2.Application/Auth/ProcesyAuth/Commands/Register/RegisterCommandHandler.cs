@@ -10,7 +10,9 @@ namespace CastlePlus2.Application.Auth.ProcesyAuth.Commands.Register
     public sealed class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterResult>
     {
         private const string AdminRoleCode = "Admin";
+        private const string AdminRoleCodeFallback = "ADMIN";
         private const string UserRoleCode = "User";
+        private const string UserRoleCodeFallback = "USER";
 
         private readonly IUzytkownikAuthRepository _uzytkownikRepository;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
@@ -51,13 +53,14 @@ namespace CastlePlus2.Application.Auth.ProcesyAuth.Commands.Register
             var hasUsers = await _uzytkownikRepository.AnyUsersAsync(ct);
 
             // Pierwszy user -> ADMIN, kolejne -> USER (z fallbackiem jeśli brak USER w DB)
-            var roleCode = hasUsers ? UserRoleCode : AdminRoleCode;
-            var roleId = await _uzytkownikRepository.GetRoleIdByCodeAsync(roleCode, ct);
+            var (roleCode, roleId) = await GetRoleIdWithFallbackAsync(
+                hasUsers ? UserRoleCode : AdminRoleCode,
+                hasUsers ? UserRoleCodeFallback : AdminRoleCodeFallback,
+                ct);
 
             if (roleId == null && hasUsers)
             {
-                roleCode = AdminRoleCode;
-                roleId = await _uzytkownikRepository.GetRoleIdByCodeAsync(roleCode, ct);
+                (roleCode, roleId) = await GetRoleIdWithFallbackAsync(AdminRoleCode, AdminRoleCodeFallback, ct);
             }
 
             if (roleId == null)
@@ -106,6 +109,21 @@ namespace CastlePlus2.Application.Auth.ProcesyAuth.Commands.Register
                     AccessTokenExpiresAtUtc = _authTokenService.GetAccessTokenExpiresAtUtc(utcNow)
                 }
             };
+        }
+
+        private async Task<(string RoleCode, int? RoleId)> GetRoleIdWithFallbackAsync(
+            string primaryRoleCode,
+            string fallbackRoleCode,
+            CancellationToken ct)
+        {
+            var roleId = await _uzytkownikRepository.GetRoleIdByCodeAsync(primaryRoleCode, ct);
+            if (roleId.HasValue)
+            {
+                return (primaryRoleCode, roleId);
+            }
+
+            roleId = await _uzytkownikRepository.GetRoleIdByCodeAsync(fallbackRoleCode, ct);
+            return (fallbackRoleCode, roleId);
         }
     }
 }

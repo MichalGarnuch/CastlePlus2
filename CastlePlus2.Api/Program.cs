@@ -1,7 +1,7 @@
 using AutoMapper;
 using CastlePlus2.Api.Middleware;
 using CastlePlus2.Api.Services;
-using CastlePlus2.Application;
+using CastlePlus2.Application.Common.Behaviors;
 using CastlePlus2.Application.Interfaces.Auth;
 using CastlePlus2.Application.Interfaces.Dashboard;
 using CastlePlus2.Application.Interfaces.Dokumenty;
@@ -16,6 +16,7 @@ using CastlePlus2.Application.Interfaces.Slowniki;
 using CastlePlus2.Application.Interfaces.Utrzymanie;
 using CastlePlus2.Application.Mappings.Rdzen;
 using CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomosc;
+using CastlePlus2.Domain.Entities.Auth;
 using CastlePlus2.Infrastructure.Persistence;
 using CastlePlus2.Infrastructure.Repositories.Auth;
 using CastlePlus2.Infrastructure.Repositories.Dokumenty;
@@ -26,25 +27,20 @@ using CastlePlus2.Infrastructure.Repositories.Podmioty;
 using CastlePlus2.Infrastructure.Repositories.Rdzen;
 using CastlePlus2.Infrastructure.Repositories.Slowniki;
 using CastlePlus2.Infrastructure.Repositories.Utrzymanie;
+using CastlePlus2.Infrastructure.Services.Auth;
 using CastlePlus2.Infrastructure.Services.Dashboard;
 using CastlePlus2.Infrastructure.Services.Exports;
 using CastlePlus2.Infrastructure.Services.Najem;
 using CastlePlus2.Infrastructure.Services.Reports;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi;
-using Microsoft.OpenApi.Models; // <--- WAŻNE: Ten using jest potrzebny do konfiguracji
 using FluentValidation;
 using MediatR;
-using CastlePlus2.Application.Common.Behaviors;
-using System.Reflection;
-using CastlePlus2.Infrastructure.Services.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
+using System.Security.Claims;
 using System.Text;
-using CastlePlus2.Application.Interfaces.Auth;
-using CastlePlus2.Domain.Entities.Auth;
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,51 +59,43 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<CastlePlus2DbContext>(options =>
     options.UseSqlServer(connectionString, sqlOptions =>
     {
-        // To jest wymagane dla typów geograficznych (np. lokalizacja nieruchomości)
         sqlOptions.UseNetTopologySuite();
-
-        // Odporność na chwilowe błędy sieci
         sqlOptions.EnableRetryOnFailure(maxRetryCount: 5);
-
-        // !!! KLUCZOWA POPRAWKA !!!
-        // Informujemy EF Core, że pliki migracji mają trafić do projektu Infrastructure
         sqlOptions.MigrationsAssembly("CastlePlus2.Infrastructure");
     }));
 
 // -------------------------------------------------------------------------
-// 2. Rejestracja Warstwy Application (CQRS, Mapper)
+// 2. Rejestracja warstwy Application: MediatR + FluentValidation (bez AddApplication())
+//    (to usuwa typową przyczynę duplikacji profili AutoMapper)
 // -------------------------------------------------------------------------
-
-//builder.Services.AddMediatR(cfg => {
-//    cfg.RegisterServicesFromAssembly(typeof(CreateNieruchomoscCommand).Assembly);
-//});
-
-builder.Services.AddApplication();
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(CreateNieruchomoscCommand).Assembly);
+});
 
 builder.Services.AddValidatorsFromAssembly(typeof(CastlePlus2.Application.Auth.ProcesyAuth.Commands.Login.LoginCommand).Assembly);
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
-// RĘCZNA konfiguracja AutoMapper – bez pakietu DI
+// -------------------------------------------------------------------------
+// 2b. AutoMapper – ręczna konfiguracja (jedno źródło prawdy)
+// -------------------------------------------------------------------------
 var mapperConfig = new MapperConfiguration(cfg =>
 {
-    // Dodajemy wszystkie profile z assembly Application.Mappings.Rdzen
-    cfg.AddMaps(typeof(NieruchomoscProfile).Assembly);
+    // Jeśli AutoMapper w Twojej wersji to wspiera – włączamy additive,
+    // żeby nie wywalało appki przy zduplikowanych CreateMap (zostanie „ostatnia” definicja).
+    TryEnableAdditiveTypeMapCreation(cfg);
 
-    // Gdybyś wolał jawnie:
-    // cfg.AddProfile<NieruchomoscProfile>();
-    // cfg.AddProfile<BudynekProfile>();
-    // cfg.AddProfile<AdresProfile>();
+    // Profile z assembly Application (masz tam wszystkie moduły)
+    cfg.AddMaps(typeof(NieruchomoscProfile).Assembly);
 });
 
 IMapper mapper = mapperConfig.CreateMapper();
-
-// Rejestrujemy jako singleton w DI
 builder.Services.AddSingleton(mapper);
 
 // -------------------------------------------------------------------------
-// 3. Rejestracja Warstwy Infrastructure (Repozytoria)
+// 3. Rejestracja Warstwy Infrastructure (Repozytoria / Serwisy)
 // -------------------------------------------------------------------------
-//RDZEN
+// RDZEN
 builder.Services.AddScoped<INieruchomoscRepository, NieruchomoscRepository>();
 builder.Services.AddScoped<IAdresRepository, AdresRepository>();
 builder.Services.AddScoped<IBudynekRepository, BudynekRepository>();
@@ -115,34 +103,39 @@ builder.Services.AddScoped<ILokalRepository, LokalRepository>();
 builder.Services.AddScoped<IPomieszczenieRepository, PomieszczenieRepository>();
 builder.Services.AddScoped<IPrzypisanieAdresuRepository, PrzypisanieAdresuRepository>();
 builder.Services.AddScoped<IEncjaRepository, EncjaRepository>();
-//AUTH
+
+// AUTH
 builder.Services.AddScoped<IUzytkownikAuthRepository, UzytkownikAuthRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IAuthTokenService, AuthTokenService>();
 builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
 
-
-//UTRZYMANIE
+// UTRZYMANIE
 builder.Services.AddScoped<IZleceniePracyRepository, ZleceniePracyRepository>();
 builder.Services.AddScoped<IPowiazanieZleceniaRepository, PowiazanieZleceniaRepository>();
-//DOKUMENTY
+
+// DOKUMENTY
 builder.Services.AddScoped<IDokumentRepository, DokumentRepository>();
 builder.Services.AddScoped<IPowiazanieDokumentuRepository, PowiazanieDokumentuRepository>();
-//FINANSE
+
+// FINANSE
 builder.Services.AddScoped<IAlokacjaKosztuRepository, AlokacjaKosztuRepository>();
 builder.Services.AddScoped<IKategoriaKosztuRepository, KategoriaKosztuRepository>();
 builder.Services.AddScoped<IFakturaRepository, FakturaRepository>();
 builder.Services.AddScoped<IPozycjaKosztuRepository, PozycjaKosztuRepository>();
 builder.Services.AddScoped<IPlatnoscRepository, PlatnoscRepository>();
 builder.Services.AddScoped<IRozliczeniePlatnosciRepository, RozliczeniePlatnosciRepository>();
-//SLOWNIK
+
+// SLOWNIKI
 builder.Services.AddScoped<IWalutaRepository, WalutaRepository>();
 builder.Services.AddScoped<IIndeksacjaRepository, IndeksacjaRepository>();
 builder.Services.AddScoped<IJednostkaMiaryRepository, JednostkaMiaryRepository>();
-//PODMIOTY
+
+// PODMIOTY
 builder.Services.AddScoped<IPodmiotRepository, PodmiotRepository>();
 builder.Services.AddScoped<IKontaktRepository, KontaktRepository>();
-//NAJEM
+
+// NAJEM
 builder.Services.AddScoped<IUmowaNajmuRepository, UmowaNajmuRepository>();
 builder.Services.AddScoped<IPrzedmiotNajmuRepository, PrzedmiotNajmuRepository>();
 builder.Services.AddScoped<ISkladnikCzynszuRepository, SkladnikCzynszuRepository>();
@@ -151,30 +144,33 @@ builder.Services.AddScoped<IUmowaNajmuKodGenerator, UmowaNajmuKodGenerator>();
 builder.Services.AddScoped<IWlasnoscRepository, WlasnoscRepository>();
 builder.Services.AddScoped<INajemDashboardQueryService, NajemDashboardQueryService>();
 builder.Services.AddScoped<IDashboardV1NajemQueryService, DashboardV1NajemQueryService>();
-//MEDIA
+
+// MEDIA
 builder.Services.AddScoped<IRodzajMediumRepository, RodzajMediumRepository>();
 builder.Services.AddScoped<IPrzylaczeRepository, PrzylaczeRepository>();
 builder.Services.AddScoped<ILicznikRepository, LicznikRepository>();
 builder.Services.AddScoped<IOdczytRepository, OdczytRepository>();
-//EXPORT
+
+// EXPORT / REPORTS
 builder.Services.AddScoped<IReportExportService, ReportExportService>();
 builder.Services.AddScoped<IExportArchiveService, ExportArchiveService>();
 builder.Services.AddScoped<IReportsReadService, ReportsReadService>();
+
 builder.Services.AddScoped<
     CastlePlus2.Application.Interfaces.Reports.IReportDefinition,
     CastlePlus2.Infrastructure.Services.Reports.Definitions.PodsumowanieOperacyjneReportDefinition>();
 builder.Services.AddScoped<
     CastlePlus2.Application.Interfaces.Reports.IReportDefinition,
     CastlePlus2.Infrastructure.Services.Reports.Definitions.FakturyReportDefinition>();
-builder.Services.AddScoped<
-    CastlePlus2.Application.Interfaces.Reports.IReportDataPreviewService,
-    CastlePlus2.Infrastructure.Services.Reports.ReportDataPreviewService>();
+
 builder.Services.AddScoped<
     CastlePlus2.Application.Interfaces.Reports.IReportRegistry,
     CastlePlus2.Application.Reports.ReportRegistry>();
+
 builder.Services.AddScoped<
     CastlePlus2.Application.Interfaces.Reports.IReportDataPreviewService,
     CastlePlus2.Infrastructure.Services.Reports.ReportDataPreviewService>();
+
 builder.Services.AddScoped<
     CastlePlus2.Application.Interfaces.Reports.IReportDocumentPreviewService,
     CastlePlus2.Infrastructure.Services.Reports.ReportDocumentPreviewService>();
@@ -184,23 +180,25 @@ builder.Services.AddScoped<XlsxReportExporter>();
 builder.Services.AddScoped<PdfReportExporter>();
 builder.Services.AddScoped<DocxReportExporter>();
 builder.Services.AddHostedService<ExportArchiveRetentionService>();
+
 builder.Services.AddSingleton(exportStorageOptions);
 builder.Services.AddMemoryCache();
 
-
 // -------------------------------------------------------------------------
-// 4. Konfiguracja API i Swaggera (TU BYŁ PROBLEM)
+// 4. Konfiguracja API i Swagger
 // -------------------------------------------------------------------------
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// POPRAWKA: Jawna konfiguracja dokumentu Swaggera
 builder.Services.AddSwaggerGen(c =>
 {
     c.CustomSchemaIds(t => t.FullName ?? t.Name);
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "CastlePlus2 API", Version = "v1" });
 });
 
+// -------------------------------------------------------------------------
+// 5. JWT AuthN/AuthZ
+// -------------------------------------------------------------------------
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var signingKey = jwtSection["SigningKey"];
 if (string.IsNullOrWhiteSpace(signingKey))
@@ -221,26 +219,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = !string.IsNullOrWhiteSpace(audience),
             ValidAudience = audience,
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.FromMinutes(1)
+            ClockSkew = TimeSpan.FromMinutes(1),
+            RoleClaimType = ClaimTypes.Role
         };
     });
 
-builder.Services.AddAuthorization();
-
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Authenticated", policy => policy.RequireAuthenticatedUser());
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin", "ADMIN"));
+    options.AddPolicy("UserOrAdmin", policy => policy.RequireRole("User", "USER", "Admin", "ADMIN"));
+});
 
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-
-// -------------------------------------------------------------------------
-// 5. Pipeline HTTP
-// -------------------------------------------------------------------------
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    // POPRAWKA: Wskazanie konkretnego pliku JSON
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "CastlePlus2 API V1");
@@ -278,15 +275,31 @@ if (app.Environment.IsDevelopment() &&
         throw new InvalidOperationException("Auth:SeedAdmin:Login i Auth:SeedAdmin:Password muszą być ustawione.");
 
     // Rola
-    var roleId = await uzytkownikRepository.GetRoleIdByCodeAsync(roleCode, CancellationToken.None)
-        ?? await uzytkownikRepository.GetRoleIdByCodeAsync("Admin", CancellationToken.None);
+    var roleId = await uzytkownikRepository.GetRoleIdByCodeAsync(roleCode, CancellationToken.None);
+    if (!roleId.HasValue)
+    {
+        var fallbackRoleCode = string.Equals(roleCode, "Admin", StringComparison.OrdinalIgnoreCase)
+            ? "ADMIN"
+            : "Admin";
+        roleId = await uzytkownikRepository.GetRoleIdByCodeAsync(fallbackRoleCode, CancellationToken.None);
+        if (roleId.HasValue)
+        {
+            roleCode = fallbackRoleCode;
+        }
+    }
+
+    if (!roleId.HasValue && !string.Equals(roleCode, "Admin", StringComparison.OrdinalIgnoreCase))
+    {
+        roleCode = "Admin";
+        roleId = await uzytkownikRepository.GetRoleIdByCodeAsync(roleCode, CancellationToken.None)
+            ?? await uzytkownikRepository.GetRoleIdByCodeAsync("ADMIN", CancellationToken.None);
+    }
 
     if (!roleId.HasValue)
         throw new InvalidOperationException($"Brak roli '{roleCode}' w bazie (auth.Rola).");
 
     var utcNow = DateTime.UtcNow;
 
-    // Szukamy po loginie (pewniejsze niż 'AnyUsers')
     var existing = await db.Uzytkownicy
         .FirstOrDefaultAsync(x => x.Login == login, CancellationToken.None);
 
@@ -309,7 +322,6 @@ if (app.Environment.IsDevelopment() &&
     }
     else
     {
-        // opcjonalnie reset hasła w DEV
         if (resetPassword)
         {
             existing.HasloHash = passwordHashService.Hash(password);
@@ -324,7 +336,6 @@ if (app.Environment.IsDevelopment() &&
 
         await db.SaveChangesAsync(CancellationToken.None);
 
-        // Ensure roli
         var roles = await uzytkownikRepository.GetRoleCodesAsync(existing.IdUzytkownika, CancellationToken.None);
         if (!roles.Contains(roleCode, StringComparer.OrdinalIgnoreCase))
         {
@@ -333,7 +344,44 @@ if (app.Environment.IsDevelopment() &&
     }
 }
 
-
-
-
 app.Run();
+
+static void TryEnableAdditiveTypeMapCreation(IMapperConfigurationExpression cfg)
+{
+    // AutoMapper: w zależności od wersji, opcja może być w cfg.Advanced.* albo cfg.Internal().*
+    try
+    {
+        var advanced = cfg.GetType().GetProperty("Advanced")?.GetValue(cfg);
+        var allow = advanced?.GetType().GetProperty("AllowAdditiveTypeMapCreation");
+        if (allow?.CanWrite == true)
+        {
+            allow.SetValue(advanced, true);
+            return;
+        }
+    }
+    catch
+    {
+        // ignore
+    }
+
+    try
+    {
+        var internalMethod = cfg.GetType().GetMethod(
+            "Internal",
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+            binder: null,
+            types: Type.EmptyTypes,
+            modifiers: null);
+
+        var internalCfg = internalMethod?.Invoke(cfg, null);
+        var allow = internalCfg?.GetType().GetProperty("AllowAdditiveTypeMapCreation");
+        if (allow?.CanWrite == true)
+        {
+            allow.SetValue(internalCfg, true);
+        }
+    }
+    catch
+    {
+        // ignore
+    }
+}

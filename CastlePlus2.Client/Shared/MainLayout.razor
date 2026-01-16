@@ -165,6 +165,14 @@
                 <MudNavLink Href="/dokumenty/powiazania" Icon="@Icons.Material.Filled.Link">Powiązania dokumentu</MudNavLink>
             </MudNavGroup>
 
+            <AuthorizeView Roles="Admin,ADMIN">
+                <MudNavGroup Title="Administracja" Expanded="true">
+                    <MudNavLink Href="/admin/uzytkownicy-role" Icon="@Icons.Material.Filled.AdminPanelSettings">
+                        Użytkownicy i role
+                    </MudNavLink>
+                </MudNavGroup>
+            </AuthorizeView>
+
         </MudNavMenu>
     </MudDrawer>
 
