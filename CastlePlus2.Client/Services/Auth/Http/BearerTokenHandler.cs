@@ -6,24 +6,25 @@ using CastlePlus2.Client.Services.Auth.Storage;
 
 namespace CastlePlus2.Client.Services.Auth.Http;
 
-public class BearerTokenHandler : DelegatingHandler
+public sealed class BearerTokenHandler : DelegatingHandler
 {
-    private readonly IAccessTokenStore _tokenStore;
+    private readonly IAccessTokenStore _accessTokenStore;
 
-    public BearerTokenHandler(IAccessTokenStore tokenStore)
+    public BearerTokenHandler(IAccessTokenStore accessTokenStore)
     {
-        _tokenStore = tokenStore;
+        _accessTokenStore = accessTokenStore;
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        if (request.Headers.Authorization == null)
+        // Nie nadpisuj ręcznie ustawionego Authorization
+        if (request.Headers.Authorization is null)
         {
-            var tokens = await _tokenStore.GetAsync();
-            if (!string.IsNullOrWhiteSpace(tokens?.AccessToken))
-            {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokens.AccessToken);
-            }
+            var pair = await _accessTokenStore.GetAsync();
+            var accessToken = pair?.AccessToken;
+
+            if (!string.IsNullOrWhiteSpace(accessToken))
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         }
 
         return await base.SendAsync(request, cancellationToken);

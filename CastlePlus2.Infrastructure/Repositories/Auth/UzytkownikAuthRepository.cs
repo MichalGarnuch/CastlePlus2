@@ -141,27 +141,39 @@ namespace CastlePlus2.Infrastructure.Repositories.Auth
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToArray();
 
-            var roles = await _dbContext.Role
-                .Where(r => distinctRoleCodes.Contains(r.Kod))
-                .Select(r => r.IdRoli)
-                .ToListAsync(ct);
+            if (distinctRoleCodes.Length == 0)
+                return;
 
-            await using var transaction = await _dbContext.Database.BeginTransactionAsync(ct);
+            // Ważne: ExecutionStrategy + transakcja w środku
+            var strategy = _dbContext.Database.CreateExecutionStrategy();
 
-            var existing = _dbContext.UzytkownikRole.Where(x => x.IdUzytkownika == userId);
-            _dbContext.UzytkownikRole.RemoveRange(existing);
-
-            foreach (var roleId in roles)
+            await strategy.ExecuteAsync(async () =>
             {
-                _dbContext.UzytkownikRole.Add(new UzytkownikRola
-                {
-                    IdUzytkownika = userId,
-                    IdRoli = roleId
-                });
-            }
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync(ct);
 
-            await _dbContext.SaveChangesAsync(ct);
-            await transaction.CommitAsync(ct);
+                // Pobierz role pod wskazane kody (przy typowej kolacji SQL Server i tak będzie case-insensitive)
+                var roles = await _dbContext.Role
+                    .Where(r => distinctRoleCodes.Contains(r.Kod))
+                    .Select(r => r.IdRoli)
+                    .ToListAsync(ct);
+
+                // Replace
+                var existing = _dbContext.UzytkownikRole.Where(x => x.IdUzytkownika == userId);
+                _dbContext.UzytkownikRole.RemoveRange(existing);
+
+                foreach (var roleId in roles)
+                {
+                    _dbContext.UzytkownikRole.Add(new UzytkownikRola
+                    {
+                        IdUzytkownika = userId,
+                        IdRoli = roleId
+                    });
+                }
+
+                await _dbContext.SaveChangesAsync(ct);
+                await transaction.CommitAsync(ct);
+            });
         }
+
     }
 }

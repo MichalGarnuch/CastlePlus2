@@ -10,7 +10,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Reflection.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -50,8 +49,11 @@ namespace CastlePlus2.Api.Controllers.Raporty
             _authorizationService = authorizationService;
         }
 
-        [HttpGet("eksport")]
-        public async Task<IActionResult> Export(
+        // =========================================================
+        // 1️⃣ GENEROWANIE LINKU DO EKSPORTU (AUTH REQUIRED)
+        // =========================================================
+        [HttpGet("eksport-link")]
+        public async Task<IActionResult> CreateExportLink(
             [FromQuery] string reportKey,
             [FromQuery] ExportFormat format,
             [FromQuery] bool archive = false,
@@ -59,8 +61,16 @@ namespace CastlePlus2.Api.Controllers.Raporty
             CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(reportKey))
-            {
                 return BadRequest("Brak klucza raportu.");
+
+            if (!Enum.IsDefined(format))
+                return BadRequest("Nieobsługiwany format.");
+
+            if (archive)
+            {
+                var auth = await _authorizationService.AuthorizeAsync(User, "AdminOnly");
+                if (!auth.Succeeded)
+                    return Forbid();
             }
 
             IReportDefinition definition;
@@ -73,159 +83,101 @@ namespace CastlePlus2.Api.Controllers.Raporty
                 return BadRequest(ex.Message);
             }
 
-            var rowsObjects = definition is FakturyReportDefinition fakturyDefinition
-                ? await fakturyDefinition.BuildRowsAsync(take, ct)
+            var rows = definition is FakturyReportDefinition faktury
+                ? await faktury.BuildRowsAsync(take, ct)
                 : await definition.BuildRowsAsync(ct);
 
-            var typedRows = CreateTypedRows(definition.RowType, rowsObjects);
+            var typedRows = CreateTypedRows(definition.RowType, rows);
 
             var fileNameBase = $"{definition.FileNameBase}_{DateTime.UtcNow:yyyyMMdd_HHmm}";
-            var fileName = $"{fileNameBase}{format.GetFileExtension()}";
+            var fileName = fileNameBase + format.GetFileExtension();
             var contentType = format.GetContentType();
-            var title = definition.Title;
 
-            if (!Enum.IsDefined(format))
-            {
-                return BadRequest("Nieobsługiwany format eksportu.");
-            }
-
-            var fileBytes = format switch
+            var bytes = format switch
             {
                 ExportFormat.Csv => InvokeExport(nameof(IReportExportService.ExportCsv), definition.RowType, typedRows, fileNameBase),
-                ExportFormat.Pdf => InvokeExport(nameof(IReportExportService.ExportPdf), definition.RowType, typedRows, title, fileNameBase),
-                ExportFormat.Xlsx => InvokeExport(nameof(IReportExportService.ExportXlsx), definition.RowType, typedRows, title, fileNameBase),
-                ExportFormat.Docx => InvokeExport(nameof(IReportExportService.ExportDocx), definition.RowType, typedRows, title, fileNameBase),
-                _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Nieobsługiwany format eksportu.")
+                ExportFormat.Pdf => InvokeExport(nameof(IReportExportService.ExportPdf), definition.RowType, typedRows, definition.Title, fileNameBase),
+                ExportFormat.Xlsx => InvokeExport(nameof(IReportExportService.ExportXlsx), definition.RowType, typedRows, definition.Title, fileNameBase),
+                ExportFormat.Docx => InvokeExport(nameof(IReportExportService.ExportDocx), definition.RowType, typedRows, definition.Title, fileNameBase),
+                _ => throw new ArgumentOutOfRangeException()
             };
 
-            var storageMode = _configuration.GetValue<ExportStorageMode>("ExportStorage:Mode");
-            if (archive)
-            {
-                var authResult = await _authorizationService.AuthorizeAsync(User, "AdminOnly");
-                if (!authResult.Succeeded)
-                {
-                    return Forbid();
-                }
-            }
-            if (archive || storageMode == ExportStorageMode.Archive)
+            if (archive || _configuration.GetValue<ExportStorageMode>("ExportStorage:Mode") == ExportStorageMode.Archive)
             {
                 var now = DateTime.UtcNow;
-                var relativePath = $"Exports/{now:yyyy}/{now:MM}/{now:dd}/raporty/{reportKey}/{fileName}";
-                await _exportArchiveService.SaveAsync(fileBytes, relativePath, ct);
+                var path = $"Exports/{now:yyyy}/{now:MM}/{now:dd}/raporty/{reportKey}/{fileName}";
+                await _exportArchiveService.SaveAsync(bytes, path, ct);
             }
 
-            return File(fileBytes, contentType, fileName);
+            var downloadId = Guid.NewGuid().ToString("N");
+            var expiresAt = DateTime.UtcNow.AddMinutes(10);
+
+            _cache.Set(
+                $"report-export:{downloadId}",
+                (bytes, fileName, contentType),
+                expiresAt
+            );
+
+            return Ok(new ReportExportLinkResponse(
+                DownloadUrl: $"/api/raporty/eksport-pobierz/{downloadId}",
+                ExpiresAtUtc: expiresAt
+            ));
         }
 
-        [HttpGet("podglad-danych")]
-        public async Task<IActionResult> DataPreview(
-            [FromQuery] string reportKey,
-            [FromQuery] int take = 50,
-            CancellationToken ct = default)
+        // =========================================================
+        // 2️⃣ POBRANIE PLIKU (ALLOW ANONYMOUS)
+        // =========================================================
+        [HttpGet("eksport-pobierz/{id}")]
+        [AllowAnonymous]
+        public IActionResult Download([FromRoute] string id)
         {
-            if (string.IsNullOrWhiteSpace(reportKey))
-            {
-                return BadRequest("Brak klucza raportu.");
-            }
+            if (!_cache.TryGetValue($"report-export:{id}",
+                out (byte[] Bytes, string FileName, string ContentType) entry))
+                return NotFound();
 
-            if (take < 1)
-            {
-                take = 1;
-            }
-            else if (take > 200)
-            {
-                take = 200;
-            }
-
-            try
-            {
-                _ = _reportRegistry.GetByKey(reportKey);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
-            var response = await _reportDataPreviewService.BuildAsync(reportKey, take, ct);
-            return Ok(response);
+            Response.Headers["Cache-Control"] = "no-store";
+            return File(entry.Bytes, entry.ContentType, entry.FileName);
         }
+
+        // =========================================================
+        // 3️⃣ PODGLĄDY (jak było, ale stream anonymous)
+        // =========================================================
+        [HttpGet("podglad-danych")]
+        public async Task<IActionResult> DataPreview(string reportKey, int take = 50, CancellationToken ct = default)
+            => Ok(await _reportDataPreviewService.BuildAsync(reportKey, take, ct));
 
         [HttpGet("podglad-dokumentu")]
-        public async Task<IActionResult> DocumentPreview(
-            [FromQuery] string reportKey,
-            [FromQuery] int take = 50,
-            CancellationToken ct = default)
-        {
-            if (string.IsNullOrWhiteSpace(reportKey))
-            {
-                return BadRequest("Brak klucza raportu.");
-            }
-
-            if (take < 1)
-            {
-                take = 1;
-            }
-            else if (take > 200)
-            {
-                take = 200;
-            }
-
-            try
-            {
-                _ = _reportRegistry.GetByKey(reportKey);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
-            var response = await _reportDocumentPreviewService.CreatePdfPreviewAsync(reportKey, take, ct);
-            return Ok(response);
-        }
+        public async Task<IActionResult> DocumentPreview(string reportKey, int take = 50, CancellationToken ct = default)
+            => Ok(await _reportDocumentPreviewService.CreatePdfPreviewAsync(reportKey, take, ct));
 
         [HttpGet("podglad-dokumentu/{previewId}")]
-        public IActionResult DocumentPreviewStream([FromRoute] string previewId)
+        [AllowAnonymous]
+        public IActionResult DocumentStream(string previewId)
         {
-            if (string.IsNullOrWhiteSpace(previewId))
-            {
+            if (!_cache.TryGetValue($"report-doc-preview:{previewId}",
+                out (byte[] Bytes, string FileName, string ContentType) entry))
                 return NotFound();
-            }
-
-            var cacheKey = $"report-doc-preview:{previewId}";
-            if (!_cache.TryGetValue(cacheKey, out (byte[] Bytes, string FileName, string ContentType) entry))
-            {
-                return NotFound();
-            }
 
             Response.Headers["Content-Disposition"] = $"inline; filename=\"{entry.FileName}\"";
-            Response.Headers["Cache-Control"] = "no-store";
             return File(entry.Bytes, entry.ContentType);
         }
 
-        private byte[] InvokeExport(string methodName, Type rowType, params object[] parameters)
+        // =========================================================
+        // Helpers
+        // =========================================================
+        private byte[] InvokeExport(string method, Type rowType, params object[] args)
         {
-            var method = typeof(IReportExportService)
-                .GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance)
-                ?.MakeGenericMethod(rowType);
+            var m = typeof(IReportExportService)
+                .GetMethod(method)!
+                .MakeGenericMethod(rowType);
 
-            if (method is null)
-            {
-                throw new InvalidOperationException($"Brak metody eksportu: {methodName}.");
-            }
-
-            return (byte[])method.Invoke(_reportExportService, parameters)!;
+            return (byte[])m.Invoke(_reportExportService, args)!;
         }
 
-        private static object CreateTypedRows(Type rowType, IReadOnlyList<object> rows)
+        private static object CreateTypedRows(Type type, IReadOnlyList<object> rows)
         {
-            var listType = typeof(List<>).MakeGenericType(rowType);
-            var list = (IList)Activator.CreateInstance(listType)!;
-
-            foreach (var row in rows)
-            {
-                list.Add(row);
-            }
-
+            var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(type))!;
+            foreach (var r in rows) list.Add(r);
             return list;
         }
     }

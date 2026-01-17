@@ -26,17 +26,26 @@ namespace CastlePlus2.Mobile
             builder.Services.AddCastlePlus2Client();
 
             // 2) Token store dla MAUI
-            builder.Services.AddScoped<IAccessTokenStore, SecureStorageTokenStore>();
+            builder.Services.AddScoped<IAccessTokenStore, InMemoryAccessTokenStore>();
+            // builder.Services.AddScoped<IAccessTokenStore, SecureStorageTokenStore>();
 
             // 3) HttpClient
             string apiBaseUrl = DeviceInfo.Platform == DevicePlatform.Android
                 ? "http://10.0.2.2:5072/"
                 : "http://localhost:5072/";
 
-            builder.Services.AddHttpClient("ApiClient", client => client.BaseAddress = new Uri(apiBaseUrl))
-                .AddHttpMessageHandler<BearerTokenHandler>();
+            builder.Services.AddTransient<BearerTokenHandler>();
 
-            builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ApiClient"));
+            builder.Services.AddScoped<HttpClient>(sp =>
+            {
+                var handler = sp.GetRequiredService<BearerTokenHandler>();
+                handler.InnerHandler = new HttpClientHandler();
+
+                return new HttpClient(handler)
+                {
+                    BaseAddress = new Uri(apiBaseUrl)
+                };
+            });
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();

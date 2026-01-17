@@ -18,15 +18,21 @@ builder.Services.AddCastlePlus2Client();
 
 // 2) Storage dla tokenów (musi byæ przed HttpClientem z handlerem)
 builder.Services.AddScoped<ProtectedLocalStorage>();
-builder.Services.AddScoped<IAccessTokenStore, ProtectedLocalStorageTokenStore>();
+builder.Services.AddScoped<IAccessTokenStore, InMemoryAccessTokenStore>();
+// builder.Services.AddScoped<IAccessTokenStore, ProtectedLocalStorageTokenStore>();
 
-// 3) HttpClient + BearerTokenHandler
-builder.Services.AddHttpClient("ApiClient", client =>
-    client.BaseAddress = new Uri("http://localhost:5072/"))
-    .AddHttpMessageHandler<BearerTokenHandler>();
+builder.Services.AddTransient<BearerTokenHandler>();
 
-builder.Services.AddScoped(sp =>
-    sp.GetRequiredService<IHttpClientFactory>().CreateClient("ApiClient"));
+builder.Services.AddScoped<HttpClient>(sp =>
+{
+    var handler = sp.GetRequiredService<BearerTokenHandler>();
+    handler.InnerHandler = new HttpClientHandler();
+
+    return new HttpClient(handler)
+    {
+        BaseAddress = new Uri("http://localhost:5072/")
+    };
+});
 
 var app = builder.Build();
 

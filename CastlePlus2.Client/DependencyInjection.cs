@@ -99,6 +99,9 @@ public static class DependencyInjection
         services.AddScoped<IReportDataPreviewService, ReportDataPreviewService>();
         services.AddScoped<IReportDocumentPreviewService, ReportDocumentPreviewService>();
 
+        services.AddScoped<IReportExportDownloadService, ReportExportDownloadService>();
+        // services.AddScoped<ReportExportDownloadService>();
+
         return services;
     }
 }

@@ -12,6 +12,9 @@
 @inject HttpClient Http
 @inject ISnackbar Snackbar
 @inject NavigationManager Nav
+@inject IReportExportDownloadService ExportService
+
+
 
 <MudText Typo="Typo.h4" Class="fw-700 mb-4">Eksporty raportów</MudText>
 
@@ -217,22 +220,24 @@ else if (!string.IsNullOrWhiteSpace(_pdfPreviewUrl))
         StateHasChanged();
     }
 
-    private void StartExport()
+    private async Task StartExport()
     {
-        if (string.IsNullOrWhiteSpace(_selectedReportKey))
-            return;
-
-        var parameters = new Dictionary<string, string?>
+        try
         {
-            ["reportKey"] = _selectedReportKey,
-            ["format"] = _selectedFormat.ToString(),
-            // ZAWSZE wysyłamy, żebyś widział w Network:
-            ["archive"] = _archive ? "true" : "false"
-        };
+            var link = await ExportService.CreateLinkAsync(
+                _selectedReportKey!,
+                _selectedFormat,
+                _archive,
+                _previewTake
+            );
 
-        // Tu NIC nie kombinujemy – Twoja usługa już umie budować ABSOLUTE URL do API
-        // (wykorzystuje HttpClient.BaseAddress albo konfigurację Api:BaseUrl).
-        ReportExportUrlService.OpenExportUrl("/api/raporty/eksport", parameters);
+            var absoluteUrl = ExportService.ToAbsolute(link.DownloadUrl);
+            Nav.NavigateTo(absoluteUrl, forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
     }
 
     private async Task LoadPreviewAsync()
