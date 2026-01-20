@@ -1,0 +1,106 @@
+﻿@page "/konfiguracja/zasoby-ui"
+@using CastlePlus2.Client.Services.Konfiguracja
+@using CastlePlus2.Contracts.DTOs.Konfiguracja
+@using MudBlazor
+@inject IZasobyUIService Service
+@inject NavigationManager Nav
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Zasoby UI</MudText>
+
+<MudPaper Class="pa-4">
+    <MudTable Items="_items"
+              Dense="true"
+              Hover="true"
+              Bordered="true"
+              Striped="true"
+              Loading="_loading">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Lista zasobów</MudText>
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                           Color="Color.Info"
+                           AriaLabel="Odśwież"
+                           Title="Odśwież"
+                           OnClick="ReloadAsync"
+                           Class="mr-2" />
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="CreateAsync">
+                Dodaj
+            </MudButton>
+        </ToolBarContent>
+
+        <HeaderContent>
+            <MudTh>Kod</MudTh>
+            <MudTh>Typ</MudTh>
+            <MudTh>Kategoria</MudTh>
+            <MudTh>Aktywny</MudTh>
+            <MudTh>Sort</MudTh>
+            <MudTh>Ważne od</MudTh>
+            <MudTh>Ważne do</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Kod">@context.KodZasobu</MudTd>
+            <MudTd DataLabel="Typ">@context.Typ</MudTd>
+            <MudTd DataLabel="Kategoria">@context.Kategoria</MudTd>
+            <MudTd DataLabel="Aktywny">@(context.CzyAktywny ? "Tak" : "Nie")</MudTd>
+            <MudTd DataLabel="Sort">@context.Sort</MudTd>
+            <MudTd DataLabel="Ważne od">@FormatDate(context.WazneOdUtc)</MudTd>
+            <MudTd DataLabel="Ważne do">@FormatDate(context.WazneDoUtc)</MudTd>
+            <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               OnClick="@(() => EditAsync(context))" />
+            </MudTd>
+        </RowTemplate>
+
+        <NoRecordsContent>
+            <MudText Class="pa-4">Brak rekordów.</MudText>
+        </NoRecordsContent>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private bool _loading = true;
+    private List<ZasobUIDto> _items = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        _loading = true;
+        try
+        {
+            _items = await Service.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void CreateAsync()
+    {
+        Nav.NavigateTo("/konfiguracja/zasoby-ui/new");
+    }
+
+    private void EditAsync(ZasobUIDto item)
+    {
+        Nav.NavigateTo($"/konfiguracja/zasoby-ui/{item.IdEncji}");
+    }
+
+    private static string FormatDate(DateTime? value)
+        => value.HasValue ? value.Value.ToString("yyyy-MM-dd") : "-";
+}

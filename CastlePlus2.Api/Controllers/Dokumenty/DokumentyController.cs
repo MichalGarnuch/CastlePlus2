@@ -3,6 +3,7 @@ using CastlePlus2.Application.Dokumenty.Dokumenty.Commands.CreateDokument;
 using CastlePlus2.Application.Dokumenty.Dokumenty.Commands.DeleteDokument;
 using CastlePlus2.Application.Dokumenty.Dokumenty.Commands.UpdateDokument;
 using CastlePlus2.Application.Dokumenty.Dokumenty.Queries.GetAllDokumenty;
+using CastlePlus2.Application.Dokumenty.Dokumenty.Queries.GetDokumentyByEncjaId;
 using CastlePlus2.Application.Dokumenty.Dokumenty.Queries.GetDokumentById;
 using CastlePlus2.Contracts.DTOs.Dokumenty;
 using CastlePlus2.Contracts.Requests.Dokumenty;
@@ -34,6 +35,13 @@ namespace CastlePlus2.Api.Controllers
         {
             var result = await _mediator.Send(new GetDokumentByIdQuery(id), cancellationToken);
             return result is null ? NotFound() : Ok(result);
+        }
+
+        [HttpGet("by-encja/{idEncji:guid}")]
+        public async Task<ActionResult<List<DokumentDto>>> GetByEncja([FromRoute] Guid idEncji, CancellationToken cancellationToken)
+        {
+            var list = await _mediator.Send(new GetDokumentyByEncjaIdQuery(idEncji), cancellationToken);
+            return Ok(list);
         }
 
         [HttpPost]

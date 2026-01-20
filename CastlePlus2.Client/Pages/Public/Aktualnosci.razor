@@ -1,0 +1,41 @@
+﻿@page "/aktualnosci"
+
+@using CastlePlus2.Client.Services.Konfiguracja
+@using CastlePlus2.Contracts.DTOs.Konfiguracja
+@inject IZasobyUIService Service
+
+<PageTitle>Aktualności</PageTitle>
+
+<MudPaper Class="pa-4">
+    <MudText Typo="Typo.h5">Aktualności</MudText>
+
+    @if (_items.Count == 0)
+    {
+        <MudText Class="mt-2">Brak aktualności.</MudText>
+    }
+    else
+    {
+        <MudStack Class="mt-2" Spacing="2">
+            @foreach (var it in _items.OrderByDescending(x => x.Sort))
+            {
+                <MudPaper Class="pa-3">
+                    <MudText Typo="Typo.h6">@it.KodZasobu</MudText>
+
+                    @foreach (var t in it.Teksty.OrderBy(x => x.Sort))
+                    {
+                        <MudText>@t.Wartosc</MudText>
+                    }
+                </MudPaper>
+            }
+        </MudStack>
+    }
+</MudPaper>
+
+@code {
+    private List<ZasobUIPublicDto> _items = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _items = await Service.GetPublicAsync("NEWS", "HOME", "pl-PL");
+    }
+}

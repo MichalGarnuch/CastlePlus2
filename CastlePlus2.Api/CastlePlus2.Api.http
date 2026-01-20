@@ -345,3 +345,64 @@ Content-Type: application/json
     "Admin"
   ]
 }
+
+### [KONFIGURACJA] Create ZasobUI (CMS)
+POST {{baseUrl}}/api/konfiguracja/zasobyui
+Content-Type: application/json
+
+{
+  "kodZasobu": "HOME_NEWS_001",
+  "typ": "NEWS",
+  "kategoria": "HOME",
+  "czyAktywny": true,
+  "sort": 10,
+  "wazneOdUtc": null,
+  "wazneDoUtc": null
+}
+
+### [KONFIGURACJA] Create ZasobUITekst Title
+POST {{baseUrl}}/api/konfiguracja/zasobyuiteksty
+Content-Type: application/json
+
+{
+  "idEncji": "{{zasobUiId}}",
+  "jezyk": "pl-PL",
+  "pole": "Title",
+  "wartosc": "Tytu³ 1",
+  "format": "Plain"
+}
+
+### [KONFIGURACJA] Create ZasobUITekst Body
+POST {{baseUrl}}/api/konfiguracja/zasobyuiteksty
+Content-Type: application/json
+
+{
+  "idEncji": "{{zasobUiId}}",
+  "jezyk": "pl-PL",
+  "pole": "Body",
+  "wartosc": "Treœæ aktualnoœci.",
+  "format": "Plain"
+}
+
+### [DOKUMENTY] (opcjonalnie) Create Dokument
+POST {{baseUrl}}/api/dokumenty
+Content-Type: application/json
+
+{
+  "nazwa": "Miniatura",
+  "opis": "Zdjêcie aktualnoœci",
+  "sciezkaPliku": "/uploads/news/miniatura.jpg",
+  "idEncjiOwner": null
+}
+
+### [DOKUMENTY] (opcjonalnie) Create PowiazanieDokumentu
+POST {{baseUrl}}/api/dokumenty/powiazaniadokumentu
+Content-Type: application/json
+
+{
+  "idDokumentu": {{dokumentId}},
+  "idEncji": "{{zasobUiId}}"
+}
+
+### [KONFIGURACJA] Public read model
+GET {{baseUrl}}/api/konfiguracja/zasobyui/public?typ=NEWS&kategoria=HOME&jezyk=pl-PL

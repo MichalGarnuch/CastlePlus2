@@ -6,6 +6,7 @@ using CastlePlus2.Client.Services.Dashboard;
 using CastlePlus2.Client.Services.Dokumenty;
 using CastlePlus2.Client.Services.Exports;
 using CastlePlus2.Client.Services.Finanse;
+using CastlePlus2.Client.Services.Konfiguracja;
 using CastlePlus2.Client.Services.Media;
 using CastlePlus2.Client.Services.Najem;
 using CastlePlus2.Client.Services.Podmioty;
@@ -93,6 +94,10 @@ public static class DependencyInjection
         services.AddScoped<IDokumentyService, DokumentyService>();
         services.AddScoped<IPowiazaniaDokumentuService, PowiazaniaDokumentuService>();
         services.AddScoped<IProcesyDokumentowService, ProcesyDokumentowService>();
+
+        // KONFIGURACJA
+        services.AddScoped<IZasobyUIService, ZasobyUIService>();
+        services.AddScoped<IZasobyUITekstyService, ZasobyUITekstyService>();
 
         // EXPORT
         services.AddScoped<IReportExportUrlService, ReportExportUrlService>();

@@ -1,4 +1,5 @@
 ﻿using CastlePlus2.Domain.Entities.Auth;
+using CastlePlus2.Domain.Entities.Konfiguracja;
 using CastlePlus2.Domain.Entities.Dokumenty;
 using CastlePlus2.Domain.Entities.Finanse;
 using CastlePlus2.Domain.Entities.Media;
@@ -55,6 +56,10 @@ namespace CastlePlus2.Infrastructure.Persistence
         //DOKUMENTY
         public DbSet<Dokument> Dokumenty { get; set; } = null!;
         public DbSet<PowiazanieDokumentu> PowiazaniaDokumentow { get; set; } = null!;
+
+        // KONFIGURACJA
+        public DbSet<ZasobUI> ZasobyUI { get; set; } = null!;
+        public DbSet<ZasobUITekst> ZasobyUITeksty { get; set; } = null!;
 
         //FINANSE
         public DbSet<AlokacjaKosztu> AlokacjeKosztow { get; set; } = null!;

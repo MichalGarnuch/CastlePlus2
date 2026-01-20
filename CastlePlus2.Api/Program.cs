@@ -7,6 +7,7 @@ using CastlePlus2.Application.Interfaces.Dashboard;
 using CastlePlus2.Application.Interfaces.Dokumenty;
 using CastlePlus2.Application.Interfaces.Exports;
 using CastlePlus2.Application.Interfaces.Finanse;
+using CastlePlus2.Application.Interfaces.Konfiguracja;
 using CastlePlus2.Application.Interfaces.Media;
 using CastlePlus2.Application.Interfaces.Najem;
 using CastlePlus2.Application.Interfaces.Podmioty;
@@ -21,6 +22,7 @@ using CastlePlus2.Infrastructure.Persistence;
 using CastlePlus2.Infrastructure.Repositories.Auth;
 using CastlePlus2.Infrastructure.Repositories.Dokumenty;
 using CastlePlus2.Infrastructure.Repositories.Finanse;
+using CastlePlus2.Infrastructure.Repositories.Konfiguracja;
 using CastlePlus2.Infrastructure.Repositories.Media;
 using CastlePlus2.Infrastructure.Repositories.Najem;
 using CastlePlus2.Infrastructure.Repositories.Podmioty;
@@ -117,6 +119,10 @@ builder.Services.AddScoped<IPowiazanieZleceniaRepository, PowiazanieZleceniaRepo
 // DOKUMENTY
 builder.Services.AddScoped<IDokumentRepository, DokumentRepository>();
 builder.Services.AddScoped<IPowiazanieDokumentuRepository, PowiazanieDokumentuRepository>();
+
+// KONFIGURACJA
+builder.Services.AddScoped<IZasobUIRepository, ZasobUIRepository>();
+builder.Services.AddScoped<IZasobUITekstRepository, ZasobUITekstRepository>();
 
 // FINANSE
 builder.Services.AddScoped<IAlokacjaKosztuRepository, AlokacjaKosztuRepository>();

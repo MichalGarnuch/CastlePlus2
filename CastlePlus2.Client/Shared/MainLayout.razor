@@ -165,6 +165,11 @@
                 <MudNavLink Href="/dokumenty/powiazania" Icon="@Icons.Material.Filled.Link">Powiązania dokumentu</MudNavLink>
             </MudNavGroup>
 
+            <MudNavGroup Title="Konfiguracja" Expanded="true">
+                <MudNavLink Href="/konfiguracja/zasoby-ui" Icon="@Icons.Material.Filled.Tune">Zasoby UI</MudNavLink>
+                <MudNavLink Href="/public/aktualnosci" Icon="@Icons.Material.Filled.Newspaper">Aktualności (public)</MudNavLink>
+            </MudNavGroup>
+
             <AuthorizeView Roles="Admin,ADMIN">
                 <MudNavGroup Title="Administracja" Expanded="true">
                     <MudNavLink Href="/admin/uzytkownicy-role" Icon="@Icons.Material.Filled.AdminPanelSettings">
