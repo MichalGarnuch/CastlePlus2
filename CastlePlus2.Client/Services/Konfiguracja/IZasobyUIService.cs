@@ -5,7 +5,7 @@ namespace CastlePlus2.Client.Services.Konfiguracja;
 
 public interface IZasobyUIService
 {
-    Task<List<ZasobUIDto>> GetAllAsync(string? typ = null, string? kategoria = null, bool? includeInactive = null, CancellationToken ct = default);
+    Task<List<ZasobUIDto>> GetAllAsync(string? typ = null, string? kategoria = null, bool? aktywny = null, CancellationToken ct = default);
     Task<ZasobUIDto?> GetByIdAsync(Guid idEncji, CancellationToken ct = default);
 
     Task<List<ZasobUIPublicDto>> GetPublicAsync(

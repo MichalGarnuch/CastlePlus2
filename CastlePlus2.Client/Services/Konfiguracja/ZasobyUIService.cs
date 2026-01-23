@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using CastlePlus2.Contracts.DTOs.Konfiguracja;
 using CastlePlus2.Contracts.Requests.Konfiguracja;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CastlePlus2.Client.Services.Konfiguracja;
 
@@ -8,12 +9,12 @@ public class ZasobyUIService(HttpClient http) : IZasobyUIService
 {
     private const string Base = "api/konfiguracja/zasobyui";
 
-    public async Task<List<ZasobUIDto>> GetAllAsync(string? typ = null, string? kategoria = null, bool? includeInactive = null, CancellationToken ct = default)
+    public async Task<List<ZasobUIDto>> GetAllAsync(string? typ = null, string? kategoria = null, bool? aktywny = null, CancellationToken ct = default)
     {
         var qs = new List<string>();
         if (!string.IsNullOrWhiteSpace(typ)) qs.Add($"typ={Uri.EscapeDataString(typ)}");
         if (!string.IsNullOrWhiteSpace(kategoria)) qs.Add($"kategoria={Uri.EscapeDataString(kategoria)}");
-        if (includeInactive.HasValue) qs.Add($"includeInactive={includeInactive.Value.ToString().ToLowerInvariant()}");
+        if (aktywny.HasValue) qs.Add($"aktywny={aktywny.Value.ToString().ToLowerInvariant()}");
 
         var url = qs.Count == 0 ? Base : $"{Base}?{string.Join("&", qs)}";
         return (await http.GetFromJsonAsync<List<ZasobUIDto>>(url, ct)) ?? new();
@@ -36,24 +37,23 @@ public class ZasobyUIService(HttpClient http) : IZasobyUIService
     public async Task<Guid> CreateAsync(CreateZasobUIRequest request, CancellationToken ct = default)
     {
         var resp = await http.PostAsJsonAsync(Base, request, ct);
-        resp.EnsureSuccessStatusCode();
+        if (!resp.IsSuccessStatusCode)
+            await ThrowForErrorAsync(resp, "Nie udało się utworzyć zasobu UI.", ct);
 
-        // API może zwracać Guid albo cały DTO – obsługujemy oba warianty.
         try
         {
             var id = await resp.Content.ReadFromJsonAsync<Guid>(cancellationToken: ct);
             if (id != Guid.Empty) return id;
         }
-        catch { /* ignore */ }
+        catch { }
 
         try
         {
             var dto = await resp.Content.ReadFromJsonAsync<ZasobUIDto>(cancellationToken: ct);
             if (dto is not null && dto.IdEncji != Guid.Empty) return dto.IdEncji;
         }
-        catch { /* ignore */ }
+        catch { }
 
-        // fallback: Location header
         if (resp.Headers.Location is not null)
         {
             var last = resp.Headers.Location.ToString().Split('/', StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
@@ -66,12 +66,31 @@ public class ZasobyUIService(HttpClient http) : IZasobyUIService
     public async Task<bool> UpdateAsync(Guid idEncji, UpdateZasobUIRequest request, CancellationToken ct = default)
     {
         var resp = await http.PutAsJsonAsync($"{Base}/{idEncji}", request, ct);
-        return resp.IsSuccessStatusCode;
+        if (!resp.IsSuccessStatusCode)
+            await ThrowForErrorAsync(resp, "Nie udało się zapisać zmian zasobu UI.", ct);
+
+        return true;
     }
 
     public async Task<bool> DeleteAsync(Guid idEncji, CancellationToken ct = default)
     {
         var resp = await http.DeleteAsync($"{Base}/{idEncji}", ct);
         return resp.IsSuccessStatusCode;
+    }
+
+    private static async Task ThrowForErrorAsync(HttpResponseMessage response, string fallbackMessage, CancellationToken ct)
+    {
+        string? message = null;
+
+        try
+        {
+            var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(cancellationToken: ct);
+            if (!string.IsNullOrWhiteSpace(problem?.Detail)) message = problem.Detail;
+            else if (!string.IsNullOrWhiteSpace(problem?.Title)) message = problem.Title;
+        }
+        catch { }
+
+        message ??= fallbackMessage;
+        throw new InvalidOperationException(message);
     }
 }

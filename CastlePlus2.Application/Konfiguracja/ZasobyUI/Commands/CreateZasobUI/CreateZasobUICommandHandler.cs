@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CastlePlus2.Application.Common.Exceptions;
 using CastlePlus2.Application.Interfaces.Konfiguracja;
 using CastlePlus2.Application.Interfaces.Rdzen;
 using CastlePlus2.Contracts.DTOs.Konfiguracja;
@@ -26,11 +27,10 @@ namespace CastlePlus2.Application.Konfiguracja.ZasobyUI.Commands.CreateZasobUI
         {
             var existing = await _repo.GetByKodZasobuAsync(request.KodZasobu, ct);
             if (existing != null)
-            {
-                return _mapper.Map<ZasobUIDto>(existing);
-            }
+                throw new BusinessConflictException("Zasób UI o podanym kodzie już istnieje.");
 
             var idEncji = Guid.NewGuid();
+
             var encja = new Encja
             {
                 Id = idEncji,
