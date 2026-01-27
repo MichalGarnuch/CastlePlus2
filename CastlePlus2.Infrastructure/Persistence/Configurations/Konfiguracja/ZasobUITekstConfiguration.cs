@@ -61,6 +61,11 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Konfiguracja
                    .HasColumnName("RowVersion")
                    .IsRowVersion();
 
+            builder.Property(x => x.Sort)
+                   .HasColumnName("Sort")
+                   .HasDefaultValue(0)
+                   .IsRequired();
+
             builder.HasIndex(x => new { x.IdEncji, x.Jezyk, x.Pole })
                    .IsUnique()
                    .HasDatabaseName("UQ_konf_ZasobUITekst_Encja_Jezyk_Pole");

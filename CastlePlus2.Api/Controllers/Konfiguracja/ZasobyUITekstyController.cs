@@ -44,7 +44,8 @@ namespace CastlePlus2.Api.Controllers.Konfiguracja
                 Jezyk = request.Jezyk,
                 Pole = request.Pole,
                 Wartosc = request.Wartosc,
-                Format = request.Format
+                Format = request.Format,
+                Sort = request.Sort
             }, ct);
 
             return CreatedAtAction(nameof(GetById), new { id = dto.IdZasobuTekstu }, dto);
@@ -60,7 +61,8 @@ namespace CastlePlus2.Api.Controllers.Konfiguracja
                 Jezyk = request.Jezyk,
                 Pole = request.Pole,
                 Wartosc = request.Wartosc,
-                Format = request.Format
+                Format = request.Format,
+                Sort = request.Sort
             }, ct);
 
             return ok ? NoContent() : NotFound();
@@ -72,5 +74,6 @@ namespace CastlePlus2.Api.Controllers.Konfiguracja
             var ok = await _mediator.Send(new DeleteZasobUITekstCommand(id), ct);
             return ok ? NoContent() : NotFound();
         }
+
     }
 }

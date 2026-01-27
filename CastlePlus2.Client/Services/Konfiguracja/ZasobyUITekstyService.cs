@@ -8,8 +8,9 @@ public class ZasobyUITekstyService(HttpClient http) : IZasobyUITekstyService
 {
     private const string Base = "api/konfiguracja/zasobyuiteksty";
 
+    // FIX: endpoint w API to "by-encja", a nie "encja"
     public async Task<List<ZasobUITekstDto>> GetByEncjaAsync(Guid idEncji, CancellationToken ct = default)
-        => (await http.GetFromJsonAsync<List<ZasobUITekstDto>>($"{Base}/encja/{idEncji}", ct)) ?? new();
+    => (await http.GetFromJsonAsync<List<ZasobUITekstDto>>($"{Base}/by-encja/{idEncji}", ct)) ?? new();
 
     public async Task<ZasobUITekstDto?> GetByZasobIdAsync(long idZasobuTekstu, CancellationToken ct = default)
         => await http.GetFromJsonAsync<ZasobUITekstDto>($"{Base}/{idZasobuTekstu}", ct);

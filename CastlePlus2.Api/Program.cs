@@ -58,13 +58,31 @@ if (!string.IsNullOrWhiteSpace(exportStorageOptions.RootPath) && !Path.IsPathRoo
 // -------------------------------------------------------------------------
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException(
+    "Brak ConnectionStrings:DefaultConnection. Uzupełnij w CastlePlus2.Api/appsettings.json (lub user-secrets).");
+}
+
+
 builder.Services.AddDbContext<CastlePlus2DbContext>(options =>
+{
     options.UseSqlServer(connectionString, sqlOptions =>
     {
         sqlOptions.UseNetTopologySuite();
         sqlOptions.EnableRetryOnFailure(maxRetryCount: 5);
         sqlOptions.MigrationsAssembly("CastlePlus2.Infrastructure");
-    }));
+    });
+
+
+    // tylko DEV – pomaga złapać dokładne SQL i miejsce, gdzie wali 'Sort'
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableDetailedErrors();
+        options.EnableSensitiveDataLogging();
+    }
+});
 
 // -------------------------------------------------------------------------
 // 2. Rejestracja warstwy Application: MediatR + FluentValidation (bez AddApplication())
@@ -238,6 +256,32 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<CastlePlus2DbContext>();
+
+
+    var conn = db.Database.GetDbConnection();
+    app.Logger.LogInformation("EF CONNECTED TO: {DataSource} | DB: {Database}",
+    conn.DataSource, conn.Database);
+
+
+    try
+    {
+        await db.Database.ExecuteSqlRawAsync("SELECT TOP(0) [Sort] FROM [konfiguracja].[ZasobUI];");
+        app.Logger.LogInformation("CHECK OK: [konfiguracja].[ZasobUI] has column [Sort].");
+
+
+        await db.Database.ExecuteSqlRawAsync("SELECT TOP(0) [Sort] FROM [konfiguracja].[ZasobUITekst];");
+        app.Logger.LogInformation("CHECK OK: [konfiguracja].[ZasobUITekst] has column [Sort].");
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "CHECK FAILED: column [Sort] not found for current connection.");
+    }
+}
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 

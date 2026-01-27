@@ -10,6 +10,7 @@ namespace CastlePlus2.Application.Konfiguracja.ZasobyUITeksty.Commands.CreateZas
         public string Jezyk { get; set; } = string.Empty;
         public string Pole { get; set; } = string.Empty;
         public string Wartosc { get; set; } = string.Empty;
-        public string Format { get; set; } = string.Empty;
+        public string? Format { get; set; }
+        public int Sort { get; set; }
     }
 }

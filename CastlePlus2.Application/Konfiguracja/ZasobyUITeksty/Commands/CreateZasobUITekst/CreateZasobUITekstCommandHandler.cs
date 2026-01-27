@@ -22,9 +22,7 @@ namespace CastlePlus2.Application.Konfiguracja.ZasobyUITeksty.Commands.CreateZas
         {
             var existing = await _repo.GetByKeyAsync(request.IdEncji, request.Jezyk, request.Pole, ct);
             if (existing != null)
-            {
                 throw new BusinessConflictException("Istnieje już tekst dla podanego języka i pola.");
-            }
 
             var entity = new ZasobUITekst
             {
@@ -32,7 +30,8 @@ namespace CastlePlus2.Application.Konfiguracja.ZasobyUITeksty.Commands.CreateZas
                 Jezyk = request.Jezyk,
                 Pole = request.Pole,
                 Wartosc = request.Wartosc,
-                Format = request.Format,
+                Format = string.IsNullOrWhiteSpace(request.Format) ? "Plain" : request.Format,
+                Sort = request.Sort,
                 UtworzonoUtc = DateTime.UtcNow
             };
 
