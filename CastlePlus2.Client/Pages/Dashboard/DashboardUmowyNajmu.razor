@@ -10,11 +10,28 @@
 
 @if (_loading)
 {
-    <MudProgressCircular Indeterminate="true" />
+    <MudCard Class="pa-4 glass-panel">
+        <MudStack Spacing="2">
+            <MudText Typo="Typo.subtitle1" Class="fw-700">Wczytywanie danych…</MudText>
+
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                Proszę czekać.
+            </MudText>
+
+            <MudProgressLinear Indeterminate="true" />
+        </MudStack>
+    </MudCard>
 }
 else if (!string.IsNullOrWhiteSpace(_error))
 {
-    <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">@_error</MudAlert>
+    <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
+        <MudStack Spacing="2">
+            <MudText>@_error</MudText>
+            <MudButton Variant="Variant.Outlined" OnClick="Reload">
+                Spróbuj ponownie
+            </MudButton>
+        </MudStack>
+    </MudAlert>
 }
 else
 {
@@ -25,12 +42,14 @@ else
                 <MudText Typo="Typo.h4" Class="fw-700">@_dashboard.LokaleRazem</MudText>
             </MudCard>
         </MudItem>
+
         <MudItem xs="12" sm="6" md="4">
             <MudCard Class="pa-4 glass-panel">
                 <MudText Typo="Typo.subtitle2" Color="Color.Warning">Lokale zajęte</MudText>
                 <MudText Typo="Typo.h4" Class="fw-700">@_dashboard.LokaleZajete</MudText>
             </MudCard>
         </MudItem>
+
         <MudItem xs="12" sm="6" md="4">
             <MudCard Class="pa-4 glass-panel">
                 <MudText Typo="Typo.subtitle2" Color="Color.Success">Lokale wolne</MudText>
@@ -115,7 +134,7 @@ else
                 @(!string.IsNullOrWhiteSpace(context.KodUmowy)
                             ? context.KodUmowy
                             : context.IdUmowy.ToString()[..8])
-        </MudTd>
+                                                          </MudTd>
 
             <MudTd DataLabel="Przedmiot najmu">
                 @(string.IsNullOrWhiteSpace(context.PrzedmiotNajmu) ? "-" : context.PrzedmiotNajmu)
@@ -123,12 +142,13 @@ else
 
             <MudTd DataLabel="Najemca">@context.Najemca</MudTd>
             <MudTd DataLabel="Wynajmujący">@context.Wynajmujacy</MudTd>
+
             <MudTd DataLabel="Data zakończenia">
                 @(context.DataZakonczenia.HasValue
                             ? context.DataZakonczenia.Value.ToString("yyyy-MM-dd")
                             : "-")
         </MudTd>
-        </RowTemplate>
+    </RowTemplate>
 
         <NoRecordsContent>
             <MudText>Brak wyników.</MudText>
@@ -145,8 +165,14 @@ else
     private bool _loading = true;
     private string? _error;
 
-    private int _zakresDni = 30; // domyślnie 30
+    private int _zakresDni = 30;
     private string _search = string.Empty;
+
+    // 10 prób co 1 sekundę
+    private readonly int _maxAttempts = 10;
+    private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(1);
+
+    private CancellationTokenSource? _reloadCts;
 
     protected override async Task OnInitializedAsync()
     {
@@ -181,16 +207,49 @@ else
 
     private async Task Reload()
     {
+        _reloadCts?.Cancel();
+        _reloadCts?.Dispose();
+        _reloadCts = new CancellationTokenSource();
+        var ct = _reloadCts.Token;
+
         _loading = true;
         _error = null;
+        StateHasChanged();
 
         try
         {
-            _dashboard = await DashboardService.GetNajemDashboardAsync(_zakresDni);
-        }
-        catch
-        {
-            _error = "Nie udało się wczytać danych dashboardu.";
+            for (var attempt = 1; attempt <= _maxAttempts; attempt++)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                try
+                {
+                    _dashboard = await DashboardService.GetNajemDashboardAsync(_zakresDni, ct);
+                    _error = null;
+                    return;
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+                catch (HttpRequestException)
+                {
+                    // API jeszcze nie gotowe
+                    if (attempt < _maxAttempts)
+                    {
+                        await Task.Delay(RetryDelay, ct);
+                        continue;
+                    }
+
+                    _error = "Nie uruchomiono bazy danych lub API nie jest gotowe. Uruchom CastlePlus2.Api i spróbuj ponownie.";
+                    return;
+                }
+                catch
+                {
+                    _error = "Nie udało się wczytać danych dashboardu. Sprawdź logi CastlePlus2.Api.";
+                    return;
+                }
+            }
         }
         finally
         {
