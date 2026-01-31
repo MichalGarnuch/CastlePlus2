@@ -75,125 +75,151 @@
                 Strona główna
             </MudNavLink>
 
-            <MudNavGroup Title="Dashboard" Expanded="@IsGroupExpanded("/dashboard")">
-                <MudNavLink Href="/dashboard/najem"
-                            Match="NavLinkMatch.All"
-                            Icon="@Icons.Material.Filled.Dashboard">
-                    Dashboard
-                </MudNavLink>
+            <AuthorizeView Roles="@RoleCodes.AdminOrManagerOrEmployee">
+                <MudNavGroup Title="Dashboard" Expanded="@IsGroupExpanded("/dashboard")">
+                    <MudNavLink Href="/dashboard/najem"
+                                Match="NavLinkMatch.All"
+                                Icon="@Icons.Material.Filled.Dashboard">
+                        Dashboard
+                    </MudNavLink>
 
-                <MudNavLink Href="/dashboard/v1"
-                            Match="NavLinkMatch.All"
-                            Icon="@Icons.Material.Filled.DashboardCustomize">
-                    Dashboard V1 (najem)
-                </MudNavLink>
-            </MudNavGroup>
+                    <MudNavLink Href="/dashboard/v1"
+                                Match="NavLinkMatch.All"
+                                Icon="@Icons.Material.Filled.DashboardCustomize">
+                        Dashboard V1 (najem)
+                    </MudNavLink>
+                </MudNavGroup>
+            </AuthorizeView>
 
-            <MudNavGroup Title="Obiekty (Rdzeń)" Expanded="@IsGroupExpanded("/rdzen")">
-                <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
-                <MudNavLink Href="/rdzen/nieruchomosci" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.HomeWork">Nieruchomości</MudNavLink>
-                <MudNavLink Href="/rdzen/budynki" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Apartment">Budynki</MudNavLink>
-                <MudNavLink Href="/rdzen/lokale" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.MeetingRoom">Lokale</MudNavLink>
-                <MudNavLink Href="/rdzen/pomieszczenia" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.MeetingRoom">Pomieszczenia</MudNavLink>
-                <MudNavLink Href="/rdzen/adresy" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Place">Adresy</MudNavLink>
-                <MudNavLink Href="/rdzen/przypisania-adresow" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Link">Przypisania adresów</MudNavLink>
-                <MudNavLink Href="/rdzen/encje" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Layers">Encje</MudNavLink>
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
+                <MudNavGroup Title="Obiekty (Rdzeń)" Expanded="@IsGroupExpanded("/rdzen")">
+                    <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
+                    <MudNavLink Href="/rdzen/nieruchomosci" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.HomeWork">Nieruchomości</MudNavLink>
+                    <MudNavLink Href="/rdzen/budynki" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Apartment">Budynki</MudNavLink>
+                    <MudNavLink Href="/rdzen/lokale" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.MeetingRoom">Lokale</MudNavLink>
+                    <MudNavLink Href="/rdzen/pomieszczenia" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.MeetingRoom">Pomieszczenia</MudNavLink>
+                    <MudNavLink Href="/rdzen/adresy" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Place">Adresy</MudNavLink>
+                    <MudNavLink Href="/rdzen/przypisania-adresow" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Link">Przypisania adresów</MudNavLink>
+                    <MudNavLink Href="/rdzen/encje" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Layers">Encje</MudNavLink>
 
-                <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
-                <MudNavLink Href="/rdzen/adresy/przypisz" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AddLocationAlt">Przypisz adres</MudNavLink>
-            </MudNavGroup>
+                    <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
+                    <MudNavLink Href="/rdzen/adresy/przypisz" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AddLocationAlt">Przypisz adres</MudNavLink>
+                </MudNavGroup>
+            </AuthorizeView>
 
-            <MudNavGroup Title="Podmioty" Expanded="@IsGroupExpanded("/podmioty")">
-                <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
-                <MudNavLink Href="/podmioty/podmioty" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Business">Podmioty</MudNavLink>
-                <MudNavLink Href="/podmioty/wlasnosci" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Assignment">Własności</MudNavLink>
-                <MudNavLink Href="/podmioty/kontakty" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Contacts">Kontakty</MudNavLink>
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
+                <MudNavGroup Title="Podmioty" Expanded="@IsGroupExpanded("/podmioty")">
+                    <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
+                    <MudNavLink Href="/podmioty/podmioty" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Business">Podmioty</MudNavLink>
+                    <MudNavLink Href="/podmioty/wlasnosci" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Assignment">Własności</MudNavLink>
+                    <MudNavLink Href="/podmioty/kontakty" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Contacts">Kontakty</MudNavLink>
 
-                <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
-                <MudNavLink Href="/podmioty/wlasnosc/ustaw" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.People">Ustaw udziały właścicielskie</MudNavLink>
-            </MudNavGroup>
+                    <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
+                    <MudNavLink Href="/podmioty/wlasnosc/ustaw" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.People">Ustaw udziały właścicielskie</MudNavLink>
+                </MudNavGroup>
+            </AuthorizeView>
 
-            <MudNavGroup Title="Najem" Expanded="@IsGroupExpanded("/najem")">
-                <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
-                <MudNavLink Href="/najem/przedmioty-najmu" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Description">Przedmioty najmu</MudNavLink>
-                <MudNavLink Href="/najem/kaucje" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Savings">Kaucje</MudNavLink>
-                <MudNavLink Href="/najem/skladniki-czynszu" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.RequestQuote">Składniki czynszu</MudNavLink>
-                <MudNavLink Href="/najem/umowy" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Assignment">Umowy najmu</MudNavLink>
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
+                <MudNavGroup Title="Najem" Expanded="@IsGroupExpanded("/najem")">
+                    <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
+                    <MudNavLink Href="/najem/przedmioty-najmu" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Description">Przedmioty najmu</MudNavLink>
+                    <MudNavLink Href="/najem/kaucje" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Savings">Kaucje</MudNavLink>
+                    <MudNavLink Href="/najem/skladniki-czynszu" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.RequestQuote">Składniki czynszu</MudNavLink>
+                    <MudNavLink Href="/najem/umowy" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Assignment">Umowy najmu</MudNavLink>
 
-                <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
-                <MudNavLink Href="/najem/umowy/zawrz" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.EditNote">Zawarcie umowy najmu</MudNavLink>
-                @* Te procesy mają warianty routów z ID -> Prefix, żeby link był aktywny także na podstronach *@
-                <MudNavLink Href="/najem/umowy/czynsz/aneks" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.RequestQuote">Aneks czynszu</MudNavLink>
-                <MudNavLink Href="/najem/umowy/zakoncz" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AssignmentTurnedIn">Zakończenie umowy najmu</MudNavLink>
-            </MudNavGroup>
+                    <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
+                    <MudNavLink Href="/najem/umowy/zawrz" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.EditNote">Zawarcie umowy najmu</MudNavLink>
+                    @* Te procesy mają warianty routów z ID -> Prefix, żeby link był aktywny także na podstronach *@
+                    <MudNavLink Href="/najem/umowy/czynsz/aneks" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.RequestQuote">Aneks czynszu</MudNavLink>
+                    <MudNavLink Href="/najem/umowy/zakoncz" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AssignmentTurnedIn">Zakończenie umowy najmu</MudNavLink>
+                </MudNavGroup>
+            </AuthorizeView>
 
-            <MudNavGroup Title="Finanse" Expanded="@IsGroupExpanded("/finanse")">
-                <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
-                <MudNavLink Href="/finanse/faktury" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ReceiptLong">Faktury</MudNavLink>
-                <MudNavLink Href="/finanse/platnosci" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Payment">Płatności</MudNavLink>
-                <MudNavLink Href="/finanse/alokacje-kosztow" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.PieChart">Alokacje kosztów</MudNavLink>
-                <MudNavLink Href="/finanse/kategorie-kosztow" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Category">Kategorie kosztów</MudNavLink>
-                <MudNavLink Href="/finanse/pozycje-kosztow" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ReceiptLong">Pozycje kosztów</MudNavLink>
-                <MudNavLink Href="/finanse/rozliczenia-platnosci" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.SyncAlt">Rozliczenia płatności</MudNavLink>
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
+                <MudNavGroup Title="Finanse" Expanded="@IsGroupExpanded("/finanse")">
+                    <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
+                    <MudNavLink Href="/finanse/faktury" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ReceiptLong">Faktury</MudNavLink>
+                    <MudNavLink Href="/finanse/platnosci" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Payment">Płatności</MudNavLink>
+                    <MudNavLink Href="/finanse/alokacje-kosztow" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.PieChart">Alokacje kosztów</MudNavLink>
+                    <MudNavLink Href="/finanse/kategorie-kosztow" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Category">Kategorie kosztów</MudNavLink>
+                    <MudNavLink Href="/finanse/pozycje-kosztow" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ReceiptLong">Pozycje kosztów</MudNavLink>
+                    <MudNavLink Href="/finanse/rozliczenia-platnosci" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.SyncAlt">Rozliczenia płatności</MudNavLink>
 
-                <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
-                <MudNavLink Href="/finanse/faktury/wystaw" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.NoteAdd">Wystaw fakturę</MudNavLink>
-                <MudNavLink Href="/finanse/platnosci/zarejestruj" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AddCircle">Zarejestruj płatność</MudNavLink>
-            </MudNavGroup>
+                    <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
+                    <MudNavLink Href="/finanse/faktury/wystaw" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.NoteAdd">Wystaw fakturę</MudNavLink>
+                    <MudNavLink Href="/finanse/platnosci/zarejestruj" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AddCircle">Zarejestruj płatność</MudNavLink>
+                </MudNavGroup>
+            </AuthorizeView>
 
-            <MudNavGroup Title="Utrzymanie" Expanded="@IsGroupExpanded("/utrzymanie")">
-                <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
-                <MudNavLink Href="/utrzymanie/zlecenia-pracy" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Build">Zlecenia pracy</MudNavLink>
-                <MudNavLink Href="/utrzymanie/powiazania-zlecenia" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Link">Powiązania zleceń</MudNavLink>
+            @* FIX RZ9999: unikamy konfliktu nazwy "context" przy zagnieżdżonych AuthorizeView *@
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployeeOrUser" Context="authUtrzymanie">
+                <MudNavGroup Title="Utrzymanie" Expanded="@IsGroupExpanded("/utrzymanie")">
+                    <AuthorizeView Roles="@RoleCodes.AdminOrEmployee" Context="authUtrzymanieCrud">
+                        <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
+                        <MudNavLink Href="/utrzymanie/zlecenia-pracy" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Build">Zlecenia pracy</MudNavLink>
+                        <MudNavLink Href="/utrzymanie/powiazania-zlecenia" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Link">Powiązania zleceń</MudNavLink>
+                    </AuthorizeView>
 
-                <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
-                <MudNavLink Href="/utrzymanie/zgloszenia/nowe" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ReportProblem">Zgłoszenie usterki</MudNavLink>
-            </MudNavGroup>
+                    <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
+                    <MudNavLink Href="/utrzymanie/zgloszenia/nowe" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ReportProblem">Zgłoszenie usterki</MudNavLink>
+                </MudNavGroup>
+            </AuthorizeView>
 
-            <MudNavGroup Title="Media" Expanded="@IsGroupExpanded("/media")">
-                <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
-                <MudNavLink Href="/media/rodzaje-mediow" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.WaterDrop">Rodzaje mediów</MudNavLink>
-                <MudNavLink Href="/media/przylacza" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.SettingsInputComposite">Przyłącza</MudNavLink>
-                <MudNavLink Href="/media/liczniki" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ElectricMeter">Liczniki</MudNavLink>
-                <MudNavLink Href="/media/odczyty" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.FactCheck">Odczyty</MudNavLink>
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
+                <MudNavGroup Title="Media" Expanded="@IsGroupExpanded("/media")">
+                    <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
+                    <MudNavLink Href="/media/rodzaje-mediow" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.WaterDrop">Rodzaje mediów</MudNavLink>
+                    <MudNavLink Href="/media/przylacza" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.SettingsInputComposite">Przyłącza</MudNavLink>
+                    <MudNavLink Href="/media/liczniki" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ElectricMeter">Liczniki</MudNavLink>
+                    <MudNavLink Href="/media/odczyty" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.FactCheck">Odczyty</MudNavLink>
 
-                <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
-                <MudNavLink Href="/media/odczyty/dodaj" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AddCircle">Dodaj odczyt</MudNavLink>
-            </MudNavGroup>
+                    <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
+                    <MudNavLink Href="/media/odczyty/dodaj" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AddCircle">Dodaj odczyt</MudNavLink>
+                </MudNavGroup>
+            </AuthorizeView>
 
-            <MudNavGroup Title="Dokumenty" Expanded="@IsGroupExpanded("/dokumenty")">
-                <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
-                <MudNavLink Href="/dokumenty" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Description">Dokumenty</MudNavLink>
-                <MudNavLink Href="/dokumenty/powiazania" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Link">Powiązania dokumentu</MudNavLink>
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
+                <MudNavGroup Title="Dokumenty" Expanded="@IsGroupExpanded("/dokumenty")">
+                    <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
+                    <MudNavLink Href="/dokumenty" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Description">Dokumenty</MudNavLink>
+                    <MudNavLink Href="/dokumenty/powiazania" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Link">Powiązania dokumentu</MudNavLink>
 
-                <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
-                <MudNavLink Href="/dokumenty/rejestruj" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.PostAdd">Rejestracja dokumentu</MudNavLink>
-            </MudNavGroup>
+                    <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
+                    <MudNavLink Href="/dokumenty/rejestruj" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.PostAdd">Rejestracja dokumentu</MudNavLink>
+                </MudNavGroup>
+            </AuthorizeView>
 
-            <MudNavGroup Title="Raporty" Expanded="@IsGroupExpanded("/raporty")">
-                <MudNavLink Href="/raporty/eksporty" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.FileDownload">
-                    Eksporty
-                </MudNavLink>
-            </MudNavGroup>
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
+                <MudNavGroup Title="Raporty" Expanded="@IsGroupExpanded("/raporty")">
+                    <MudNavLink Href="/raporty/eksporty" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.FileDownload">
+                        Eksporty
+                    </MudNavLink>
+                </MudNavGroup>
+            </AuthorizeView>
 
-            <MudNavGroup Title="Słowniki" Expanded="@IsGroupExpanded("/slowniki")">
-                <MudNavLink Href="/slowniki/jednostki-miary" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Scale">Jednostki miary</MudNavLink>
-                <MudNavLink Href="/slowniki/indeksacje" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Timeline">Indeksacje</MudNavLink>
-                <MudNavLink Href="/slowniki/waluty" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AttachMoney">Waluty</MudNavLink>
-            </MudNavGroup>
 
-            <MudNavGroup Title="Konfiguracja / CMS" Expanded="@IsGroupExpanded("/konfiguracja", "/public", "/aktualnosci")">
-                @* Ma podstrony /new i /{guid} -> Prefix *@
-                <MudNavLink Href="/konfiguracja/zasoby-ui" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Tune">Zasoby UI</MudNavLink>
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
+                <MudNavGroup Title="Słowniki" Expanded="@IsGroupExpanded("/slowniki")">
+                    <MudNavLink Href="/slowniki/jednostki-miary" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Scale">Jednostki miary</MudNavLink>
+                    <MudNavLink Href="/slowniki/indeksacje" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Timeline">Indeksacje</MudNavLink>
+                    <MudNavLink Href="/slowniki/waluty" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AttachMoney">Waluty</MudNavLink>
+                </MudNavGroup>
+            </AuthorizeView>
 
-                @* Jeśli istnieje panel admin aktualności *@
-                <MudNavLink Href="/aktualnosci" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Newspaper">Aktualności</MudNavLink>
+            <AuthorizeView Roles="@RoleCodes.Admin">
+                <MudNavGroup Title="Konfiguracja / CMS" Expanded="@IsGroupExpanded("/konfiguracja", "/public", "/aktualnosci")">
+                    @* Ma podstrony /new i /{guid} -> Prefix *@
+                    <MudNavLink Href="/konfiguracja/zasoby-ui" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Tune">Zasoby UI</MudNavLink>
 
-                @* Publiczny podgląd *@
-                <MudNavLink Href="/public/aktualnosci" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Public">Aktualności (public)</MudNavLink>
-            </MudNavGroup>
+                    @* Jeśli istnieje panel admin aktualności *@
+                    <MudNavLink Href="/aktualnosci" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Newspaper">Aktualności</MudNavLink>
 
-            <AuthorizeView Roles="Admin,ADMIN">
+                    @* Publiczny podgląd *@
+                    <MudNavLink Href="/public/aktualnosci" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Public">Aktualności (public)</MudNavLink>
+                </MudNavGroup>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="@RoleCodes.Admin">
                 <MudNavGroup Title="Administracja" Expanded="@IsGroupExpanded("/admin")">
                     <MudNavLink Href="/admin/uzytkownicy-role" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AdminPanelSettings">
                         Użytkownicy i role

@@ -1,4 +1,5 @@
 ﻿@page "/raporty/eksporty"
+@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
 
 @using CastlePlus2.Client.Services.Exports
 @using CastlePlus2.Client.Services.Reports

@@ -1,4 +1,6 @@
 ﻿@page "/media/odczyty/dodaj"
+@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+
 @using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Media
 @using CastlePlus2.Contracts.Requests.Media

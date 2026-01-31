@@ -4,7 +4,16 @@
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(CastlePlus2.Client.DependencyInjection).Assembly">
         <Found Context="routeData">
-            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                <NotAuthorized>
+                    <LayoutView Layout="@typeof(MainLayout)">
+                        <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mt-4">
+                            Brak uprawnień do tej strony.
+                            <MudLink Href="/" Class="ml-2">Wróć na stronę główną</MudLink>
+                        </MudAlert>
+                    </LayoutView>
+                </NotAuthorized>
+            </AuthorizeRouteView>
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
         </Found>
         <NotFound>

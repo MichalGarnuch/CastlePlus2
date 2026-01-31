@@ -1,4 +1,6 @@
 ﻿@page "/utrzymanie/zgloszenia/nowe"
+@attribute [Authorize(Roles = RoleCodes.AdminOrEmployeeOrUser)]
+
 @using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Utrzymanie
 @using CastlePlus2.Contracts.Requests.Utrzymanie

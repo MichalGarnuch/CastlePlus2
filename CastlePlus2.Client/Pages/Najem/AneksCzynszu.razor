@@ -1,5 +1,7 @@
 ﻿@page "/najem/umowy/{IdUmowy:guid}/czynsz/aneks"
 @page "/najem/umowy/czynsz/aneks"
+@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+
 @using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Najem
 @using CastlePlus2.Contracts.DTOs.Slowniki

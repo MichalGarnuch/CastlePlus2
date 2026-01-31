@@ -1,4 +1,6 @@
 ﻿@page "/slowniki/jednostki-miary"
+@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+
 @using MudBlazor
 @using CastlePlus2.Client.Services.Slowniki
 @using CastlePlus2.Contracts.DTOs.Slowniki

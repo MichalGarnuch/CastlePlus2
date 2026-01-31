@@ -1,4 +1,6 @@
 ﻿@page "/najem/skladniki-czynszu"
+@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+
 @using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Najem
 @using CastlePlus2.Contracts.DTOs.Slowniki

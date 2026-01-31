@@ -1,4 +1,6 @@
 ﻿@page "/slowniki/indeksacje"
+@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+
 @using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Slowniki
 @using CastlePlus2.Contracts.Requests.Slownik

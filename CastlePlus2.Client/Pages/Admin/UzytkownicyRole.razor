@@ -1,5 +1,5 @@
 ﻿@page "/admin/uzytkownicy-role"
-@attribute [Authorize(Roles = "Admin,ADMIN")]
+@attribute [Authorize(Roles = RoleCodes.Admin)]
 @using System
 @using CastlePlus2.Client.Services.Auth.Admin
 @using CastlePlus2.Contracts.DTOs.Auth

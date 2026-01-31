@@ -1,4 +1,6 @@
 ﻿@page "/najem/umowy/zawrz"
+@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+
 @using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Najem
 @using CastlePlus2.Contracts.DTOs.Podmioty

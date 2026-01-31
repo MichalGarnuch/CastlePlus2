@@ -1,4 +1,6 @@
 ﻿@page "/finanse/kategorie-kosztow"
+@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+
 @using MudBlazor
 @using CastlePlus2.Client.Services.Finanse
 @using CastlePlus2.Contracts.DTOs.Finanse

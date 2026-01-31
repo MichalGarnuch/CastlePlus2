@@ -1,4 +1,6 @@
 ﻿@page "/podmioty/wlasnosc/ustaw"
+@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+
 @using System.Linq
 @using MudBlazor
 @using CastlePlus2.Client.Services.Podmioty

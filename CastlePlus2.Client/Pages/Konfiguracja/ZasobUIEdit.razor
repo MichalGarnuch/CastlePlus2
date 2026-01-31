@@ -1,5 +1,6 @@
 ﻿@page "/konfiguracja/zasoby-ui/new"
 @page "/konfiguracja/zasoby-ui/{IdEncji:guid?}"
+@attribute [Authorize(Roles = RoleCodes.Admin)]
 
 @using System.Linq
 

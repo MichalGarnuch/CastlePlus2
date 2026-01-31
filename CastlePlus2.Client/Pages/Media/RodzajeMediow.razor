@@ -1,4 +1,6 @@
 ﻿@page "/media/rodzaje-mediow"
+@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+
 @using MudBlazor
 @using CastlePlus2.Client.Services.Media
 @using CastlePlus2.Contracts.DTOs.Media

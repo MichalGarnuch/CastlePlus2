@@ -1,4 +1,6 @@
 ﻿@page "/dokumenty/rejestruj"
+@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+
 @using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Dokumenty
 @using CastlePlus2.Contracts.Requests.Dokumenty

@@ -1,4 +1,6 @@
 ﻿@page "/finanse/alokacje-kosztow"
+@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+
 @using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Finanse
 @using CastlePlus2.Contracts.Requests.Finanse
