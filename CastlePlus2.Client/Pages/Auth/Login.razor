@@ -1,6 +1,7 @@
 ﻿@page "/login"
 @page "/auth/login"
 
+@using Microsoft.AspNetCore.Components.Web
 @inject IAuthService AuthService
 @inject CustomAuthStateProvider AuthStateProvider
 @inject NavigationManager Nav
@@ -16,8 +17,13 @@
         <MudTextField @bind-Value="_password"
                       Label="Hasło"
                       Variant="Variant.Outlined"
-                      InputType="InputType.Password"
-                      Required="true" />
+                      InputType="@(_showPassword? InputType.Text: InputType.Password)"
+                      Required="true"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@(_showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                      AdornmentAriaLabel="Pokaż lub ukryj hasło"
+                      OnAdornmentClick="TogglePasswordVisibility"
+                      @onkeydown="HandlePasswordKeyDown" />
         <MudButton Variant="Variant.Filled"
                    Color="Color.Primary"
                    OnClick="HandleLoginAsync"
@@ -38,6 +44,20 @@
     private string _loginOrEmail = string.Empty;
     private string _password = string.Empty;
     private bool _isSubmitting;
+    private bool _showPassword;
+
+    private void TogglePasswordVisibility()
+    {
+        _showPassword = !_showPassword;
+    }
+
+    private async Task HandlePasswordKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await HandleLoginAsync();
+        }
+    }
 
     private async Task HandleLoginAsync()
     {

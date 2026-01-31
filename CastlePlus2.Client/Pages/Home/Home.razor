@@ -1,0 +1,113 @@
+﻿@page "/"
+@page "/home"
+
+@using System.Net
+@using CastlePlus2.Client.Services.Dashboard
+@inject IDashboardService DashboardService
+@inject NavigationManager Nav
+
+@if (_loading)
+{
+    <MudCard Class="pa-4 glass-panel">
+        <MudStack Spacing="2">
+            <MudText Typo="Typo.subtitle1" Class="fw-700">Wczytywanie danych…</MudText>
+
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                Proszę czekać.
+            </MudText>
+
+            <MudProgressLinear Indeterminate="true" />
+        </MudStack>
+    </MudCard>
+}
+else if (!string.IsNullOrWhiteSpace(_error))
+{
+    <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
+        <MudStack Spacing="2">
+            <MudText>@_error</MudText>
+            <MudButton Variant="Variant.Outlined" OnClick="Reload">
+                Spróbuj ponownie
+            </MudButton>
+        </MudStack>
+    </MudAlert>
+}
+else
+{
+    <MudStack Spacing="2">
+        <MudText Typo="Typo.h4" Class="fw-700">Strona główna</MudText>
+        <MudText Typo="Typo.subtitle1">Strona główna – w przygotowaniu.</MudText>
+    </MudStack>
+}
+
+@code {
+    private bool _loading = true;
+    private string? _error;
+
+    private readonly int _maxAttempts = 10;
+    private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(1);
+
+    private CancellationTokenSource? _reloadCts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Reload();
+    }
+
+    private async Task Reload()
+    {
+        _reloadCts?.Cancel();
+        _reloadCts?.Dispose();
+        _reloadCts = new CancellationTokenSource();
+        var ct = _reloadCts.Token;
+
+        _loading = true;
+        _error = null;
+        StateHasChanged();
+
+        try
+        {
+            for (var attempt = 1; attempt <= _maxAttempts; attempt++)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                try
+                {
+                    await DashboardService.GetNajemDashboardAsync(30, ct);
+                    _error = null;
+                    return;
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized
+                                                     || ex.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    Nav.NavigateTo("/auth/login", forceLoad: true);
+                    return;
+                }
+                catch (HttpRequestException)
+                {
+                    if (attempt < _maxAttempts)
+                    {
+                        await Task.Delay(RetryDelay, ct);
+                        continue;
+                    }
+
+                    _error = "Nie uruchomiono bazy danych lub API nie jest gotowe. Uruchom CastlePlus2.Api i spróbuj ponownie.";
+                    return;
+                }
+                catch
+                {
+                    _error = "Nie udało się wczytać danych startowych. Sprawdź logi CastlePlus2.Api.";
+                    return;
+                }
+            }
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+}

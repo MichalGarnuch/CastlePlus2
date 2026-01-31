@@ -1,5 +1,4 @@
-﻿@page "/"
-@page "/dashboard/najem"
+﻿@page "/dashboard/najem"
 
 @using CastlePlus2.Client.Services.Dashboard
 @using CastlePlus2.Contracts.DTOs.Dashboard
@@ -168,10 +167,6 @@ else
     private int _zakresDni = 30;
     private string _search = string.Empty;
 
-    // 10 prób co 1 sekundę
-    private readonly int _maxAttempts = 10;
-    private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(1);
-
     private CancellationTokenSource? _reloadCts;
 
     protected override async Task OnInitializedAsync()
@@ -218,38 +213,15 @@ else
 
         try
         {
-            for (var attempt = 1; attempt <= _maxAttempts; attempt++)
-            {
-                ct.ThrowIfCancellationRequested();
-
-                try
-                {
-                    _dashboard = await DashboardService.GetNajemDashboardAsync(_zakresDni, ct);
-                    _error = null;
-                    return;
-                }
-                catch (OperationCanceledException)
-                {
-                    return;
-                }
-                catch (HttpRequestException)
-                {
-                    // API jeszcze nie gotowe
-                    if (attempt < _maxAttempts)
-                    {
-                        await Task.Delay(RetryDelay, ct);
-                        continue;
-                    }
-
-                    _error = "Nie uruchomiono bazy danych lub API nie jest gotowe. Uruchom CastlePlus2.Api i spróbuj ponownie.";
-                    return;
-                }
-                catch
-                {
-                    _error = "Nie udało się wczytać danych dashboardu. Sprawdź logi CastlePlus2.Api.";
-                    return;
-                }
-            }
+            _dashboard = await DashboardService.GetNajemDashboardAsync(_zakresDni, ct);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        catch
+        {
+            _error = "Nie udało się wczytać danych dashboardu. Sprawdź logi CastlePlus2.Api.";
         }
         finally
         {
