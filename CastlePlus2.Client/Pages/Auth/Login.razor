@@ -1,6 +1,7 @@
 ﻿@page "/login"
 @page "/auth/login"
 
+@using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
 @inject IAuthService AuthService
 @inject CustomAuthStateProvider AuthStateProvider
@@ -13,12 +14,14 @@
         <MudTextField @bind-Value="_loginOrEmail"
                       Label="Login lub email"
                       Variant="Variant.Outlined"
-                      Required="true" />
+                      Required="true"
+                      Immediate="true" />
         <MudTextField @bind-Value="_password"
                       Label="Hasło"
                       Variant="Variant.Outlined"
                       InputType="@(_showPassword? InputType.Text: InputType.Password)"
                       Required="true"
+                      Immediate="true"
                       Adornment="Adornment.End"
                       AdornmentIcon="@(_showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                       AdornmentAriaLabel="Pokaż lub ukryj hasło"
@@ -41,6 +44,9 @@
 </MudPaper>
 
 @code {
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? ReturnUrl { get; set; }
+
     private string _loginOrEmail = string.Empty;
     private string _password = string.Empty;
     private bool _isSubmitting;
@@ -71,7 +77,8 @@
         {
             await AuthService.LoginAsync(_loginOrEmail, _password, "client");
             await AuthStateProvider.MarkUserAsAuthenticatedFromTokenAsync();
-            Nav.NavigateTo("/");
+            var redirectUrl = ResolveReturnUrl();
+            Nav.NavigateTo(redirectUrl, replace: true);
         }
         catch (Exception ex)
         {
@@ -82,4 +89,26 @@
             _isSubmitting = false;
         }
     }
+    private string ResolveReturnUrl()
+    {
+        if (string.IsNullOrWhiteSpace(ReturnUrl))
+        {
+            return "/dashboard/najem";
+        }
+
+        if (ReturnUrl.Equals("/auth/login", StringComparison.OrdinalIgnoreCase)
+            || ReturnUrl.Equals("/login", StringComparison.OrdinalIgnoreCase))
+        {
+            return "/dashboard/najem";
+        }
+
+        if (ReturnUrl.StartsWith("/", StringComparison.Ordinal)
+            && !ReturnUrl.StartsWith("//", StringComparison.Ordinal))
+        {
+            return ReturnUrl;
+        }
+
+        return "/dashboard/najem";
+    }
+}
 }

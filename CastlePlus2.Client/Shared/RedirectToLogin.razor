@@ -1,0 +1,25 @@
+﻿@inject NavigationManager Nav
+
+@code {
+    protected override void OnInitialized()
+    {
+        var relativePath = Nav.ToBaseRelativePath(Nav.Uri);
+        var currentPath = "/" + relativePath;
+
+        if (string.IsNullOrWhiteSpace(relativePath))
+        {
+            currentPath = "/";
+        }
+
+        if (relativePath.StartsWith("auth/login", StringComparison.OrdinalIgnoreCase)
+            || relativePath.StartsWith("login", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var returnUrl = currentPath;
+        var encodedReturnUrl = Uri.EscapeDataString(returnUrl);
+
+        Nav.NavigateTo($"/auth/login?returnUrl={encodedReturnUrl}", forceLoad: false);
+    }
+}

@@ -11,6 +11,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddMudServices();
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
 
 // 1) Client DI (rejestruje m.in. CustomAuthStateProvider itd.)
 builder.Services.AddCastlePlus2Client();
@@ -50,6 +52,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()

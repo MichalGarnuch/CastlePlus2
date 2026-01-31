@@ -5,17 +5,27 @@
     <Router AppAssembly="@typeof(CastlePlus2.Client.DependencyInjection).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-                <NotAuthorized>
-                    <LayoutView Layout="@typeof(MainLayout)">
-                        <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mt-4">
-                            Brak uprawnień do tej strony.
-                            <MudLink Href="/" Class="ml-2">Wróć na stronę główną</MudLink>
-                        </MudAlert>
-                    </LayoutView>
+                <NotAuthorized Context="routeAuthState">
+                    <AuthorizeView Context="viewAuthState">
+                        <Authorized Context="authorizedState">
+                            <LayoutView Layout="@typeof(MainLayout)">
+                                <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mt-4">
+                                    Brak uprawnień do tej strony.
+                                    <MudLink Href="/" Class="ml-2">Wróć na stronę główną</MudLink>
+                                </MudAlert>
+                            </LayoutView>
+                        </Authorized>
+
+                        <NotAuthorized Context="notAuthorizedState">
+                            <RedirectToLogin />
+                        </NotAuthorized>
+                    </AuthorizeView>
                 </NotAuthorized>
             </AuthorizeRouteView>
+
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
         </Found>
+
         <NotFound>
             <LayoutView Layout="@typeof(MainLayout)">
                 <p>Nie znaleziono strony (404).</p>
