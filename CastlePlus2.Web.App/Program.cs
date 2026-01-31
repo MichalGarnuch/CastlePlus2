@@ -2,7 +2,6 @@ using CastlePlus2.Client;
 using CastlePlus2.Client.Services.Auth.Http;
 using CastlePlus2.Client.Services.Auth.Storage;
 using CastlePlus2.Web.App.Components;
-using CastlePlus2.Web.App.Services.Auth;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using MudBlazor.Services;
 
@@ -13,22 +12,28 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddMudServices();
 
-// 1) Client DI (rejestruje m.in. BearerTokenHandler)
+// 1) Client DI (rejestruje m.in. CustomAuthStateProvider itd.)
 builder.Services.AddCastlePlus2Client();
 
-// 2) Storage dla tokenów (musi byæ przed HttpClientem z handlerem)
+// 2) Storage dla tokenów (musi byæ przed handlerami/HttpClientem)
 builder.Services.AddScoped<ProtectedLocalStorage>();
 builder.Services.AddScoped<IAccessTokenStore, InMemoryAccessTokenStore>();
 // builder.Services.AddScoped<IAccessTokenStore, ProtectedLocalStorageTokenStore>();
 
+// 3) Handlery HTTP
 builder.Services.AddTransient<BearerTokenHandler>();
+builder.Services.AddTransient<AuthorizationFailureHandler>();
 
+// 4) HttpClient: Bearer -> AuthFailure(401) -> HttpClientHandler
 builder.Services.AddScoped<HttpClient>(sp =>
 {
-    var handler = sp.GetRequiredService<BearerTokenHandler>();
-    handler.InnerHandler = new HttpClientHandler();
+    var bearer = sp.GetRequiredService<BearerTokenHandler>();
+    var authFailure = sp.GetRequiredService<AuthorizationFailureHandler>();
 
-    return new HttpClient(handler)
+    authFailure.InnerHandler = new HttpClientHandler();
+    bearer.InnerHandler = authFailure;
+
+    return new HttpClient(bearer)
     {
         BaseAddress = new Uri("http://localhost:5072/")
     };

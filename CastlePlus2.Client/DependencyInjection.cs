@@ -25,19 +25,17 @@ public static class DependencyInjection
     public static IServiceCollection AddCastlePlus2Client(this IServiceCollection services)
     {
         services.AddMudServices();
-
         services.AddAuthorizationCore();
 
-        // ✅ krytyczne: provider jako konkretny typ
         services.AddScoped<CustomAuthStateProvider>();
-
-        // ✅ i jako AuthenticationStateProvider (AuthorizeView/AuthorizeRouteView)
         services.AddScoped<AuthenticationStateProvider>(sp =>
             sp.GetRequiredService<CustomAuthStateProvider>());
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IAuthAdminService, AuthAdminService>();
+
         services.AddTransient<BearerTokenHandler>();
+        services.AddTransient<AuthorizationFailureHandler>();
 
         // DASHBOARD
         services.AddScoped<IDashboardService, DashboardService>();
@@ -103,9 +101,7 @@ public static class DependencyInjection
         services.AddScoped<IReportExportUrlService, ReportExportUrlService>();
         services.AddScoped<IReportDataPreviewService, ReportDataPreviewService>();
         services.AddScoped<IReportDocumentPreviewService, ReportDocumentPreviewService>();
-
         services.AddScoped<IReportExportDownloadService, ReportExportDownloadService>();
-        // services.AddScoped<ReportExportDownloadService>();
 
         return services;
     }

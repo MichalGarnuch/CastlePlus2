@@ -1,10 +1,16 @@
 ﻿@page "/konfiguracja/zasoby-ui"
+
+@using System
+@using System.Linq
 @using CastlePlus2.Client.Services.Konfiguracja
 @using CastlePlus2.Contracts.DTOs.Konfiguracja
 @using MudBlazor
+
 @inject IZasobyUIService Service
 @inject NavigationManager Nav
 @inject ISnackbar Snackbar
+
+<PageTitle>Zasoby UI</PageTitle>
 
 <MudText Typo="Typo.h4" Class="fw-700 mb-4">Zasoby UI</MudText>
 
@@ -14,7 +20,9 @@
               Hover="true"
               Bordered="true"
               Striped="true"
-              Loading="_loading">
+              Loading="_loading"
+              @bind-SelectedItem="_selectedItem"
+              RowClick="OnRowClick">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Lista zasobów</MudText>
             <MudSpacer />
@@ -27,7 +35,7 @@
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
                        StartIcon="@Icons.Material.Filled.Add"
-                       OnClick="CreateAsync">
+                       OnClick="Create">
                 Dodaj
             </MudButton>
         </ToolBarContent>
@@ -55,7 +63,8 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
-                               OnClick="@(() => EditAsync(context))" />
+                               Title="Edytuj"
+                               OnClick="@(() => Edit(context))" />
             </MudTd>
         </RowTemplate>
 
@@ -69,6 +78,9 @@
     private bool _loading = true;
     private List<ZasobUIDto> _items = new();
 
+    private ZasobUIDto? _selectedItem;
+    private Guid? _selectedIdEncji;
+
     protected override async Task OnInitializedAsync()
     {
         await ReloadAsync();
@@ -77,9 +89,16 @@
     private async Task ReloadAsync()
     {
         _loading = true;
+
         try
         {
             _items = await Service.GetAllAsync();
+
+            // odtwórz zaznaczenie po odświeżeniu
+            if (_selectedIdEncji.HasValue)
+            {
+                _selectedItem = _items.SingleOrDefault(x => x.IdEncji == _selectedIdEncji.Value);
+            }
         }
         catch (Exception ex)
         {
@@ -91,14 +110,21 @@
         }
     }
 
-    private void CreateAsync()
+    private void Create()
     {
         Nav.NavigateTo("/konfiguracja/zasoby-ui/new");
     }
 
-    private void EditAsync(ZasobUIDto item)
+    private void Edit(ZasobUIDto item)
     {
+        _selectedIdEncji = item.IdEncji;
         Nav.NavigateTo($"/konfiguracja/zasoby-ui/{item.IdEncji}");
+    }
+
+    private void OnRowClick(TableRowClickEventArgs<ZasobUIDto> args)
+    {
+        _selectedItem = args.Item;
+        _selectedIdEncji = args.Item.IdEncji;
     }
 
     private static string FormatDate(DateTime? value)

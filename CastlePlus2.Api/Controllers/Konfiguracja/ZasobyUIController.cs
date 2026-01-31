@@ -8,6 +8,7 @@ using CastlePlus2.Application.Konfiguracja.ZasobyUI.Queries.GetZasobUIById;
 using CastlePlus2.Contracts.DTOs.Konfiguracja;
 using CastlePlus2.Contracts.Requests.Konfiguracja;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -119,6 +120,7 @@ namespace CastlePlus2.Api.Controllers.Konfiguracja
         }
 
         [HttpGet("public")]
+        [AllowAnonymous]
         public async Task<ActionResult<List<ZasobUIPublicDto>>> GetPublic(
             [FromQuery] string typ,
             [FromQuery] string? kategoria,
