@@ -1,0 +1,268 @@
+﻿@page "/admin/request-access"
+@using CastlePlus2.Client.Services.Auth.RequestAccess
+@using CastlePlus2.Client.Services.Auth.Admin
+@using CastlePlus2.Contracts.DTOs.Auth
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Web
+
+@inject IRequestAccessAdminService RequestAccessAdminService
+@inject IAuthAdminService AuthAdminService
+@inject ISnackbar Snackbar
+
+<MudPaper Class="pa-4 glass-card" Elevation="0">
+    <MudStack Spacing="3">
+        <MudText Typo="Typo.h5" Class="fw-700">Zgłoszenia dostępu</MudText>
+
+        <MudSelect T="string"
+                   Label="Status"
+                   Variant="Variant.Outlined"
+                   Value="_selectedStatus"
+                   ValueChanged="@(async (string v) => await OnStatusChanged(v))">
+            <MudSelectItem Value="@RequestAccessStatus.Pending">Pending</MudSelectItem>
+            <MudSelectItem Value="@RequestAccessStatus.Approved">Approved</MudSelectItem>
+            <MudSelectItem Value="@RequestAccessStatus.Rejected">Rejected</MudSelectItem>
+        </MudSelect>
+
+        <MudButton Variant="Variant.Outlined"
+                   OnClick="@(async (MouseEventArgs _) => await LoadAsync())"
+                   Disabled="_isLoading">
+            Odśwież
+        </MudButton>
+
+        <MudTable Items="_requests"
+                  Hover="true"
+                  Dense="true"
+                  SelectedItem="_selectedRequest"
+                  SelectedItemChanged="@((RequestAccessDto? r) => OnSelectedChanged(r))">
+            <HeaderContent>
+                <MudTh>Imię i nazwisko</MudTh>
+                <MudTh>Email</MudTh>
+                <MudTh>Login</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh>Utworzono</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Imię i nazwisko">@context.FullName</MudTd>
+                <MudTd DataLabel="Email">@context.Email</MudTd>
+                <MudTd DataLabel="Login">@context.Login</MudTd>
+                <MudTd DataLabel="Status">@context.Status</MudTd>
+                <MudTd DataLabel="Utworzono">@context.CreatedAtUtc.ToLocalTime().ToString("g")</MudTd>
+            </RowTemplate>
+        </MudTable>
+
+        @if (_selectedRequest is not null)
+        {
+            <MudDivider />
+            <MudStack Spacing="2">
+                <MudText Typo="Typo.subtitle1" Class="fw-700">Szczegóły</MudText>
+                <MudText>Imię i nazwisko: @_selectedRequest.FullName</MudText>
+                <MudText>Email: @_selectedRequest.Email</MudText>
+                <MudText>Login: @_selectedRequest.Login</MudText>
+                <MudText>Telefon: @_selectedRequest.Phone</MudText>
+                <MudText>Dział/rola: @_selectedRequest.Department</MudText>
+                <MudText>Uzasadnienie: @_selectedRequest.Justification</MudText>
+                <MudText>Status: @_selectedRequest.Status</MudText>
+
+                @if (_selectedRequest.Status == RequestAccessStatus.Pending)
+                {
+                    <MudText Typo="Typo.subtitle2" Class="mt-2">Akceptacja</MudText>
+
+                    <MudTextField @bind-Value="_approveLogin" Label="Login" Variant="Variant.Outlined" />
+                    <MudTextField @bind-Value="_approveEmail" Label="Email" Variant="Variant.Outlined" />
+
+                    <!-- Klucz: @ref + odczyt SelectedValues w callbacku bez parametru -->
+                    <MudSelect T="string"
+                               @ref="_rolesSelect"
+                               Label="Role"
+                               Variant="Variant.Outlined"
+                               MultiSelection="true"
+                               SelectedValues="_approveRoles"
+                               SelectedValuesChanged="@(() => OnApproveRolesChanged())">
+                        @foreach (var role in _roles)
+                        {
+                            <MudSelectItem Value="@role.Kod">@role.Kod</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudStack Row="true" Spacing="2">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   OnClick="@(async (MouseEventArgs _) => await ApproveAsync())"
+                                   Disabled="_isLoading">
+                            Zatwierdź
+                        </MudButton>
+
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Error"
+                                   OnClick="@(async (MouseEventArgs _) => await RejectAsync())"
+                                   Disabled="_isLoading">
+                            Odrzuć
+                        </MudButton>
+                    </MudStack>
+                }
+            </MudStack>
+        }
+    </MudStack>
+</MudPaper>
+
+@code {
+    private static class RequestAccessStatus
+    {
+        public const string Pending = "Pending";
+        public const string Approved = "Approved";
+        public const string Rejected = "Rejected";
+    }
+
+    private readonly List<RequestAccessDto> _requests = new();
+    private readonly List<RoleDto> _roles = new();
+
+    private RequestAccessDto? _selectedRequest;
+    private string _selectedStatus = RequestAccessStatus.Pending;
+
+    private string _approveLogin = string.Empty;
+    private string _approveEmail = string.Empty;
+    private HashSet<string> _approveRoles = new(StringComparer.OrdinalIgnoreCase);
+
+    private MudSelect<string>? _rolesSelect;
+
+    private bool _isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRolesAsync();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            _requests.Clear();
+            var result = await RequestAccessAdminService.GetRequestsAsync(_selectedStatus);
+            _requests.AddRange(result);
+
+            _selectedRequest = _requests.FirstOrDefault();
+            ApplySelectedDefaults();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się pobrać zgłoszeń: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task OnStatusChanged(string status)
+    {
+        _selectedStatus = status;
+        await LoadAsync();
+    }
+
+    private async Task LoadRolesAsync()
+    {
+        try
+        {
+            _roles.Clear();
+            var roles = await AuthAdminService.GetRolesAsync();
+            _roles.AddRange(roles.OrderBy(r => r.Kod));
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się pobrać ról: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void ApplySelectedDefaults()
+    {
+        if (_selectedRequest is null)
+            return;
+
+        _approveLogin = _selectedRequest.Login ?? string.Empty;
+        _approveEmail = _selectedRequest.Email;
+
+        // startujemy od pustej listy ról do wybrania przez admina
+        _approveRoles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private void OnSelectedChanged(RequestAccessDto? request)
+    {
+        _selectedRequest = request;
+        ApplySelectedDefaults();
+    }
+
+    private Task OnApproveRolesChanged()
+    {
+        // MudSelect nie przekazuje wartości w argumencie (EventCallback bez typu),
+        // więc pobieramy stan bezpośrednio z kontrolki.
+        var selected = _rolesSelect?.SelectedValues;
+        _approveRoles = selected is null
+            ? new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            : new HashSet<string>(selected, StringComparer.OrdinalIgnoreCase);
+
+        return Task.CompletedTask;
+    }
+
+    private async Task ApproveAsync()
+    {
+        if (_selectedRequest is null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(_approveLogin) || string.IsNullOrWhiteSpace(_approveEmail))
+        {
+            Snackbar.Add("Login i email są wymagane.", Severity.Warning);
+            return;
+        }
+
+        if (_approveRoles.Count == 0)
+        {
+            Snackbar.Add("Wybierz co najmniej jedną rolę.", Severity.Warning);
+            return;
+        }
+
+        _isLoading = true;
+        try
+        {
+            await RequestAccessAdminService.ApproveAsync(
+                _selectedRequest.IdRequestAccess,
+                _approveLogin,
+                _approveEmail,
+                _approveRoles.ToArray());
+
+            Snackbar.Add("Zgłoszenie zostało zatwierdzone.", Severity.Success);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się zatwierdzić: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task RejectAsync()
+    {
+        if (_selectedRequest is null)
+            return;
+
+        _isLoading = true;
+        try
+        {
+            await RequestAccessAdminService.RejectAsync(_selectedRequest.IdRequestAccess, null);
+            Snackbar.Add("Zgłoszenie zostało odrzucone.", Severity.Info);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się odrzucić: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

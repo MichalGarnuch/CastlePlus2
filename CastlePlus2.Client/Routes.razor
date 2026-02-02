@@ -4,11 +4,11 @@
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(CastlePlus2.Client.DependencyInjection).Assembly">
         <Found Context="routeData">
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" Context="routeView">
                 <NotAuthorized Context="routeAuthState">
                     <AuthorizeView Context="viewAuthState">
                         <Authorized Context="authorizedState">
-                            <LayoutView Layout="@typeof(MainLayout)">
+                            <LayoutView Layout="@typeof(MainLayout)" Context="authorizedLayout">
                                 <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mt-4">
                                     Brak uprawnień do tej strony.
                                     <MudLink Href="/" Class="ml-2">Wróć na stronę główną</MudLink>

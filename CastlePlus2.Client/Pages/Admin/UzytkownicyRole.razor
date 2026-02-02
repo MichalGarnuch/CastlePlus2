@@ -9,6 +9,7 @@
 @inject IAuthService AuthService
 @inject CustomAuthStateProvider AuthStateProvider
 @inject ISnackbar Snackbar
+@inject NavigationManager Nav
 
 <MudText Typo="Typo.h4" Class="fw-700 mb-4">Administracja: użytkownicy i role</MudText>
 
@@ -16,6 +17,12 @@
     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
         <MudText Typo="Typo.h6">Zarządzanie rolami</MudText>
         <MudStack Row="true" Spacing="2">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Secondary"
+                       StartIcon="@Icons.Material.Filled.PersonAdd"
+                       OnClick="@(() => Nav.NavigateTo("/admin/create-user"))">
+                Dodaj konto
+            </MudButton>
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Info"
                        StartIcon="@Icons.Material.Filled.Refresh"

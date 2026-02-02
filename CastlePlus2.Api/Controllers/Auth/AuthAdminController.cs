@@ -1,4 +1,5 @@
-﻿using CastlePlus2.Application.Auth.Administracja.Commands.SetUserRoles;
+﻿using CastlePlus2.Application.Auth.Administracja.Commands.CreateUser;
+using CastlePlus2.Application.Auth.Administracja.Commands.SetUserRoles;
 using CastlePlus2.Application.Auth.Administracja.Queries.GetRoles;
 using CastlePlus2.Application.Auth.Administracja.Queries.GetUsersWithRoles;
 using CastlePlus2.Contracts.DTOs.Auth;
@@ -48,6 +49,28 @@ namespace CastlePlus2.Api.Controllers.Auth
             }
 
             await _mediator.Send(new SetUserRolesCommand(id, request.RoleCodes), ct);
+            return NoContent();
+        }
+
+        [HttpPost("users")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request, CancellationToken ct)
+        {
+            if (request is null)
+            {
+                return BadRequest("Brak danych wejściowych.");
+            }
+
+            var createdBy = User.FindFirst("Login")?.Value ?? User.Identity?.Name ?? "admin";
+            await _mediator.Send(new CreateUserCommand
+            {
+                CreatedBy = createdBy,
+                Login = request.Login,
+                Email = request.Email,
+                RoleCodes = request.RoleCodes
+            }, ct);
+
             return NoContent();
         }
     }

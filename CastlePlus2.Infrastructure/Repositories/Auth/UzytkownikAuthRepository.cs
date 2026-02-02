@@ -175,5 +175,19 @@ namespace CastlePlus2.Infrastructure.Repositories.Auth
             });
         }
 
+        public async Task UpdatePasswordAsync(int userId, string passwordHash, DateTime utcNow, CancellationToken ct)
+        {
+            var user = await _dbContext.Uzytkownicy.FirstOrDefaultAsync(x => x.IdUzytkownika == userId, ct);
+            if (user is null)
+            {
+                return;
+            }
+
+            user.HasloHash = passwordHash;
+            user.DataModyfikacjiUtc = utcNow;
+            _dbContext.Uzytkownicy.Update(user);
+            await _dbContext.SaveChangesAsync(ct);
+        }
+
     }
 }

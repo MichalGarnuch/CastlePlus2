@@ -1,6 +1,7 @@
 ﻿using CastlePlus2.Client.Services.Auth;
 using CastlePlus2.Client.Services.Auth.Admin;
 using CastlePlus2.Client.Services.Auth.Http;
+using CastlePlus2.Client.Services.Auth.RequestAccess;
 using CastlePlus2.Client.Services.Auth.State;
 using CastlePlus2.Client.Services.Dashboard;
 using CastlePlus2.Client.Services.Dokumenty;
@@ -33,6 +34,8 @@ public static class DependencyInjection
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IAuthAdminService, AuthAdminService>();
+        services.AddScoped<IAccessRequestService, AccessRequestService>();
+        services.AddScoped<IRequestAccessAdminService, RequestAccessAdminService>();
 
         services.AddTransient<BearerTokenHandler>();
         services.AddTransient<AuthorizationFailureHandler>();

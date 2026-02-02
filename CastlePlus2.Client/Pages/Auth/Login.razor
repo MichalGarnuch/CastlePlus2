@@ -9,45 +9,50 @@
 @inject NavigationManager Nav
 @inject ISnackbar Snackbar
 
-<MudPaper Class="pa-6" Elevation="0">
-    <MudStack Spacing="3">
-        <MudText Typo="Typo.h5">Logowanie</MudText>
-        <MudTextField @bind-Value="_loginOrEmail"
-                      Label="Login lub email"
-                      Variant="Variant.Outlined"
-                      Required="true"
-                      Immediate="true" />
-        <MudTextField @bind-Value="_password"
-                      Label="Hasło"
-                      Variant="Variant.Outlined"
-                      InputType="@(_showPassword? InputType.Text: InputType.Password)"
-                      Required="true"
-                      Immediate="true"
-                      Adornment="Adornment.End"
-                      AdornmentIcon="@(_showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
-                      AdornmentAriaLabel="Pokaż lub ukryj hasło"
-                      OnAdornmentClick="TogglePasswordVisibility"
-                      @onkeydown="HandlePasswordKeyDown" />
-        <MudButton Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   OnClick="HandleLoginAsync"
-                   Disabled="_isSubmitting">
-            Zaloguj
-        </MudButton>
-        <MudButton Variant="Variant.Text"
-                   Color="Color.Inherit"
-                   Disabled="_isSubmitting"
-                   OnClick="@(() => Nav.NavigateTo("/auth/register"))">
-            Nie masz konta? Zarejestruj się
-        </MudButton>
+<MudPaper Class="pa-6 glass-card" Elevation="0">
+    <MudForm @ref="_form">
+        <MudStack Spacing="3">
+            <MudText Typo="Typo.h5">Logowanie</MudText>
+            <MudTextField @bind-Value="_loginOrEmail"
+                          Label="Login lub email"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          RequiredError="Login lub email jest wymagany"
+                          Immediate="true" />
+            <MudTextField @bind-Value="_password"
+                          Label="Hasło"
+                          Variant="Variant.Outlined"
+                          InputType="@(_showPassword? InputType.Text: InputType.Password)"
+                          Required="true"
+                          RequiredError="Hasło jest wymagane"
+                          Immediate="true"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@(_showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                          AdornmentAriaLabel="Pokaż lub ukryj hasło"
+                          OnAdornmentClick="TogglePasswordVisibility"
+                          @onkeydown="HandlePasswordKeyDown" />
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="HandleLoginAsync"
+                       Disabled="_isSubmitting">
+                Zaloguj
+            </MudButton>
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Info"
+                       Disabled="_isSubmitting"
+                       OnClick="@(() => Nav.NavigateTo("/auth/request-access"))">
+                Poproś o dostęp
+            </MudButton>
 
-    </MudStack>
+        </MudStack>
+    </MudForm>
 </MudPaper>
 
 @code {
     [SupplyParameterFromQuery(Name = "returnUrl")]
     public string? ReturnUrl { get; set; }
 
+    private MudForm? _form;
     private string _loginOrEmail = string.Empty;
     private string _password = string.Empty;
     private bool _isSubmitting;
@@ -70,6 +75,18 @@
     {
         if (_isSubmitting)
         {
+            return;
+        }
+
+        if (_form is null)
+        {
+            return;
+        }
+
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            Snackbar.Add("Uzupełnij wymagane pola.", Severity.Warning);
             return;
         }
 

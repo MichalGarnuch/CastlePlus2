@@ -1,0 +1,152 @@
+﻿@page "/admin/create-user"
+@attribute [Authorize(Roles = RoleCodes.Admin)]
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Web
+@using CastlePlus2.Client.Services.Auth.Admin
+@using CastlePlus2.Contracts.DTOs.Auth
+@using MudBlazor
+
+@inject IAuthAdminService AuthAdminService
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+
+<MudPaper Class="pa-4 glass-card" Elevation="0">
+    <MudStack Spacing="3">
+        <MudText Typo="Typo.h5" Class="fw-700">Dodaj konto</MudText>
+        <MudText Typo="Typo.body2" Class="opacity-80">
+            Konto zostanie utworzone przez administratora, a użytkownik dostanie link aktywacyjny do ustawienia hasła.
+        </MudText>
+
+        <MudForm @ref="_form">
+            <MudStack Spacing="3">
+                <MudTextField @bind-Value="_login"
+                              Label="Login"
+                              Variant="Variant.Outlined"
+                              Required="true"
+                              RequiredError="Login jest wymagany" />
+
+                <MudTextField @bind-Value="_email"
+                              Label="Email"
+                              Variant="Variant.Outlined"
+                              Required="true"
+                              RequiredError="Email jest wymagany" />
+
+                <!-- WAŻNE: bez @bind-SelectedValues (bo generuje SelectedValuesChanged z HashSet<T>) -->
+                <!-- W Twojej wersji MudBlazor SelectedValuesChanged jest EventCallback (niegeneryczny) -->
+                <MudSelect T="string"
+                           Label="Role"
+                           Variant="Variant.Outlined"
+                           MultiSelection="true"
+                           SelectedValues="_rolesSelected"
+                           SelectedValuesChanged="OnRolesSelectedChanged">
+                    @foreach (var role in _roles)
+                    {
+                        <MudSelectItem Value="@role.Kod">@role.Kod</MudSelectItem>
+                    }
+                </MudSelect>
+
+                @if (_isSubmitting)
+                {
+                    <MudProgressLinear Indeterminate="true" />
+                }
+
+                <MudStack Row="true" Spacing="2">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Inherit"
+                               OnClick="@( (MouseEventArgs _) => GoBack() )">
+                        Wróć
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Disabled="_isSubmitting"
+                               OnClick="@(async (MouseEventArgs _) => await HandleSubmitAsync())">
+                        Utwórz konto
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudForm>
+    </MudStack>
+</MudPaper>
+
+@code {
+    private MudForm? _form;
+    private string _login = string.Empty;
+    private string _email = string.Empty;
+
+    // Trzymamy HashSet – MudSelect przy MultiSelection zwykle mutuje przekazaną kolekcję
+    private HashSet<string> _rolesSelected = new(StringComparer.OrdinalIgnoreCase);
+
+    private List<RoleDto> _roles = new();
+    private bool _isSubmitting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRolesAsync();
+    }
+
+    private async Task LoadRolesAsync()
+    {
+        try
+        {
+            var roles = await AuthAdminService.GetRolesAsync();
+            _roles = roles.OrderBy(r => r.Kod).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się pobrać ról: {ex.Message}", Severity.Error);
+        }
+    }
+
+    // W Twojej wersji MudBlazor to jest EventCallback (bez typu), więc handler też musi być bez parametru.
+    private Task OnRolesSelectedChanged()
+    {
+        // jeśli MudSelect mutuje HashSet, to tylko odświeżamy UI
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/admin/uzytkownicy-role");
+    }
+
+    private async Task HandleSubmitAsync()
+    {
+        if (_isSubmitting)
+            return;
+
+        if (_form is null)
+            return;
+
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            Snackbar.Add("Uzupełnij wymagane pola.", Severity.Warning);
+            return;
+        }
+
+        if (_rolesSelected.Count == 0)
+        {
+            Snackbar.Add("Wybierz co najmniej jedną rolę.", Severity.Warning);
+            return;
+        }
+
+        _isSubmitting = true;
+        try
+        {
+            await AuthAdminService.CreateUserAsync(_login, _email, _rolesSelected.ToArray());
+            Snackbar.Add("Konto zostało utworzone.", Severity.Success);
+            Nav.NavigateTo("/admin/uzytkownicy-role");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się utworzyć konta: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}

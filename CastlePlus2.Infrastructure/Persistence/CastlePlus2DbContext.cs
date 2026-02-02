@@ -96,6 +96,8 @@ namespace CastlePlus2.Infrastructure.Persistence
         public DbSet<Rola> Role { get; set; } = null!;
         public DbSet<UzytkownikRola> UzytkownikRole { get; set; } = null!;
         public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+        public DbSet<RequestAccess> RequestAccesses { get; set; } = null!;
+        public DbSet<ActivationToken> ActivationTokens { get; set; } = null!;
 
         /// <summary>
         /// Metoda wywoływana przy tworzeniu modelu EF Core.

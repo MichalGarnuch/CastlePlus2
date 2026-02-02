@@ -15,6 +15,7 @@ using CastlePlus2.Application.Interfaces.Rdzen;
 using CastlePlus2.Application.Interfaces.Reports;
 using CastlePlus2.Application.Interfaces.Slowniki;
 using CastlePlus2.Application.Interfaces.Utrzymanie;
+using CastlePlus2.Application.Interfaces.Notifications;
 using CastlePlus2.Application.Mappings.Rdzen;
 using CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomosc;
 using CastlePlus2.Domain.Entities.Auth;
@@ -34,6 +35,7 @@ using CastlePlus2.Infrastructure.Services.Dashboard;
 using CastlePlus2.Infrastructure.Services.Exports;
 using CastlePlus2.Infrastructure.Services.Najem;
 using CastlePlus2.Infrastructure.Services.Reports;
+using CastlePlus2.Infrastructure.Services.Notifications;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -129,6 +131,11 @@ builder.Services.AddScoped<IUzytkownikAuthRepository, UzytkownikAuthRepository>(
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IAuthTokenService, AuthTokenService>();
 builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
+builder.Services.AddScoped<IAccessRequestRepository, RequestAccessRepository>();
+builder.Services.AddScoped<IActivationTokenRepository, ActivationTokenRepository>();
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+builder.Services.AddScoped<IAppUrlProvider, AppUrlProvider>();
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
 
 // UTRZYMANIE
 builder.Services.AddScoped<IZleceniePracyRepository, ZleceniePracyRepository>();

@@ -2,137 +2,37 @@
 @page "/auth/register"
 @layout CastlePlus2.Client.Shared.AuthLayout
 
-@using MudBlazor
-@using CastlePlus2.Client.Services.Auth
-@using CastlePlus2.Client.Services.Auth.State
-
-@inject IAuthService AuthService
-@inject CustomAuthStateProvider AuthStateProvider
 @inject NavigationManager Nav
 @inject ISnackbar Snackbar
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="mt-10">
-    <MudPaper Elevation="0" Class="pa-8 glass-card">
+<MudPaper Elevation="0" Class="pa-8 glass-card">
+    <MudStack Spacing="3">
+        <MudText Typo="Typo.h4" Class="fw-700">Rejestracja została wyłączona</MudText>
+        <MudText Typo="Typo.body2" Class="opacity-80">
+            Konto może utworzyć wyłącznie administrator po akceptacji prośby o dostęp.
+        </MudText>
 
-        <MudStack Spacing="3">
-            <MudText Typo="Typo.h4" Class="fw-700">Utwórz konto</MudText>
-            <MudText Typo="Typo.body2" Class="opacity-80">
-                Wypełnij dane, aby utworzyć użytkownika w systemie.
-            </MudText>
+        <MudDivider Class="my-2" />
 
-            <MudDivider Class="my-2" />
+        <MudStack Row="true" Spacing="2" Justify="Justify.SpaceBetween" Class="mt-2">
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Inherit"
+                       OnClick="@(() => Nav.NavigateTo("/auth/login"))">
+                Wróć do logowania
+            </MudButton>
 
-            <MudForm @ref="_form" Model="_model">
-                <MudStack Spacing="3">
-
-                    <MudTextField @bind-Value="_model.Login"
-                                  Label="Login"
-                                  Variant="Variant.Outlined"
-                                  Required="true"
-                                  RequiredError="Login jest wymagany"
-                                  Immediate="true" />
-
-                    <MudTextField @bind-Value="_model.Email"
-                                  Label="Email (opcjonalnie)"
-                                  Variant="Variant.Outlined"
-                                  Immediate="true" />
-
-                    <MudTextField @bind-Value="_model.Password"
-                                  Label="Hasło"
-                                  Variant="Variant.Outlined"
-                                  InputType="InputType.Password"
-                                  Required="true"
-                                  RequiredError="Hasło jest wymagane"
-                                  Immediate="true" />
-
-                    <MudTextField @bind-Value="_model.ConfirmPassword"
-                                  Label="Powtórz hasło"
-                                  Variant="Variant.Outlined"
-                                  InputType="InputType.Password"
-                                  Required="true"
-                                  RequiredError="Powtórzenie hasła jest wymagane"
-                                  Immediate="true"
-                                  Validation="ValidateConfirmPassword" />
-
-                    @if (_isSubmitting)
-                    {
-                        <MudProgressLinear Indeterminate="true" />
-                    }
-
-                    <MudStack Row="true" Spacing="2" Justify="Justify.SpaceBetween" Class="mt-2">
-                        <MudButton Variant="Variant.Text"
-                                   Color="Color.Inherit"
-                                   Disabled="_isSubmitting"
-                                   OnClick="@(() => Nav.NavigateTo("/auth/login"))">
-                            Mam już konto
-                        </MudButton>
-
-                        <MudButton Variant="Variant.Filled"
-                                   Color="Color.Primary"
-                                   Disabled="_isSubmitting"
-                                   OnClick="HandleRegisterAsync">
-                            Utwórz konto
-                        </MudButton>
-                    </MudStack>
-
-                </MudStack>
-            </MudForm>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Info"
+                       OnClick="@(() => Nav.NavigateTo("/auth/request-access"))">
+                Poproś o dostęp
+            </MudButton>
         </MudStack>
-    </MudPaper>
-</MudContainer>
+    </MudStack>
+</MudPaper>
 
 @code {
-    private MudForm? _form;
-    private bool _isSubmitting;
-
-    private RegisterVm _model = new();
-
-    private string? ValidateConfirmPassword(string value)
+    protected override void OnInitialized()
     {
-        if (string.IsNullOrWhiteSpace(value))
-            return "Powtórz hasło.";
-
-        if (!string.Equals(_model.Password, value, StringComparison.Ordinal))
-            return "Hasła nie są identyczne.";
-
-        return null;
-    }
-
-    private async Task HandleRegisterAsync()
-    {
-        if (_isSubmitting)
-            return;
-
-        if (_form is null)
-            return;
-
-        await _form.Validate();
-        if (!_form.IsValid)
-            return;
-
-        _isSubmitting = true;
-        try
-        {
-            // DeviceInfo możesz zmienić dowolnie (np. "web.app")
-            await AuthService.RegisterAsync(_model.Login, _model.Email, _model.Password, "client");
-            await AuthStateProvider.MarkUserAsAuthenticatedFromTokenAsync();
-            Nav.NavigateTo("/");
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Nie udało się utworzyć konta: {ex.Message}", Severity.Error);
-        }
-        finally
-        {
-            _isSubmitting = false;
-        }
-    }
-
-    private sealed class RegisterVm
-    {
-        public string Login { get; set; } = string.Empty;
-        public string? Email { get; set; }
-        public string Password { get; set; } = string.Empty;
-        public string ConfirmPassword { get; set; } = string.Empty;
+        Snackbar.Add("Publiczna rejestracja jest wyłączona. Użyj formularza prośby o dostęp.", Severity.Info);
     }
 }

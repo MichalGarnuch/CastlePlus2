@@ -8,4 +8,5 @@ public interface IAuthAdminService
     Task<AdminUserDto[]> GetUsersAsync();
     Task<RoleDto[]> GetRolesAsync();
     Task SetUserRolesAsync(int userId, string[] roleCodes);
+    Task CreateUserAsync(string login, string email, string[] roleCodes);
 }

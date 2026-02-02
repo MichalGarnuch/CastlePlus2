@@ -103,6 +103,18 @@ body {
     overflow: auto;
 }
 
+.auth-main {
+    min-height: 100vh;
+    padding: 24px 12px;
+    overflow: auto;
+}
+
+.auth-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
 /* Logo in AppBar */
 .castle-brand {
     display: flex;

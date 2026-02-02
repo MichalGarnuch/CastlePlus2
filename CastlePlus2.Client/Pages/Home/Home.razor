@@ -4,6 +4,7 @@
 
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
+@inject ILogger<Home> Logger
 
 <MudCard Class="pa-4 glass-panel">
     <MudStack Spacing="2">
@@ -18,6 +19,8 @@
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var isAuthenticated = authState.User?.Identity?.IsAuthenticated == true;
         var targetUrl = isAuthenticated ? "/dashboard/najem" : "/auth/login";
+
+        Logger.LogInformation("Home redirect: authenticated={IsAuthenticated}, target={TargetUrl}", isAuthenticated, targetUrl);
 
         Nav.NavigateTo(targetUrl, replace: true);
     }

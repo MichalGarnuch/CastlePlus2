@@ -61,6 +61,27 @@ public sealed class AuthAdminService : IAuthAdminService
             $"Błąd zapisu ról: {(int)response.StatusCode} ({response.ReasonPhrase}). {message}");
     }
 
+    public async Task CreateUserAsync(string login, string email, string[] roleCodes)
+    {
+        var request = new CreateUserRequest
+        {
+            Login = login,
+            Email = email,
+            RoleCodes = roleCodes ?? Array.Empty<string>()
+        };
+
+        var response = await _httpClient.PostAsJsonAsync("api/auth/admin/users", request);
+        if (response.IsSuccessStatusCode)
+        {
+            return;
+        }
+
+        var body = await response.Content.ReadAsStringAsync();
+        var message = TryExtractProblemMessage(body);
+        throw new InvalidOperationException(
+            $"Błąd tworzenia konta: {(int)response.StatusCode} ({response.ReasonPhrase}). {message}");
+    }
+
     private static string TryExtractProblemMessage(string body)
     {
         if (string.IsNullOrWhiteSpace(body))

@@ -1,4 +1,5 @@
 ﻿@inject NavigationManager Nav
+@inject ILogger<RedirectToLogin> Logger
 
 @code {
     protected override void OnInitialized()
@@ -14,11 +15,14 @@
         if (relativePath.StartsWith("auth/login", StringComparison.OrdinalIgnoreCase)
             || relativePath.StartsWith("login", StringComparison.OrdinalIgnoreCase))
         {
+            Logger.LogInformation("RedirectToLogin: już na stronie logowania, brak przekierowania.");
             return;
         }
 
         var returnUrl = currentPath;
         var encodedReturnUrl = Uri.EscapeDataString(returnUrl);
+
+        Logger.LogInformation("RedirectToLogin: przekierowanie na logowanie z returnUrl={ReturnUrl}", returnUrl);
 
         Nav.NavigateTo($"/auth/login?returnUrl={encodedReturnUrl}", forceLoad: false);
     }

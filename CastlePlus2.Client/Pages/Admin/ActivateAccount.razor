@@ -1,0 +1,126 @@
+﻿@page "/auth/activate"
+@layout CastlePlus2.Client.Shared.AuthLayout
+
+@using MudBlazor
+@using CastlePlus2.Client.Services.Auth.RequestAccess
+
+@inject IAccessRequestService AccessRequestService
+@inject NavigationManager Nav
+@inject ISnackbar Snackbar
+
+<MudPaper Elevation="0" Class="pa-6 glass-card">
+    @if (_isActivated)
+    {
+        <MudStack Spacing="3" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h5" Class="fw-700">Konto aktywne</MudText>
+            <MudText Typo="Typo.body2" Class="opacity-80">
+                Hasło zostało ustawione. Możesz się zalogować.
+            </MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Nav.NavigateTo("/auth/login"))">
+                Przejdź do logowania
+            </MudButton>
+        </MudStack>
+    }
+    else
+    {
+        <MudForm @ref="_form">
+            <MudStack Spacing="3">
+                <MudText Typo="Typo.h5">Aktywacja konta</MudText>
+                <MudText Typo="Typo.body2" Class="opacity-80">
+                    Ustaw nowe hasło do konta.
+                </MudText>
+
+                <MudTextField @bind-Value="_password"
+                              Label="Hasło"
+                              Variant="Variant.Outlined"
+                              InputType="@(_showPassword ? InputType.Text : InputType.Password)"
+                              Required="true"
+                              RequiredError="Hasło jest wymagane"
+                              Immediate="true" />
+
+                <MudTextField @bind-Value="_confirmPassword"
+                              Label="Powtórz hasło"
+                              Variant="Variant.Outlined"
+                              InputType="@(_showPassword ? InputType.Text : InputType.Password)"
+                              Required="true"
+                              RequiredError="Powtórz hasło"
+                              Immediate="true" />
+
+                <MudCheckBox T="bool" @bind-Checked="_showPassword" Label="Pokaż hasło" />
+
+
+                @if (_isSubmitting)
+                {
+                    <MudProgressLinear Indeterminate="true" />
+                }
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Disabled="_isSubmitting"
+                           OnClick="HandleActivateAsync">
+                    Ustaw hasło
+                </MudButton>
+            </MudStack>
+        </MudForm>
+    }
+</MudPaper>
+
+@code {
+    [SupplyParameterFromQuery(Name = "token")]
+    public string? Token { get; set; }
+
+    private MudForm? _form;
+    private bool _isSubmitting;
+    private bool _isActivated;
+    private bool _showPassword;
+    private string _password = string.Empty;
+    private string _confirmPassword = string.Empty;
+
+    private async Task HandleActivateAsync()
+    {
+        if (_isSubmitting || _isActivated)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Token))
+        {
+            Snackbar.Add("Brak tokenu aktywacyjnego.", Severity.Error);
+            return;
+        }
+
+        if (_form is null)
+        {
+            return;
+        }
+
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            Snackbar.Add("Uzupełnij wymagane pola.", Severity.Warning);
+            return;
+        }
+
+        if (_password != _confirmPassword)
+        {
+            Snackbar.Add("Hasła nie są identyczne.", Severity.Warning);
+            return;
+        }
+
+        _isSubmitting = true;
+        try
+        {
+            await AccessRequestService.ActivateAccountAsync(Token, _password, _confirmPassword);
+            _isActivated = true;
+            Snackbar.Add("Hasło zostało ustawione.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się aktywować konta: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}

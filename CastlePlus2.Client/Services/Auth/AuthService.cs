@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CastlePlus2.Client.Services.Auth.Storage;
 using CastlePlus2.Contracts.DTOs.Auth;
 using CastlePlus2.Contracts.Requests.Auth;
+using Microsoft.Extensions.Logging;
 
 namespace CastlePlus2.Client.Services.Auth;
 
@@ -13,11 +14,13 @@ public class AuthService : IAuthService
 {
     private readonly HttpClient _http;
     private readonly IAccessTokenStore _tokenStore;
+    private readonly ILogger<AuthService> _logger;
 
-    public AuthService(HttpClient http, IAccessTokenStore tokenStore)
+    public AuthService(HttpClient http, IAccessTokenStore tokenStore, ILogger<AuthService> logger)
     {
         _http = http;
         _tokenStore = tokenStore;
+        _logger = logger;
     }
 
     public async Task<AuthTokensDto> LoginAsync(string loginOrEmail, string password, string? deviceInfo)
@@ -30,7 +33,13 @@ public class AuthService : IAuthService
         };
 
         var response = await _http.PostAsJsonAsync("api/auth/login", request);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            _logger.LogWarning("Login failed: {StatusCode}. Body: {Body}", response.StatusCode, body);
+            response.EnsureSuccessStatusCode();
+        }
+        _logger.LogInformation("Login response: {StatusCode}", response.StatusCode);
 
         var tokens = await response.Content.ReadFromJsonAsync<AuthTokensDto>()
                      ?? throw new InvalidOperationException("Brak tokenów w odpowiedzi.");
@@ -51,7 +60,13 @@ public class AuthService : IAuthService
         };
 
         var response = await _http.PostAsJsonAsync("api/auth/register", request);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            _logger.LogWarning("Register failed: {StatusCode}. Body: {Body}", response.StatusCode, body);
+            response.EnsureSuccessStatusCode();
+        }
+        _logger.LogInformation("Register response: {StatusCode}", response.StatusCode);
 
         var tokens = await response.Content.ReadFromJsonAsync<AuthTokensDto>()
                      ?? throw new InvalidOperationException("Brak tokenów w odpowiedzi.");
@@ -75,7 +90,13 @@ public class AuthService : IAuthService
         };
 
         var response = await _http.PostAsJsonAsync("api/auth/refresh", request);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            _logger.LogWarning("Refresh failed: {StatusCode}. Body: {Body}", response.StatusCode, body);
+            response.EnsureSuccessStatusCode();
+        }
+        _logger.LogInformation("Refresh response: {StatusCode}", response.StatusCode);
 
         var refreshedTokens = await response.Content.ReadFromJsonAsync<AuthTokensDto>()
                              ?? throw new InvalidOperationException("Brak tokenów w odpowiedzi.");

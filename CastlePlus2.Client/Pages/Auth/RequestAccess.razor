@@ -1,0 +1,148 @@
+﻿@page "/auth/request-access"
+@layout CastlePlus2.Client.Shared.AuthLayout
+
+@using MudBlazor
+@using CastlePlus2.Client.Services.Auth.RequestAccess
+@using CastlePlus2.Contracts.Requests.Auth
+
+@inject IAccessRequestService AccessRequestService
+@inject NavigationManager Nav
+@inject ISnackbar Snackbar
+
+<MudPaper Elevation="0" Class="pa-6 glass-card">
+    @if (_isSubmitted)
+    {
+        <MudStack Spacing="3" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h5" Class="fw-700">Zgłoszenie przyjęte</MudText>
+            <MudText Typo="Typo.body2" Class="opacity-80">
+                Czekaj na kontakt administratora.
+            </MudText>
+            <MudButton Variant="Variant.Text" Color="Color.Inherit" OnClick="NavigateToLogin">
+                Wróć do logowania
+            </MudButton>
+        </MudStack>
+    }
+    else
+    {
+        <MudForm @ref="_form" Model="_model">
+            <MudStack Spacing="3">
+                <MudText Typo="Typo.h5">Poproś o dostęp</MudText>
+                <MudText Typo="Typo.body2" Class="opacity-80">
+                    Wypełnij formularz. Konto zostanie utworzone po akceptacji administratora.
+                </MudText>
+
+                <MudTextField @bind-Value="_model.FullName"
+                              Label="Imię i nazwisko"
+                              Variant="Variant.Outlined"
+                              Required="true"
+                              RequiredError="Imię i nazwisko jest wymagane"
+                              Immediate="true" />
+
+                <MudTextField @bind-Value="_model.Email"
+                              Label="Email służbowy"
+                              Variant="Variant.Outlined"
+                              Required="true"
+                              RequiredError="Email jest wymagany"
+                              Immediate="true" />
+
+                <MudTextField @bind-Value="_model.Login"
+                              Label="Login (opcjonalnie)"
+                              Variant="Variant.Outlined"
+                              Immediate="true" />
+
+                <MudTextField @bind-Value="_model.Phone"
+                              Label="Telefon (opcjonalnie)"
+                              Variant="Variant.Outlined"
+                              Immediate="true" />
+
+                <MudTextField @bind-Value="_model.Department"
+                              Label="Dział / rola biznesowa"
+                              Variant="Variant.Outlined"
+                              Required="true"
+                              RequiredError="Dział/rola jest wymagany"
+                              Immediate="true" />
+
+                <MudTextField @bind-Value="_model.Justification"
+                              Label="Uzasadnienie"
+                              Variant="Variant.Outlined"
+                              Required="true"
+                              RequiredError="Uzasadnienie jest wymagane"
+                              Lines="4"
+                              Immediate="true" />
+
+                @if (_isSubmitting)
+                {
+                    <MudProgressLinear Indeterminate="true" />
+                }
+
+                <MudStack Row="true" Spacing="2" Justify="Justify.SpaceBetween" Class="mt-2">
+                    <MudButton Variant="Variant.Text" Color="Color.Inherit" Disabled="_isSubmitting" OnClick="NavigateToLogin">
+                        Wróć do logowania
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_isSubmitting" OnClick="HandleSubmitAsync">
+                        Wyślij prośbę
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudForm>
+    }
+</MudPaper>
+
+@code {
+    private MudForm? _form;
+    private bool _isSubmitting;
+    private bool _isSubmitted;
+
+    private CreateRequestAccessRequest _model = new();
+
+    private async Task HandleSubmitAsync()
+    {
+        if (_isSubmitting || _isSubmitted)
+        {
+            return;
+        }
+
+        if (_form is null)
+        {
+            return;
+        }
+
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            Snackbar.Add("Uzupełnij wymagane pola.", Severity.Warning);
+            return;
+        }
+
+        _isSubmitting = true;
+        try
+        {
+            await AccessRequestService.CreateRequestAsync(_model);
+            _isSubmitted = true;
+            Snackbar.Add("Zgłoszenie zostało zapisane.", Severity.Success);
+            _ = RedirectAfterDelayAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się wysłać zgłoszenia: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private void NavigateToLogin()
+    {
+        Nav.NavigateTo("/auth/login");
+    }
+
+    private async Task RedirectAfterDelayAsync()
+    {
+        await Task.Delay(2500);
+        if (_isSubmitted)
+        {
+            Nav.NavigateTo("/auth/login", replace: true);
+        }
+    }
+}

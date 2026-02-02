@@ -3,7 +3,7 @@ using CastlePlus2.Application.Auth.ProcesyAuth.Commands.Login;
 using CastlePlus2.Application.Auth.ProcesyAuth.Commands.Refresh;
 using CastlePlus2.Application.Auth.ProcesyAuth.Commands.Register;
 using CastlePlus2.Application.Auth.ProcesyAuth.Queries.GetMe;
-using CastlePlus2.Application.Auth.ProcesyAuth.Commands.Register;
+using CastlePlus2.Application.Auth.RequestAccess.Commands;
 using CastlePlus2.Contracts.DTOs.Auth;
 using CastlePlus2.Contracts.Requests.Auth;
 using MediatR;
@@ -68,6 +68,8 @@ namespace CastlePlus2.Api.Controllers.Auth
             }
         }
 
+        [Authorize(Policy = "AdminOnly")]
+
         [HttpPost("register")]
         [ProducesResponseType(typeof(AuthTokensDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -82,6 +84,41 @@ namespace CastlePlus2.Api.Controllers.Auth
             }, ct);
 
             return Ok(result.Tokens);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("request-access")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> RequestAccess([FromBody] CreateRequestAccessRequest request, CancellationToken ct)
+        {
+            var result = await _mediator.Send(new CreateRequestAccessCommand
+            {
+                FullName = request.FullName,
+                Email = request.Email,
+                Login = request.Login,
+                Phone = request.Phone,
+                Department = request.Department,
+                Justification = request.Justification
+            }, ct);
+
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("activate")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Activate([FromBody] ActivateAccountRequest request, CancellationToken ct)
+        {
+            await _mediator.Send(new ActivateAccountCommand
+            {
+                Token = request.Token,
+                Password = request.Password,
+                ConfirmPassword = request.ConfirmPassword
+            }, ct);
+
+            return NoContent();
         }
 
         [Authorize]
