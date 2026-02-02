@@ -4,6 +4,7 @@
 @using CastlePlus2.Client.Services.Auth.Admin
 @using CastlePlus2.Contracts.DTOs.Auth
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Web
 @using MudBlazor
 @inject IAuthAdminService AuthAdminService
 @inject IAuthService AuthService
@@ -13,26 +14,29 @@
 
 <MudText Typo="Typo.h4" Class="fw-700 mb-4">Administracja: użytkownicy i role</MudText>
 
-<MudPaper Class="pa-4">
+<MudPaper Class="pa-4 users-role-page">
     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
         <MudText Typo="Typo.h6">Zarządzanie rolami</MudText>
         <MudStack Row="true" Spacing="2">
+
             <MudButton Variant="Variant.Filled"
                        Color="Color.Secondary"
                        StartIcon="@Icons.Material.Filled.PersonAdd"
-                       OnClick="@(() => Nav.NavigateTo("/admin/create-user"))">
+                       OnClick="GoCreateUser">
                 Dodaj konto
             </MudButton>
+
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Info"
                        StartIcon="@Icons.Material.Filled.Refresh"
-                       OnClick="ReloadAsync">
+                       OnClick="ReloadClickAsync">
                 Odśwież listę
             </MudButton>
+
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
                        StartIcon="@Icons.Material.Filled.Sync"
-                       OnClick="RefreshSessionAsync">
+                       OnClick="RefreshSessionClickAsync">
                 Odśwież sesję
             </MudButton>
         </MudStack>
@@ -42,58 +46,73 @@
         Zmiana ról nie odświeża tokena natychmiast. Użyj „Odśwież sesję”, aby pobrać nowy token JWT.
     </MudAlert>
 
-    <MudTable Items="_users"
-              Dense="true"
-              Hover="true"
-              Bordered="true"
-              Loading="_loading">
-        <HeaderContent>
-            <MudTh>Login</MudTh>
-            <MudTh>Email</MudTh>
-            <MudTh>Aktywny</MudTh>
-            <MudTh>Role</MudTh>
-            <MudTh></MudTh>
-        </HeaderContent>
+    <div class="users-role-table-scroll">
+        <MudTable Items="_users"
+                  Dense="true"
+                  Hover="true"
+                  Bordered="true"
+                  Loading="_loading"
+                  Class="users-role-table">
+            <HeaderContent>
+                <MudTh>Login</MudTh>
+                <MudTh>Email</MudTh>
+                <MudTh>Aktywny</MudTh>
+                <MudTh Style="min-width:320px;">Role</MudTh>
+                <MudTh></MudTh>
+            </HeaderContent>
 
-        <RowTemplate>
-            <MudTd DataLabel="Login">@context.Login</MudTd>
-            <MudTd DataLabel="Email">@context.Email</MudTd>
-            <MudTd DataLabel="Aktywny">
-                @if (context.CzyAktywny)
-                {
-                    <MudChip T="string" Color="Color.Success" Size="Size.Small">Tak</MudChip>
-                }
-                else
-                {
-                    <MudChip T="string" Color="Color.Error" Size="Size.Small">Nie</MudChip>
-                }
-            </MudTd>
-            <MudTd DataLabel="Role">
-                <MudSelect T="string"
-                           Dense="true"
-                           MultiSelection="true"
-                           SelectedValues="GetSelectedRoles(context.IdUzytkownika)"
-                           SelectedValuesChanged="values => OnRolesChanged(context.IdUzytkownika, values)">
-                    @foreach (var role in _roles)
+            <RowTemplate>
+                <MudTd DataLabel="Login">
+                    <span class="truncate" title="@context.Login">@context.Login</span>
+                </MudTd>
+
+                <MudTd DataLabel="Email">
+                    <span class="truncate" title="@context.Email">@context.Email</span>
+                </MudTd>
+
+                <MudTd DataLabel="Aktywny">
+                    @if (context.CzyAktywny)
                     {
-                        <MudSelectItem Value="@role.Kod">@role.Kod</MudSelectItem>
+                        <MudChip T="string" Color="Color.Success" Size="Size.Small">Tak</MudChip>
                     }
-                </MudSelect>
-            </MudTd>
-            <MudTd DataLabel="Akcje" Class="text-right">
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           Disabled="@IsSaving(context.IdUzytkownika)"
-                           OnClick="@(() => SaveRolesAsync(context))">
-                    Zapisz
-                </MudButton>
-            </MudTd>
-        </RowTemplate>
+                    else
+                    {
+                        <MudChip T="string" Color="Color.Error" Size="Size.Small">Nie</MudChip>
+                    }
+                </MudTd>
 
-        <NoRecordsContent>
-            <MudText Class="pa-4">Brak użytkowników.</MudText>
-        </NoRecordsContent>
-    </MudTable>
+                <MudTd DataLabel="Role">
+                    <MudSelect T="string"
+                               Dense="true"
+                               MultiSelection="true"
+                               Class="role-select"
+                               Style="min-width:320px; max-width:520px;"
+                               SelectedValues="@GetSelectedRolesSet(context.IdUzytkownika)"
+                               SelectedValuesChanged="@(v => OnRolesChanged(context.IdUzytkownika, v))">
+                        @foreach (var role in _roles)
+                        {
+                            <MudSelectItem Value="@role.Kod">
+                                <span class="role-option">@role.Kod</span>
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+
+                <MudTd DataLabel="Akcje" Class="text-right">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Disabled="@IsSaving(context.IdUzytkownika)"
+                               OnClick="@(args => SaveClickAsync(args, context))">
+                        Zapisz
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+
+            <NoRecordsContent>
+                <MudText Class="pa-4">Brak użytkowników.</MudText>
+            </NoRecordsContent>
+        </MudTable>
+    </div>
 </MudPaper>
 
 @code {
@@ -107,6 +126,22 @@
     {
         await ReloadAsync();
     }
+
+    // --- kliknięcia (sygnatury pasujące do EventCallback<MouseEventArgs>) ---
+
+    private void GoCreateUser(MouseEventArgs _)
+        => Nav.NavigateTo("/admin/create-user");
+
+    private async Task ReloadClickAsync(MouseEventArgs _)
+        => await ReloadAsync();
+
+    private async Task RefreshSessionClickAsync(MouseEventArgs _)
+        => await RefreshSessionAsync();
+
+    private async Task SaveClickAsync(MouseEventArgs _, AdminUserDto user)
+        => await SaveRolesAsync(user);
+
+    // --- data load ---
 
     private async Task ReloadAsync()
     {
@@ -137,21 +172,20 @@
         }
     }
 
-    private IReadOnlyCollection<string> GetSelectedRoles(int userId)
+    private HashSet<string> GetSelectedRolesSet(int userId)
     {
         if (_selectedRoles.TryGetValue(userId, out var roles))
-        {
             return roles;
-        }
 
         var created = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         _selectedRoles[userId] = created;
         return created;
     }
 
+    // UWAGA: IEnumerable<string> zamiast HashSet<string> (pasuje do MudSelect)
     private void OnRolesChanged(int userId, IEnumerable<string> values)
     {
-        _selectedRoles[userId] = new HashSet<string>(values, StringComparer.OrdinalIgnoreCase);
+        _selectedRoles[userId] = new HashSet<string>(values ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase);
     }
 
     private bool IsSaving(int userId) => _savingUsers.Contains(userId);

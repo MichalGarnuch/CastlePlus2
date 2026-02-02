@@ -326,3 +326,48 @@ body {
     -webkit-backdrop-filter: none !important;
     border: 1px solid rgba(255,255,255,0.10) !important;
 }
+/* ===== Users/Role admin table responsiveness ===== */
+.users-role-table-scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+/* żeby tabela nie “zgniatała” kolumn do zera */
+.users-role-table {
+    min-width: 980px;
+}
+
+/* elipsy dla login/email */
+.users-role-page .truncate {
+    display: inline-block;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+/* role select ma być sensowny nawet w tabeli */
+.users-role-page .role-select .mud-input-slot {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* tekst opcji może się łamać (jak role są długie) */
+.role-option {
+    display: block;
+    white-space: normal;
+    line-height: 1.2;
+}
+
+/* mobile: nieco węższe limity */
+@media (max-width: 600px) {
+    .users-role-page .truncate {
+        max-width: 180px;
+    }
+
+    .users-role-table {
+        min-width: 900px;
+    }
+}
