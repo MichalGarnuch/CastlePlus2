@@ -8,10 +8,12 @@ using CastlePlus2.Contracts.Requests.Rdzen;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Rzden
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class LokaleController : ControllerBase
     {

@@ -4,10 +4,12 @@ using CastlePlus2.Contracts.DTOs.Najem;
 using CastlePlus2.Contracts.Requests.Najem;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Najem
 {
     [ApiController]
+    [Authorize]
     [Route("api/najem/procesy")]
     public class ProcesyNajmuController : ControllerBase
     {

@@ -4,6 +4,7 @@ using CastlePlus2.Application.Auth.Administracja.Queries.GetRoles;
 using CastlePlus2.Application.Auth.Administracja.Queries.GetUsersWithRoles;
 using CastlePlus2.Contracts.DTOs.Auth;
 using CastlePlus2.Contracts.Requests.Auth;
+using CastlePlus2.Shared.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +13,7 @@ namespace CastlePlus2.Api.Controllers.Auth
 {
     [ApiController]
     [Route("api/auth/admin")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Roles = RoleCodes.Admin)]
     public sealed class AuthAdminController : ControllerBase
     {
         private readonly IMediator _mediator;

@@ -8,10 +8,12 @@ using CastlePlus2.Contracts.DTOs.Dokumenty;
 using CastlePlus2.Contracts.Requests.Dokumenty;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Dokumenty
 {
     [ApiController]
+    [Authorize]
     [Route("api/dokumenty/[controller]")]
     public class PowiazaniaDokumentuController : ControllerBase
     {

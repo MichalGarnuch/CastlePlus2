@@ -6,6 +6,7 @@ using CastlePlus2.Application.Auth.ProcesyAuth.Queries.GetMe;
 using CastlePlus2.Application.Auth.RequestAccess.Commands;
 using CastlePlus2.Contracts.DTOs.Auth;
 using CastlePlus2.Contracts.Requests.Auth;
+using CastlePlus2.Shared.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,7 @@ namespace CastlePlus2.Api.Controllers.Auth
 {
     [ApiController]
     [Route("api/auth")]
+    [Authorize]
     public sealed class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -24,6 +26,7 @@ namespace CastlePlus2.Api.Controllers.Auth
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(AuthTokensDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -47,6 +50,7 @@ namespace CastlePlus2.Api.Controllers.Auth
         }
 
         [HttpPost("refresh")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(AuthTokensDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -68,9 +72,9 @@ namespace CastlePlus2.Api.Controllers.Auth
             }
         }
 
-        [Authorize(Policy = "AdminOnly")]
 
         [HttpPost("register")]
+        [Authorize(Roles = RoleCodes.Admin)]
         [ProducesResponseType(typeof(AuthTokensDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken ct)
@@ -121,7 +125,6 @@ namespace CastlePlus2.Api.Controllers.Auth
             return NoContent();
         }
 
-        [Authorize]
         [HttpGet("me")]
         [ProducesResponseType(typeof(CurrentUserDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

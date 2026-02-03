@@ -8,10 +8,12 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Podmioty
 {
     [ApiController]
+    [Authorize]
     [Route("api/podmioty/procesy/wlasnosc")]
     public class ProcesyPodmiotyController : ControllerBase
     {

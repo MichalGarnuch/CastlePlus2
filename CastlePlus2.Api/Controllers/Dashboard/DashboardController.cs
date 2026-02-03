@@ -4,10 +4,12 @@ using CastlePlus2.Contracts.DTOs.Dashboard;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Dashboard
 {
     [ApiController]
+    [Authorize]
     [Route("api/dashboard")]
     public class DashboardController : ControllerBase
     {

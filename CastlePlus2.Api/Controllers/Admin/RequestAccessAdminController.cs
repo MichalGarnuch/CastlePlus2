@@ -3,6 +3,7 @@ using CastlePlus2.Application.Auth.RequestAccess.Queries;
 using CastlePlus2.Contracts.DTOs.Auth;
 using CastlePlus2.Contracts.Requests.Auth;
 using CastlePlus2.Domain.Entities.Auth;
+using CastlePlus2.Shared.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ namespace CastlePlus2.Api.Controllers.Admin
 {
     [ApiController]
     [Route("api/admin/request-access")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Roles = RoleCodes.Admin)]
     public sealed class RequestAccessAdminController : ControllerBase
     {
         private readonly IMediator _mediator;

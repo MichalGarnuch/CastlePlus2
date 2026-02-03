@@ -11,10 +11,12 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Rzden
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class PomieszczeniaController : ControllerBase
     {

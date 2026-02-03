@@ -7,10 +7,12 @@ using CastlePlus2.Contracts.DTOs.Slowniki;
 using CastlePlus2.Contracts.Requests.Slownik;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Slowniki
 {
     [ApiController]
+    [Authorize]
     [Route("api/slowniki/[controller]")]
     public class JednostkiMiaryController : ControllerBase
     {

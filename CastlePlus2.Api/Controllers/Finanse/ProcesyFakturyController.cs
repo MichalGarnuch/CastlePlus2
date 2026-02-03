@@ -6,10 +6,12 @@ using CastlePlus2.Contracts.DTOs.Finanse;
 using CastlePlus2.Contracts.Requests.Finanse;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Finanse
 {
     [ApiController]
+    [Authorize]
     [Route("api/finanse/procesy/faktury")]
     public class ProcesyFakturyController : ControllerBase
     {

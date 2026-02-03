@@ -8,10 +8,12 @@ using CastlePlus2.Contracts.Requests.Rdzen;
 using Microsoft.AspNetCore.Http;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Rdzen
 {
     [ApiController]
+    [Authorize]
     [Route("api/rdzen/[controller]")]
     public class AdresyController : ControllerBase
     {

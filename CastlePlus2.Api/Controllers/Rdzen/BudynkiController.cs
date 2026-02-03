@@ -9,10 +9,12 @@ using CastlePlus2.Contracts.Requests.Rdzen;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Rdzen
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class BudynkiController : ControllerBase
     {

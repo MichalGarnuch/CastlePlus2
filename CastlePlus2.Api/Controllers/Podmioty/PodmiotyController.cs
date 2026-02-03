@@ -8,10 +8,12 @@ using CastlePlus2.Contracts.Requests.Podmioty;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Podmioty
 {
     [ApiController]
+    [Authorize]
     [Route("api/podmioty/[controller]")]
     public class PodmiotyController : ControllerBase
     {

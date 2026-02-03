@@ -10,10 +10,12 @@ using CastlePlus2.Contracts.DTOs.Media;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Media
 {
     [ApiController]
+    [Authorize]
     [Route("api/media/[controller]")]
     public class RodzajeMediowController : ControllerBase
     {

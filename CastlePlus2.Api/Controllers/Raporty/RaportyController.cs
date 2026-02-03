@@ -2,6 +2,7 @@
 using CastlePlus2.Application.Interfaces.Reports;
 using CastlePlus2.Contracts.Exports;
 using CastlePlus2.Infrastructure.Services.Reports.Definitions;
+using CastlePlus2.Shared.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -17,7 +18,7 @@ namespace CastlePlus2.Api.Controllers.Raporty
 {
     [ApiController]
     [Route("api/raporty")]
-    [Authorize(Policy = "Authenticated")]
+    [Authorize]
     public class RaportyController : ControllerBase
     {
         private readonly IReportExportService _reportExportService;
@@ -27,7 +28,6 @@ namespace CastlePlus2.Api.Controllers.Raporty
         private readonly IReportDocumentPreviewService _reportDocumentPreviewService;
         private readonly IMemoryCache _cache;
         private readonly IConfiguration _configuration;
-        private readonly IAuthorizationService _authorizationService;
 
         public RaportyController(
             IReportExportService reportExportService,
@@ -36,8 +36,7 @@ namespace CastlePlus2.Api.Controllers.Raporty
             IReportDataPreviewService reportDataPreviewService,
             IReportDocumentPreviewService reportDocumentPreviewService,
             IMemoryCache cache,
-            IConfiguration configuration,
-            IAuthorizationService authorizationService)
+            IConfiguration configuration)
         {
             _reportExportService = reportExportService;
             _reportRegistry = reportRegistry;
@@ -46,7 +45,6 @@ namespace CastlePlus2.Api.Controllers.Raporty
             _reportDocumentPreviewService = reportDocumentPreviewService;
             _cache = cache;
             _configuration = configuration;
-            _authorizationService = authorizationService;
         }
 
         // =========================================================
@@ -68,8 +66,7 @@ namespace CastlePlus2.Api.Controllers.Raporty
 
             if (archive)
             {
-                var auth = await _authorizationService.AuthorizeAsync(User, "AdminOnly");
-                if (!auth.Succeeded)
+                if (!User.IsInRole(RoleCodes.Admin))
                     return Forbid();
             }
 

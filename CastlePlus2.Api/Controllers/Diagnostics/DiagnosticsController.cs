@@ -1,5 +1,7 @@
 ﻿using CastlePlus2.Infrastructure.Persistence;
+using CastlePlus2.Shared.Auth;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +12,7 @@ namespace CastlePlus2.Api.Controllers.Diagnostics
     [ApiController]
     [Route("api/diagnostics")]
     [ApiExplorerSettings(IgnoreApi = true)]
+    [Authorize(Roles = RoleCodes.Admin)]
     public sealed class DiagnosticsController : ControllerBase
     {
         private readonly CastlePlus2DbContext _dbContext;

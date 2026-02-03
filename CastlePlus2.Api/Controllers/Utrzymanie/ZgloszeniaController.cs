@@ -4,10 +4,12 @@ using CastlePlus2.Contracts.DTOs.Utrzymanie;
 using CastlePlus2.Contracts.Requests.Utrzymanie;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Utrzymanie
 {
     [ApiController]
+    [Authorize]
     [Route("api/utrzymanie/zgloszenia")]
     public class ZgloszeniaController : ControllerBase
     {

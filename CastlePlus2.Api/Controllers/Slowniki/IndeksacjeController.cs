@@ -6,10 +6,12 @@ using CastlePlus2.Application.Slowniki.Indeksacje.Queries.GetIndeksacjaByKod;
 using CastlePlus2.Contracts.Requests.Slownik;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Slowniki
 {
     [ApiController]
+    [Authorize]
     [Route("api/slowniki/[controller]")]
     public class IndeksacjeController : ControllerBase
     {

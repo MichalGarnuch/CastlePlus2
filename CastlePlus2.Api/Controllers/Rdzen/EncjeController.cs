@@ -8,10 +8,12 @@ using CastlePlus2.Contracts.DTOs.Rdzen;
 using CastlePlus2.Contracts.Requests.Rdzen;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Rdzen
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class EncjeController : ControllerBase
     {

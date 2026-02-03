@@ -6,10 +6,12 @@ using CastlePlus2.Application.Slowniki.Waluty.Queries.GetWalutaByKod;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using CastlePlus2.Contracts.Requests.Slownik;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Slowniki
 {
     [ApiController]
+    [Authorize]
     [Route("api/slowniki/[controller]")]
     public class WalutyController : ControllerBase
     {

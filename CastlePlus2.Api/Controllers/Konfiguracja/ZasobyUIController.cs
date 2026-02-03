@@ -7,6 +7,7 @@ using CastlePlus2.Application.Konfiguracja.ZasobyUI.Queries.GetPublicZasobyUI;
 using CastlePlus2.Application.Konfiguracja.ZasobyUI.Queries.GetZasobUIById;
 using CastlePlus2.Contracts.DTOs.Konfiguracja;
 using CastlePlus2.Contracts.Requests.Konfiguracja;
+using CastlePlus2.Shared.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,7 @@ namespace CastlePlus2.Api.Controllers.Konfiguracja
 {
     [ApiController]
     [Route("api/konfiguracja/[controller]")]
+    [Authorize(Roles = RoleCodes.Admin)]
     public class ZasobyUIController : ControllerBase
     {
         private readonly IMediator _mediator;
