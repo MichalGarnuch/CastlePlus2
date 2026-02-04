@@ -3,6 +3,7 @@ using CastlePlus2.Application.Podmioty.Podmioty.Commands.DeletePodmiot;
 using CastlePlus2.Application.Podmioty.Podmioty.Commands.UpdatePodmiot;
 using CastlePlus2.Application.Podmioty.Podmioty.Queries.GetAllPodmioty;
 using CastlePlus2.Application.Podmioty.Podmioty.Queries.GetPodmiotById;
+using CastlePlus2.Application.Podmioty.Podmioty.Queries.GetPodmiotyPaged;
 using CastlePlus2.Contracts.DTOs.Podmioty;
 using CastlePlus2.Contracts.Requests.Podmioty;
 using MediatR;
@@ -45,6 +46,28 @@ namespace CastlePlus2.Api.Controllers.Podmioty
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
             var result = await _mediator.Send(new GetAllPodmiotyQuery(), ct);
+            return Ok(result);
+        }
+
+        [HttpGet("paged")]
+        [ProducesResponseType(typeof(PodmiotPagedResultDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetPaged(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            [FromQuery] string? searchTerm = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] bool sortDesc = false,
+            CancellationToken ct = default)
+        {
+            var result = await _mediator.Send(new GetPodmiotyPagedQuery
+            {
+                Page = page,
+                PageSize = pageSize,
+                SearchTerm = searchTerm,
+                SortBy = sortBy,
+                SortDesc = sortDesc
+            }, ct);
+
             return Ok(result);
         }
 

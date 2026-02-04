@@ -1,5 +1,10 @@
 ﻿@using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Podmioty
+@using CastlePlus2.Contracts.Requests.Podmioty
+@using CastlePlus2.Client.Services.Common
+@using CastlePlus2.Client.Services.Podmioty
+@inject IPodmiotyService PodmiotyService
+@inject ISnackbar Snackbar
 
 <MudDialog>
     <DialogContent>
@@ -25,6 +30,10 @@
                                   Label="Nazwa"
                                   Required="true"
                                   RequiredError="Nazwa jest wymagana"
+                                  Error="@HasError(nameof(Model.Nazwa))"
+                                  ErrorText="@GetErrorText(nameof(Model.Nazwa))"
+                                  MaxLength="200"
+                                  HelperText="Nazwa podmiotu (max 200 znaków)"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -33,24 +42,46 @@
                                   Label="TypPodmiotu"
                                   Required="true"
                                   RequiredError="TypPodmiotu jest wymagany"
+                                  Error="@HasError(nameof(Model.TypPodmiotu))"
+                                  ErrorText="@GetErrorText(nameof(Model.TypPodmiotu))"
+                                  MaxLength="30"
+                                  HelperText="Np. Osoba / Firma (max 30 znaków)"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="Model.NIP"
                                   Label="NIP"
+                                  Error="@HasError(nameof(Model.NIP))"
+                                  ErrorText="@GetErrorText(nameof(Model.NIP))"
+                                  MaxLength="20"
+                                  Placeholder="Np. 1234567890"
+                                  HelperText="NIP: 10 cyfr"
+                                  InputAttributes="_numericInputAttrs"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="Model.REGON"
                                   Label="REGON"
+                                  Error="@HasError(nameof(Model.REGON))"
+                                  ErrorText="@GetErrorText(nameof(Model.REGON))"
+                                  MaxLength="20"
+                                  Placeholder="Np. 123456789 lub 12345678901234"
+                                  HelperText="REGON: 9 lub 14 cyfr"
+                                  InputAttributes="_numericInputAttrs"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="Model.PESEL"
                                   Label="PESEL"
+                                  Error="@HasError(nameof(Model.PESEL))"
+                                  ErrorText="@GetErrorText(nameof(Model.PESEL))"
+                                  MaxLength="11"
+                                  Placeholder="Np. 44051401359"
+                                  HelperText="PESEL: 11 cyfr"
+                                  InputAttributes="_numericInputAttrs"
                                   Margin="Margin.Dense" />
                 </MudItem>
             </MudGrid>
@@ -72,6 +103,14 @@
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
+    private readonly Dictionary<string, string> _fieldErrors = new(StringComparer.OrdinalIgnoreCase);
+
+    // Wersjo-niezależne “numeryczne” zachowanie na mobile (bez InputType/InputMode enumów).
+    private static readonly Dictionary<string, object> _numericInputAttrs = new()
+    {
+        ["inputmode"] = "numeric",
+        ["pattern"] = "[0-9]*"
+    };
 
     private void Cancel() => MudDialog.Cancel();
 
@@ -82,9 +121,71 @@
         await _form.Validate();
         if (!_form.IsValid) return;
 
+        _fieldErrors.Clear();
+
         Model.Nazwa = Model.Nazwa.Trim();
         Model.TypPodmiotu = Model.TypPodmiotu.Trim();
+        Model.NIP = Model.NIP?.Trim();
+        Model.REGON = Model.REGON?.Trim();
+        Model.PESEL = Model.PESEL?.Trim();
 
-        MudDialog.Close(DialogResult.Ok(Model));
+        try
+        {
+            if (_isEdit)
+            {
+                var request = new UpdatePodmiotRequest
+                {
+                    Nazwa = Model.Nazwa,
+                    TypPodmiotu = Model.TypPodmiotu,
+                    NIP = Model.NIP,
+                    REGON = Model.REGON,
+                    PESEL = Model.PESEL
+                };
+
+                await PodmiotyService.UpdateAsync(Model.IdPodmiotu, request);
+                MudDialog.Close(DialogResult.Ok(new PodmiotDialogResult(Model.IdPodmiotu, true)));
+            }
+            else
+            {
+                var request = new CreatePodmiotRequest
+                {
+                    Nazwa = Model.Nazwa,
+                    TypPodmiotu = Model.TypPodmiotu,
+                    NIP = Model.NIP,
+                    REGON = Model.REGON,
+                    PESEL = Model.PESEL
+                };
+
+                var created = await PodmiotyService.CreateAsync(request);
+                MudDialog.Close(DialogResult.Ok(new PodmiotDialogResult(created.IdPodmiotu, false)));
+            }
+        }
+        catch (ApiValidationException ex)
+        {
+            ApplyFieldErrors(ex.Errors);
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd zapisu podmiotu: {ex.Message}", Severity.Error);
+        }
     }
+
+    private bool HasError(string field) => _fieldErrors.ContainsKey(field);
+
+    private string? GetErrorText(string field)
+        => _fieldErrors.TryGetValue(field, out var text) ? text : null;
+
+    private void ApplyFieldErrors(IReadOnlyDictionary<string, string[]> errors)
+    {
+        _fieldErrors.Clear();
+
+        foreach (var (key, messages) in errors)
+        {
+            if (messages.Length == 0) continue;
+            _fieldErrors[key] = string.Join(" ", messages);
+        }
+    }
+
+    public sealed record PodmiotDialogResult(long IdPodmiotu, bool IsEdit);
 }

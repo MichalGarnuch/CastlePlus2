@@ -29,6 +29,43 @@ namespace CastlePlus2.Infrastructure.Repositories.Podmioty
             return _db.Podmioty.OrderBy(x => x.IdPodmiotu).ToListAsync(ct);
         }
 
+        public async Task<(List<Podmiot> Items, int TotalCount)> GetPagedAsync(
+            int page,
+            int pageSize,
+            string? searchTerm,
+            string? sortBy,
+            bool sortDesc,
+            CancellationToken ct)
+        {
+            var query = _db.Podmioty.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var term = searchTerm.Trim();
+                query = query.Where(x =>
+                    x.Nazwa.Contains(term)
+                    || x.TypPodmiotu.Contains(term)
+                    || (x.NIP != null && x.NIP.Contains(term))
+                    || (x.REGON != null && x.REGON.Contains(term))
+                    || (x.PESEL != null && x.PESEL.Contains(term)));
+            }
+
+            query = sortBy switch
+            {
+                "Nazwa" => sortDesc ? query.OrderByDescending(x => x.Nazwa) : query.OrderBy(x => x.Nazwa),
+                "TypPodmiotu" => sortDesc ? query.OrderByDescending(x => x.TypPodmiotu) : query.OrderBy(x => x.TypPodmiotu),
+                "NIP" => sortDesc ? query.OrderByDescending(x => x.NIP) : query.OrderBy(x => x.NIP),
+                "REGON" => sortDesc ? query.OrderByDescending(x => x.REGON) : query.OrderBy(x => x.REGON),
+                "PESEL" => sortDesc ? query.OrderByDescending(x => x.PESEL) : query.OrderBy(x => x.PESEL),
+                _ => sortDesc ? query.OrderByDescending(x => x.IdPodmiotu) : query.OrderBy(x => x.IdPodmiotu)
+            };
+
+            var total = await query.CountAsync(ct);
+            var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(ct);
+
+            return (items, total);
+        }
+
         public Task<int> SaveChangesAsync(CancellationToken ct)
         {
             return _db.SaveChangesAsync(ct);

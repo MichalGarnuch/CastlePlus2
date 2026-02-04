@@ -3,7 +3,6 @@
 
 @using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Podmioty
-@using CastlePlus2.Contracts.Requests.Podmioty
 @using CastlePlus2.Client.Services.Podmioty
 @inject IPodmiotyService PodmiotyService
 @inject IDialogService DialogService
@@ -12,20 +11,23 @@
 <MudText Typo="Typo.h4" Class="fw-700 mb-4">Podmioty</MudText>
 
 <MudPaper Class="pa-4">
-    <MudTable Items="_items"
+    <MudTable T="PodmiotDto"
+              ServerData="LoadServerData"
               RowsPerPage="20"
               RowsPerPageOptions="new int[] { 20, 50, 100 }"
               Dense="true"
               Hover="true"
               Bordered="true"
               Striped="true"
-              Filter="FilterFunc"
-              Loading="_loading">
+              Loading="_loading"
+              @ref="_table">
+
         <ToolBarContent>
             <MudText Typo="Typo.h6">Lista Podmiotów</MudText>
             <MudSpacer />
 
-            <MudTextField @bind-Value="_search"
+            <MudTextField Value="_search"
+                          ValueChanged="@_searchChangedCallback"
                           Placeholder="Szukaj..."
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Search"
@@ -49,12 +51,12 @@
         </ToolBarContent>
 
         <HeaderContent>
-            <MudTh>Id</MudTh>
-            <MudTh>Nazwa</MudTh>
-            <MudTh>Typ</MudTh>
-            <MudTh>NIP</MudTh>
-            <MudTh>REGON</MudTh>
-            <MudTh>PESEL</MudTh>
+            <MudTh SortLabel="IdPodmiotu">Id</MudTh>
+            <MudTh SortLabel="Nazwa">Nazwa</MudTh>
+            <MudTh SortLabel="TypPodmiotu">Typ</MudTh>
+            <MudTh SortLabel="NIP">NIP</MudTh>
+            <MudTh SortLabel="REGON">REGON</MudTh>
+            <MudTh SortLabel="PESEL">PESEL</MudTh>
             <MudTh></MudTh>
         </HeaderContent>
 
@@ -91,48 +93,64 @@
 </MudPaper>
 
 @code {
-    private List<PodmiotDto> _items = new();
     private string _search = string.Empty;
-    private bool _loading = true; // 2. DODANO ZMIENNĄ (startuje jako true)
+    private bool _loading = false;
+    private MudTable<PodmiotDto>? _table;
 
-    protected override async Task OnInitializedAsync()
+    private EventCallback<string> _searchChangedCallback;
+
+    protected override void OnInitialized()
     {
+        // Jawna konwersja method-group → EventCallback<string> (usuwa CS1503).
+        _searchChangedCallback = EventCallback.Factory.Create<string>(this, OnSearchChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
         await ReloadAsync();
     }
 
     private async Task ReloadAsync()
     {
-        // 3. OBSŁUGA STANU ŁADOWANIA
+        if (_table is null) return;
+        await _table.ReloadServerData();
+    }
+
+    private async Task<TableData<PodmiotDto>> LoadServerData(TableState state, CancellationToken token)
+    {
         _loading = true;
         try
         {
-            var data = await PodmiotyService.GetAllAsync();
-            _items = (data ?? new List<PodmiotDto>()).ToList();
-            await InvokeAsync(StateHasChanged);
+            var result = await PodmiotyService.GetPagedAsync(
+                state.Page + 1, // zostawiamy 1-based; jeśli API ma 0-based, usuń +1
+                state.PageSize,
+                _search,
+                state.SortLabel,
+                state.SortDirection == SortDirection.Descending);
+
+            return new TableData<PodmiotDto>
+            {
+                Items = result.Items,
+                TotalItems = result.TotalCount
+            };
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania podmiotów: {ex.Message}", Severity.Error);
+            return new TableData<PodmiotDto> { Items = Array.Empty<PodmiotDto>(), TotalItems = 0 };
         }
         finally
         {
-            _loading = false; // Zawsze wyłącz na końcu
+            _loading = false;
         }
     }
 
-    private bool FilterFunc(PodmiotDto item)
+    private async Task OnSearchChanged(string value)
     {
-        if (string.IsNullOrWhiteSpace(_search))
-            return true;
-
-        var s = _search.Trim();
-
-        return item.IdPodmiotu.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
-               || item.Nazwa.Contains(s, StringComparison.OrdinalIgnoreCase)
-               || item.TypPodmiotu.Contains(s, StringComparison.OrdinalIgnoreCase)
-               || (item.NIP?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
-               || (item.REGON?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
-               || (item.PESEL?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false);
+        _search = value ?? string.Empty;
+        if (_table is not null)
+            await _table.ReloadServerData();
     }
 
     private async Task CreateAsync()
@@ -148,27 +166,10 @@
         var dialog = await DialogService.ShowAsync<PodmiotDialog>("Dodaj podmiot", parameters, options);
         var result = await dialog.Result;
 
-        if (!result.Canceled && result.Data is PodmiotDto model)
+        if (!result.Canceled && result.Data is PodmiotDialog.PodmiotDialogResult dialogResult)
         {
-            try
-            {
-                var request = new CreatePodmiotRequest
-                {
-                    Nazwa = model.Nazwa,
-                    TypPodmiotu = model.TypPodmiotu,
-                    NIP = model.NIP,
-                    REGON = model.REGON,
-                    PESEL = model.PESEL
-                };
-
-                var created = await PodmiotyService.CreateAsync(request);
-                Snackbar.Add($"Dodano podmiot (Id={created.IdPodmiotu}).", Severity.Success);
-                await ReloadAsync();
-            }
-            catch (Exception ex)
-            {
-                Snackbar.Add($"Błąd dodawania: {ex.Message}", Severity.Error);
-            }
+            Snackbar.Add($"Dodano podmiot (Id={dialogResult.IdPodmiotu}).", Severity.Success);
+            await ReloadAsync();
         }
     }
 
@@ -195,33 +196,10 @@
         var dialog = await DialogService.ShowAsync<PodmiotDialog>("Edytuj podmiot", parameters, options);
         var result = await dialog.Result;
 
-        if (!result.Canceled && result.Data is PodmiotDto model)
+        if (!result.Canceled && result.Data is PodmiotDialog.PodmiotDialogResult)
         {
-            try
-            {
-                var request = new UpdatePodmiotRequest
-                {
-                    Nazwa = model.Nazwa,
-                    TypPodmiotu = model.TypPodmiotu,
-                    NIP = model.NIP,
-                    REGON = model.REGON,
-                    PESEL = model.PESEL
-                };
-
-                var ok = await PodmiotyService.UpdateAsync(model.IdPodmiotu, request);
-                if (!ok)
-                {
-                    Snackbar.Add("Nie znaleziono rekordu do edycji (404).", Severity.Warning);
-                    return;
-                }
-
-                Snackbar.Add("Zapisano zmiany.", Severity.Success);
-                await ReloadAsync();
-            }
-            catch (Exception ex)
-            {
-                Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
-            }
+            Snackbar.Add("Zapisano zmiany.", Severity.Success);
+            await ReloadAsync();
         }
     }
 

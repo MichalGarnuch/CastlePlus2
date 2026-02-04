@@ -1,8 +1,12 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Linq;
+using CastlePlus2.Client.Services.Common;
 using CastlePlus2.Contracts.DTOs.Podmioty;
 using CastlePlus2.Contracts.Requests.Podmioty;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CastlePlus2.Client.Services.Podmioty
 {
@@ -28,6 +32,39 @@ namespace CastlePlus2.Client.Services.Podmioty
             return await resp.Content.ReadFromJsonAsync<List<PodmiotDto>>(cancellationToken: ct) ?? new();
         }
 
+        public async Task<PodmiotPagedResultDto> GetPagedAsync(
+            int page,
+            int pageSize,
+            string? searchTerm,
+            string? sortBy,
+            bool sortDesc,
+            CancellationToken ct = default)
+        {
+            var url = $"{BaseUrl}/paged?page={page}&pageSize={pageSize}";
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+                url += $"&searchTerm={Uri.EscapeDataString(searchTerm)}";
+
+            if (!string.IsNullOrWhiteSpace(sortBy))
+                url += $"&sortBy={Uri.EscapeDataString(sortBy)}&sortDesc={sortDesc}";
+
+            using var req = new HttpRequestMessage(HttpMethod.Get, url);
+            req.Headers.CacheControl = new CacheControlHeaderValue { NoCache = true, NoStore = true };
+            req.Headers.Pragma.ParseAdd("no-cache");
+
+            var resp = await _http.SendAsync(req, ct);
+            resp.EnsureSuccessStatusCode();
+
+            return await resp.Content.ReadFromJsonAsync<PodmiotPagedResultDto>(cancellationToken: ct)
+                   ?? new PodmiotPagedResultDto();
+        }
+
+        public async Task<List<PodmiotDto>> SearchAsync(string searchTerm, int take, CancellationToken ct = default)
+        {
+            var result = await GetPagedAsync(1, take, searchTerm, "Nazwa", false, ct);
+            return result.Items;
+        }
+
         public async Task<PodmiotDto?> GetByIdAsync(long id, CancellationToken ct = default)
         {
             using var req = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/{id}");
@@ -44,16 +81,37 @@ namespace CastlePlus2.Client.Services.Podmioty
         public async Task<PodmiotDto> CreateAsync(CreatePodmiotRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PostAsJsonAsync(BaseUrl, request, ct);
-            resp.EnsureSuccessStatusCode();
-            var dto = await resp.Content.ReadFromJsonAsync<PodmiotDto>(cancellationToken: ct);
-            return dto!;
+            if (resp.IsSuccessStatusCode)
+            {
+                var dto = await resp.Content.ReadFromJsonAsync<PodmiotDto>(cancellationToken: ct);
+                return dto!;
+            }
+
+            if (resp.StatusCode == HttpStatusCode.BadRequest)
+            {
+                var errors = await TryReadValidationErrorsAsync(resp, ct);
+                if (errors != null)
+                    throw new ApiValidationException("Błąd walidacji danych podmiotu.", errors);
+            }
+
+            await ThrowForErrorAsync(resp, "Nie udało się dodać podmiotu.", ct);
+            return null!;
         }
 
         public async Task<bool> UpdateAsync(long id, UpdatePodmiotRequest request, CancellationToken ct = default)
         {
             var resp = await _http.PutAsJsonAsync($"{BaseUrl}/{id}", request, ct);
             if (resp.StatusCode == HttpStatusCode.NotFound) return false;
-            resp.EnsureSuccessStatusCode();
+            if (resp.IsSuccessStatusCode) return true;
+
+            if (resp.StatusCode == HttpStatusCode.BadRequest)
+            {
+                var errors = await TryReadValidationErrorsAsync(resp, ct);
+                if (errors != null)
+                    throw new ApiValidationException("Błąd walidacji danych podmiotu.", errors);
+            }
+
+            await ThrowForErrorAsync(resp, "Nie udało się zapisać zmian podmiotu.", ct);
             return true;
         }
 
@@ -63,6 +121,60 @@ namespace CastlePlus2.Client.Services.Podmioty
             if (resp.StatusCode == HttpStatusCode.NotFound) return false;
             resp.EnsureSuccessStatusCode();
             return true;
+        }
+
+        private static async Task<IReadOnlyDictionary<string, string[]>?> TryReadValidationErrorsAsync(
+            HttpResponseMessage response,
+            CancellationToken ct)
+        {
+            try
+            {
+                var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: ct);
+                if (json.ValueKind != JsonValueKind.Object)
+                    return null;
+
+                if (json.TryGetProperty("errors", out var errors) && errors.ValueKind == JsonValueKind.Object)
+                {
+                    var dict = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+
+                    foreach (var field in errors.EnumerateObject())
+                    {
+                        if (field.Value.ValueKind != JsonValueKind.Array)
+                            continue;
+
+                        var messages = field.Value.EnumerateArray()
+                            .Select(x => x.GetString())
+                            .Where(x => !string.IsNullOrWhiteSpace(x))
+                            .Select(x => x!)
+                            .ToArray();
+
+                        if (messages.Length > 0)
+                            dict[field.Name] = messages;
+                    }
+
+                    return dict.Count > 0 ? dict : null;
+                }
+            }
+            catch (JsonException) { }
+            catch (NotSupportedException) { }
+
+            return null;
+        }
+
+        private static async Task ThrowForErrorAsync(HttpResponseMessage response, string fallbackMessage, CancellationToken ct)
+        {
+            string? message = null;
+
+            try
+            {
+                var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(cancellationToken: ct);
+                if (!string.IsNullOrWhiteSpace(problem?.Detail)) message = problem.Detail;
+                else if (!string.IsNullOrWhiteSpace(problem?.Title)) message = problem.Title;
+            }
+            catch { }
+
+            message ??= fallbackMessage;
+            throw new InvalidOperationException(message);
         }
     }
 }

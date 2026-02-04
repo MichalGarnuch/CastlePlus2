@@ -406,3 +406,44 @@ Content-Type: application/json
 
 ### [KONFIGURACJA] Public read model
 GET {{baseUrl}}/api/konfiguracja/zasobyui/public?typ=NEWS&kategoria=HOME&jezyk=pl-PL
+### [PODMIOTY] Manual test: POST -> GET -> PUT -> GET -> DELETE -> GET
+# POST
+POST {{baseUrl}}/api/podmioty/podmioty
+Content-Type: application/json
+
+{
+  "nazwa": "Testowy Podmiot",
+  "typPodmiotu": "Firma",
+  "nip": "1234567890",
+  "regon": "123456789",
+  "pesel": ""
+}
+
+###
+# GET (podmieñ {id} na IdPodmiotu z POST)
+GET {{baseUrl}}/api/podmioty/podmioty/{id}
+
+###
+# PUT
+PUT {{baseUrl}}/api/podmioty/podmioty/{id}
+Content-Type: application/json
+
+{
+  "nazwa": "Testowy Podmiot Aktualizacja",
+  "typPodmiotu": "Firma",
+  "nip": "1234567890",
+  "regon": "12345678901234",
+  "pesel": ""
+}
+
+###
+# GET
+GET {{baseUrl}}/api/podmioty/podmioty/{id}
+
+###
+# DELETE
+DELETE {{baseUrl}}/api/podmioty/podmioty/{id}
+
+###
+# GET (powinno zwróciæ 404)
+GET {{baseUrl}}/api/podmioty/podmioty/{id}
