@@ -1,5 +1,9 @@
-﻿@using CastlePlus2.Contracts.DTOs.Slowniki
+﻿﻿@using CastlePlus2.Client.Services.Common
+@using CastlePlus2.Client.Services.Slowniki
+@using CastlePlus2.Contracts.Requests.Slownik
 @using MudBlazor
+@inject IWalutyService Service
+@inject ISnackbar Snackbar
 
 <MudDialog>
     <DialogContent>
@@ -17,7 +21,9 @@
                                       Required="true"
                                       Immediate="true"
                                       MaxLength="3"
-                                      HelperText="Dokładnie 3 znaki (np. PLN, EUR)" />
+                                      HelperText="Dokładnie 3 znaki"
+                                      Error="@HasError(nameof(KodWaluty))"
+                                      ErrorText="@GetErrorText(nameof(KodWaluty))" />
                     }
                     else
                     {
@@ -32,7 +38,10 @@
                                   Label="Nazwa"
                                   Required="true"
                                   Immediate="true"
-                                  MaxLength="50" />
+                                  MaxLength="50"
+                                  HelperText="Maks. 50 znaków"
+                                  Error="@HasError(nameof(Nazwa))"
+                                  ErrorText="@GetErrorText(nameof(Nazwa))" />
                 </MudItem>
             </MudGrid>
         </MudForm>
@@ -54,6 +63,7 @@
 
     private MudForm _form = default!;
     private bool _isCreate => IsCreate;
+    private readonly Dictionary<string, string> _fieldErrors = new(StringComparer.OrdinalIgnoreCase);
 
     private void Cancel() => MudDialog.Cancel();
 
@@ -62,15 +72,55 @@
         await _form.Validate();
         if (!_form.IsValid) return;
 
+        _fieldErrors.Clear();
+
         KodWaluty = (KodWaluty ?? string.Empty).Trim().ToUpperInvariant();
         Nazwa = (Nazwa ?? string.Empty).Trim();
 
-        if (_isCreate && KodWaluty.Length != 3)
-            return; // Required + MaxLength już łapią, to jest dodatkowy bezpiecznik.
-
-        MudDialog.Close(DialogResult.Ok(new WalutaDto
+        try
         {
-            KodWaluty = KodWaluty,
-            Nazwa = Nazwa
-        }));    }
+            if (_isCreate)
+            {
+                await Service.CreateAsync(new CreateWalutaRequest
+                {
+                    KodWaluty = KodWaluty,
+                    Nazwa = Nazwa
+                });
+            }
+            else
+            {
+                await Service.UpdateAsync(KodWaluty, new UpdateWalutaRequest
+                {
+                    Nazwa = Nazwa
+                });
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (ApiValidationException ex)
+        {
+            ApplyFieldErrors(ex.Errors);
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd zapisu waluty: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private bool HasError(string field) => _fieldErrors.ContainsKey(field);
+
+    private string? GetErrorText(string field)
+        => _fieldErrors.TryGetValue(field, out var text) ? text : null;
+
+    private void ApplyFieldErrors(IReadOnlyDictionary<string, string[]> errors)
+    {
+        _fieldErrors.Clear();
+
+        foreach (var (key, messages) in errors)
+        {
+            if (messages.Length == 0) continue;
+            _fieldErrors[key] = string.Join(" ", messages);
+        }
+    }
 }

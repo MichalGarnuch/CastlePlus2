@@ -1,7 +1,8 @@
-﻿@using CastlePlus2.Client.Services.Slowniki
-@using CastlePlus2.Contracts.DTOs.Slowniki
+﻿﻿@using CastlePlus2.Client.Services.Common
+@using CastlePlus2.Client.Services.Slowniki
 @using CastlePlus2.Contracts.Requests.Slownik
 @inject IIndeksacjeService Service
+@inject ISnackbar Snackbar
 
 <MudDialog Class="glass-panel">
     <DialogContent>
@@ -16,21 +17,30 @@
                                   Label="Kod indeksacji"
                                   Required="true"
                                   Disabled="@_isEdit"
-                                  MaxLength="20" />
+                                  MaxLength="20"
+                                  HelperText="Maks. 20 znaków"
+                                  Error="@HasError("KodIndeksacji")"
+                                  ErrorText="@GetErrorText("KodIndeksacji")" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="_nazwa"
                                   Label="Nazwa"
                                   Required="true"
-                                  MaxLength="100" />
+                                  MaxLength="100"
+                                  HelperText="Maks. 100 znaków"
+                                  Error="@HasError("Nazwa")"
+                                  ErrorText="@GetErrorText("Nazwa")" />
                 </MudItem>
 
                 <MudItem xs="12">
                     <MudTextField @bind-Value="_url"
                                   Label="Adres źródła URL"
                                   Required="false"
-                                  MaxLength="400" />
+                                  MaxLength="400"
+                                  HelperText="Maks. 400 znaków"
+                                  Error="@HasError("AdresZrodlaURL")"
+                                  ErrorText="@GetErrorText("AdresZrodlaURL")" />
                 </MudItem>
             </MudGrid>
         </MudForm>
@@ -53,6 +63,7 @@
     private string _kod = string.Empty;
     private string _nazwa = string.Empty;
     private string? _url;
+    private readonly Dictionary<string, string> _fieldErrors = new(StringComparer.OrdinalIgnoreCase);
 
     private bool _isEdit => !string.IsNullOrWhiteSpace(KodIndeksacji);
 
@@ -73,24 +84,60 @@
         await _form.Validate();
         if (!_form.IsValid) return;
 
-        if (_isEdit)
-        {
-            await Service.UpdateAsync(_kod, new UpdateIndeksacjaRequest
-            {
-                Nazwa = _nazwa,
-                AdresZrodlaURL = _url
-            });
-        }
-        else
-        {
-            await Service.CreateAsync(new CreateIndeksacjaRequest
-            {
-                KodIndeksacji = _kod,
-                Nazwa = _nazwa,
-                AdresZrodlaURL = _url
-            });
-        }
 
-        MudDialog.Close(DialogResult.Ok(true));
+
+        _fieldErrors.Clear();
+
+        try
+        {
+            _kod = _kod.Trim();
+            _nazwa = _nazwa.Trim();
+            _url = string.IsNullOrWhiteSpace(_url) ? null : _url.Trim();
+
+            if (_isEdit)
+            {
+                await Service.UpdateAsync(_kod, new UpdateIndeksacjaRequest
+                {
+                    Nazwa = _nazwa,
+                    AdresZrodlaURL = _url
+                });
+            }
+            else
+            {
+                await Service.CreateAsync(new CreateIndeksacjaRequest
+                {
+                    KodIndeksacji = _kod,
+                    Nazwa = _nazwa,
+                    AdresZrodlaURL = _url
+                });
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (ApiValidationException ex)
+        {
+            ApplyFieldErrors(ex.Errors);
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd zapisu indeksacji: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private bool HasError(string field) => _fieldErrors.ContainsKey(field);
+
+    private string? GetErrorText(string field)
+        => _fieldErrors.TryGetValue(field, out var text) ? text : null;
+
+    private void ApplyFieldErrors(IReadOnlyDictionary<string, string[]> errors)
+    {
+        _fieldErrors.Clear();
+
+        foreach (var (key, messages) in errors)
+        {
+            if (messages.Length == 0) continue;
+            _fieldErrors[key] = string.Join(" ", messages);
+        }
     }
 }

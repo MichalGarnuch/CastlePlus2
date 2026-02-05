@@ -4,7 +4,6 @@
 @using MudBlazor
 @using CastlePlus2.Client.Services.Slowniki
 @using CastlePlus2.Contracts.DTOs.Slowniki
-@using CastlePlus2.Contracts.Requests.Slownik
 @inject IWalutyService Service
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
@@ -134,22 +133,8 @@
         var result = await dialog.Result;
         if (result.Canceled) return;
 
-        var dto = (WalutaDto)result.Data!;
-        try
-        {
-            await Service.CreateAsync(new CreateWalutaRequest
-            {
-                KodWaluty = dto.KodWaluty,
-                Nazwa = dto.Nazwa
-            });
-
-            Snackbar.Add("Dodano.", Severity.Success);
-            await ReloadAsync();
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Błąd dodawania: {ex.Message}", Severity.Error);
-        }
+        Snackbar.Add("Dodano.", Severity.Success);
+        await ReloadAsync();
     }
 
     private async Task EditAsync(WalutaDto item)
@@ -172,21 +157,8 @@
         var result = await dialog.Result;
         if (result.Canceled) return;
 
-        var dto = (WalutaDto)result.Data!;
-        try
-        {
-            await Service.UpdateAsync(item.KodWaluty, new UpdateWalutaRequest
-            {
-                Nazwa = dto.Nazwa
-            });
-
-            Snackbar.Add("Zapisano.", Severity.Success);
-            await ReloadAsync();
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Błąd edycji: {ex.Message}", Severity.Error);
-        }
+        Snackbar.Add("Zapisano.", Severity.Success);
+        await ReloadAsync();
     }
 
     private async Task DeleteAsync(WalutaDto item)

@@ -447,3 +447,115 @@ DELETE {{baseUrl}}/api/podmioty/podmioty/{id}
 ###
 # GET (powinno zwróciæ 404)
 GET {{baseUrl}}/api/podmioty/podmioty/{id}
+### [SLOWNIKI] WALUTA - POST valid
+POST {{CastlePlus2.Api_HostAddress}}/api/slowniki/Waluty
+Content-Type: application/json
+
+{
+  "kodWaluty": "TST",
+  "nazwa": "Waluta testowa"
+}
+
+### [SLOWNIKI] WALUTA - POST invalid
+POST {{CastlePlus2.Api_HostAddress}}/api/slowniki/Waluty
+Content-Type: application/json
+
+{
+  "kodWaluty": "",
+  "nazwa": ""
+}
+
+### [SLOWNIKI] WALUTA - GET by kod
+GET {{CastlePlus2.Api_HostAddress}}/api/slowniki/Waluty/TST
+Accept: application/json
+
+### [SLOWNIKI] WALUTA - PUT
+PUT {{CastlePlus2.Api_HostAddress}}/api/slowniki/Waluty/TST
+Content-Type: application/json
+
+{
+  "nazwa": "Waluta testowa 2"
+}
+
+### [SLOWNIKI] WALUTA - DELETE
+DELETE {{CastlePlus2.Api_HostAddress}}/api/slowniki/Waluty/TST
+
+### [SLOWNIKI] WALUTA - GET po DELETE
+GET {{CastlePlus2.Api_HostAddress}}/api/slowniki/Waluty/TST
+Accept: application/json
+
+### [SLOWNIKI] JEDNOSTKA MIARY - POST valid
+POST {{CastlePlus2.Api_HostAddress}}/api/slowniki/JednostkiMiary
+Content-Type: application/json
+
+{
+  "kodJednostki": "JM_TEST",
+  "nazwa": "Jednostka testowa"
+}
+
+### [SLOWNIKI] JEDNOSTKA MIARY - POST invalid
+POST {{CastlePlus2.Api_HostAddress}}/api/slowniki/JednostkiMiary
+Content-Type: application/json
+
+{
+  "kodJednostki": "",
+  "nazwa": ""
+}
+
+### [SLOWNIKI] JEDNOSTKA MIARY - GET by kod
+GET {{CastlePlus2.Api_HostAddress}}/api/slowniki/JednostkiMiary/JM_TEST
+Accept: application/json
+
+### [SLOWNIKI] JEDNOSTKA MIARY - PUT
+PUT {{CastlePlus2.Api_HostAddress}}/api/slowniki/JednostkiMiary/JM_TEST
+Content-Type: application/json
+
+{
+  "nazwa": "Jednostka testowa 2"
+}
+
+### [SLOWNIKI] JEDNOSTKA MIARY - DELETE
+DELETE {{CastlePlus2.Api_HostAddress}}/api/slowniki/JednostkiMiary/JM_TEST
+
+### [SLOWNIKI] JEDNOSTKA MIARY - GET po DELETE
+GET {{CastlePlus2.Api_HostAddress}}/api/slowniki/JednostkiMiary/JM_TEST
+Accept: application/json
+
+### [SLOWNIKI] INDEKSACJA - POST valid
+POST {{CastlePlus2.Api_HostAddress}}/api/slowniki/Indeksacje
+Content-Type: application/json
+
+{
+  "kodIndeksacji": "IND_TEST",
+  "nazwa": "Indeksacja testowa",
+  "adresZrodlaURL": "https://example.com/index"
+}
+
+### [SLOWNIKI] INDEKSACJA - POST invalid
+POST {{CastlePlus2.Api_HostAddress}}/api/slowniki/Indeksacje
+Content-Type: application/json
+
+{
+  "kodIndeksacji": "",
+  "nazwa": ""
+}
+
+### [SLOWNIKI] INDEKSACJA - GET by kod
+GET {{CastlePlus2.Api_HostAddress}}/api/slowniki/Indeksacje/IND_TEST
+Accept: application/json
+
+### [SLOWNIKI] INDEKSACJA - PUT
+PUT {{CastlePlus2.Api_HostAddress}}/api/slowniki/Indeksacje/IND_TEST
+Content-Type: application/json
+
+{
+  "nazwa": "Indeksacja testowa 2",
+  "adresZrodlaURL": null
+}
+
+### [SLOWNIKI] INDEKSACJA - DELETE
+DELETE {{CastlePlus2.Api_HostAddress}}/api/slowniki/Indeksacje/IND_TEST
+
+### [SLOWNIKI] INDEKSACJA - GET po DELETE
+GET {{CastlePlus2.Api_HostAddress}}/api/slowniki/Indeksacje/IND_TEST
+Accept: application/json
