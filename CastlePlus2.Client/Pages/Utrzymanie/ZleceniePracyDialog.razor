@@ -4,10 +4,6 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isReadOnly ? "Podgląd zlecenia pracy" : _isEdit ? "Edycja zlecenia pracy" : "Nowe zlecenie pracy")
-            </MudText>
-
             <MudGrid Spacing="2">
                 @if (_isEdit)
                 {
@@ -24,7 +20,7 @@
                                   Label="IdEncjiGospodarza (GUID)"
                                   Required="true"
                                   RequiredError="IdEncjiGospodarza jest wymagane"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -34,7 +30,7 @@
                                   Required="true"
                                   RequiredError="Tytuł jest wymagany"
                                   MaxLength="200"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -44,16 +40,25 @@
                                   Required="true"
                                   RequiredError="Status jest wymagany"
                                   MaxLength="20"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
-                    <MudDatePicker Label="Data zamknięcia (opcjonalnie)"
-                                   Date="_dataZamkniecia"
-                                   DateChanged="OnDataZamknieciaChanged"
-                                   Disabled="IsReadOnly"
-                                   Margin="Margin.Dense" />
+                    @if (_isReadOnly)
+                    {
+                        <MudTextField Label="Data zamknięcia (opcjonalnie)"
+                                      ReadOnly="true"
+                                      Margin="Margin.Dense"
+                                      Value="@FormatDate(_dataZamkniecia)" />
+                    }
+                    else
+                    {
+                        <MudDatePicker Label="Data zamknięcia (opcjonalnie)"
+                                       Date="_dataZamkniecia"
+                                       DateChanged="OnDataZamknieciaChanged"
+                                       Margin="Margin.Dense" />
+                    }
                 </MudItem>
 
                 <MudItem xs="12">
@@ -61,7 +66,7 @@
                                   Label="Opis (opcjonalnie)"
                                   MaxLength="1000"
                                   Lines="3"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -78,9 +83,14 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
         }
     </DialogActions>
@@ -118,6 +128,11 @@
     }
 
     private void Cancel() => MudDialog.Cancel();
+
+    private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
+
+    private static string FormatDate(DateTime? value)
+        => value?.ToString("yyyy-MM-dd") ?? string.Empty;
 
     private async Task SaveAsync()
     {

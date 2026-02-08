@@ -4,10 +4,6 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isReadOnly ? "Podgląd przypisania" : _isEdit ? "Edycja przypisania" : "Nowe przypisanie")
-            </MudText>
-
             <MudGrid Spacing="2">
                 @if (_isEdit)
                 {
@@ -25,48 +21,80 @@
                                   Required="true"
                                   RequiredError="IdEncji jest wymagane"
                                   Margin="Margin.Dense"
-                                  Disabled="@(_isEdit || _isReadOnly)" />
+                                  ReadOnly="@(_isEdit || _isReadOnly)" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
-                    <MudSelect T="long"
-                               Label="Adres"
-                               @bind-Value="Model.IdAdresu"
-                               Required="true"
-                               RequiredError="Adres jest wymagany"
-                               Disabled="IsReadOnly"
-                               Margin="Margin.Dense">
-                        @foreach (var kv in Adresy)
-                        {
-                            <MudSelectItem Value="@kv.Key">@kv.Value</MudSelectItem>
-                        }
-                    </MudSelect>
+                    @if (_isReadOnly)
+                    {
+                        <MudTextField Label="Adres"
+                                      Margin="Margin.Dense"
+                                      ReadOnly="true"
+                                      Value="@GetAdresLabel(Model.IdAdresu)" />
+                    }
+                    else
+                    {
+                        <MudSelect T="long"
+                                   Label="Adres"
+                                   @bind-Value="Model.IdAdresu"
+                                   Required="true"
+                                   RequiredError="Adres jest wymagany"
+                                   Margin="Margin.Dense">
+                            @foreach (var kv in Adresy)
+                            {
+                                <MudSelectItem Value="@kv.Key">@kv.Value</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
-                    <MudDatePicker Label="Od dnia"
-                                   Date="@_odDnia"
-                                   DateChanged="OnOdDniaChanged"
-                                   Margin="Margin.Dense"
-                                   Disabled="IsReadOnly"
-                                   Required="true" />
+                    @if (_isReadOnly)
+                    {
+                        <MudTextField Label="Od dnia"
+                                      Margin="Margin.Dense"
+                                      ReadOnly="true"
+                                      Value="@FormatDate(_odDnia)" />
+                    }
+                    else
+                    {
+                        <MudDatePicker Label="Od dnia"
+                                       Date="@_odDnia"
+                                       DateChanged="OnOdDniaChanged"
+                                       Margin="Margin.Dense"
+                                       Required="true" />
+                    }
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
-                    <MudDatePicker Label="Do dnia (opcjonalnie)"
-                                   Date="@_doDnia"
-                                   DateChanged="OnDoDniaChanged"
-                                   Disabled="IsReadOnly"
-                                   Margin="Margin.Dense" />
+                    @if (_isReadOnly)
+                    {
+                        <MudTextField Label="Do dnia (opcjonalnie)"
+                                      Margin="Margin.Dense"
+                                      ReadOnly="true"
+                                      Value="@FormatDate(_doDnia)" />
+                    }
+                    else
+                    {
+                        <MudDatePicker Label="Do dnia (opcjonalnie)"
+                                       Date="@_doDnia"
+                                       DateChanged="OnDoDniaChanged"
+                                       Margin="Margin.Dense" />
+                    }
                 </MudItem>
             </MudGrid>
         </MudForm>
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
         }
     </DialogActions>
@@ -100,6 +128,14 @@
     }
 
     private void Cancel() => MudDialog.Cancel();
+
+    private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
+
+    private string GetAdresLabel(long idAdresu)
+        => Adresy.TryGetValue(idAdresu, out var label) ? label : idAdresu.ToString();
+
+    private static string FormatDate(DateTime? value)
+        => value?.ToString("yyyy-MM-dd") ?? string.Empty;
 
     private void OnOdDniaChanged(DateTime? dt)
     {

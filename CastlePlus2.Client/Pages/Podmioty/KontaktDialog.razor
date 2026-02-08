@@ -4,11 +4,6 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isReadOnly ? "Podgląd kontaktu" : _isEdit ? "Edycja kontaktu" : "Nowy kontakt")
-            </MudText>
-
             <MudGrid Spacing="2">
                 @if (_isEdit)
                 {
@@ -21,20 +16,29 @@
                 }
 
                 <MudItem xs="12">
-                    <MudSelect T="long"
-                               Label="Podmiot"
-                               @bind-Value="Model.IdPodmiotu"
-                               Required="true"
-                               RequiredError="Podmiot jest wymagany"
-                               Disabled="IsReadOnly"
-                               Margin="Margin.Dense">
-                        @foreach (var podmiot in Podmioty)
-                        {
-                            <MudSelectItem T="long" Value="@podmiot.IdPodmiotu">
-                                @($"Id={podmiot.IdPodmiotu} / {podmiot.Nazwa}")
-                            </MudSelectItem>
-                        }
-                    </MudSelect>
+                    @if (_isReadOnly)
+                    {
+                        <MudTextField Label="Podmiot"
+                                      Margin="Margin.Dense"
+                                      ReadOnly="true"
+                                      Value="@GetPodmiotLabel(Model.IdPodmiotu)" />
+                    }
+                    else
+                    {
+                        <MudSelect T="long"
+                                   Label="Podmiot"
+                                   @bind-Value="Model.IdPodmiotu"
+                                   Required="true"
+                                   RequiredError="Podmiot jest wymagany"
+                                   Margin="Margin.Dense">
+                            @foreach (var podmiot in Podmioty)
+                            {
+                                <MudSelectItem T="long" Value="@podmiot.IdPodmiotu">
+                                    @($"Id={podmiot.IdPodmiotu} / {podmiot.Nazwa}")
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
@@ -42,7 +46,7 @@
                                   Label="Rodzaj"
                                   Required="true"
                                   RequiredError="Rodzaj jest wymagany"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -51,7 +55,7 @@
                                   Label="Wartosc"
                                   Required="true"
                                   RequiredError="Wartosc jest wymagana"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
             </MudGrid>
@@ -60,9 +64,14 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
         }
     </DialogActions>
@@ -81,6 +90,14 @@
     private bool _isReadOnly => IsReadOnly;
 
     private void Cancel() => MudDialog.Cancel();
+
+    private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
+
+    private string GetPodmiotLabel(long idPodmiotu)
+    {
+        var podmiot = Podmioty.FirstOrDefault(p => p.IdPodmiotu == idPodmiotu);
+        return podmiot is null ? idPodmiotu.ToString() : $"Id={podmiot.IdPodmiotu} / {podmiot.Nazwa}";
+    }
 
     private async Task SaveAsync()
     {

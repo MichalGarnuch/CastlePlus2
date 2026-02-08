@@ -4,10 +4,6 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isReadOnly ? "Podgląd powiązania" : _isCreate ? "Nowe powiązanie" : "Edycja powiązania")
-            </MudText>
-
             <MudGrid Spacing="2">
                 @if (!_isCreate)
                 {
@@ -25,7 +21,7 @@
                                      Required="true"
                                      RequiredError="IdZlecenia jest wymagane"
                                      Margin="Margin.Dense"
-                                     Disabled="IsReadOnly"
+                                     ReadOnly="IsReadOnly"
                                      @bind-Value="_idZlecenia" />
                 </MudItem>
 
@@ -35,7 +31,7 @@
                                   Required="true"
                                   RequiredError="IdEncji jest wymagane"
                                   Margin="Margin.Dense"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Error="_guidInvalid"
                                   ErrorText="Podaj poprawny GUID" />
                 </MudItem>
@@ -44,9 +40,14 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
         }
     </DialogActions>
@@ -75,6 +76,8 @@
     }
 
     private void Cancel() => MudDialog.Cancel();
+
+    private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
 
     private async Task SaveAsync()
     {

@@ -8,10 +8,6 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isReadOnly ? "Podgląd waluty" : _isCreate ? "Nowa waluta" : "Edycja waluty")
-            </MudText>
-
             <MudGrid Spacing="2">
                 <MudItem xs="12" sm="6">
                     @if (_isCreate)
@@ -22,7 +18,7 @@
                                       Immediate="true"
                                       MaxLength="3"
                                       HelperText="Dokładnie 3 znaki"
-                                      Disabled="IsReadOnly"
+                                      ReadOnly="IsReadOnly"
                                       Error="@HasError(nameof(KodWaluty))"
                                       ErrorText="@GetErrorText(nameof(KodWaluty))" />
                     }
@@ -41,7 +37,7 @@
                                   Immediate="true"
                                   MaxLength="50"
                                   HelperText="Maks. 50 znaków"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Error="@HasError(nameof(Nazwa))"
                                   ErrorText="@GetErrorText(nameof(Nazwa))" />
                 </MudItem>
@@ -50,9 +46,14 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
             <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save">Zapisz</MudButton>
         }
     </DialogActions>
@@ -73,6 +74,8 @@
     private readonly Dictionary<string, string> _fieldErrors = new(StringComparer.OrdinalIgnoreCase);
 
     private void Cancel() => MudDialog.Cancel();
+
+    private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
 
     private async Task Save()
     {

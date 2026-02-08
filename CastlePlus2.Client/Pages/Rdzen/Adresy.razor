@@ -277,7 +277,12 @@
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
         var dialog = await DialogService.ShowAsync<AdresDialog>("Podgląd adresu", parameters, options);
-        await dialog.Result;
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is DialogActionResult { Action: DialogAction.Edit })
+        {
+            await EditAsync(item);
+        }
     }
 
 

@@ -4,10 +4,6 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isReadOnly ? "Podgląd nieruchomości" : _isEdit ? "Edycja nieruchomości" : "Nowa nieruchomość")
-            </MudText>
-
             <MudGrid Spacing="2">
                 @if (_isEdit)
                 {
@@ -24,40 +20,58 @@
                                   Label="Nazwa"
                                   Required="true"
                                   RequiredError="Nazwa jest wymagana"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
-                    <MudSelect T="long?"
-                               Label="Adres główny (opcjonalnie)"
-                               @bind-Value="Model.IdAdresuGlownego"
-                               Clearable="true"
-                               Disabled="IsReadOnly"
-                               Margin="Margin.Dense">
-                        <MudSelectItem Value="@((long?)null)">(brak)</MudSelectItem>
+                    @if (_isReadOnly)
+                    {
+                        <MudTextField Label="Adres główny (opcjonalnie)"
+                                      Margin="Margin.Dense"
+                                      ReadOnly="true"
+                                      Value="@GetAdresLabel(Model.IdAdresuGlownego)" />
+                    }
+                    else
+                    {
+                        <MudSelect T="long?"
+                                   Label="Adres główny (opcjonalnie)"
+                                   @bind-Value="Model.IdAdresuGlownego"
+                                   Clearable="true"
+                                   Margin="Margin.Dense">
+                            <MudSelectItem Value="@((long?)null)">(brak)</MudSelectItem>
 
-                        @foreach (var kv in Adresy)
-                        {
-                            <MudSelectItem Value="@((long?)kv.Key)">@kv.Value</MudSelectItem>
-                        }
-                    </MudSelect>
+                            @foreach (var kv in Adresy)
+                            {
+                                <MudSelectItem Value="@((long?)kv.Key)">@kv.Value</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
-                    <MudSelect T="long?"
-                               Label="Właściciel (podmiot) (opcjonalnie)"
-                               @bind-Value="Model.IdPodmiotuWlasciciela"
-                               Clearable="true"
-                               Disabled="IsReadOnly"
-                               Margin="Margin.Dense">
-                        <MudSelectItem Value="@((long?)null)">(brak)</MudSelectItem>
+                    @if (_isReadOnly)
+                    {
+                        <MudTextField Label="Właściciel (podmiot) (opcjonalnie)"
+                                      Margin="Margin.Dense"
+                                      ReadOnly="true"
+                                      Value="@GetPodmiotLabel(Model.IdPodmiotuWlasciciela)" />
+                    }
+                    else
+                    {
+                        <MudSelect T="long?"
+                                   Label="Właściciel (podmiot) (opcjonalnie)"
+                                   @bind-Value="Model.IdPodmiotuWlasciciela"
+                                   Clearable="true"
+                                   Margin="Margin.Dense">
+                            <MudSelectItem Value="@((long?)null)">(brak)</MudSelectItem>
 
-                        @foreach (var kv in Podmioty)
-                        {
-                            <MudSelectItem Value="@((long?)kv.Key)">@kv.Value</MudSelectItem>
-                        }
-                    </MudSelect>
+                            @foreach (var kv in Podmioty)
+                            {
+                                <MudSelectItem Value="@((long?)kv.Key)">@kv.Value</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
                 </MudItem>
             </MudGrid>
 
@@ -65,9 +79,14 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
         }
     </DialogActions>
@@ -89,6 +108,14 @@
     private bool _isReadOnly => IsReadOnly;
 
     private void Cancel() => MudDialog.Cancel();
+
+    private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
+
+    private string GetAdresLabel(long? idAdresu)
+        => idAdresu is null ? "(brak)" : (Adresy.TryGetValue(idAdresu.Value, out var label) ? label : idAdresu.Value.ToString());
+
+    private string GetPodmiotLabel(long? idPodmiotu)
+        => idPodmiotu is null ? "(brak)" : (Podmioty.TryGetValue(idPodmiotu.Value, out var label) ? label : idPodmiotu.Value.ToString());
 
     private async Task SaveAsync()
     {

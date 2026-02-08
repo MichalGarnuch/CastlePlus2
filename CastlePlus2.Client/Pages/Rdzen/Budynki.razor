@@ -5,6 +5,7 @@
 @using CastlePlus2.Client.Services.Rdzen
 @using CastlePlus2.Contracts.DTOs.Rdzen
 @using CastlePlus2.Contracts.Requests.Rdzen
+@using CastlePlus2.Client.Components.Crud
 @inject IBudynkiService BudynkiService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
@@ -246,7 +247,12 @@
 
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
         var dialog = DialogService.Show<BudynekDialog>("Podgląd budynku", parameters, options);
-        await dialog.Result;
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is DialogActionResult { Action: DialogAction.Edit })
+        {
+            await EditAsync(item);
+        }
     }
 
     private async Task DeleteAsync(BudynekDto item)

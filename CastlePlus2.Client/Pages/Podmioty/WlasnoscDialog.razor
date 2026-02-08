@@ -1,20 +1,18 @@
 ﻿@using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Podmioty
+@using CastlePlus2.Client.Components.Crud
 
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isReadOnly ? "Podgląd własności" : _isEdit ? "Edycja własności" : "Nowa własność")
-            </MudText>
-
             <MudGrid Spacing="2">
+
                 @if (_isEdit)
                 {
                     <MudItem xs="12">
-                        <MudTextField Value="@Model.IdWlasnosci.ToString()"
+                        <MudTextField Value="@_model.IdWlasnosci.ToString()"
                                       Label="IdWlasnosci"
-                                      Disabled="true"
+                                      ReadOnly="true"
                                       Margin="Margin.Dense" />
                     </MudItem>
                 }
@@ -24,7 +22,9 @@
                                   Label="IdEncji (GUID)"
                                   Required="true"
                                   RequiredError="IdEncji jest wymagane"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="@_isReadOnly"
+                                  Error="@(!string.IsNullOrWhiteSpace(_idEncjiError))"
+                                  ErrorText="@_idEncjiError"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -34,8 +34,8 @@
                                      Required="true"
                                      RequiredError="IdPodmiotu jest wymagane"
                                      Margin="Margin.Dense"
-                                     Disabled="IsReadOnly"
-                                     @bind-Value="Model.IdPodmiotu" />
+                                     ReadOnly="@_isReadOnly"
+                                     @bind-Value="_model.IdPodmiotu" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
@@ -44,35 +44,60 @@
                                      Required="true"
                                      RequiredError="Udział procent jest wymagany"
                                      Margin="Margin.Dense"
-                                     Disabled="IsReadOnly"
-                                     @bind-Value="Model.UdzialProcent" />
+                                     ReadOnly="@_isReadOnly"
+                                     @bind-Value="_model.UdzialProcent" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
-                    <MudDatePicker Label="Od dnia"
-                                   Date="@_odDnia"
-                                   DateChanged="OnOdDniaChanged"
-                                   Margin="Margin.Dense"
-                                   Disabled="IsReadOnly"
-                                   Required="true" />
+                    @if (_isReadOnly)
+                    {
+                        <MudTextField Label="Od dnia"
+                                      Margin="Margin.Dense"
+                                      ReadOnly="true"
+                                      Value="@FormatDate(_odDnia)" />
+                    }
+                    else
+                    {
+                        <MudDatePicker Label="Od dnia"
+                                       Date="@_odDnia"
+                                       DateChanged="@OnOdDniaChanged"
+                                       Margin="Margin.Dense"
+                                       Required="true"
+                                       RequiredError="Od dnia jest wymagane" />
+                    }
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
-                    <MudDatePicker Label="Do dnia (opcjonalnie)"
-                                   Date="@_doDnia"
-                                   DateChanged="OnDoDniaChanged"
-                                   Disabled="IsReadOnly"
-                                   Margin="Margin.Dense" />
+                    @if (_isReadOnly)
+                    {
+                        <MudTextField Label="Do dnia (opcjonalnie)"
+                                      Margin="Margin.Dense"
+                                      ReadOnly="true"
+                                      Value="@FormatDate(_doDnia)" />
+                    }
+                    else
+                    {
+                        <MudDatePicker Label="Do dnia (opcjonalnie)"
+                                       Date="@_doDnia"
+                                       DateChanged="@OnDoDniaChanged"
+                                       Margin="Margin.Dense" />
+                    }
                 </MudItem>
+
             </MudGrid>
         </MudForm>
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="@Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="@Cancel">Anuluj</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@SaveAsync">Zapisz</MudButton>
         }
     </DialogActions>
 </MudDialog>
@@ -82,63 +107,82 @@
 
     [Parameter] public WlasnoscDto Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
-    [Parameter] public bool IsReadOnly { get; set; } = false;
+    [Parameter] public bool IsReadOnly { get; set; }
 
     private MudForm? _form;
+
     private bool _isEdit => IsEdit;
     private bool _isReadOnly => IsReadOnly;
 
+    private WlasnoscDto _model = new();
     private string _idEncjiText = string.Empty;
+    private string? _idEncjiError;
+
     private DateTime? _odDnia;
     private DateTime? _doDnia;
 
     protected override void OnInitialized()
     {
-        _idEncjiText = Model.IdEncji == Guid.Empty ? string.Empty : Model.IdEncji.ToString();
+        _model = new WlasnoscDto
+        {
+            IdWlasnosci = Model.IdWlasnosci,
+            IdEncji = Model.IdEncji,
+            IdPodmiotu = Model.IdPodmiotu,
+            UdzialProcent = Model.UdzialProcent,
+            OdDnia = Model.OdDnia,
+            DoDnia = Model.DoDnia
+        };
 
-        _odDnia = new DateTime(Model.OdDnia.Year, Model.OdDnia.Month, Model.OdDnia.Day);
-        _doDnia = Model.DoDnia is null
+        _idEncjiText = _model.IdEncji == Guid.Empty ? string.Empty : _model.IdEncji.ToString();
+
+        _odDnia = new DateTime(_model.OdDnia.Year, _model.OdDnia.Month, _model.OdDnia.Day);
+        _doDnia = _model.DoDnia is null
             ? null
-            : new DateTime(Model.DoDnia.Value.Year, Model.DoDnia.Value.Month, Model.DoDnia.Value.Day);
+            : new DateTime(_model.DoDnia.Value.Year, _model.DoDnia.Value.Month, _model.DoDnia.Value.Day);
     }
 
     private void Cancel() => MudDialog.Cancel();
 
+    private void Edit()
+        => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
+
+    private static string FormatDate(DateTime? value)
+        => value?.ToString("yyyy-MM-dd") ?? string.Empty;
+
     private void OnOdDniaChanged(DateTime? dt)
     {
-        if (_isReadOnly)
-            return;
+        if (_isReadOnly) return;
 
         _odDnia = dt;
         if (dt is not null)
-            Model.OdDnia = DateOnly.FromDateTime(dt.Value);
+            _model.OdDnia = DateOnly.FromDateTime(dt.Value);
     }
 
     private void OnDoDniaChanged(DateTime? dt)
     {
-        if (_isReadOnly)
-            return;
+        if (_isReadOnly) return;
 
         _doDnia = dt;
-        Model.DoDnia = dt is null ? null : DateOnly.FromDateTime(dt.Value);
+        _model.DoDnia = dt is null ? null : DateOnly.FromDateTime(dt.Value);
     }
 
     private async Task SaveAsync()
     {
-        if (_isReadOnly)
-            return;
-
+        if (_isReadOnly) return;
         if (_form is null) return;
+
+        _idEncjiError = null;
 
         await _form.Validate();
         if (!_form.IsValid) return;
 
         if (!Guid.TryParse(_idEncjiText?.Trim(), out var guid))
         {
+            _idEncjiError = "Niepoprawny GUID w IdEncji.";
             return;
         }
 
-        Model.IdEncji = guid;
-        MudDialog.Close(DialogResult.Ok(Model));
+        _model.IdEncji = guid;
+        MudDialog.Close(DialogResult.Ok(_model));
     }
 }

@@ -4,9 +4,6 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isReadOnly ? "Podgląd budynku" : _isEdit ? "Edycja budynku" : "Nowy budynek")
-            </MudText>
             <MudGrid Spacing="2">
                 <MudItem xs="12">
                     <MudTextField @bind-Value="Model.KodBudynku"
@@ -15,7 +12,7 @@
                                   RequiredError="Kod jest wymagany"
                                   MaxLength="50"
                                   Variant="Variant.Outlined"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -26,7 +23,7 @@
                                   RequiredError="Musisz podać ID Nieruchomości"
                                   HelperText="Wklej GUID nieruchomości nadrzędnej"
                                   Variant="Variant.Outlined"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -35,7 +32,7 @@
                                      @bind-Value="Model.Kondygnacje"
                                      Label="Kondygnacje"
                                      Variant="Variant.Outlined"
-                                     Disabled="IsReadOnly"
+                                     ReadOnly="IsReadOnly"
                                      Margin="Margin.Dense" />
                 </MudItem>
 
@@ -44,7 +41,7 @@
                                      @bind-Value="Model.PowierzchniaUzytkowa"
                                      Label="Powierzchnia (m²)"
                                      Variant="Variant.Outlined"
-                                     Disabled="IsReadOnly"
+                                     ReadOnly="IsReadOnly"
                                      Margin="Margin.Dense" />
                 </MudItem>
 
@@ -53,7 +50,7 @@
                                      @bind-Value="Model.IdAdresu"
                                      Label="ID Adresu (opcjonalne)"
                                      Variant="Variant.Outlined"
-                                     Disabled="IsReadOnly"
+                                     ReadOnly="IsReadOnly"
                                      Margin="Margin.Dense" />
                 </MudItem>
 
@@ -70,9 +67,14 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
             <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Zapisz</MudButton>
         }
     </DialogActions>
@@ -98,6 +100,8 @@
 
     private void Cancel() => MudDialog.Cancel();
 
+    private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
+
     private async Task Submit()
     {
         if (_isReadOnly)
@@ -120,3 +124,4 @@
         MudDialog.Close(DialogResult.Ok(Model));
     }
 }
+

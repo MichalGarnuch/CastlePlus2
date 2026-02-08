@@ -5,45 +5,58 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isReadOnly ? "Podgląd przyłącza" : _isEdit ? "Edycja przyłącza" : "Nowe przyłącze")
-            </MudText>
-
             <MudGrid Spacing="2">
                 <MudItem xs="12" sm="6">
-                    <MudSelect T="Guid"
-                               Label="Gospodarz (Nieruchomość)"
-                               Dense="true"
-                               Required="true"
-                               Disabled="IsReadOnly"
-                               @bind-Value="_model.IdEncjiGospodarza">
-                        @foreach (var n in _nieruchomosci)
-                        {
-                            <MudSelectItem T="Guid" Value="@n.Id">@n.Nazwa</MudSelectItem>
-                        }
-                    </MudSelect>
+                    @if (_isReadOnly)
+                    {
+                        <MudTextField Label="Gospodarz (Nieruchomość)"
+                                      Dense="true"
+                                      ReadOnly="true"
+                                      Value="@GetNieruchomoscLabel(_model.IdEncjiGospodarza)" />
+                    }
+                    else
+                    {
+                        <MudSelect T="Guid"
+                                   Label="Gospodarz (Nieruchomość)"
+                                   Dense="true"
+                                   Required="true"
+                                   @bind-Value="_model.IdEncjiGospodarza">
+                            @foreach (var n in _nieruchomosci)
+                            {
+                                <MudSelectItem T="Guid" Value="@n.Id">@n.Nazwa</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
-                    <MudSelect T="string"
-                               Label="Rodzaj medium"
-                               Dense="true"
-                               Required="true"
-                               Disabled="IsReadOnly"
-                               @bind-Value="_model.KodRodzaju">
-                        @foreach (var r in _rodzaje)
-                        {
-                            <MudSelectItem T="string" Value="@r.KodRodzaju">@($"{r.Nazwa} ({r.KodRodzaju})")</MudSelectItem>
-                        }
-                    </MudSelect>
+                    @if (_isReadOnly)
+                    {
+                        <MudTextField Label="Rodzaj medium"
+                                      Dense="true"
+                                      ReadOnly="true"
+                                      Value="@GetRodzajLabel(_model.KodRodzaju)" />
+                    }
+                    else
+                    {
+                        <MudSelect T="string"
+                                   Label="Rodzaj medium"
+                                   Dense="true"
+                                   Required="true"
+                                   @bind-Value="_model.KodRodzaju">
+                            @foreach (var r in _rodzaje)
+                            {
+                                <MudSelectItem T="string" Value="@r.KodRodzaju">@($"{r.Nazwa} ({r.KodRodzaju})")</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
                 </MudItem>
 
                 <MudItem xs="12">
                     <MudTextField Label="Opis"
                                   Dense="true"
                                   Lines="3"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   @bind-Value="_model.Opis" />
                 </MudItem>
             </MudGrid>
@@ -51,12 +64,15 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync">
-                Zapisz
-            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync">Zapisz</MudButton>
         }
     </DialogActions>
 </MudDialog>
@@ -94,6 +110,17 @@
     }
 
     private void Cancel() => MudDialog.Cancel();
+
+    private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
+
+    private string GetNieruchomoscLabel(Guid id)
+        => _nieruchomosci.FirstOrDefault(n => n.Id == id)?.Nazwa ?? id.ToString();
+
+    private string GetRodzajLabel(string? kodRodzaju)
+    {
+        var rodzaj = _rodzaje.FirstOrDefault(r => r.KodRodzaju == kodRodzaju);
+        return rodzaj is null ? (kodRodzaju ?? string.Empty) : $"{rodzaj.Nazwa} ({rodzaj.KodRodzaju})";
+    }
 
     private async Task SubmitAsync()
     {

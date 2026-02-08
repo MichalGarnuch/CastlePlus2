@@ -14,10 +14,6 @@
             </MudAlert>
 
             <MudForm @ref="_form">
-                <MudText Typo="Typo.h6" Class="mb-3">
-                    @(_isReadOnly ? "Podgląd jednostki miary" : _isEdit ? "Edycja jednostki miary" : "Nowa jednostka miary")
-                </MudText>
-
                 <MudGrid Spacing="2">
                     <MudItem xs="12" sm="6">
                         <MudTextField @bind-Value="_kod"
@@ -29,7 +25,7 @@
                                       RequiredError="Kod jest wymagany"
                                       Error="@HasError("KodJednostki")"
                                       ErrorText="@GetErrorText("KodJednostki")"
-                                      Disabled="@(_isEdit || _isReadOnly)"
+                                      ReadOnly="@(_isEdit || _isReadOnly)"
                                       MaxLength="20"
                                       Immediate="true" />
                     </MudItem>
@@ -44,7 +40,7 @@
                                       RequiredError="Nazwa jest wymagana"
                                       Error="@HasError("Nazwa")"
                                       ErrorText="@GetErrorText("Nazwa")"
-                                      Disabled="_isReadOnly"
+                                      ReadOnly="_isReadOnly"
                                       MaxLength="100"
                                       Immediate="true" />
                     </MudItem>
@@ -54,12 +50,14 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel" Disabled="_saving">
-            @(_isReadOnly ? "Zamknij" : "Anuluj")
-        </MudButton>
-
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="Cancel" Disabled="_saving">Anuluj</MudButton>
             <MudButton Color="Color.Primary"
                        Variant="Variant.Filled"
                        StartIcon="@Icons.Material.Filled.Save"
@@ -99,6 +97,8 @@
     }
 
     private void Cancel() => MudDialog.Cancel();
+
+    private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
 
     private async Task Save()
     {

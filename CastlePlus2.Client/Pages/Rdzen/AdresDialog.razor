@@ -4,46 +4,41 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isReadOnly ? "Podgląd adresu" : _isEdit ? "Edycja adresu" : "Nowy adres")
-            </MudText>
-
             <MudGrid Spacing="2">
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="Model.Kraj"
                                   Label="Kraj"
                                   Required="true"
                                   RequiredError="Kraj jest wymagany"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="Model.Wojewodztwo"
                                   Label="Województwo"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="Model.Powiat"
                                   Label="Powiat"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="Model.Gmina"
                                   Label="Gmina"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="Model.Miejscowosc"
                                   Label="Miejscowość"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Required="true"
                                   RequiredError="Miejscowość jest wymagana"
                                   Margin="Margin.Dense" />
@@ -52,21 +47,21 @@
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="Model.Ulica"
                                   Label="Ulica"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="Model.Numer"
                                   Label="Numer"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="Model.KodPocztowy"
                                   Label="Kod pocztowy"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -74,7 +69,7 @@
                     <MudTextField @bind-Value="Model.AdresPelny"
                                   Label="Adres pełny (opcjonalnie)"
                                   Lines="3"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -92,18 +87,15 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text"
-                   OnClick="Cancel">
-            @(_isReadOnly ? "Zamknij" : "Anuluj")
-        </MudButton>
-
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       OnClick="SaveAsync">
-                Zapisz
-            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
         }
     </DialogActions>
 </MudDialog>
@@ -120,6 +112,8 @@
     private bool _isReadOnly => IsReadOnly;
 
     private void Cancel() => MudDialog.Cancel();
+
+    private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
 
     private async Task SaveAsync()
     {

@@ -237,7 +237,12 @@
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };
         var dialog = await DialogService.ShowAsync<EncjaDialog>("Podgląd encji", parameters, options);
-        await dialog.Result;
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is DialogActionResult { Action: DialogAction.Edit })
+        {
+            await EditAsync(item);
+        }
     }
 
     private async Task DeleteAsync(EncjaDto item)

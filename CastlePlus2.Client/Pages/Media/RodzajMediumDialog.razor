@@ -4,10 +4,6 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isReadOnly ? "Podgląd rodzaju medium" : _isCreate ? "Nowy rodzaj medium" : "Edycja rodzaju medium")
-            </MudText>
-
             <MudGrid Spacing="2">
                 <MudItem xs="12" sm="6">
                     @if (_isCreate)
@@ -16,7 +12,7 @@
                                       Label="Kod rodzaju"
                                       Required="true"
                                       MaxLength="20"
-                                      Disabled="IsReadOnly"
+                                      ReadOnly="IsReadOnly"
                                       Immediate="true" />
                     }
                     else
@@ -32,7 +28,7 @@
                                   Label="Nazwa"
                                   Required="true"
                                   MaxLength="100"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Immediate="true" />
                 </MudItem>
             </MudGrid>
@@ -41,12 +37,15 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
-            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save">
-                Zapisz
-            </MudButton>
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save">Zapisz</MudButton>
         }
     </DialogActions>
 </MudDialog>
@@ -64,6 +63,8 @@
     private bool _isReadOnly => IsReadOnly;
 
     private void Cancel() => MudDialog.Cancel();
+
+    private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
 
     private async Task Save()
     {

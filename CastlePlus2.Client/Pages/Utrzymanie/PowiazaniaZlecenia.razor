@@ -207,7 +207,12 @@
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };
         var dialog = await DialogService.ShowAsync<PowiazanieZleceniaDialog>("Podgląd powiązania", parameters, options);
-        await dialog.Result;
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is DialogActionResult { Action: DialogAction.Edit })
+        {
+            await EditAsync(item);
+        }
     }
 
 

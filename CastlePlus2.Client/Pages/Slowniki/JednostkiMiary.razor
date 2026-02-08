@@ -168,7 +168,12 @@
 
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
         var dialog = await DialogService.ShowAsync<JednostkaMiaryDialog>("Podgląd jednostki miary", parameters, options);
-        await dialog.Result;
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is DialogActionResult { Action: DialogAction.Edit })
+        {
+            await EditAsync(item);
+        }
     }
 
     private async Task DeleteAsync(JednostkaMiaryDto item)

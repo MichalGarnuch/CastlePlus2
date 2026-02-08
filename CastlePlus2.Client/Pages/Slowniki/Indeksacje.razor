@@ -195,7 +195,12 @@
 
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
         var dialog = await Dialogs.ShowAsync<IndeksacjaDialog>("Podgląd indeksacji", parameters, options);
-        await dialog.Result;
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is DialogActionResult { Action: DialogAction.Edit })
+        {
+            await EditAsync(item);
+        }
     }
 
     private async Task DeleteAsync(IndeksacjaDto item)

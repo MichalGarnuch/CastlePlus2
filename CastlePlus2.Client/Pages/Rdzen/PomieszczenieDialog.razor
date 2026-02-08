@@ -4,32 +4,37 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isReadOnly ? "Podgląd pomieszczenia" : _isEdit ? "Edycja pomieszczenia" : "Nowe pomieszczenie")
-            </MudText>
-
             <MudGrid Spacing="2">
                 <MudItem xs="12">
-                    <MudSelect T="Guid"
-                               Label="Lokal"
-                               Dense="true"
-                               Required="true"
-                               Disabled="IsReadOnly"
-                               @bind-Value="Model.IdEncjiNadrzednej">
-                        @foreach (var l in Lokale)
-                        {
-                            <MudSelectItem Value="@l.Id">
-                                @(!string.IsNullOrWhiteSpace(l.KodLokalu) ? l.KodLokalu : l.Id.ToString())
-                            </MudSelectItem>
-                        }
-                    </MudSelect>
+                    @if (_isReadOnly)
+                    {
+                        <MudTextField Label="Lokal"
+                                      Dense="true"
+                                      ReadOnly="true"
+                                      Value="@GetLokalLabel(Model.IdEncjiNadrzednej)" />
+                    }
+                    else
+                    {
+                        <MudSelect T="Guid"
+                                   Label="Lokal"
+                                   Dense="true"
+                                   Required="true"
+                                   @bind-Value="Model.IdEncjiNadrzednej">
+                            @foreach (var l in Lokale)
+                            {
+                                <MudSelectItem Value="@l.Id">
+                                    @(!string.IsNullOrWhiteSpace(l.KodLokalu) ? l.KodLokalu : l.Id.ToString())
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
                 </MudItem>
 
                 <MudItem xs="12">
                     <MudTextField Label="Kod pomieszczenia"
                                   Dense="true"
                                   Required="true"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   @bind-Value="Model.KodPomieszczenia" />
                 </MudItem>
 
@@ -37,7 +42,7 @@
                     <MudNumericField T="decimal?"
                                      Label="Powierzchnia"
                                      Dense="true"
-                                     Disabled="IsReadOnly"
+                                     ReadOnly="IsReadOnly"
                                      @bind-Value="Model.Powierzchnia" />
                 </MudItem>
             </MudGrid>
@@ -46,9 +51,14 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
         }
     </DialogActions>
@@ -67,6 +77,14 @@
     private bool _isReadOnly => IsReadOnly;
 
     private void Cancel() => MudDialog.Cancel();
+
+    private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
+
+    private string GetLokalLabel(Guid idLokalu)
+    {
+        var lokal = Lokale.FirstOrDefault(l => l.Id == idLokalu);
+        return lokal is null ? idLokalu.ToString() : (!string.IsNullOrWhiteSpace(lokal.KodLokalu) ? lokal.KodLokalu : lokal.Id.ToString());
+    }
 
     private async Task SaveAsync()
     {

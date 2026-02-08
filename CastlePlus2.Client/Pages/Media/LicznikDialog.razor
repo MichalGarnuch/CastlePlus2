@@ -1,91 +1,135 @@
-﻿﻿@using MudBlazor
+﻿@using System.Linq
+@using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Media
 @using CastlePlus2.Contracts.DTOs.Slowniki
+@using CastlePlus2.Client.Components.Crud
 
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isReadOnly ? "Podgląd licznika" : _isEdit ? "Edycja licznika" : "Nowy licznik")
-            </MudText>
-
             <MudGrid Spacing="2">
+
                 <MudItem xs="12" sm="6">
-                    <MudSelect T="long"
-                               Label="Przyłącze (IdPrzylacza)"
-                               Dense="true"
-                               Required="true"
-                               Disabled="IsReadOnly"
-                               @bind-Value="_model.IdPrzylacza">
-                        @foreach (var p in _przylacza)
-                        {
-                            <MudSelectItem T="long" Value="@p.IdPrzylacza">@($"Id={p.IdPrzylacza} / Rodzaj={p.KodRodzaju}")</MudSelectItem>
-                        }
-                    </MudSelect>
+                    @if (_isReadOnly)
+                    {
+                        <MudTextField Label="Przyłącze (IdPrzylacza)"
+                                      Dense="true"
+                                      ReadOnly="true"
+                                      Value="@GetPrzylaczeLabel(_model.IdPrzylacza)" />
+                    }
+                    else
+                    {
+                        <MudSelect T="long"
+                                   Label="Przyłącze (IdPrzylacza)"
+                                   Dense="true"
+                                   Required="true"
+                                   @bind-Value="_model.IdPrzylacza">
+                            @foreach (var p in _przylacza)
+                            {
+                                <MudSelectItem T="long" Value="@p.IdPrzylacza">
+                                    @($"Id={p.IdPrzylacza} / Rodzaj={p.KodRodzaju}")
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
-                    <MudSelect T="long?"
-                               Label="Licznik nadrzędny (opcjonalnie)"
-                               Dense="true"
-                               Disabled="IsReadOnly"
-                               @bind-Value="_model.IdLicznikaNadrzednego">
-                        <MudSelectItem T="long?" Value="@(null)">Brak</MudSelectItem>
-                        @foreach (var l in _liczniki.Where(x => x.IdLicznika != _model.IdLicznika))
-                        {
-                            <MudSelectItem T="long?" Value="@l.IdLicznika">@($"Id={l.IdLicznika} / {l.NumerNV}")</MudSelectItem>
-                        }
-                    </MudSelect>
+                    @if (_isReadOnly)
+                    {
+                        <MudTextField Label="Licznik nadrzędny (opcjonalnie)"
+                                      Dense="true"
+                                      ReadOnly="true"
+                                      Value="@GetLicznikNadrzednyLabel(_model.IdLicznikaNadrzednego)" />
+                    }
+                    else
+                    {
+                        <MudSelect T="long?"
+                                   Label="Licznik nadrzędny (opcjonalnie)"
+                                   Dense="true"
+                                   @bind-Value="_model.IdLicznikaNadrzednego">
+                            <MudSelectItem T="long?" Value="@(null)">Brak</MudSelectItem>
+                            @foreach (var l in _liczniki.Where(x => x.IdLicznika != _model.IdLicznika))
+                            {
+                                <MudSelectItem T="long?" Value="@l.IdLicznika">
+                                    @($"Id={l.IdLicznika} / {l.NumerNV}")
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
                     <MudTextField Label="NumerNV"
                                   Dense="true"
                                   Required="true"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="@_isReadOnly"
                                   @bind-Value="_model.NumerNV" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
-                    <MudSelect T="string"
-                               Label="KodJednostki"
-                               Dense="true"
-                               Required="true"
-                               Disabled="IsReadOnly"
-                               @bind-Value="_model.KodJednostki">
-                        @foreach (var j in _jednostki)
-                        {
-                            <MudSelectItem T="string" Value="@j.KodJednostki">@($"{j.Nazwa} ({j.KodJednostki})")</MudSelectItem>
-                        }
-                    </MudSelect>
+                    @if (_isReadOnly)
+                    {
+                        <MudTextField Label="KodJednostki"
+                                      Dense="true"
+                                      ReadOnly="true"
+                                      Value="@GetJednostkaLabel(_model.KodJednostki)" />
+                    }
+                    else
+                    {
+                        <MudSelect T="string"
+                                   Label="KodJednostki"
+                                   Dense="true"
+                                   Required="true"
+                                   @bind-Value="_model.KodJednostki">
+                            @foreach (var j in _jednostki)
+                            {
+                                <MudSelectItem T="string" Value="@j.KodJednostki">
+                                    @($"{j.Nazwa} ({j.KodJednostki})")
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
                     <MudNumericField T="decimal?"
                                      Label="Współczynnik przeliczeniowy (decimal(12,6))"
                                      Dense="true"
-                                     Disabled="IsReadOnly"
+                                     ReadOnly="@_isReadOnly"
                                      @bind-Value="_model.WspolczynnikPrzeliczeniowy" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
-                    <MudSwitch T="bool"
-                               Label="Aktywny"
-                               Color="Color.Primary"
-                               Disabled="IsReadOnly"
-                               @bind-Checked="_model.Aktywny" />
+                    @if (_isReadOnly)
+                    {
+                        <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">
+                            @(_model.Aktywny ? "TAK" : "NIE")
+                        </MudChip>
+                    }
+                    else
+                    {
+                        <MudSwitch T="bool"
+                                   Label="Aktywny"
+                                   Color="Color.Primary"
+                                   @bind-Checked="_model.Aktywny" />
+                    }
                 </MudItem>
+
             </MudGrid>
         </MudForm>
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync">
-                Zapisz
-            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="@Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="@Cancel">Anuluj</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@SubmitAsync">Zapisz</MudButton>
         }
     </DialogActions>
 </MudDialog>
@@ -95,7 +139,7 @@
 
     [Parameter] public LicznikDto Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
-    [Parameter] public bool IsReadOnly { get; set; } = false;
+    [Parameter] public bool IsReadOnly { get; set; }
 
     [Parameter] public List<PrzylaczeDto> Przylacza { get; set; } = new();
     [Parameter] public List<JednostkaMiaryDto> Jednostki { get; set; } = new();
@@ -104,6 +148,7 @@
     private MudForm? _form;
     private bool _isEdit => IsEdit;
     private bool _isReadOnly => IsReadOnly;
+
     private LicznikDto _model = new();
 
     private List<PrzylaczeDto> _przylacza = new();
@@ -130,18 +175,36 @@
 
     private void Cancel() => MudDialog.Cancel();
 
+    private void Edit()
+        => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
+
+    private string GetPrzylaczeLabel(long idPrzylacza)
+    {
+        var przylacze = _przylacza.FirstOrDefault(p => p.IdPrzylacza == idPrzylacza);
+        return przylacze is null ? idPrzylacza.ToString() : $"Id={przylacze.IdPrzylacza} / Rodzaj={przylacze.KodRodzaju}";
+    }
+
+    private string GetLicznikNadrzednyLabel(long? idLicznika)
+    {
+        if (idLicznika is null) return "Brak";
+
+        var licznik = _liczniki.FirstOrDefault(l => l.IdLicznika == idLicznika.Value);
+        return licznik is null ? idLicznika.Value.ToString() : $"Id={licznik.IdLicznika} / {licznik.NumerNV}";
+    }
+
+    private string GetJednostkaLabel(string? kodJednostki)
+    {
+        var jednostka = _jednostki.FirstOrDefault(j => j.KodJednostki == kodJednostki);
+        return jednostka is null ? (kodJednostki ?? string.Empty) : $"{jednostka.Nazwa} ({jednostka.KodJednostki})";
+    }
+
     private async Task SubmitAsync()
     {
-        if (_isReadOnly)
-            return;
-
-        if (_form is null)
-            return;
+        if (_isReadOnly) return;
+        if (_form is null) return;
 
         await _form.Validate();
-
-        if (!_form.IsValid)
-            return;
+        if (!_form.IsValid) return;
 
         MudDialog.Close(DialogResult.Ok(_model));
     }

@@ -7,16 +7,12 @@
 <MudDialog Class="glass-panel">
     <DialogContent>
         <MudForm @ref="_form">
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isReadOnly ? "Podgląd indeksacji" : _isEdit ? "Edycja indeksacji" : "Nowa indeksacja")
-            </MudText>
-
             <MudGrid Spacing="2">
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="_kod"
                                   Label="Kod indeksacji"
                                   Required="true"
-                                  Disabled="@(_isEdit || _isReadOnly)"
+                                  ReadOnly="@(_isEdit || _isReadOnly)"
                                   MaxLength="20"
                                   HelperText="Maks. 20 znaków"
                                   Error="@HasError("KodIndeksacji")"
@@ -27,7 +23,7 @@
                     <MudTextField @bind-Value="_nazwa"
                                   Label="Nazwa"
                                   Required="true"
-                                  Disabled="_isReadOnly"
+                                  ReadOnly="_isReadOnly"
                                   MaxLength="100"
                                   HelperText="Maks. 100 znaków"
                                   Error="@HasError("Nazwa")"
@@ -38,7 +34,7 @@
                     <MudTextField @bind-Value="_url"
                                   Label="Adres źródła URL"
                                   Required="false"
-                                  Disabled="_isReadOnly"
+                                  ReadOnly="_isReadOnly"
                                   MaxLength="400"
                                   HelperText="Maks. 400 znaków"
                                   Error="@HasError("AdresZrodlaURL")"
@@ -49,9 +45,14 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
             <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save">Zapisz</MudButton>
         }
     </DialogActions>
@@ -85,6 +86,8 @@
     }
 
     private void Cancel() => MudDialog.Cancel();
+
+    private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
 
     private async Task Save()
     {

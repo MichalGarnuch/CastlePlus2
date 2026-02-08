@@ -9,11 +9,6 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-
-            <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isReadOnly ? "Podgląd podmiotu" : _isEdit ? "Edycja podmiotu" : "Nowy podmiot")
-            </MudText>
-
             <MudGrid Spacing="2">
                 @if (_isEdit)
                 {
@@ -34,7 +29,7 @@
                                   ErrorText="@GetErrorText(nameof(Model.Nazwa))"
                                   MaxLength="200"
                                   HelperText="Nazwa podmiotu (max 200 znaków)"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -47,7 +42,7 @@
                                   ErrorText="@GetErrorText(nameof(Model.TypPodmiotu))"
                                   MaxLength="30"
                                   HelperText="Np. Osoba / Firma (max 30 znaków)"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -60,7 +55,7 @@
                                   Placeholder="Np. 1234567890"
                                   HelperText="NIP: 10 cyfr"
                                   InputAttributes="_numericInputAttrs"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -73,7 +68,7 @@
                                   Placeholder="Np. 123456789 lub 12345678901234"
                                   HelperText="REGON: 9 lub 14 cyfr"
                                   InputAttributes="_numericInputAttrs"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -86,7 +81,7 @@
                                   Placeholder="Np. 44051401359"
                                   HelperText="PESEL: 11 cyfr"
                                   InputAttributes="_numericInputAttrs"
-                                  Disabled="IsReadOnly"
+                                  ReadOnly="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
             </MudGrid>
@@ -95,9 +90,14 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
-        @if (!_isReadOnly)
+        @if (_isReadOnly)
         {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Edit">Edytuj</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Zamknij</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
         }
     </DialogActions>
@@ -123,6 +123,8 @@
     };
 
     private void Cancel() => MudDialog.Cancel();
+
+    private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
 
     private async Task SaveAsync()
     {
