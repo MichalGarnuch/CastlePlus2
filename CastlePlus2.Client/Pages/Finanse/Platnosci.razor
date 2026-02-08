@@ -72,6 +72,12 @@
             <MudTd DataLabel="Kwota" Class="text-right">@context.Kwota.ToString("0.00")</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -273,6 +279,31 @@
         {
             Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
         }
+    }
+
+    private async Task ViewAsync(PlatnoscDto item)
+    {
+        var clone = new PlatnoscDto
+        {
+            IdPlatnosci = item.IdPlatnosci,
+            IdPodmiotu = item.IdPodmiotu,
+            DataPlatnosci = item.DataPlatnosci,
+            KodWaluty = item.KodWaluty,
+            Kwota = item.Kwota
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true,
+            ["Podmioty"] = _podmioty,
+            ["Waluty"] = _waluty
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = DialogService.Show<PlatnoscDialog>("Podgląd płatności", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(PlatnoscDto item)

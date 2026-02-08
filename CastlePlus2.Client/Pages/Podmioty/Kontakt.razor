@@ -94,6 +94,12 @@
             <MudTd DataLabel="Wartość">@context.Wartosc</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -273,6 +279,29 @@
                 Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
             }
         }
+    }
+
+    private async Task ViewAsync(KontaktDto item)
+    {
+        var clone = new KontaktDto
+        {
+            IdKontaktu = item.IdKontaktu,
+            IdPodmiotu = item.IdPodmiotu,
+            Rodzaj = item.Rodzaj,
+            Wartosc = item.Wartosc
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["Podmioty"] = _podmioty,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<KontaktDialog>("Podgląd kontaktu", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(KontaktDto item)

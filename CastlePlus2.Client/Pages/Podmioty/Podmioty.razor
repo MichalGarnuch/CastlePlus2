@@ -69,6 +69,12 @@
             <MudTd DataLabel="PESEL">@context.PESEL</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -201,6 +207,30 @@
             Snackbar.Add("Zapisano zmiany.", Severity.Success);
             await ReloadAsync();
         }
+    }
+
+    private async Task ViewAsync(PodmiotDto item)
+    {
+        var clone = new PodmiotDto
+        {
+            IdPodmiotu = item.IdPodmiotu,
+            Nazwa = item.Nazwa,
+            TypPodmiotu = item.TypPodmiotu,
+            NIP = item.NIP,
+            REGON = item.REGON,
+            PESEL = item.PESEL
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<PodmiotDialog>("Podgląd podmiotu", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(PodmiotDto item)

@@ -67,6 +67,12 @@
             <MudTd DataLabel="Waluta">@context.KodWaluty</MudTd>
             <MudTd DataLabel="Data operacji">@context.DataOperacji.ToString("yyyy-MM-dd")</MudTd>
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -231,6 +237,30 @@
         {
             Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
         }
+    }
+
+    private async Task ViewAsync(KaucjaDto item)
+    {
+        var clone = new KaucjaDto
+        {
+            IdOperacjiKaucji = item.IdOperacjiKaucji,
+            IdUmowyNajmu = item.IdUmowyNajmu,
+            Kwota = item.Kwota,
+            RodzajOperacji = item.RodzajOperacji,
+            KodWaluty = item.KodWaluty,
+            DataOperacji = item.DataOperacji
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = DialogService.Show<KaucjaDialog>("Podgląd kaucji", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(KaucjaDto item)

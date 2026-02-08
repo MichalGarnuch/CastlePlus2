@@ -6,7 +6,7 @@
         <MudForm @ref="_form">
 
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isEdit ? "Edycja odczytu" : "Nowy odczyt")
+                @(_isReadOnly ? "Podgląd odczytu" : _isEdit ? "Edycja odczytu" : "Nowy odczyt")
             </MudText>
 
             <MudGrid Spacing="2">
@@ -17,6 +17,7 @@
                                ValueChanged="OnLicznikChanged"
                                Required="true"
                                RequiredError="Licznik jest wymagany"
+                               Disabled="IsReadOnly"
                                Margin="Margin.Dense">
                         @foreach (var l in Liczniki)
                         {
@@ -31,6 +32,7 @@
                                    DateChanged="OnDataChanged"
                                    Required="true"
                                    RequiredError="Data odczytu jest wymagana"
+                                   Disabled="IsReadOnly"
                                    Margin="Margin.Dense" />
                 </MudItem>
 
@@ -40,12 +42,14 @@
                                      Label="Wskazanie"
                                      Required="true"
                                      RequiredError="Wskazanie jest wymagane"
+                                     Disabled="IsReadOnly"
                                      Margin="Margin.Dense" />
                 </MudItem>
 
                 <MudItem xs="12">
                     <MudTextField @bind-Value="_model.Zrodlo"
                                   Label="Źródło (max 20)"
+                                  Disabled="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -63,8 +67,11 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
+        @if (!_isReadOnly)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -74,9 +81,11 @@
     [Parameter] public OdczytDto Model { get; set; } = new();
     [Parameter] public List<LicznikDto> Liczniki { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; } = false;
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
+    private bool _isReadOnly => IsReadOnly;
 
     private OdczytDto _model = new();
     private DateTime? _dataOdczytu;
@@ -92,16 +101,24 @@
             Zrodlo = Model.Zrodlo
         };
 
-        _dataOdczytu = _model.DataOdczytu == default ? DateTime.Today : _model.DataOdczytu;
+        _dataOdczytu = _model.DataOdczytu == default && !IsReadOnly && !IsEdit
+            ? DateTime.Today
+            : _model.DataOdczytu;
     }
 
     private void OnLicznikChanged(long value)
     {
+        if (_isReadOnly)
+            return;
+
         _model.IdLicznika = value;
     }
 
     private void OnDataChanged(DateTime? value)
     {
+        if (_isReadOnly)
+            return;
+
         _dataOdczytu = value;
         _model.DataOdczytu = (value ?? DateTime.Today).Date;
     }
@@ -110,6 +127,9 @@
 
     private async Task SaveAsync()
     {
+        if (_isReadOnly)
+            return;
+
         if (_form is null)
             return;
 

@@ -60,6 +60,13 @@
             <MudTd DataLabel="IdEncji">@context.IdEncji</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -200,6 +207,27 @@
                 Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
             }
         }
+    }
+
+    private async Task ViewAsync(PowiazanieDokumentuDto item)
+    {
+        var clone = new PowiazanieDokumentuDto
+        {
+            IdPowiazania = item.IdPowiazania,
+            IdDokumentu = item.IdDokumentu,
+            IdEncji = item.IdEncji
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };
+        var dialog = DialogService.Show<PowiazanieDokumentuDialog>("Podgląd powiązania", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(PowiazanieDokumentuDto item)

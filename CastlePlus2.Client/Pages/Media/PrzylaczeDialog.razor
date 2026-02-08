@@ -7,7 +7,7 @@
         <MudForm @ref="_form">
 
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isEdit ? "Edycja przyłącza" : "Nowe przyłącze")
+                @(_isReadOnly ? "Podgląd przyłącza" : _isEdit ? "Edycja przyłącza" : "Nowe przyłącze")
             </MudText>
 
             <MudGrid Spacing="2">
@@ -16,6 +16,7 @@
                                Label="Gospodarz (Nieruchomość)"
                                Dense="true"
                                Required="true"
+                               Disabled="IsReadOnly"
                                @bind-Value="_model.IdEncjiGospodarza">
                         @foreach (var n in _nieruchomosci)
                         {
@@ -29,6 +30,7 @@
                                Label="Rodzaj medium"
                                Dense="true"
                                Required="true"
+                               Disabled="IsReadOnly"
                                @bind-Value="_model.KodRodzaju">
                         @foreach (var r in _rodzaje)
                         {
@@ -41,6 +43,7 @@
                     <MudTextField Label="Opis"
                                   Dense="true"
                                   Lines="3"
+                                  Disabled="IsReadOnly"
                                   @bind-Value="_model.Opis" />
                 </MudItem>
             </MudGrid>
@@ -48,10 +51,13 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync">
-            Zapisz
-        </MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
+        @if (!_isReadOnly)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync">
+                Zapisz
+            </MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -60,12 +66,14 @@
 
     [Parameter] public PrzylaczeDto Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; } = false;
 
     [Parameter] public List<RodzajMediumDto> Rodzaje { get; set; } = new();
     [Parameter] public List<NieruchomoscDto> Nieruchomosci { get; set; } = new();
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
+    private bool _isReadOnly => IsReadOnly;
     private PrzylaczeDto _model = new();
 
     private List<RodzajMediumDto> _rodzaje = new();
@@ -89,6 +97,9 @@
 
     private async Task SubmitAsync()
     {
+        if (_isReadOnly)
+            return;
+
         if (_form is null)
             return;
 

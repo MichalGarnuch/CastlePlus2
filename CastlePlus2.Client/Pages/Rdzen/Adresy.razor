@@ -71,6 +71,12 @@
             <MudTd DataLabel="Kod">@context.KodPocztowy</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -245,6 +251,35 @@
             }
         }
     }
+
+    private async Task ViewAsync(AdresDto item)
+    {
+        var clone = new AdresDto
+        {
+            IdAdresu = item.IdAdresu,
+            Kraj = item.Kraj,
+            Wojewodztwo = item.Wojewodztwo,
+            Powiat = item.Powiat,
+            Gmina = item.Gmina,
+            Miejscowosc = item.Miejscowosc,
+            Ulica = item.Ulica,
+            Numer = item.Numer,
+            KodPocztowy = item.KodPocztowy,
+            AdresPelny = item.AdresPelny
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+        var dialog = await DialogService.ShowAsync<AdresDialog>("Podgląd adresu", parameters, options);
+        await dialog.Result;
+    }
+
 
     private async Task DeleteAsync(AdresDto item)
     {

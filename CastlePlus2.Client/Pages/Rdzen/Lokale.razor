@@ -66,6 +66,12 @@
             </MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -247,6 +253,30 @@
                 Snackbar.Add($"Błąd edycji: {ex.Message}", Severity.Error);
             }
         }
+    }
+
+    private async Task ViewAsync(LokalDto item)
+    {
+        var clone = new LokalDto
+        {
+            Id = item.Id,
+            IdBudynku = item.IdBudynku,
+            KodLokalu = item.KodLokalu,
+            Powierzchnia = item.Powierzchnia,
+            Przeznaczenie = item.Przeznaczenie
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true,
+            ["Budynki"] = _budynki
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+        var dialog = await DialogService.ShowAsync<LokalDialog>("Podgląd lokalu", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(LokalDto item)

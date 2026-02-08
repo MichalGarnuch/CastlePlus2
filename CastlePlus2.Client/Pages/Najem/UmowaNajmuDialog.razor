@@ -8,7 +8,7 @@
         <MudForm @ref="_form">
 
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isEdit ? "Edycja umowy najmu" : "Nowa umowa najmu")
+                @(_isReadOnly ? "Podgląd umowy najmu" : _isEdit ? "Edycja umowy najmu" : "Nowa umowa najmu")
             </MudText>
 
             <MudGrid Spacing="2">
@@ -17,6 +17,7 @@
                                Label="Wynajmujący (IdPodmiotu)"
                                Dense="true"
                                Required="true"
+                               Disabled="IsReadOnly"
                                @bind-Value="Model.IdWynajmujacego">
                         @foreach (var p in Podmioty)
                         {
@@ -32,6 +33,7 @@
                                Label="Najemca (IdPodmiotu)"
                                Dense="true"
                                Required="true"
+                               Disabled="IsReadOnly"
                                @bind-Value="Model.IdNajemcy">
                         @foreach (var p in Podmioty)
                         {
@@ -47,6 +49,7 @@
                                    Dense="true"
                                    Required="true"
                                    RequiredError="Data zawarcia jest wymagana"
+                                   Disabled="IsReadOnly"
                                    @bind-Date="_dataZawarcia" />
                 </MudItem>
 
@@ -55,12 +58,14 @@
                                    Dense="true"
                                    Required="true"
                                    RequiredError="Data początku jest wymagana"
+                                   Disabled="IsReadOnly"
                                    @bind-Date="_dataPoczatku" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
                     <MudDatePicker Label="Data zakończenia (opcjonalnie)"
                                    Dense="true"
+                                   Disabled="IsReadOnly"
                                    @bind-Date="_dataZakonczenia" />
                 </MudItem>
 
@@ -69,6 +74,7 @@
                                Label="Waluta (KodWaluty)"
                                Dense="true"
                                Required="true"
+                               Disabled="IsReadOnly"
                                @bind-Value="Model.KodWaluty">
                         @foreach (var w in Waluty)
                         {
@@ -83,6 +89,7 @@
                     <MudSelect T="string"
                                Label="Indeksacja (opcjonalnie)"
                                Dense="true"
+                               Disabled="IsReadOnly"
                                @bind-Value="_kodIndeksacji">
                         <MudSelectItem T="string" Value="@(string.Empty)">Brak</MudSelectItem>
                         @foreach (var i in Indeksacje)
@@ -108,8 +115,11 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
+        @if (!_isReadOnly)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -118,6 +128,7 @@
 
     [Parameter] public UmowaNajmuDto Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; } = false;
 
     [Parameter] public List<PodmiotDto> Podmioty { get; set; } = new();
     [Parameter] public List<WalutaDto> Waluty { get; set; } = new();
@@ -125,6 +136,7 @@
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
+    private bool _isReadOnly => IsReadOnly;
 
     private DateTime? _dataZawarcia;
     private DateTime? _dataPoczatku;
@@ -133,8 +145,12 @@
 
     protected override void OnInitialized()
     {
-        _dataZawarcia = Model.DataZawarcia == default ? DateTime.Today : Model.DataZawarcia;
-        _dataPoczatku = Model.DataPoczatku == default ? DateTime.Today : Model.DataPoczatku;
+        _dataZawarcia = Model.DataZawarcia == default && !IsEdit && !IsReadOnly
+            ? DateTime.Today
+            : Model.DataZawarcia;
+        _dataPoczatku = Model.DataPoczatku == default && !IsEdit && !IsReadOnly
+            ? DateTime.Today
+            : Model.DataPoczatku;
         _dataZakonczenia = Model.DataZakonczenia;
         _kodIndeksacji = Model.KodIndeksacji ?? string.Empty;
     }
@@ -143,6 +159,9 @@
 
     private async Task SaveAsync()
     {
+        if (_isReadOnly)
+            return;
+
         if (_form is null)
             return;
 

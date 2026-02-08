@@ -6,7 +6,7 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isEdit ? "Edycja licznika" : "Nowy licznik")
+                @(_isReadOnly ? "Podgląd licznika" : _isEdit ? "Edycja licznika" : "Nowy licznik")
             </MudText>
 
             <MudGrid Spacing="2">
@@ -15,6 +15,7 @@
                                Label="Przyłącze (IdPrzylacza)"
                                Dense="true"
                                Required="true"
+                               Disabled="IsReadOnly"
                                @bind-Value="_model.IdPrzylacza">
                         @foreach (var p in _przylacza)
                         {
@@ -27,6 +28,7 @@
                     <MudSelect T="long?"
                                Label="Licznik nadrzędny (opcjonalnie)"
                                Dense="true"
+                               Disabled="IsReadOnly"
                                @bind-Value="_model.IdLicznikaNadrzednego">
                         <MudSelectItem T="long?" Value="@(null)">Brak</MudSelectItem>
                         @foreach (var l in _liczniki.Where(x => x.IdLicznika != _model.IdLicznika))
@@ -40,6 +42,7 @@
                     <MudTextField Label="NumerNV"
                                   Dense="true"
                                   Required="true"
+                                  Disabled="IsReadOnly"
                                   @bind-Value="_model.NumerNV" />
                 </MudItem>
 
@@ -48,6 +51,7 @@
                                Label="KodJednostki"
                                Dense="true"
                                Required="true"
+                               Disabled="IsReadOnly"
                                @bind-Value="_model.KodJednostki">
                         @foreach (var j in _jednostki)
                         {
@@ -60,6 +64,7 @@
                     <MudNumericField T="decimal?"
                                      Label="Współczynnik przeliczeniowy (decimal(12,6))"
                                      Dense="true"
+                                     Disabled="IsReadOnly"
                                      @bind-Value="_model.WspolczynnikPrzeliczeniowy" />
                 </MudItem>
 
@@ -67,6 +72,7 @@
                     <MudSwitch T="bool"
                                Label="Aktywny"
                                Color="Color.Primary"
+                               Disabled="IsReadOnly"
                                @bind-Checked="_model.Aktywny" />
                 </MudItem>
             </MudGrid>
@@ -74,10 +80,13 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync">
-            Zapisz
-        </MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
+        @if (!_isReadOnly)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync">
+                Zapisz
+            </MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -86,6 +95,7 @@
 
     [Parameter] public LicznikDto Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; } = false;
 
     [Parameter] public List<PrzylaczeDto> Przylacza { get; set; } = new();
     [Parameter] public List<JednostkaMiaryDto> Jednostki { get; set; } = new();
@@ -93,6 +103,7 @@
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
+    private bool _isReadOnly => IsReadOnly;
     private LicznikDto _model = new();
 
     private List<PrzylaczeDto> _przylacza = new();
@@ -121,6 +132,9 @@
 
     private async Task SubmitAsync()
     {
+        if (_isReadOnly)
+            return;
+
         if (_form is null)
             return;
 

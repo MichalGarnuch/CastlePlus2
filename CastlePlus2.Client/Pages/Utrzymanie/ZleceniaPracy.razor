@@ -64,6 +64,12 @@
             <MudTd DataLabel="Utworzono">@FormatDate(context.DataUtworzenia)</MudTd>
             <MudTd DataLabel="Zamknięto">@FormatDate(context.DataZamkniecia)</MudTd>
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -222,6 +228,31 @@
         {
             Snackbar.Add($"Błąd edycji: {ex.Message}", Severity.Error);
         }
+    }
+
+    private async Task ViewAsync(ZleceniePracyDto item)
+    {
+        var clone = new ZleceniePracyDto
+        {
+            IdZlecenia = item.IdZlecenia,
+            IdEncjiGospodarza = item.IdEncjiGospodarza,
+            Tytul = item.Tytul,
+            Status = item.Status,
+            Opis = item.Opis,
+            DataUtworzenia = item.DataUtworzenia,
+            DataZamkniecia = item.DataZamkniecia
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<ZleceniePracyDialog>("Podgląd zlecenia pracy", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(ZleceniePracyDto item)

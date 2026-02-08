@@ -78,6 +78,12 @@
             <MudTd DataLabel="Brutto" Class="text-right">@context.KwotaBrutto</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -249,6 +255,34 @@
         {
             Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
         }
+    }
+
+    private async Task ViewAsync(FakturaDto item)
+    {
+        var model = new FakturaDto
+        {
+            IdFaktury = item.IdFaktury,
+            NumerFaktury = item.NumerFaktury,
+            IdPodmiotu = item.IdPodmiotu,
+            DataWystawienia = item.DataWystawienia,
+            DataSprzedazy = item.DataSprzedazy,
+            KodWaluty = item.KodWaluty,
+            KwotaNetto = item.KwotaNetto,
+            KwotaBrutto = item.KwotaBrutto
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = model,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true,
+            ["Podmioty"] = _podmioty,
+            ["Waluty"] = _waluty
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+        var dialog = DialogService.Show<FakturaDialog>("Podgląd faktury", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(FakturaDto item)

@@ -78,6 +78,12 @@
             <MudTd DataLabel="Do dnia">@(context.DoDnia is null ? "-" : context.DoDnia.Value.ToString("yyyy-MM-dd"))</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -279,6 +285,36 @@
                 Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
             }
         }
+    }
+
+    private async Task ViewAsync(SkladnikCzynszuDto item)
+    {
+        var clone = new SkladnikCzynszuDto
+        {
+            IdSkladnikaCzynszu = item.IdSkladnikaCzynszu,
+            IdUmowyNajmu = item.IdUmowyNajmu,
+            Nazwa = item.Nazwa,
+            KodJednostki = item.KodJednostki,
+            Stawka = item.Stawka,
+            IloscBazowa = item.IloscBazowa,
+            KodIndeksacji = item.KodIndeksacji,
+            OdDnia = item.OdDnia,
+            DoDnia = item.DoDnia
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["UmowyNajmu"] = _umowy,          // <- BYŁO _umowyNajmu
+            ["Jednostki"] = _jednostki,
+            ["Indeksacje"] = _indeksacje,
+            ["IsEdit"] = false,              // w podglądzie lepiej false
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = DialogService.Show<SkladnikiCzynszuDialog>("Podgląd składnika czynszu", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(SkladnikCzynszuDto item)

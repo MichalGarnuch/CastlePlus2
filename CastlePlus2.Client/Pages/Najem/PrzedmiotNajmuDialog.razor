@@ -5,7 +5,7 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isEdit ? "Edycja przedmiotu najmu" : "Nowy przedmiot najmu")
+                @(_isReadOnly ? "Podgląd przedmiotu najmu" : _isEdit ? "Edycja przedmiotu najmu" : "Nowy przedmiot najmu")
             </MudText>
 
             <MudGrid Spacing="2">
@@ -24,6 +24,7 @@
                                   Label="IdUmowyNajmu (GUID)"
                                   Required="true"
                                   RequiredError="IdUmowyNajmu jest wymagane"
+                                  Disabled="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -32,6 +33,7 @@
                                   Label="IdEncji (GUID)"
                                   Required="true"
                                   RequiredError="IdEncji jest wymagane"
+                                  Disabled="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -39,6 +41,7 @@
                     <MudNumericField T="decimal?"
                                      Label="Udział procent (opcjonalnie)"
                                      Margin="Margin.Dense"
+                                     Disabled="IsReadOnly"
                                      @bind-Value="Model.UdzialProcent" />
                 </MudItem>
 
@@ -47,6 +50,7 @@
                                    Date="@_odDnia"
                                    DateChanged="OnOdDniaChanged"
                                    Margin="Margin.Dense"
+                                   Disabled="IsReadOnly"
                                    Required="true" />
                 </MudItem>
 
@@ -54,6 +58,7 @@
                     <MudDatePicker Label="Do dnia (opcjonalnie)"
                                    Date="@_doDnia"
                                    DateChanged="OnDoDniaChanged"
+                                   Disabled="IsReadOnly"
                                    Margin="Margin.Dense" />
                 </MudItem>
             </MudGrid>
@@ -61,8 +66,11 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
+        @if (!_isReadOnly)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -71,9 +79,11 @@
 
     [Parameter] public PrzedmiotNajmuDto Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; } = false;
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
+    private bool _isReadOnly => IsReadOnly;
 
     private string _idUmowyNajmuText = string.Empty;
     private string _idEncjiText = string.Empty;
@@ -95,6 +105,9 @@
 
     private void OnOdDniaChanged(DateTime? dt)
     {
+        if (_isReadOnly)
+            return;
+
         _odDnia = dt;
         if (dt is not null)
             Model.OdDnia = DateOnly.FromDateTime(dt.Value);
@@ -102,12 +115,18 @@
 
     private void OnDoDniaChanged(DateTime? dt)
     {
+        if (_isReadOnly)
+            return;
+
         _doDnia = dt;
         Model.DoDnia = dt is null ? null : DateOnly.FromDateTime(dt.Value);
     }
 
     private async Task SaveAsync()
     {
+        if (_isReadOnly)
+            return;
+
         if (_form is null) return;
 
         await _form.Validate();

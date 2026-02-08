@@ -64,6 +64,12 @@
             <MudTd DataLabel="Pow.">@context.Powierzchnia</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -238,6 +244,29 @@
         {
             Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
         }
+    }
+
+    private async Task ViewAsync(PomieszczenieDto item)
+    {
+        var clone = new PomieszczenieDto
+        {
+            Id = item.Id,
+            IdEncjiNadrzednej = item.IdEncjiNadrzednej,
+            KodPomieszczenia = item.KodPomieszczenia,
+            Powierzchnia = item.Powierzchnia
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true,
+            ["Lokale"] = _lokale
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };
+        var dialog = await DialogService.ShowAsync<PomieszczenieDialog>("Podgląd pomieszczenia", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(PomieszczenieDto item)

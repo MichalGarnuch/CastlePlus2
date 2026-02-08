@@ -5,7 +5,7 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isEdit ? "Edycja lokalu" : "Nowy lokal")
+                @(_isReadOnly ? "Podgląd lokalu" : _isEdit ? "Edycja lokalu" : "Nowy lokal")
             </MudText>
 
             <MudGrid Spacing="2">
@@ -15,6 +15,7 @@
                                Dense="true"
                                Margin="Margin.Dense"
                                Required="true"
+                               Disabled="IsReadOnly"
                                @bind-Value="Model.IdBudynku">
                         @foreach (var b in (Budynki ?? new()))
                         {
@@ -29,6 +30,7 @@
                                   Dense="true"
                                   Margin="Margin.Dense"
                                   Required="true"
+                                  Disabled="IsReadOnly"
                                   @bind-Value="Model.KodLokalu" />
                 </MudItem>
 
@@ -37,6 +39,7 @@
                                      Label="Powierzchnia"
                                      Dense="true"
                                      Margin="Margin.Dense"
+                                     Disabled="IsReadOnly"
                                      @bind-Value="Model.Powierzchnia" />
                 </MudItem>
 
@@ -44,6 +47,7 @@
                     <MudTextField Label="Przeznaczenie"
                                   Dense="true"
                                   Margin="Margin.Dense"
+                                  Disabled="IsReadOnly"
                                   @bind-Value="Model.Przeznaczenie" />
                 </MudItem>
             </MudGrid>
@@ -51,8 +55,11 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit">Zapisz</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
+        @if (!_isReadOnly)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit">Zapisz</MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -61,16 +68,21 @@
 
     [Parameter] public LokalDto Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; } = false;
 
     [Parameter] public List<BudynekDto>? Budynki { get; set; }
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
+    private bool _isReadOnly => IsReadOnly;
 
     private void Cancel() => MudDialog.Cancel();
 
     private async Task Submit()
     {
+        if (_isReadOnly)
+            return;
+
         if (_form is not null)
         {
             await _form.Validate();

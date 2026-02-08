@@ -5,7 +5,7 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isEdit ? "Edycja alokacji kosztu" : "Nowa alokacja kosztu")
+                @(_isReadOnly ? "Podgląd alokacji kosztu" : _isEdit ? "Edycja alokacji kosztu" : "Nowa alokacja kosztu")
             </MudText>
 
             <MudGrid Spacing="2">
@@ -15,6 +15,7 @@
                                      Dense="true"
                                      Required="true"
                                      RequiredError="IdPozycjiKosztu jest wymagane"
+                                     Disabled="IsReadOnly"
                                      @bind-Value="Model.IdPozycjiKosztu" />
                 </MudItem>
 
@@ -23,6 +24,7 @@
                                   Dense="true"
                                   Required="true"
                                   RequiredError="IdEncji jest wymagane"
+                                  Disabled="IsReadOnly"
                                   @bind-Value="_idEncjiText" />
                 </MudItem>
 
@@ -32,6 +34,7 @@
                                      Dense="true"
                                      Required="true"
                                      RequiredError="Kwota netto jest wymagana"
+                                     Disabled="IsReadOnly"
                                      @bind-Value="Model.KwotaNetto" />
                 </MudItem>
 
@@ -41,6 +44,7 @@
                                      Dense="true"
                                      Required="true"
                                      RequiredError="Kwota brutto jest wymagana"
+                                     Disabled="IsReadOnly"
                                      @bind-Value="Model.KwotaBrutto" />
                 </MudItem>
 
@@ -57,8 +61,11 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
+        @if (!_isReadOnly)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -67,9 +74,11 @@
 
     [Parameter] public AlokacjaKosztuDto Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; } = false;
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
+    private bool _isReadOnly => IsReadOnly;
 
     private string _idEncjiText = string.Empty;
 
@@ -82,6 +91,9 @@
 
     private async Task SaveAsync()
     {
+        if (_isReadOnly)
+            return;
+
         if (_form is null)
             return;
 

@@ -5,7 +5,7 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isEdit ? "Edycja kaucji" : "Nowa kaucja")
+                @(_isReadOnly ? "Podgląd kaucji" : _isEdit ? "Edycja kaucji" : "Nowa kaucja")
             </MudText>
 
             <MudGrid Spacing="2">
@@ -24,6 +24,7 @@
                                   Label="IdUmowyNajmu (GUID)"
                                   Required="true"
                                   RequiredError="IdUmowyNajmu jest wymagane"
+                                  Disabled="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -33,6 +34,7 @@
                                      Required="true"
                                      RequiredError="Kwota jest wymagana"
                                      Margin="Margin.Dense"
+                                     Disabled="IsReadOnly"
                                      @bind-Value="Model.Kwota" />
                 </MudItem>
 
@@ -41,6 +43,7 @@
                                   Label="Rodzaj operacji"
                                   Required="true"
                                   RequiredError="Rodzaj operacji jest wymagany"
+                                  Disabled="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -49,6 +52,7 @@
                                   Label="Kod waluty"
                                   Required="true"
                                   RequiredError="Kod waluty jest wymagany"
+                                  Disabled="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -57,6 +61,7 @@
                                    Date="@_dataOperacji"
                                    DateChanged="OnDataOperacjiChanged"
                                    Margin="Margin.Dense"
+                                   Disabled="IsReadOnly"
                                    Required="true" />
                 </MudItem>
             </MudGrid>
@@ -64,8 +69,11 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
+        @if (!_isReadOnly)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -74,9 +82,11 @@
 
     [Parameter] public KaucjaDto Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; } = false;
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
+    private bool _isReadOnly => IsReadOnly;
     private string _idUmowyText = string.Empty;
     private DateTime? _dataOperacji;
 
@@ -91,6 +101,9 @@
 
     private void OnDataOperacjiChanged(DateTime? dt)
     {
+        if (_isReadOnly)
+            return;
+
         _dataOperacji = dt;
         if (dt is not null)
             Model.DataOperacji = DateOnly.FromDateTime(dt.Value);
@@ -98,6 +111,9 @@
 
     private async Task SaveAsync()
     {
+        if (_isReadOnly)
+            return;
+
         if (_form is null) return;
 
         await _form.Validate();

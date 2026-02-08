@@ -5,7 +5,7 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isEdit ? "Edycja zlecenia pracy" : "Nowe zlecenie pracy")
+                @(_isReadOnly ? "Podgląd zlecenia pracy" : _isEdit ? "Edycja zlecenia pracy" : "Nowe zlecenie pracy")
             </MudText>
 
             <MudGrid Spacing="2">
@@ -24,6 +24,7 @@
                                   Label="IdEncjiGospodarza (GUID)"
                                   Required="true"
                                   RequiredError="IdEncjiGospodarza jest wymagane"
+                                  Disabled="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -33,6 +34,7 @@
                                   Required="true"
                                   RequiredError="Tytuł jest wymagany"
                                   MaxLength="200"
+                                  Disabled="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -42,6 +44,7 @@
                                   Required="true"
                                   RequiredError="Status jest wymagany"
                                   MaxLength="20"
+                                  Disabled="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -49,6 +52,7 @@
                     <MudDatePicker Label="Data zamknięcia (opcjonalnie)"
                                    Date="_dataZamkniecia"
                                    DateChanged="OnDataZamknieciaChanged"
+                                   Disabled="IsReadOnly"
                                    Margin="Margin.Dense" />
                 </MudItem>
 
@@ -57,6 +61,7 @@
                                   Label="Opis (opcjonalnie)"
                                   MaxLength="1000"
                                   Lines="3"
+                                  Disabled="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -73,8 +78,11 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
+        @if (!_isReadOnly)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -83,9 +91,11 @@
 
     [Parameter] public ZleceniePracyDto Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; } = false;
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
+    private bool _isReadOnly => IsReadOnly;
     private string _idEncjiText = string.Empty;
     private DateTime? _dataZamkniecia;
 
@@ -100,6 +110,9 @@
 
     private void OnDataZamknieciaChanged(DateTime? value)
     {
+        if (_isReadOnly)
+            return;
+
         _dataZamkniecia = value;
         Model.DataZamkniecia = value;
     }
@@ -108,6 +121,9 @@
 
     private async Task SaveAsync()
     {
+        if (_isReadOnly)
+            return;
+
         if (_form is null) return;
 
         await _form.Validate();

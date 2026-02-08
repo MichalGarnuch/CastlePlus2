@@ -67,6 +67,12 @@
             <MudTd DataLabel="Brutto">@context.KwotaBrutto</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => OpenViewDialog(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -219,6 +225,30 @@
         {
             Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
         }
+    }
+
+    private async Task OpenViewDialog(PozycjaKosztuDto item)
+    {
+        var clone = new PozycjaKosztuDto
+        {
+            IdPozycjiKosztu = item.IdPozycjiKosztu,
+            IdFaktury = item.IdFaktury,
+            IdKategoriiKosztu = item.IdKategoriiKosztu,
+            Opis = item.Opis,
+            KwotaNetto = item.KwotaNetto,
+            KwotaBrutto = item.KwotaBrutto
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };
+        var dialog = Dialogs.Show<PozycjaKosztuDialog>("Podgląd pozycji kosztu", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(PozycjaKosztuDto item)

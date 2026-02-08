@@ -10,6 +10,7 @@
 @inject IZasobyUIService Service
 @inject NavigationManager Nav
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <PageTitle>Zasoby UI</PageTitle>
 
@@ -61,6 +62,11 @@
             <MudTd DataLabel="Ważne od">@FormatDate(context.WazneOdUtc)</MudTd>
             <MudTd DataLabel="Ważne do">@FormatDate(context.WazneDoUtc)</MudTd>
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -120,6 +126,34 @@
     {
         _selectedIdEncji = item.IdEncji;
         Nav.NavigateTo($"/konfiguracja/zasoby-ui/{item.IdEncji}");
+    }
+
+    private async Task ViewAsync(ZasobUIDto item)
+    {
+        var clone = new ZasobUIDto
+        {
+            IdEncji = item.IdEncji,
+            KodZasobu = item.KodZasobu,
+            Typ = item.Typ,
+            Kategoria = item.Kategoria,
+            CzyAktywny = item.CzyAktywny,
+            Sort = item.Sort,
+            WazneOdUtc = item.WazneOdUtc,
+            WazneDoUtc = item.WazneDoUtc,
+            UtworzonoUtc = item.UtworzonoUtc,
+            ZmienionoUtc = item.ZmienionoUtc,
+            Teksty = item.Teksty.ToList(),
+            Dokumenty = item.Dokumenty.ToList()
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = DialogService.Show<ZasobUIViewDialog>("Podgląd zasobu UI", parameters, options);
+        await dialog.Result;
     }
 
     private void OnRowClick(TableRowClickEventArgs<ZasobUIDto> args)

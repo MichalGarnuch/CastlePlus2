@@ -6,7 +6,7 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isEdit ? "Edycja składnika czynszu" : "Nowy składnik czynszu")
+                @(_isReadOnly ? "Podgląd składnika czynszu" : _isEdit ? "Edycja składnika czynszu" : "Nowy składnik czynszu")
             </MudText>
 
             @if (_isEdit)
@@ -25,6 +25,7 @@
                                ValueChanged="OnUmowaChanged"
                                Required="true"
                                RequiredError="Umowa najmu jest wymagana"
+                               Disabled="IsReadOnly"
                                Margin="Margin.Dense">
                         @foreach (var u in UmowyNajmu)
                         {
@@ -38,6 +39,7 @@
                                   Label="Nazwa"
                                   Required="true"
                                   RequiredError="Nazwa jest wymagana"
+                                  Disabled="IsReadOnly"
                                   Margin="Margin.Dense" />
                 </MudItem>
 
@@ -48,6 +50,7 @@
                                ValueChanged="OnJednostkaChanged"
                                Required="true"
                                RequiredError="Jednostka jest wymagana"
+                               Disabled="IsReadOnly"
                                Margin="Margin.Dense">
                         @foreach (var j in Jednostki)
                         {
@@ -61,6 +64,7 @@
                                Label="Indeksacja"
                                Value="_kodIndeksacji"
                                ValueChanged="OnIndeksacjaChanged"
+                               Disabled="IsReadOnly"
                                Margin="Margin.Dense">
                         <MudSelectItem T="string" Value="@(string.Empty)">Brak</MudSelectItem>
                         @foreach (var i in Indeksacje)
@@ -76,6 +80,7 @@
                                      Required="true"
                                      RequiredError="Stawka jest wymagana"
                                      Margin="Margin.Dense"
+                                     Disabled="IsReadOnly"
                                      @bind-Value="_model.Stawka" />
                 </MudItem>
 
@@ -83,6 +88,7 @@
                     <MudNumericField T="decimal?"
                                      Label="Ilość bazowa"
                                      Margin="Margin.Dense"
+                                     Disabled="IsReadOnly"
                                      @bind-Value="_model.IloscBazowa" />
                 </MudItem>
 
@@ -92,6 +98,7 @@
                                    DateChanged="OnOdDniaChanged"
                                    Required="true"
                                    RequiredError="Data od jest wymagana"
+                                   Disabled="IsReadOnly"
                                    Margin="Margin.Dense" />
                 </MudItem>
 
@@ -99,6 +106,7 @@
                     <MudDatePicker Label="Do dnia (opcjonalnie)"
                                    Date="_doDnia"
                                    DateChanged="OnDoDniaChanged"
+                                   Disabled="IsReadOnly"
                                    Margin="Margin.Dense" />
                 </MudItem>
             </MudGrid>
@@ -106,8 +114,11 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
+        @if (!_isReadOnly)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -119,9 +130,11 @@
     [Parameter] public List<JednostkaMiaryDto> Jednostki { get; set; } = new();
     [Parameter] public List<IndeksacjaDto> Indeksacje { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; } = false;
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
+    private bool _isReadOnly => IsReadOnly;
 
     private SkladnikCzynszuDto _model = new();
     private DateTime? _odDnia;
@@ -153,22 +166,34 @@
 
     private void OnUmowaChanged(Guid value)
     {
+        if (_isReadOnly)
+            return;
+
         _model.IdUmowyNajmu = value;
     }
 
     private void OnJednostkaChanged(string value)
     {
+        if (_isReadOnly)
+            return;
+
         _model.KodJednostki = value;
     }
 
     private void OnIndeksacjaChanged(string value)
     {
+        if (_isReadOnly)
+            return;
+
         _kodIndeksacji = value;
         _model.KodIndeksacji = string.IsNullOrWhiteSpace(value) ? null : value;
     }
 
     private void OnOdDniaChanged(DateTime? value)
     {
+        if (_isReadOnly)
+            return;
+
         _odDnia = value;
         if (value is not null)
             _model.OdDnia = DateOnly.FromDateTime(value.Value);
@@ -176,6 +201,9 @@
 
     private void OnDoDniaChanged(DateTime? value)
     {
+        if (_isReadOnly)
+            return;
+
         _doDnia = value;
         _model.DoDnia = value is null ? null : DateOnly.FromDateTime(value.Value);
     }
@@ -199,6 +227,9 @@
 
     private async Task SaveAsync()
     {
+        if (_isReadOnly)
+            return;
+
         if (_form is null)
             return;
 

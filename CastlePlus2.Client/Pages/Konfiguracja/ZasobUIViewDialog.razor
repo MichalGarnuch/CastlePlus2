@@ -1,0 +1,105 @@
+﻿@using MudBlazor
+@using CastlePlus2.Contracts.DTOs.Konfiguracja
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-3">Podgląd zasobu UI</MudText>
+
+        <MudGrid Spacing="2">
+            <MudItem xs="12" sm="6">
+                <MudTextField Value="@Model.KodZasobu"
+                              Label="Kod"
+                              Disabled="true"
+                              Margin="Margin.Dense" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudTextField Value="@Model.Typ"
+                              Label="Typ"
+                              Disabled="true"
+                              Margin="Margin.Dense" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudTextField Value="@Model.Kategoria"
+                              Label="Kategoria"
+                              Disabled="true"
+                              Margin="Margin.Dense" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudNumericField T="int"
+                                 Value="@Model.Sort"
+                                 Label="Sort"
+                                 Disabled="true"
+                                 Margin="Margin.Dense" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudCheckBox T="bool"
+                             Checked="@Model.CzyAktywny"
+                             Label="Aktywny"
+                             Disabled="true"
+                             Color="Color.Primary" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudTextField Value="@FormatDate(Model.WazneOdUtc)"
+                              Label="Ważne od"
+                              Disabled="true"
+                              Margin="Margin.Dense" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudTextField Value="@FormatDate(Model.WazneDoUtc)"
+                              Label="Ważne do"
+                              Disabled="true"
+                              Margin="Margin.Dense" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudTextField Value="@FormatDate(Model.UtworzonoUtc)"
+                              Label="Utworzono"
+                              Disabled="true"
+                              Margin="Margin.Dense" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudTextField Value="@FormatDate(Model.ZmienionoUtc)"
+                              Label="Zmieniono"
+                              Disabled="true"
+                              Margin="Margin.Dense" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudNumericField T="int"
+                                 Value="@(Model.Teksty?.Count ?? 0)"
+                                 Label="Liczba tekstów"
+                                 Disabled="true"
+                                 Margin="Margin.Dense" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudNumericField T="int"
+                                 Value="@(Model.Dokumenty?.Count ?? 0)"
+                                 Label="Liczba dokumentów"
+                                 Disabled="true"
+                                 Margin="Margin.Dense" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Close">Zamknij</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public ZasobUIDto Model { get; set; } = new();
+
+    private void Close() => MudDialog.Cancel();
+
+    private static string FormatDate(DateTime? value)
+        => value.HasValue ? value.Value.ToString("yyyy-MM-dd HH:mm") : "-";
+}

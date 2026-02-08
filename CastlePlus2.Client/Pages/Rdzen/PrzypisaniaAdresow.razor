@@ -66,6 +66,12 @@
             <MudTd DataLabel="Do">@context.DoDnia</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -242,6 +248,30 @@
                 Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
             }
         }
+    }
+
+    private async Task ViewAsync(PrzypisanieAdresuDto item)
+    {
+        var clone = new PrzypisanieAdresuDto
+        {
+            IdPrzypisaniaAdresu = item.IdPrzypisaniaAdresu,
+            IdEncji = item.IdEncji,
+            IdAdresu = item.IdAdresu,
+            OdDnia = item.OdDnia,
+            DoDnia = item.DoDnia
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["Adresy"] = _adresy,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+        var dialog = await DialogService.ShowAsync<PrzypisanieAdresuDialog>("Podgląd przypisania", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(PrzypisanieAdresuDto item)

@@ -67,6 +67,12 @@
             <MudTd DataLabel="Do dnia">@(context.DoDnia is null ? "-" : context.DoDnia.Value.ToString("yyyy-MM-dd"))</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -230,6 +236,30 @@
                 Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
             }
         }
+    }
+
+    private async Task ViewAsync(PrzedmiotNajmuDto item)
+    {
+        var clone = new PrzedmiotNajmuDto
+        {
+            IdPrzedmiotuNajmu = item.IdPrzedmiotuNajmu,
+            IdUmowyNajmu = item.IdUmowyNajmu,
+            IdEncji = item.IdEncji,
+            UdzialProcent = item.UdzialProcent,
+            OdDnia = item.OdDnia,
+            DoDnia = item.DoDnia
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<PrzedmiotNajmuDialog>("Podgląd przedmiotu najmu", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(PrzedmiotNajmuDto item)

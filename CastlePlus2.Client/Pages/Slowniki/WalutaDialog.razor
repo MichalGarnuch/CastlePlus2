@@ -9,7 +9,7 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isCreate ? "Nowa waluta" : "Edycja waluty")
+                @(_isReadOnly ? "Podgląd waluty" : _isCreate ? "Nowa waluta" : "Edycja waluty")
             </MudText>
 
             <MudGrid Spacing="2">
@@ -22,6 +22,7 @@
                                       Immediate="true"
                                       MaxLength="3"
                                       HelperText="Dokładnie 3 znaki"
+                                      Disabled="IsReadOnly"
                                       Error="@HasError(nameof(KodWaluty))"
                                       ErrorText="@GetErrorText(nameof(KodWaluty))" />
                     }
@@ -40,6 +41,7 @@
                                   Immediate="true"
                                   MaxLength="50"
                                   HelperText="Maks. 50 znaków"
+                                  Disabled="IsReadOnly"
                                   Error="@HasError(nameof(Nazwa))"
                                   ErrorText="@GetErrorText(nameof(Nazwa))" />
                 </MudItem>
@@ -48,8 +50,11 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save">Zapisz</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
+        @if (!_isReadOnly)
+        {
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save">Zapisz</MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -57,18 +62,23 @@
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
 
     [Parameter] public bool IsCreate { get; set; } = true;
+    [Parameter] public bool IsReadOnly { get; set; } = false;
 
     [Parameter] public string KodWaluty { get; set; } = string.Empty;
     [Parameter] public string Nazwa { get; set; } = string.Empty;
 
     private MudForm _form = default!;
     private bool _isCreate => IsCreate;
+    private bool _isReadOnly => IsReadOnly;
     private readonly Dictionary<string, string> _fieldErrors = new(StringComparer.OrdinalIgnoreCase);
 
     private void Cancel() => MudDialog.Cancel();
 
     private async Task Save()
     {
+        if (_isReadOnly)
+            return;
+
         await _form.Validate();
         if (!_form.IsValid) return;
 

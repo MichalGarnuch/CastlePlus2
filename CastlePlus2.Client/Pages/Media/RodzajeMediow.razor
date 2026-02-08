@@ -58,6 +58,12 @@
             <MudTd DataLabel="Kod">@context.KodRodzaju</MudTd>
             <MudTd DataLabel="Nazwa">@context.Nazwa</MudTd>
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -181,6 +187,21 @@
         {
             Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
         }
+    }
+
+    private async Task ViewAsync(RodzajMediumDto item)
+    {
+        var parameters = new DialogParameters
+        {
+            ["IsCreate"] = false,
+            ["KodRodzaju"] = item.KodRodzaju,
+            ["Nazwa"] = item.Nazwa,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<RodzajMediumDialog>("Podgląd rodzaju medium", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(RodzajMediumDto item)

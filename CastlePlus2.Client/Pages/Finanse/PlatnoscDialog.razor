@@ -7,7 +7,7 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isEdit ? "Edycja płatności" : "Nowa płatność")
+                @(_isReadOnly ? "Podgląd płatności" : _isEdit ? "Edycja płatności" : "Nowa płatność")
             </MudText>
 
             <MudGrid Spacing="2">
@@ -16,6 +16,7 @@
                                Label="Podmiot (IdPodmiotu)"
                                Dense="true"
                                Required="true"
+                               Disabled="IsReadOnly"
                                @bind-Value="_model.IdPodmiotu">
                         @foreach (var p in _podmioty)
                         {
@@ -29,6 +30,7 @@
                                    Dense="true"
                                    Required="true"
                                    RequiredError="Data płatności jest wymagana"
+                                   Disabled="IsReadOnly"
                                    @bind-Date="_dataPlatnosci" />
                 </MudItem>
 
@@ -37,6 +39,7 @@
                                Label="Waluta (KodWaluty)"
                                Dense="true"
                                Required="true"
+                               Disabled="IsReadOnly"
                                @bind-Value="_model.KodWaluty">
                         @foreach (var w in _waluty)
                         {
@@ -51,6 +54,7 @@
                                      Dense="true"
                                      Required="true"
                                      RequiredError="Kwota jest wymagana"
+                                     Disabled="IsReadOnly"
                                      @bind-Value="_model.Kwota" />
                 </MudItem>
 
@@ -67,8 +71,11 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync">Zapisz</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
+        @if (!_isReadOnly)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync">Zapisz</MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -77,11 +84,13 @@
 
     [Parameter] public PlatnoscDto Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; } = false;
     [Parameter] public List<PodmiotDto> Podmioty { get; set; } = new();
     [Parameter] public List<WalutaDto> Waluty { get; set; } = new();
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
+    private bool _isReadOnly => IsReadOnly;
 
     private PlatnoscDto _model = new();
     private List<PodmiotDto> _podmioty = new();
@@ -94,22 +103,29 @@
         _podmioty = Podmioty ?? new();
         _waluty = Waluty ?? new();
 
+        var defaultWaluta = (!IsEdit && !IsReadOnly) ? "PLN" : Model.KodWaluty;
+
         _model = new PlatnoscDto
         {
             IdPlatnosci = Model.IdPlatnosci,
             IdPodmiotu = Model.IdPodmiotu,
             DataPlatnosci = Model.DataPlatnosci,
-            KodWaluty = Model.KodWaluty ?? "PLN",
+            KodWaluty = defaultWaluta,
             Kwota = Model.Kwota
         };
 
-        _dataPlatnosci = _model.DataPlatnosci == default ? DateTime.Today : _model.DataPlatnosci;
+        _dataPlatnosci = _model.DataPlatnosci == default && !IsReadOnly && !IsEdit
+            ? DateTime.Today
+            : _model.DataPlatnosci;
     }
 
     private void Cancel() => MudDialog.Cancel();
 
     private async Task SubmitAsync()
     {
+        if (_isReadOnly)
+            return;
+
         if (_form is null)
             return;
 

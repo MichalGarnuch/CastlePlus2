@@ -15,7 +15,7 @@
 
             <MudForm @ref="_form">
                 <MudText Typo="Typo.h6" Class="mb-3">
-                    @(_isEdit ? "Edycja jednostki miary" : "Nowa jednostka miary")
+                    @(_isReadOnly ? "Podgląd jednostki miary" : _isEdit ? "Edycja jednostki miary" : "Nowa jednostka miary")
                 </MudText>
 
                 <MudGrid Spacing="2">
@@ -29,7 +29,7 @@
                                       RequiredError="Kod jest wymagany"
                                       Error="@HasError("KodJednostki")"
                                       ErrorText="@GetErrorText("KodJednostki")"
-                                      Disabled="@_isEdit"
+                                      Disabled="@(_isEdit || _isReadOnly)"
                                       MaxLength="20"
                                       Immediate="true" />
                     </MudItem>
@@ -44,6 +44,7 @@
                                       RequiredError="Nazwa jest wymagana"
                                       Error="@HasError("Nazwa")"
                                       ErrorText="@GetErrorText("Nazwa")"
+                                      Disabled="_isReadOnly"
                                       MaxLength="100"
                                       Immediate="true" />
                     </MudItem>
@@ -54,16 +55,19 @@
 
     <DialogActions>
         <MudButton Variant="Variant.Text" OnClick="Cancel" Disabled="_saving">
-            Anuluj
+            @(_isReadOnly ? "Zamknij" : "Anuluj")
         </MudButton>
 
-        <MudButton Color="Color.Primary"
-                   Variant="Variant.Filled"
-                   StartIcon="@Icons.Material.Filled.Save"
-                   Disabled="_saving"
-                   OnClick="Save">
-            @_savingText
-        </MudButton>
+        @if (!_isReadOnly)
+        {
+            <MudButton Color="Color.Primary"
+                       Variant="Variant.Filled"
+                       StartIcon="@Icons.Material.Filled.Save"
+                       Disabled="_saving"
+                       OnClick="Save">
+                @_savingText
+            </MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -73,6 +77,7 @@
 
     [Parameter] public string? KodJednostki { get; set; }
     [Parameter] public string? Nazwa { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; } = false;
 
     private MudForm _form = default!;
     private string _kod = string.Empty;
@@ -82,6 +87,7 @@
     private bool _saving;
     private string _savingText => _saving ? "Zapisywanie..." : "Zapisz";
     private bool _isEdit => !string.IsNullOrWhiteSpace(KodJednostki);
+    private bool _isReadOnly => IsReadOnly;
 
     protected override void OnInitialized()
     {
@@ -96,6 +102,9 @@
 
     private async Task Save()
     {
+        if (_isReadOnly)
+            return;
+
         await _form.Validate();
         if (!_form.IsValid) return;
 

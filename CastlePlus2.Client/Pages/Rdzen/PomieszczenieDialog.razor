@@ -5,7 +5,7 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isEdit ? "Edycja pomieszczenia" : "Nowe pomieszczenie")
+                @(_isReadOnly ? "Podgląd pomieszczenia" : _isEdit ? "Edycja pomieszczenia" : "Nowe pomieszczenie")
             </MudText>
 
             <MudGrid Spacing="2">
@@ -14,6 +14,7 @@
                                Label="Lokal"
                                Dense="true"
                                Required="true"
+                               Disabled="IsReadOnly"
                                @bind-Value="Model.IdEncjiNadrzednej">
                         @foreach (var l in Lokale)
                         {
@@ -28,6 +29,7 @@
                     <MudTextField Label="Kod pomieszczenia"
                                   Dense="true"
                                   Required="true"
+                                  Disabled="IsReadOnly"
                                   @bind-Value="Model.KodPomieszczenia" />
                 </MudItem>
 
@@ -35,6 +37,7 @@
                     <MudNumericField T="decimal?"
                                      Label="Powierzchnia"
                                      Dense="true"
+                                     Disabled="IsReadOnly"
                                      @bind-Value="Model.Powierzchnia" />
                 </MudItem>
             </MudGrid>
@@ -43,8 +46,11 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
+        @if (!_isReadOnly)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -54,14 +60,19 @@
     [Parameter] public PomieszczenieDto Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
     [Parameter] public List<LokalDto> Lokale { get; set; } = new();
+    [Parameter] public bool IsReadOnly { get; set; } = false;
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
+    private bool _isReadOnly => IsReadOnly;
 
     private void Cancel() => MudDialog.Cancel();
 
     private async Task SaveAsync()
     {
+        if (_isReadOnly)
+            return;
+
         if (_form is null) return;
 
         await _form.Validate();

@@ -57,6 +57,12 @@
             <MudTd DataLabel="Kod">@context.KodJednostki</MudTd>
             <MudTd DataLabel="Nazwa">@context.Nazwa</MudTd>
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -149,6 +155,20 @@
             Snackbar.Add("Zapisano.", Severity.Success);
             await ReloadAsync();
         }
+    }
+
+    private async Task ViewAsync(JednostkaMiaryDto item)
+    {
+        var parameters = new DialogParameters
+        {
+            ["KodJednostki"] = item.KodJednostki,
+            ["Nazwa"] = item.Nazwa,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<JednostkaMiaryDialog>("Podgląd jednostki miary", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(JednostkaMiaryDto item)

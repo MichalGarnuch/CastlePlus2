@@ -72,6 +72,12 @@
             <MudTd DataLabel="Aktywny">@context.Aktywny</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -271,6 +277,34 @@
         {
             Snackbar.Add($"Błąd edycji: {ex.Message}", Severity.Error);
         }
+    }
+
+    private async Task ViewAsync(LicznikDto item)
+    {
+        var clone = new LicznikDto
+        {
+            IdLicznika = item.IdLicznika,
+            IdPrzylacza = item.IdPrzylacza,
+            IdLicznikaNadrzednego = item.IdLicznikaNadrzednego,
+            NumerNV = item.NumerNV,
+            KodJednostki = item.KodJednostki,
+            WspolczynnikPrzeliczeniowy = item.WspolczynnikPrzeliczeniowy,
+            Aktywny = item.Aktywny
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true,
+            ["Przylacza"] = _przylacza,
+            ["Jednostki"] = _jednostki,
+            ["Liczniki"] = _items
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = DialogService.Show<LicznikDialog>($"Podgląd: {item.NumerNV}", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(LicznikDto item)

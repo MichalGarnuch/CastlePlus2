@@ -57,6 +57,11 @@
             <MudTd DataLabel="Kod">@context.KodWaluty</MudTd>
             <MudTd DataLabel="Nazwa">@context.Nazwa</MudTd>
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -159,6 +164,27 @@
 
         Snackbar.Add("Zapisano.", Severity.Success);
         await ReloadAsync();
+    }
+
+    private async Task ViewAsync(WalutaDto item)
+    {
+        if (string.IsNullOrWhiteSpace(item.KodWaluty))
+        {
+            Snackbar.Add("Brak kodu waluty – nie można podejrzeć.", Severity.Error);
+            return;
+        }
+
+        var parameters = new DialogParameters
+        {
+            ["IsCreate"] = false,
+            ["KodWaluty"] = item.KodWaluty,
+            ["Nazwa"] = item.Nazwa ?? string.Empty,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<WalutaDialog>("Podgląd waluty", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(WalutaDto item)

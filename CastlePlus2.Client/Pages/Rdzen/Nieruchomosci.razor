@@ -67,6 +67,12 @@
             <MudTd DataLabel="Właściciel (podmiot)">@GetPodmiotLabel(context.IdPodmiotuWlasciciela)</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -272,6 +278,30 @@
                 Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
             }
         }
+    }
+
+    private async Task ViewAsync(NieruchomoscDto item)
+    {
+        var clone = new NieruchomoscDto
+        {
+            Id = item.Id,
+            Nazwa = item.Nazwa,
+            IdAdresuGlownego = item.IdAdresuGlownego,
+            IdPodmiotuWlasciciela = item.IdPodmiotuWlasciciela
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true,
+            ["Adresy"] = _adresy,
+            ["Podmioty"] = _podmioty
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+        var dialog = await DialogService.ShowAsync<NieruchomoscDialog>("Podgląd nieruchomości", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(NieruchomoscDto item)

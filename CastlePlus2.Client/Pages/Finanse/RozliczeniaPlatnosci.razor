@@ -63,6 +63,12 @@
             <MudTd DataLabel="Kwota">@context.Kwota</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => OpenViewDialog(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -209,6 +215,29 @@
             Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
         }
     }
+
+    private async Task OpenViewDialog(RozliczeniePlatnosciDto item)
+    {
+        var clone = new RozliczeniePlatnosciDto
+        {
+            IdRozliczenia = item.IdRozliczenia,
+            IdPlatnosci = item.IdPlatnosci,
+            IdFaktury = item.IdFaktury,
+            Kwota = item.Kwota
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };
+        var dialog = Dialogs.Show<RozliczeniePlatnosciDialog>("Podgląd rozliczenia", parameters, options);
+        await dialog.Result;
+    }
+
 
     private async Task DeleteAsync(RozliczeniePlatnosciDto item)
     {

@@ -68,6 +68,12 @@
             <MudTd DataLabel="Opis">@context.Opis</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -257,6 +263,30 @@
                 Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
             }
         }
+    }
+
+    private async Task ViewAsync(PrzylaczeDto item)
+    {
+        var clone = new PrzylaczeDto
+        {
+            IdPrzylacza = item.IdPrzylacza,
+            IdEncjiGospodarza = item.IdEncjiGospodarza,
+            KodRodzaju = item.KodRodzaju,
+            Opis = item.Opis
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["Rodzaje"] = _rodzaje,
+            ["Nieruchomosci"] = _nieruchomosci,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<PrzylaczeDialog>("Podgląd przyłącza", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(PrzylaczeDto item)

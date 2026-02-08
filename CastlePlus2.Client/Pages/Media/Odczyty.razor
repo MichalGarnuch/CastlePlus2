@@ -66,6 +66,12 @@
             <MudTd DataLabel="Źródło">@context.Zrodlo</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -223,6 +229,30 @@
                 Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
             }
         }
+    }
+
+    private async Task ViewAsync(OdczytDto item)
+    {
+        var clone = new OdczytDto
+        {
+            IdOdczytu = item.IdOdczytu,
+            IdLicznika = item.IdLicznika,
+            DataOdczytu = item.DataOdczytu,
+            Wskazanie = item.Wskazanie,
+            Zrodlo = item.Zrodlo
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["Liczniki"] = _liczniki,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = DialogService.Show<OdczytDialog>("Podgląd odczytu", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(OdczytDto item)

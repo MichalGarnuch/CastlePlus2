@@ -5,7 +5,7 @@
     <DialogContent>
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-3">
-                @(_isCreate ? "Nowe powiązanie" : "Edycja powiązania")
+                @(_isReadOnly ? "Podgląd powiązania" : _isCreate ? "Nowe powiązanie" : "Edycja powiązania")
             </MudText>
 
             <MudGrid Spacing="2">
@@ -25,6 +25,7 @@
                                      Required="true"
                                      RequiredError="IdZlecenia jest wymagane"
                                      Margin="Margin.Dense"
+                                     Disabled="IsReadOnly"
                                      @bind-Value="_idZlecenia" />
                 </MudItem>
 
@@ -34,6 +35,7 @@
                                   Required="true"
                                   RequiredError="IdEncji jest wymagane"
                                   Margin="Margin.Dense"
+                                  Disabled="IsReadOnly"
                                   Error="_guidInvalid"
                                   ErrorText="Podaj poprawny GUID" />
                 </MudItem>
@@ -42,8 +44,11 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">@(_isReadOnly ? "Zamknij" : "Anuluj")</MudButton>
+        @if (!_isReadOnly)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Zapisz</MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -54,9 +59,11 @@
     [Parameter] public long IdPowiazania { get; set; }
     [Parameter] public long IdZlecenia { get; set; }
     [Parameter] public Guid IdEncji { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; } = false;
 
     private MudForm? _form;
     private bool _isCreate => IsCreate;
+    private bool _isReadOnly => IsReadOnly;
     private long _idZlecenia;
     private string _idEncjiText = string.Empty;
     private bool _guidInvalid;
@@ -71,6 +78,9 @@
 
     private async Task SaveAsync()
     {
+        if (_isReadOnly)
+            return;
+
         if (_form is null) return;
 
         _guidInvalid = false;

@@ -65,6 +65,12 @@
             <MudTd DataLabel="Data">@context.DataUtworzenia.ToString("yyyy-MM-dd HH:mm")</MudTd>
 
             <MudTd DataLabel="Akcje" Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -214,6 +220,30 @@
                 Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
             }
         }
+    }
+
+    private async Task ViewAsync(DokumentDto item)
+    {
+        var clone = new DokumentDto
+        {
+            IdDokumentu = item.IdDokumentu,
+            Nazwa = item.Nazwa,
+            SciezkaPliku = item.SciezkaPliku,
+            Opis = item.Opis,
+            IdEncjiOwner = item.IdEncjiOwner,
+            DataUtworzenia = item.DataUtworzenia
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };
+        var dialog = DialogService.Show<DokumentDialog>("Podgląd dokumentu", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(DokumentDto item)

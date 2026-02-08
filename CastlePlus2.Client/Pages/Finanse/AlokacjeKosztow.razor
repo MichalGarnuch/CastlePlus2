@@ -65,6 +65,12 @@
             <MudTd DataLabel="Brutto">@context.KwotaBrutto</MudTd>
 
             <MudTd Class="text-right">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Color="Color.Info"
+                               Size="Size.Small"
+                               Title="Podgląd"
+                               OnClick="@(() => ViewAsync(context))" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Size="Size.Small"
@@ -213,6 +219,29 @@
                 Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
             }
         }
+    }
+
+    private async Task ViewAsync(AlokacjaKosztuDto item)
+    {
+        var clone = new AlokacjaKosztuDto
+        {
+            IdAlokacji = item.IdAlokacji,
+            IdPozycjiKosztu = item.IdPozycjiKosztu,
+            IdEncji = item.IdEncji,
+            KwotaNetto = item.KwotaNetto,
+            KwotaBrutto = item.KwotaBrutto
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Model"] = clone,
+            ["IsEdit"] = true,
+            ["IsReadOnly"] = true
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = DialogService.Show<AlokacjaKosztuDialog>("Podgląd alokacji kosztu", parameters, options);
+        await dialog.Result;
     }
 
     private async Task DeleteAsync(AlokacjaKosztuDto item)
