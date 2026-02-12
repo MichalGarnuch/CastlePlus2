@@ -1,0 +1,175 @@
+﻿@using System
+@using MudBlazor
+@using CastlePlus2.Client.Services.Finanse
+@using CastlePlus2.Contracts.DTOs.Finanse
+@inject IFakturyService FakturyService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="2">
+            <MudText Typo="Typo.h6">Wybierz fakturę</MudText>
+
+            <MudTextField Value="_search"
+                          ValueChanged="@(async (string v) => await OnSearchChanged(v))"
+                          Label="Szukaj (numer / id)"
+                          Placeholder="np. FV/2025/0001"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Margin="Margin.Dense" />
+
+            <MudTable @ref="_table"
+                      ServerData="LoadServerData"
+                      T="FakturaLookupDto"
+                      Dense="true"
+                      Hover="true"
+                      Bordered="true"
+                      Striped="true"
+                      Loading="_loading"
+                      RowClassFunc="RowClassFunc"
+                      RowsPerPage="@_rowsPerPage"
+                      RowsPerPageOptions="new int[] { 20, 50, 100 }"
+                      RowsPerPageChanged="@(async (int v) => await OnRowsPerPageChanged(v))"
+                      OnRowClick="@(EventCallback.Factory.Create<TableRowClickEventArgs<FakturaLookupDto>>(this, HandleRowClick))">
+
+                <HeaderContent>
+                    <MudTh>Id</MudTh>
+                    <MudTh>Numer</MudTh>
+                    <MudTh>Data</MudTh>
+                    <MudTh>Kwota brutto</MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="Id">@context.IdFaktury</MudTd>
+                    <MudTd DataLabel="Numer">@context.NumerFaktury</MudTd>
+                    <MudTd DataLabel="Data">@context.DataWystawienia.ToString("yyyy-MM-dd")</MudTd>
+                    <MudTd DataLabel="Kwota">@context.KwotaBrutto</MudTd>
+                </RowTemplate>
+
+                <NoRecordsContent>
+                    <MudText Class="pa-4">Brak wyników.</MudText>
+                </NoRecordsContent>
+
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+            </MudTable>
+
+            <MudText Typo="Typo.caption">Wyników: @_totalItems</MudText>
+        </MudStack>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="@Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Disabled="@(_selected is null)"
+                   OnClick="@Choose">
+            Wybierz
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public long? IdPodmiotu { get; set; }
+
+    private MudTable<FakturaLookupDto>? _table;
+    private bool _loading;
+    private int _rowsPerPage = 50;
+    private int _totalItems;
+    private string _search = string.Empty;
+
+    private FakturaLookupDto? _selected;
+    private CancellationTokenSource? _searchCts;
+
+    private async Task OnRowsPerPageChanged(int value)
+    {
+        _rowsPerPage = value;
+        _selected = null;
+        await ReloadAsync();
+    }
+
+    private async Task OnSearchChanged(string value)
+    {
+        _search = value;
+
+        _searchCts?.Cancel();
+        _searchCts = new CancellationTokenSource();
+        var token = _searchCts.Token;
+
+        try
+        {
+            await Task.Delay(250, token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
+        _selected = null;
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        if (_table is null)
+        {
+            return;
+        }
+
+        await _table.ReloadServerData();
+    }
+
+    private async Task<TableData<FakturaLookupDto>> LoadServerData(TableState state, CancellationToken ct)
+    {
+        _loading = true;
+        try
+        {
+            var q = string.IsNullOrWhiteSpace(_search) ? null : _search.Trim();
+            var result = await FakturyService.SearchLookupPagedAsync(q, IdPodmiotu, state.Page + 1, state.PageSize);
+            _totalItems = result.TotalCount;
+            return new TableData<FakturaLookupDto>
+            {
+                Items = result.Items,
+                TotalItems = result.TotalCount
+            };
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania faktur (lookup): {ex.Message}", Severity.Error);
+            return new TableData<FakturaLookupDto>
+            {
+                Items = Array.Empty<FakturaLookupDto>(),
+                TotalItems = 0
+            };
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void HandleRowClick(TableRowClickEventArgs<FakturaLookupDto> args)
+    {
+        _selected = args.Item;
+    }
+
+    private string RowClassFunc(FakturaLookupDto item, int rowNumber)
+    {
+        if (_selected is null) return string.Empty;
+        return item.IdFaktury == _selected.IdFaktury ? "mud-theme-primary" : string.Empty;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void Choose()
+    {
+        if (_selected is null)
+            return;
+
+        MudDialog.Close(DialogResult.Ok(_selected));
+    }
+}

@@ -2,6 +2,10 @@
 @using CastlePlus2.Contracts.DTOs.Finanse
 @using CastlePlus2.Contracts.DTOs.Podmioty
 @using CastlePlus2.Contracts.DTOs.Slowniki
+@using CastlePlus2.Client.Pages.Podmioty
+@using CastlePlus2.Client.Services.Podmioty
+@inject IDialogService DialogService
+@inject IPodmiotyService PodmiotyService
 
 <MudDialog>
     <DialogContent>
@@ -23,20 +27,25 @@
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
-                    <MudSelect T="long"
-                               Label="Podmiot (IdPodmiotu)"
-                               Dense="true"
-                               Required="true"
-                               Disabled="IsReadOnly"
-                               @bind-Value="Model.IdPodmiotu">
-                        @foreach (var p in Podmioty)
-                        {
-                            <MudSelectItem T="long" Value="@p.IdPodmiotu">
-                                @($"Id={p.IdPodmiotu} / {p.Nazwa}" + (string.IsNullOrWhiteSpace(p.NIP) ? "" : $" (NIP {p.NIP})"))
-                            </MudSelectItem>
-                        }
-                    </MudSelect>
+                    <MudTextField Label="Podmiot"
+                                  Dense="true"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Podmiot jest wymagany"
+                                  Value="@_podmiotLabel" />
                 </MudItem>
+
+                @if (!_isReadOnly)
+                {
+                    <MudItem xs="12" Class="d-flex align-center justify-end">
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Search"
+                                   OnClick="OpenPodmiotLookupDialog">
+                            Wybierz podmiot
+                        </MudButton>
+                    </MudItem>
+                }
 
                 <MudItem xs="12" sm="6">
                     <MudDatePicker Label="Data wystawienia"
@@ -113,7 +122,6 @@
     [Parameter] public bool IsEdit { get; set; }
     [Parameter] public bool IsReadOnly { get; set; } = false;
 
-    [Parameter] public List<PodmiotDto> Podmioty { get; set; } = new();
     [Parameter] public List<WalutaDto> Waluty { get; set; } = new();
 
     private MudForm? _form;
@@ -122,13 +130,16 @@
 
     private DateTime? _dataWystawienia;
     private DateTime? _dataSprzedazy;
+    private string _podmiotLabel = string.Empty;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _dataWystawienia = Model.DataWystawienia == default && !IsEdit && !IsReadOnly
             ? DateTime.Today
             : Model.DataWystawienia;
         _dataSprzedazy = Model.DataSprzedazy;
+
+        await LoadPodmiotLabelAsync();
     }
 
     private void Cancel() => MudDialog.Cancel();
@@ -155,5 +166,46 @@
         Model.DataSprzedazy = _dataSprzedazy?.Date;
 
         MudDialog.Close(DialogResult.Ok(Model));
+    }
+
+    private async Task LoadPodmiotLabelAsync()
+    {
+        if (Model.IdPodmiotu <= 0)
+        {
+            _podmiotLabel = string.Empty;
+            return;
+        }
+
+        var podmiot = await PodmiotyService.GetByIdAsync(Model.IdPodmiotu);
+        if (podmiot is null)
+        {
+            _podmiotLabel = Model.IdPodmiotu.ToString();
+            return;
+        }
+
+        var nip = string.IsNullOrWhiteSpace(podmiot.NIP) ? "-" : podmiot.NIP;
+        _podmiotLabel = $"{podmiot.Nazwa} (NIP: {nip})";
+    }
+
+    private async Task OpenPodmiotLookupDialog()
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<PodmiotLookupDialog>("Wybierz podmiot", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not PodmiotLookupDto selected)
+            return;
+
+        Model.IdPodmiotu = selected.IdPodmiotu;
+        _podmiotLabel = selected.Label;
     }
 }

@@ -18,6 +18,12 @@ namespace CastlePlus2.Application.Interfaces.Rdzen
         void Remove(Encja entity);
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
         Task<List<Encja>> SearchAsync(string? typEncji, string? q, int take, CancellationToken cancellationToken = default);
+        Task<(List<Encja> Items, int TotalCount)> SearchPagedAsync(
+            string? typEncji,
+            string? q,
+            int page,
+            int pageSize,
+            CancellationToken cancellationToken = default);
 
     }
 }

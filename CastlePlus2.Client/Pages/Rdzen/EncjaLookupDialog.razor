@@ -1,4 +1,5 @@
-﻿@using MudBlazor
+﻿@using System
+@using MudBlazor
 @using CastlePlus2.Client.Services.Rdzen
 @using CastlePlus2.Contracts.DTOs.Rdzen
 @using Microsoft.AspNetCore.Components
@@ -37,7 +38,9 @@
                 </MudItem>
             </MudGrid>
 
-            <MudTable Items="_items"
+            <MudTable @ref="_table"
+                      ServerData="LoadServerData"
+                      T="EncjaLookupDto"
                       Dense="true"
                       Hover="true"
                       Bordered="true"
@@ -45,7 +48,7 @@
                       Loading="_loading"
                       RowClassFunc="RowClassFunc"
                       RowsPerPage="@_rowsPerPage"
-                      RowsPerPageOptions="new int[] { 20, 50, 100, 200 }"
+                      RowsPerPageOptions="new int[] { 20, 50, 100 }"
                       RowsPerPageChanged="@(async (int v) => await OnRowsPerPageChanged(v))"
                       OnRowClick="@(EventCallback.Factory.Create<TableRowClickEventArgs<EncjaLookupDto>>(this, HandleRowClick))">
 
@@ -72,16 +75,10 @@
                 </PagerContent>
             </MudTable>
 
-            <MudStack Row="true" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
-                <MudText Typo="Typo.caption">Wyników: @_items.Count (limit: @_take)</MudText>
-                <MudButton Variant="Variant.Outlined"
-                           Disabled="@(_take >= 200)"
-                           OnClick="@(async () => await LoadMore())">
-                    Pokaż więcej
-                </MudButton>
-            </MudStack>
+            <MudText Typo="Typo.caption">Wyników: @_totalItems</MudText>
 
         </MudStack>
+
     </DialogContent>
 
     <DialogActions>
@@ -101,8 +98,6 @@
     [Parameter] public string InitialTypEncji { get; set; } = "BUDYNEK";
 
     private readonly List<string> _typyEncji = new() { "BUDYNEK", "NIERUCHOMOSC", "LOKAL", "POMIESZCZENIE" };
-
-    private List<EncjaLookupDto> _items = new();
     private bool _loading;
 
     private string _typEncji = "BUDYNEK";
@@ -110,15 +105,15 @@
 
     private EncjaLookupDto? _selected;
 
+    private MudTable<EncjaLookupDto>? _table;
     private int _rowsPerPage = 50;
-    private int _take = 50;
+    private int _totalItems;
 
     private CancellationTokenSource? _searchCts;
 
     protected override async Task OnInitializedAsync()
     {
         _typEncji = string.IsNullOrWhiteSpace(InitialTypEncji) ? "BUDYNEK" : InitialTypEncji;
-        _take = Math.Min(200, _rowsPerPage);
 
         await ReloadAsync();
     }
@@ -133,7 +128,6 @@
     private async Task OnRowsPerPageChanged(int value)
     {
         _rowsPerPage = value;
-        _take = Math.Min(200, value);
         _selected = null;
         await ReloadAsync();
     }
@@ -160,29 +154,42 @@
         await ReloadAsync();
     }
 
-    private async Task LoadMore()
+    private async Task ReloadAsync()
     {
-        _take = Math.Min(200, _take + 50);
-        await ReloadAsync();
+        if (_table is null)
+        {
+            return;
+        }
+
+        await _table.ReloadServerData();
     }
 
-    private async Task ReloadAsync()
+    private async Task<TableData<EncjaLookupDto>> LoadServerData(TableState state, CancellationToken ct)
     {
         _loading = true;
         try
         {
             var q = string.IsNullOrWhiteSpace(_search) ? null : _search.Trim();
-            _items = await EncjeService.SearchLookupAsync(_typEncji, q, _take);
+            var result = await EncjeService.SearchLookupPagedAsync(_typEncji, q, state.Page + 1, state.PageSize);
+            _totalItems = result.TotalCount;
+            return new TableData<EncjaLookupDto>
+            {
+                Items = result.Items,
+                TotalItems = result.TotalCount
+            };
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd pobierania encji (lookup): {ex.Message}", Severity.Error);
-            _items = new();
+            return new TableData<EncjaLookupDto>
+            {
+                Items = Array.Empty<EncjaLookupDto>(),
+                TotalItems = 0
+            };
         }
         finally
         {
             _loading = false;
-            StateHasChanged();
         }
     }
 

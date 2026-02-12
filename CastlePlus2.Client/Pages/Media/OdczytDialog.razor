@@ -1,6 +1,8 @@
-﻿@using System.Linq
-@using MudBlazor
+﻿@using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Media
+@using CastlePlus2.Client.Services.Media
+@inject IDialogService DialogService
+@inject ILicznikiService LicznikiService
 @using CastlePlus2.Client.Components.Crud
 
 <MudDialog>
@@ -9,31 +11,25 @@
             <MudGrid Spacing="2">
 
                 <MudItem xs="12">
-                    @if (_isReadOnly)
-                    {
-                        <MudTextField Label="Licznik"
-                                      ReadOnly="true"
-                                      Margin="Margin.Dense"
-                                      Value="@GetLicznikLabel(_model.IdLicznika)" />
-                    }
-                    else
-                    {
-                        <MudSelect T="long"
-                                   Label="Licznik"
-                                   Value="@_model.IdLicznika"
-                                   ValueChanged="@OnLicznikChanged"
-                                   Required="true"
-                                   RequiredError="Licznik jest wymagany"
-                                   Margin="Margin.Dense">
-                            @foreach (var l in Liczniki)
-                            {
-                                <MudSelectItem T="long" Value="@l.IdLicznika">
-                                    @($"{l.NumerNV} (Id={l.IdLicznika})")
-                                </MudSelectItem>
-                            }
-                        </MudSelect>
-                    }
+                    <MudTextField Label="Licznik"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Licznik jest wymagany"
+                                  Margin="Margin.Dense"
+                                  Value="@_licznikLabel" />
                 </MudItem>
+
+                @if (!_isReadOnly)
+                {
+                    <MudItem xs="12" Class="d-flex align-center justify-end">
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Search"
+                                   OnClick="OpenLicznikLookupDialog">
+                            Wybierz licznik
+                        </MudButton>
+                    </MudItem>
+                }
 
                 <MudItem xs="12" sm="6">
                     @if (_isReadOnly)
@@ -110,7 +106,6 @@
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
 
     [Parameter] public OdczytDto Model { get; set; } = new();
-    [Parameter] public List<LicznikDto> Liczniki { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
     [Parameter] public bool IsReadOnly { get; set; }
 
@@ -122,7 +117,9 @@
     private OdczytDto _model = new();
     private DateTime? _dataOdczytu;
 
-    protected override void OnInitialized()
+    private string _licznikLabel = string.Empty;
+
+    protected override async Task OnInitializedAsync()
     {
         _model = new OdczytDto
         {
@@ -136,13 +133,24 @@
         _dataOdczytu = (_model.DataOdczytu == default && !IsReadOnly && !IsEdit)
             ? DateTime.Today
             : _model.DataOdczytu;
+
+        await LoadLicznikLabelAsync();
     }
 
-    private void OnLicznikChanged(long value)
+    private async Task LoadLicznikLabelAsync()
     {
-        if (_isReadOnly) return;
-        _model.IdLicznika = value;
+        if (_model.IdLicznika <= 0)
+        {
+            _licznikLabel = string.Empty;
+            return;
+        }
+
+        var licznik = await LicznikiService.GetByIdAsync(_model.IdLicznika);
+        _licznikLabel = licznik is null
+            ? _model.IdLicznika.ToString()
+            : $"{licznik.NumerNV} ({licznik.KodJednostki}) [Id={licznik.IdLicznika}]";
     }
+
 
     private void OnDataChanged(DateTime? value)
     {
@@ -157,11 +165,6 @@
     private void Edit()
         => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
 
-    private string GetLicznikLabel(long idLicznika)
-    {
-        var licznik = Liczniki.FirstOrDefault(l => l.IdLicznika == idLicznika);
-        return licznik is null ? idLicznika.ToString() : $"{licznik.NumerNV} (Id={licznik.IdLicznika})";
-    }
 
     private static string FormatDate(DateTime? value)
         => value?.ToString("yyyy-MM-dd") ?? string.Empty;
@@ -178,5 +181,27 @@
         _model.Zrodlo = _model.Zrodlo?.Trim();
 
         MudDialog.Close(DialogResult.Ok(_model));
+    }
+
+    private async Task OpenLicznikLookupDialog()
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<LicznikLookupDialog>("Wybierz licznik", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not LicznikLookupDto selected)
+            return;
+
+        _model.IdLicznika = selected.IdLicznika;
+        _licznikLabel = selected.Label;
     }
 }

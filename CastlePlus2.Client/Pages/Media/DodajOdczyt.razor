@@ -5,8 +5,10 @@
 @using CastlePlus2.Contracts.DTOs.Media
 @using CastlePlus2.Contracts.Requests.Media
 @using CastlePlus2.Client.Services.Media
+@using CastlePlus2.Client.Pages.Media
 @inject IOdczytyService OdczytyService
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudText Typo="Typo.h4" Class="fw-700 mb-4">Dodaj odczyt licznika</MudText>
 
@@ -19,20 +21,22 @@
     {
         <MudForm @ref="_form" @bind-IsValid="_isFormValid">
             <MudGrid Spacing="2">
-                <MudItem xs="12">
-                    <MudSelect T="long"
-                               Label="Licznik"
-                               Required="true"
-                               RequiredError="Licznik jest wymagany"
-                               @bind-Value="_model.IdLicznika"
-                               Margin="Margin.Dense">
-                        @foreach (var licznik in _context.Liczniki)
-                        {
-                            <MudSelectItem T="long" Value="@licznik.IdLicznika">
-                                @($"{licznik.NumerNV} ({licznik.KodJednostki}) [Id={licznik.IdLicznika}]")
-                            </MudSelectItem>
-                        }
-                    </MudSelect>
+                <MudItem xs="12" sm="8">
+                    <MudTextField Label="Licznik"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Licznik jest wymagany"
+                                  Margin="Margin.Dense"
+                                  Value="@_licznikLabel" />
+                </MudItem>
+
+                <MudItem xs="12" sm="4" Class="d-flex align-center justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Search"
+                               OnClick="OpenLicznikLookupDialog">
+                        Wybierz licznik
+                    </MudButton>
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
@@ -80,6 +84,7 @@
     private OdczytContextDto _context = new();
     private CreateOdczytRequest _model = new();
     private DateTime? _dataOdczytu = DateTime.Today;
+    private string _licznikLabel = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -128,6 +133,7 @@
 
             _model = new CreateOdczytRequest { DataOdczytu = DateTime.Today };
             _dataOdczytu = DateTime.Today;
+            _licznikLabel = string.Empty;
         }
         catch (Exception ex)
         {
@@ -137,5 +143,27 @@
         {
             _saving = false;
         }
+    }
+
+    private async Task OpenLicznikLookupDialog()
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<LicznikLookupDialog>("Wybierz licznik", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not LicznikLookupDto selected)
+            return;
+
+        _model.IdLicznika = selected.IdLicznika;
+        _licznikLabel = selected.Label;
     }
 }

@@ -1,4 +1,6 @@
-﻿using CastlePlus2.Application.Interfaces.Media;
+﻿using System;
+using System.Linq;
+using CastlePlus2.Application.Interfaces.Media;
 using CastlePlus2.Domain.Entities.Media;
 using CastlePlus2.Domain.Entities.Rdzen;
 using CastlePlus2.Infrastructure.Persistence;
@@ -59,6 +61,39 @@ namespace CastlePlus2.Infrastructure.Repositories.Media
             return await _db.Set<Encja>()
                 .AsNoTracking()
                 .AnyAsync(e => e.Id == idEncji, ct);
+        }
+
+        public async Task<(List<Przylacze> Items, int TotalCount)> SearchPagedAsync(
+            string? q,
+            int page,
+            int pageSize,
+            CancellationToken ct)
+        {
+            var currentPage = page <= 0 ? 1 : page;
+            var currentPageSize = pageSize <= 0 ? 20 : Math.Min(pageSize, 200);
+
+            IQueryable<Przylacze> query = _db.Przylacza
+    .AsNoTracking()
+    .Include(x => x.RodzajMedium);
+
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var s = q.Trim();
+                query = query.Where(p =>
+                    p.IdPrzylacza.ToString().Contains(s)
+                    || p.KodRodzaju.Contains(s)
+                    || (p.Opis != null && p.Opis.Contains(s)));
+            }
+
+            var total = await query.CountAsync(ct);
+            var items = await query
+                .OrderBy(p => p.IdPrzylacza)
+                .Skip((currentPage - 1) * currentPageSize)
+                .Take(currentPageSize)
+                .ToListAsync(ct);
+
+            return (items, total);
         }
     }
 }

@@ -1,6 +1,8 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using CastlePlus2.Contracts.DTOs.Common;
 using CastlePlus2.Contracts.DTOs.Finanse;
 using CastlePlus2.Contracts.Requests.Finanse;
 
@@ -35,6 +37,27 @@ namespace CastlePlus2.Client.Services.Finanse
 
             resp.EnsureSuccessStatusCode();
             return await resp.Content.ReadFromJsonAsync<FakturaDto>(cancellationToken: ct);
+        }
+
+        public async Task<PagedResultDto<FakturaLookupDto>> SearchLookupPagedAsync(
+            string? q,
+            long? idPodmiotu,
+            int page,
+            int pageSize,
+            CancellationToken ct = default)
+        {
+            var currentPage = page <= 0 ? 1 : page;
+            var currentPageSize = pageSize <= 0 ? 20 : Math.Min(pageSize, 200);
+            var url = $"{BaseUrl}/lookup?page={currentPage}&pageSize={currentPageSize}";
+
+            if (!string.IsNullOrWhiteSpace(q))
+                url += $"&q={Uri.EscapeDataString(q)}";
+
+            if (idPodmiotu.HasValue && idPodmiotu.Value > 0)
+                url += $"&idPodmiotu={idPodmiotu.Value}";
+
+            return await _http.GetFromJsonAsync<PagedResultDto<FakturaLookupDto>>(url, ct)
+                   ?? new PagedResultDto<FakturaLookupDto>();
         }
 
         public async Task<FakturaDto> CreateAsync(CreateFakturaRequest request, CancellationToken ct = default)

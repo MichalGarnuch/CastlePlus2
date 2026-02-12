@@ -6,7 +6,6 @@
 @using CastlePlus2.Contracts.Requests.Rdzen
 @using CastlePlus2.Client.Services.Rdzen
 @inject ILokaleService LokaleService
-@inject IBudynkiService BudynkiService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
@@ -100,36 +99,12 @@
     private string _search = string.Empty;
     private bool _loading = true; // Domyślnie true, żeby pasek był widoczny przy wejściu
 
-    private List<BudynekDto> _budynki = new();
-    private Dictionary<Guid, string> _budynkiMap = new();
-
     protected override async Task OnInitializedAsync()
     {
-        await LoadLookupsAsync();
         await ReloadAsync();
     }
-
-    private async Task LoadLookupsAsync()
-    {
-        try
-        {
-            _budynki = await BudynkiService.GetAllAsync();
-
-            _budynkiMap = (_budynki ?? new()).ToDictionary(
-                b => b.Id,
-                b => string.IsNullOrWhiteSpace(b.KodBudynku) ? b.Id.ToString() : b.KodBudynku
-            );
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Błąd pobierania budynków (lookup): {ex.Message}", Severity.Error);
-            _budynki = new();
-            _budynkiMap = new();
-        }
-    }
-
-    private string GetBudynekLabel(Guid id)
-        => _budynkiMap.TryGetValue(id, out var v) ? v : id.ToString();
+    private static string GetBudynekLabel(Guid id)
+        => id.ToString();
 
     private async Task ReloadAsync()
     {
@@ -173,8 +148,7 @@
         var parameters = new DialogParameters
         {
             ["Model"] = new LokalDto(),
-            ["IsEdit"] = false,
-            ["Budynki"] = _budynki
+            ["IsEdit"] = false
         };
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
@@ -218,8 +192,7 @@
         var parameters = new DialogParameters
         {
             ["Model"] = clone,
-            ["IsEdit"] = true,
-            ["Budynki"] = _budynki
+            ["IsEdit"] = true
         };
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
@@ -270,8 +243,7 @@
         {
             ["Model"] = clone,
             ["IsEdit"] = true,
-            ["IsReadOnly"] = true,
-            ["Budynki"] = _budynki
+            ["IsReadOnly"] = true
         };
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };

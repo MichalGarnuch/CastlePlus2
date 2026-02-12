@@ -25,5 +25,10 @@ namespace CastlePlus2.Application.Interfaces.Media
         Task AddAsync(Licznik entity, CancellationToken ct);
         void Remove(Licznik entity);
         Task SaveChangesAsync(CancellationToken ct);
+        Task<(List<Licznik> Items, int TotalCount)> SearchPagedAsync(
+            string? q,
+            int page,
+            int pageSize,
+            CancellationToken ct);
     }
 }

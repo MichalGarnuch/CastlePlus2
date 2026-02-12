@@ -1,6 +1,7 @@
 ﻿// PLIK: CastlePlus2.Infrastructure/Repositories/Media/LicznikRepository.cs
 // (CAŁY PLIK - bo dodajemy GetAll/GetForUpdate/Remove + overload NumerExists)
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -99,6 +100,37 @@ namespace CastlePlus2.Infrastructure.Repositories.Media
         public async Task SaveChangesAsync(CancellationToken ct)
         {
             await _db.SaveChangesAsync(ct);
+        }
+
+        public async Task<(List<Licznik> Items, int TotalCount)> SearchPagedAsync(
+            string? q,
+            int page,
+            int pageSize,
+            CancellationToken ct)
+        {
+            var currentPage = page <= 0 ? 1 : page;
+            var currentPageSize = pageSize <= 0 ? 20 : Math.Min(pageSize, 200);
+
+            var query = _db.Liczniki.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var s = q.Trim();
+                query = query.Where(l =>
+                    l.NumerNV.Contains(s)
+                    || l.KodJednostki.Contains(s)
+                    || l.IdLicznika.ToString().Contains(s));
+            }
+
+            var total = await query.CountAsync(ct);
+            var items = await query
+                .OrderBy(l => l.NumerNV)
+                .ThenBy(l => l.IdLicznika)
+                .Skip((currentPage - 1) * currentPageSize)
+                .Take(currentPageSize)
+                .ToListAsync(ct);
+
+            return (items, total);
         }
     }
 }

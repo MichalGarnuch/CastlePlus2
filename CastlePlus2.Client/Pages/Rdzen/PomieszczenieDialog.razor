@@ -1,34 +1,36 @@
 ﻿@using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Rdzen
+@using CastlePlus2.Client.Services.Rdzen
+@inject IDialogService DialogService
+@inject IEncjeService EncjeService
 
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
             <MudGrid Spacing="2">
                 <MudItem xs="12">
-                    @if (_isReadOnly)
-                    {
-                        <MudTextField Label="Lokal"
-                                      Dense="true"
-                                      ReadOnly="true"
-                                      Value="@GetLokalLabel(Model.IdEncjiNadrzednej)" />
-                    }
-                    else
-                    {
-                        <MudSelect T="Guid"
-                                   Label="Lokal"
-                                   Dense="true"
-                                   Required="true"
-                                   @bind-Value="Model.IdEncjiNadrzednej">
-                            @foreach (var l in Lokale)
-                            {
-                                <MudSelectItem Value="@l.Id">
-                                    @(!string.IsNullOrWhiteSpace(l.KodLokalu) ? l.KodLokalu : l.Id.ToString())
-                                </MudSelectItem>
-                            }
-                        </MudSelect>
-                    }
+                    <MudTextField Label="Lokal"
+                                  Dense="true"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Lokal jest wymagany"
+                                  Value="@_lokalLabel"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  OnAdornmentClick="OpenLokalLookupDialog" />
                 </MudItem>
+
+                @if (!_isReadOnly)
+                {
+                    <MudItem xs="12" Class="d-flex align-center justify-end">
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Search"
+                                   OnClick="OpenLokalLookupDialog">
+                            Wybierz lokal
+                        </MudButton>
+                    </MudItem>
+                }
 
                 <MudItem xs="12">
                     <MudTextField Label="Kod pomieszczenia"
@@ -69,22 +71,21 @@
 
     [Parameter] public PomieszczenieDto Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
-    [Parameter] public List<LokalDto> Lokale { get; set; } = new();
     [Parameter] public bool IsReadOnly { get; set; } = false;
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
     private bool _isReadOnly => IsReadOnly;
+    private string _lokalLabel = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLokalLabelAsync();
+    }
 
     private void Cancel() => MudDialog.Cancel();
 
     private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
-
-    private string GetLokalLabel(Guid idLokalu)
-    {
-        var lokal = Lokale.FirstOrDefault(l => l.Id == idLokalu);
-        return lokal is null ? idLokalu.ToString() : (!string.IsNullOrWhiteSpace(lokal.KodLokalu) ? lokal.KodLokalu : lokal.Id.ToString());
-    }
 
     private async Task SaveAsync()
     {
@@ -97,5 +98,51 @@
         if (!_form.IsValid) return;
 
         MudDialog.Close(DialogResult.Ok(Model));
+    }
+
+    private async Task LoadLokalLabelAsync()
+    {
+        if (Model.IdEncjiNadrzednej == Guid.Empty)
+        {
+            _lokalLabel = string.Empty;
+            return;
+        }
+
+        var encja = await EncjeService.GetByIdAsync(Model.IdEncjiNadrzednej);
+        _lokalLabel = encja is null
+            ? Model.IdEncjiNadrzednej.ToString()
+            : string.IsNullOrWhiteSpace(encja.KodEncji)
+                ? encja.TypEncji
+                : $"{encja.TypEncji} / {encja.KodEncji}";
+    }
+
+    private async Task OpenLokalLookupDialog()
+    {
+        if (_isReadOnly)
+            return;
+
+        var parameters = new DialogParameters
+        {
+            ["InitialTypEncji"] = "LOKAL"
+        };
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<EncjaLookupDialog>("Wybierz lokal", parameters, options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not EncjaLookupDto selected)
+            return;
+
+        Model.IdEncjiNadrzednej = selected.IdEncji;
+        _lokalLabel = selected.Label;
     }
 }

@@ -1,4 +1,5 @@
-﻿using CastlePlus2.Contracts.DTOs.Media;
+﻿using CastlePlus2.Contracts.DTOs.Common;
+using CastlePlus2.Contracts.DTOs.Media;
 using CastlePlus2.Contracts.Requests.Media;
 
 namespace CastlePlus2.Client.Services.Media
@@ -7,6 +8,11 @@ namespace CastlePlus2.Client.Services.Media
     {
         Task<List<PrzylaczeDto>> GetAllAsync(CancellationToken ct = default);
         Task<PrzylaczeDto?> GetByIdAsync(long id, CancellationToken ct = default);
+        Task<PagedResultDto<PrzylaczeLookupDto>> SearchLookupPagedAsync(
+            string? q,
+            int page,
+            int pageSize,
+            CancellationToken ct = default);
         Task<PrzylaczeDto> CreateAsync(CreatePrzylaczeRequest request, CancellationToken ct = default);
         Task<bool> UpdateAsync(long id, UpdatePrzylaczeRequest request, CancellationToken ct = default);
         Task<bool> DeleteAsync(long id, CancellationToken ct = default);

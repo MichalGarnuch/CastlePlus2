@@ -1,0 +1,169 @@
+﻿@using System
+@using MudBlazor
+@using CastlePlus2.Client.Services.Rdzen
+@using CastlePlus2.Contracts.DTOs.Rdzen
+@inject IAdresyService AdresyService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="2">
+            <MudText Typo="Typo.h6">Wybierz adres</MudText>
+
+            <MudTextField Value="_search"
+                          ValueChanged="@(async (string v) => await OnSearchChanged(v))"
+                          Label="Szukaj (ulica / miasto / kod)"
+                          Placeholder="np. Warszawa"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Margin="Margin.Dense" />
+
+            <MudTable @ref="_table"
+                      ServerData="LoadServerData"
+                      T="AdresLookupDto"
+                      Dense="true"
+                      Hover="true"
+                      Bordered="true"
+                      Striped="true"
+                      Loading="_loading"
+                      RowClassFunc="RowClassFunc"
+                      RowsPerPage="@_rowsPerPage"
+                      RowsPerPageOptions="new int[] { 20, 50, 100 }"
+                      RowsPerPageChanged="@(async (int v) => await OnRowsPerPageChanged(v))"
+                      OnRowClick="@(EventCallback.Factory.Create<TableRowClickEventArgs<AdresLookupDto>>(this, HandleRowClick))">
+
+                <HeaderContent>
+                    <MudTh>Id</MudTh>
+                    <MudTh>Adres</MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="Id">@context.IdAdresu</MudTd>
+                    <MudTd DataLabel="Adres">@context.Label</MudTd>
+                </RowTemplate>
+
+                <NoRecordsContent>
+                    <MudText Class="pa-4">Brak wyników.</MudText>
+                </NoRecordsContent>
+
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+            </MudTable>
+
+            <MudText Typo="Typo.caption">Wyników: @_totalItems</MudText>
+        </MudStack>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="@Cancel">Anuluj</MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Disabled="@(_selected is null)"
+                   OnClick="@Choose">
+            Wybierz
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    private MudTable<AdresLookupDto>? _table;
+    private bool _loading;
+    private int _rowsPerPage = 50;
+    private int _totalItems;
+    private string _search = string.Empty;
+
+    private AdresLookupDto? _selected;
+    private CancellationTokenSource? _searchCts;
+
+    private async Task OnRowsPerPageChanged(int value)
+    {
+        _rowsPerPage = value;
+        _selected = null;
+        await ReloadAsync();
+    }
+
+    private async Task OnSearchChanged(string value)
+    {
+        _search = value;
+
+        _searchCts?.Cancel();
+        _searchCts = new CancellationTokenSource();
+        var token = _searchCts.Token;
+
+        try
+        {
+            await Task.Delay(250, token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
+        _selected = null;
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        if (_table is null)
+        {
+            return;
+        }
+
+        await _table.ReloadServerData();
+    }
+
+    private async Task<TableData<AdresLookupDto>> LoadServerData(TableState state, CancellationToken ct)
+    {
+        _loading = true;
+        try
+        {
+            var q = string.IsNullOrWhiteSpace(_search) ? null : _search.Trim();
+            var result = await AdresyService.SearchLookupPagedAsync(q, state.Page + 1, state.PageSize);
+            _totalItems = result.TotalCount;
+            return new TableData<AdresLookupDto>
+            {
+                Items = result.Items,
+                TotalItems = result.TotalCount
+            };
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania adresów (lookup): {ex.Message}", Severity.Error);
+            return new TableData<AdresLookupDto>
+            {
+                Items = Array.Empty<AdresLookupDto>(),
+                TotalItems = 0
+            };
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void HandleRowClick(TableRowClickEventArgs<AdresLookupDto> args)
+    {
+        _selected = args.Item;
+    }
+
+    private string RowClassFunc(AdresLookupDto item, int rowNumber)
+    {
+        if (_selected is null) return string.Empty;
+        return item.IdAdresu == _selected.IdAdresu ? "mud-theme-primary" : string.Empty;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void Choose()
+    {
+        if (_selected is null)
+            return;
+
+        MudDialog.Close(DialogResult.Ok(_selected));
+    }
+}

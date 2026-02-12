@@ -1,5 +1,9 @@
 ﻿﻿@using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Podmioty
+@using CastlePlus2.Client.Pages.Podmioty
+@using CastlePlus2.Client.Services.Podmioty
+@inject IDialogService DialogService
+@inject IPodmiotyService PodmiotyService
 
 <MudDialog>
     <DialogContent>
@@ -16,30 +20,25 @@
                 }
 
                 <MudItem xs="12">
-                    @if (_isReadOnly)
-                    {
-                        <MudTextField Label="Podmiot"
-                                      Margin="Margin.Dense"
-                                      ReadOnly="true"
-                                      Value="@GetPodmiotLabel(Model.IdPodmiotu)" />
-                    }
-                    else
-                    {
-                        <MudSelect T="long"
-                                   Label="Podmiot"
-                                   @bind-Value="Model.IdPodmiotu"
-                                   Required="true"
-                                   RequiredError="Podmiot jest wymagany"
-                                   Margin="Margin.Dense">
-                            @foreach (var podmiot in Podmioty)
-                            {
-                                <MudSelectItem T="long" Value="@podmiot.IdPodmiotu">
-                                    @($"Id={podmiot.IdPodmiotu} / {podmiot.Nazwa}")
-                                </MudSelectItem>
-                            }
-                        </MudSelect>
-                    }
+                    <MudTextField Label="Podmiot"
+                                  Margin="Margin.Dense"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Podmiot jest wymagany"
+                                  Value="@_podmiotLabel" />
                 </MudItem>
+
+                @if (!_isReadOnly)
+                {
+                    <MudItem xs="12" Class="d-flex align-center justify-end">
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Search"
+                                   OnClick="OpenPodmiotLookupDialog">
+                            Wybierz podmiot
+                        </MudButton>
+                    </MudItem>
+                }
 
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="Model.Rodzaj"
@@ -81,23 +80,22 @@
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
 
     [Parameter] public KontaktDto Model { get; set; } = new();
-    [Parameter] public List<PodmiotDto> Podmioty { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
     [Parameter] public bool IsReadOnly { get; set; } = false;
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
     private bool _isReadOnly => IsReadOnly;
+    private string _podmiotLabel = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPodmiotLabelAsync();
+    }
 
     private void Cancel() => MudDialog.Cancel();
 
     private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
-
-    private string GetPodmiotLabel(long idPodmiotu)
-    {
-        var podmiot = Podmioty.FirstOrDefault(p => p.IdPodmiotu == idPodmiotu);
-        return podmiot is null ? idPodmiotu.ToString() : $"Id={podmiot.IdPodmiotu} / {podmiot.Nazwa}";
-    }
 
     private async Task SaveAsync()
     {
@@ -113,5 +111,46 @@
         Model.Wartosc = Model.Wartosc.Trim();
 
         MudDialog.Close(DialogResult.Ok(Model));
+    }
+
+    private async Task LoadPodmiotLabelAsync()
+    {
+        if (Model.IdPodmiotu <= 0)
+        {
+            _podmiotLabel = string.Empty;
+            return;
+        }
+
+        var podmiot = await PodmiotyService.GetByIdAsync(Model.IdPodmiotu);
+        if (podmiot is null)
+        {
+            _podmiotLabel = Model.IdPodmiotu.ToString();
+            return;
+        }
+
+        var nip = string.IsNullOrWhiteSpace(podmiot.NIP) ? "-" : podmiot.NIP;
+        _podmiotLabel = $"{podmiot.Nazwa} (NIP: {nip})";
+    }
+
+    private async Task OpenPodmiotLookupDialog()
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<PodmiotLookupDialog>("Wybierz podmiot", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not PodmiotLookupDto selected)
+            return;
+
+        Model.IdPodmiotu = selected.IdPodmiotu;
+        _podmiotLabel = selected.Label;
     }
 }

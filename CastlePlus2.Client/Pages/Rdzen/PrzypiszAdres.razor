@@ -57,17 +57,22 @@
 
                 <!-- Adres -->
                 <MudItem xs="12" sm="6">
-                    <MudSelect T="long"
-                               Label="Adres"
-                               Required="true"
-                               RequiredError="Adres jest wymagany"
-                               @bind-Value="_model.IdAdresu"
-                               Margin="Margin.Dense">
-                        @foreach (var adres in _context.Adresy)
-                        {
-                            <MudSelectItem T="long" Value="@adres.IdAdresu">@adres.Label</MudSelectItem>
-                        }
-                    </MudSelect>
+                    <MudTextField Label="Adres"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Adres jest wymagany"
+                                  Margin="Margin.Dense"
+                                  Value="@_adresLabel"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  OnAdornmentClick="OpenAdresDialogAsync" />
+
+                    <MudButton Variant="Variant.Outlined"
+                               StartIcon="@Icons.Material.Filled.Search"
+                               Class="mt-2"
+                               OnClick="OpenAdresDialogAsync">
+                        Wybierz adres
+                    </MudButton>
                 </MudItem>
 
                 <!-- Od / Do -->
@@ -110,6 +115,7 @@
 
     private EncjaLookupDto? _selectedEncja;
     private string _typEncji = "BUDYNEK";
+    private string _adresLabel = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -137,6 +143,28 @@
         _typEncji = value;
         _selectedEncja = null;
         _model.IdEncji = Guid.Empty;
+    }
+
+    private async Task OpenAdresDialogAsync()
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<AdresLookupDialog>("Wybierz adres", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not AdresLookupDto adres)
+            return;
+
+        _model.IdAdresu = adres.IdAdresu;
+        _adresLabel = adres.Label;
     }
 
 
@@ -206,6 +234,7 @@
             _selectedEncja = null;
             _model.IdEncji = Guid.Empty;
             _model.IdAdresu = 0;
+            _adresLabel = string.Empty;
 
             _odDnia = DateTime.Today;
             _doDnia = null;

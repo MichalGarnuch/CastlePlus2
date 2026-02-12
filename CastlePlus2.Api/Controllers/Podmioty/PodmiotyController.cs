@@ -4,6 +4,8 @@ using CastlePlus2.Application.Podmioty.Podmioty.Commands.UpdatePodmiot;
 using CastlePlus2.Application.Podmioty.Podmioty.Queries.GetAllPodmioty;
 using CastlePlus2.Application.Podmioty.Podmioty.Queries.GetPodmiotById;
 using CastlePlus2.Application.Podmioty.Podmioty.Queries.GetPodmiotyPaged;
+using CastlePlus2.Application.Podmioty.Podmioty.Queries.SearchPodmiotyLookupPaged;
+using CastlePlus2.Contracts.DTOs.Common;
 using CastlePlus2.Contracts.DTOs.Podmioty;
 using CastlePlus2.Contracts.Requests.Podmioty;
 using MediatR;
@@ -68,6 +70,18 @@ namespace CastlePlus2.Api.Controllers.Podmioty
                 SortDesc = sortDesc
             }, ct);
 
+            return Ok(result);
+        }
+
+        [HttpGet("lookup")]
+        [ProducesResponseType(typeof(PagedResultDto<PodmiotLookupDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Lookup(
+            [FromQuery] string? q = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            CancellationToken ct = default)
+        {
+            var result = await _mediator.Send(new SearchPodmiotyLookupPagedQuery(q, page, pageSize), ct);
             return Ok(result);
         }
 

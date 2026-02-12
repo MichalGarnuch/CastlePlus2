@@ -5,10 +5,15 @@
 @using CastlePlus2.Client.Services.Finanse
 @using CastlePlus2.Contracts.DTOs.Finanse
 @using CastlePlus2.Contracts.DTOs.Podmioty
+@using CastlePlus2.Contracts.DTOs.Rdzen
 @using CastlePlus2.Contracts.DTOs.Slowniki
 @using CastlePlus2.Contracts.Requests.Finanse
+@using CastlePlus2.Client.Pages.Podmioty
+@using CastlePlus2.Client.Pages.Rdzen
+@using RdzenEncjaLookupDto = CastlePlus2.Contracts.DTOs.Rdzen.EncjaLookupDto
 @inject IProcesyFinanseService ProcesyFinanseService
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudText Typo="Typo.h4" Class="fw-700 mb-4">Wystawienie faktury kosztowej</MudText>
 
@@ -31,18 +36,22 @@
                                   Margin="Margin.Dense" />
                 </MudItem>
 
-                <MudItem xs="12" sm="6">
-                    <MudSelect T="long"
-                               Label="Podmiot"
-                               Required="true"
-                               RequiredError="Podmiot jest wymagany"
-                               @bind-Value="_model.IdPodmiotu"
-                               Margin="Margin.Dense">
-                        @foreach (var podmiot in _context.Podmioty)
-                        {
-                            <MudSelectItem T="long" Value="@podmiot.IdPodmiotu">@GetPodmiotLabel(podmiot)</MudSelectItem>
-                        }
-                    </MudSelect>
+                <MudItem xs="12" sm="8">
+                    <MudTextField Label="Podmiot"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Podmiot jest wymagany"
+                                  Margin="Margin.Dense"
+                                  Value="@_podmiotLabel" />
+                </MudItem>
+
+                <MudItem xs="12" sm="4" Class="d-flex align-center justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Search"
+                               OnClick="OpenPodmiotLookupDialog">
+                        Wybierz podmiot
+                    </MudButton>
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
@@ -152,17 +161,15 @@
 
                             <MudGrid Spacing="2" Class="mt-2">
                                 <MudItem xs="12" sm="6">
-                                    <MudSelect T="Guid"
-                                               Label="Encja"
-                                               Required="true"
-                                               RequiredError="Encja jest wymagana"
-                                               @bind-Value="alokacja.IdEncji"
-                                               Margin="Margin.Dense">
-                                        @foreach (var encja in _context.Encje)
-                                        {
-                                            <MudSelectItem T="Guid" Value="@encja.IdEncji">@encja.Label</MudSelectItem>
-                                        }
-                                    </MudSelect>
+                                    <MudTextField Label="Encja"
+                                                  ReadOnly="true"
+                                                  Required="true"
+                                                  RequiredError="Encja jest wymagana"
+                                                  Margin="Margin.Dense"
+                                                  Value="@GetAlokacjaLabel(alokacja)"
+                                                  Adornment="Adornment.End"
+                                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                                  OnAdornmentClick="@(() => OpenEncjaLookupDialog(alokacja))" />
                                 </MudItem>
 
                                 <MudItem xs="12" sm="3">
@@ -219,6 +226,8 @@
     private DateTime? _dataSprzedazy;
     private WystawFaktureContextDto _context = new();
     private WystawFaktureRequest _model = new();
+    private string _podmiotLabel = string.Empty;
+    private readonly Dictionary<WystawFaktureAlokacjaRequest, string> _alokacjaLabels = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -250,6 +259,15 @@
 
         _dataWystawienia = _model.DataWystawienia;
         _dataSprzedazy = _model.DataSprzedazy;
+        _podmiotLabel = string.Empty;
+        _alokacjaLabels.Clear();
+        foreach (var pozycja in _model.Pozycje)
+        {
+            foreach (var alokacja in pozycja.Alokacje)
+            {
+                _alokacjaLabels[alokacja] = string.Empty;
+            }
+        }
     }
 
     private static WystawFakturePozycjaRequest CreatePozycja()
@@ -268,7 +286,12 @@
 
     private void AddPozycja()
     {
-        _model.Pozycje.Add(CreatePozycja());
+        var pozycja = CreatePozycja();
+        _model.Pozycje.Add(pozycja);
+        foreach (var alokacja in pozycja.Alokacje)
+        {
+            _alokacjaLabels[alokacja] = string.Empty;
+        }
     }
 
     private void RemovePozycja(WystawFakturePozycjaRequest pozycja)
@@ -283,7 +306,9 @@
 
     private void AddAlokacja(WystawFakturePozycjaRequest pozycja)
     {
-        pozycja.Alokacje.Add(CreateAlokacja());
+        var alokacja = CreateAlokacja();
+        pozycja.Alokacje.Add(alokacja);
+        _alokacjaLabels[alokacja] = string.Empty;
     }
 
     private void RemoveAlokacja(WystawFakturePozycjaRequest pozycja, WystawFaktureAlokacjaRequest alokacja)
@@ -294,6 +319,7 @@
         }
 
         pozycja.Alokacje.Remove(alokacja);
+        _alokacjaLabels.Remove(alokacja);
     }
 
     private async Task SubmitAsync()
@@ -336,9 +362,50 @@
         }
     }
 
-    private static string GetPodmiotLabel(PodmiotDto podmiot)
+    private string GetAlokacjaLabel(WystawFaktureAlokacjaRequest alokacja)
+        => _alokacjaLabels.TryGetValue(alokacja, out var label) ? label : string.Empty;
+
+    private async Task OpenPodmiotLookupDialog()
     {
-        var nip = string.IsNullOrWhiteSpace(podmiot.NIP) ? string.Empty : $" (NIP {podmiot.NIP})";
-        return $"{podmiot.Nazwa}{nip}";
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<PodmiotLookupDialog>("Wybierz podmiot", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not PodmiotLookupDto selected)
+            return;
+
+        _model.IdPodmiotu = selected.IdPodmiotu;
+        _podmiotLabel = selected.Label;
+    }
+
+    private async Task OpenEncjaLookupDialog(WystawFaktureAlokacjaRequest alokacja)
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<EncjaLookupDialog>("Wybierz encję", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not RdzenEncjaLookupDto selected)
+            return;
+
+        alokacja.IdEncji = selected.IdEncji;
+        _alokacjaLabels[alokacja] = selected.Label;
     }
 }

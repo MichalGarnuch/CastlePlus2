@@ -6,7 +6,6 @@
 @using CastlePlus2.Contracts.Requests.Rdzen
 @using CastlePlus2.Client.Services.Rdzen
 @inject IPrzypisaniaAdresowService Service
-@inject IAdresyService AdresyService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
@@ -97,34 +96,17 @@
 
 @code {
     private List<PrzypisanieAdresuDto> _items = new();
-    private Dictionary<long, string> _adresy = new();
 
     private string _search = string.Empty;
     private bool _loading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadAdresyAsync();
         await ReloadAsync();
     }
 
-    private async Task LoadAdresyAsync()
-    {
-        try
-        {
-            var list = await AdresyService.GetAllAsync();
-            _adresy = (list ?? new List<AdresDto>())
-                .ToDictionary(a => a.IdAdresu, a => !string.IsNullOrWhiteSpace(a.AdresPelny) ? a.AdresPelny : a.AdresSformatowany);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Błąd pobierania adresów (lookup): {ex.Message}", Severity.Error);
-            _adresy = new();
-        }
-    }
-
-    private string GetAdresLabel(long idAdresu)
-        => _adresy.TryGetValue(idAdresu, out var s) ? s : $"IdAdresu={idAdresu}";
+    private static string GetAdresLabel(long idAdresu)
+        => $"IdAdresu={idAdresu}";
 
     private async Task ReloadAsync()
     {
@@ -168,7 +150,6 @@
             {
                 OdDnia = DateOnly.FromDateTime(DateTime.Today)
             },
-            ["Adresy"] = _adresy,
             ["IsEdit"] = false
         };
 
@@ -213,7 +194,6 @@
         var parameters = new DialogParameters
         {
             ["Model"] = clone,
-            ["Adresy"] = _adresy,
             ["IsEdit"] = true
         };
 
@@ -264,7 +244,6 @@
         var parameters = new DialogParameters
         {
             ["Model"] = clone,
-            ["Adresy"] = _adresy,
             ["IsEdit"] = true,
             ["IsReadOnly"] = true
         };

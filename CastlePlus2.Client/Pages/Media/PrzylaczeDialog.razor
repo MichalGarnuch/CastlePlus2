@@ -1,32 +1,22 @@
 ﻿@using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Media
 @using CastlePlus2.Contracts.DTOs.Rdzen
+@using CastlePlus2.Client.Pages.Rdzen
+@using CastlePlus2.Client.Services.Rdzen
+@inject IDialogService DialogService
+@inject IEncjeService EncjeService
 
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
             <MudGrid Spacing="2">
                 <MudItem xs="12" sm="6">
-                    @if (_isReadOnly)
-                    {
-                        <MudTextField Label="Gospodarz (Nieruchomość)"
-                                      Dense="true"
-                                      ReadOnly="true"
-                                      Value="@GetNieruchomoscLabel(_model.IdEncjiGospodarza)" />
-                    }
-                    else
-                    {
-                        <MudSelect T="Guid"
-                                   Label="Gospodarz (Nieruchomość)"
-                                   Dense="true"
-                                   Required="true"
-                                   @bind-Value="_model.IdEncjiGospodarza">
-                            @foreach (var n in _nieruchomosci)
-                            {
-                                <MudSelectItem T="Guid" Value="@n.Id">@n.Nazwa</MudSelectItem>
-                            }
-                        </MudSelect>
-                    }
+                    <MudTextField Label="Gospodarz (Nieruchomość)"
+                                  Dense="true"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Gospodarz jest wymagany"
+                                  Value="@_gospodarzLabel" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
@@ -51,6 +41,18 @@
                         </MudSelect>
                     }
                 </MudItem>
+
+                @if (!_isReadOnly)
+                {
+                    <MudItem xs="12" Class="d-flex align-center justify-end">
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Search"
+                                   OnClick="OpenGospodarzLookupDialog">
+                            Wybierz gospodarza
+                        </MudButton>
+                    </MudItem>
+                }
 
                 <MudItem xs="12">
                     <MudTextField Label="Opis"
@@ -85,7 +87,6 @@
     [Parameter] public bool IsReadOnly { get; set; } = false;
 
     [Parameter] public List<RodzajMediumDto> Rodzaje { get; set; } = new();
-    [Parameter] public List<NieruchomoscDto> Nieruchomosci { get; set; } = new();
 
     private MudForm? _form;
     private bool _isEdit => IsEdit;
@@ -93,9 +94,9 @@
     private PrzylaczeDto _model = new();
 
     private List<RodzajMediumDto> _rodzaje = new();
-    private List<NieruchomoscDto> _nieruchomosci = new();
+    private string _gospodarzLabel = string.Empty;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _model = new PrzylaczeDto
         {
@@ -106,15 +107,12 @@
         };
 
         _rodzaje = Rodzaje ?? new();
-        _nieruchomosci = Nieruchomosci ?? new();
+        await LoadGospodarzLabelAsync();
     }
 
     private void Cancel() => MudDialog.Cancel();
 
     private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
-
-    private string GetNieruchomoscLabel(Guid id)
-        => _nieruchomosci.FirstOrDefault(n => n.Id == id)?.Nazwa ?? id.ToString();
 
     private string GetRodzajLabel(string? kodRodzaju)
     {
@@ -136,5 +134,48 @@
             return;
 
         MudDialog.Close(DialogResult.Ok(_model));
+    }
+
+    private async Task LoadGospodarzLabelAsync()
+    {
+        if (_model.IdEncjiGospodarza == Guid.Empty)
+        {
+            _gospodarzLabel = string.Empty;
+            return;
+        }
+
+        var encja = await EncjeService.GetByIdAsync(_model.IdEncjiGospodarza);
+        _gospodarzLabel = encja is null
+            ? _model.IdEncjiGospodarza.ToString()
+            : string.IsNullOrWhiteSpace(encja.KodEncji)
+                ? encja.TypEncji
+                : $"{encja.TypEncji} / {encja.KodEncji}";
+    }
+
+    private async Task OpenGospodarzLookupDialog()
+    {
+        var parameters = new DialogParameters
+        {
+            ["InitialTypEncji"] = "NIERUCHOMOSC"
+        };
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<EncjaLookupDialog>("Wybierz nieruchomość", parameters, options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not EncjaLookupDto selected)
+            return;
+
+        _model.IdEncjiGospodarza = selected.IdEncji;
+        _gospodarzLabel = selected.Label;
     }
 }

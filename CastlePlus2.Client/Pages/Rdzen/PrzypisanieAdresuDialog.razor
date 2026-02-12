@@ -1,5 +1,8 @@
 ﻿@using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Rdzen
+@using CastlePlus2.Client.Services.Rdzen
+@inject IDialogService DialogService
+@inject IAdresyService AdresyService
 
 <MudDialog>
     <DialogContent>
@@ -25,28 +28,28 @@
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
-                    @if (_isReadOnly)
-                    {
-                        <MudTextField Label="Adres"
-                                      Margin="Margin.Dense"
-                                      ReadOnly="true"
-                                      Value="@GetAdresLabel(Model.IdAdresu)" />
-                    }
-                    else
-                    {
-                        <MudSelect T="long"
-                                   Label="Adres"
-                                   @bind-Value="Model.IdAdresu"
-                                   Required="true"
-                                   RequiredError="Adres jest wymagany"
-                                   Margin="Margin.Dense">
-                            @foreach (var kv in Adresy)
-                            {
-                                <MudSelectItem Value="@kv.Key">@kv.Value</MudSelectItem>
-                            }
-                        </MudSelect>
-                    }
+                    <MudTextField Label="Adres"
+                                  Margin="Margin.Dense"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Adres jest wymagany"
+                                  Value="@_adresLabel"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  OnAdornmentClick="OpenAdresLookupDialog" />
                 </MudItem>
+
+                @if (!_isReadOnly)
+                {
+                    <MudItem xs="12" Class="d-flex align-center justify-end">
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Search"
+                                   OnClick="OpenAdresLookupDialog">
+                            Wybierz adres
+                        </MudButton>
+                    </MudItem>
+                }
 
                 <MudItem xs="12" sm="6">
                     @if (_isReadOnly)
@@ -104,7 +107,6 @@
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
 
     [Parameter] public PrzypisanieAdresuDto Model { get; set; } = new();
-    [Parameter] public Dictionary<long, string> Adresy { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
     [Parameter] public bool IsReadOnly { get; set; } = false;
 
@@ -113,11 +115,12 @@
     private bool _isReadOnly => IsReadOnly;
 
     private string _idEncjiText = string.Empty;
+    private string _adresLabel = string.Empty;
 
     private DateTime? _odDnia;
     private DateTime? _doDnia;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _idEncjiText = Model.IdEncji == Guid.Empty ? string.Empty : Model.IdEncji.ToString();
 
@@ -125,14 +128,13 @@
         _doDnia = Model.DoDnia is null
             ? null
             : new DateTime(Model.DoDnia.Value.Year, Model.DoDnia.Value.Month, Model.DoDnia.Value.Day);
+
+        await LoadAdresLabelAsync();
     }
 
     private void Cancel() => MudDialog.Cancel();
 
     private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
-
-    private string GetAdresLabel(long idAdresu)
-        => Adresy.TryGetValue(idAdresu, out var label) ? label : idAdresu.ToString();
 
     private static string FormatDate(DateTime? value)
         => value?.ToString("yyyy-MM-dd") ?? string.Empty;
@@ -175,5 +177,44 @@
         Model.IdEncji = guid;
 
         MudDialog.Close(DialogResult.Ok(Model));
+    }
+
+    private async Task LoadAdresLabelAsync()
+    {
+        if (Model.IdAdresu <= 0)
+        {
+            _adresLabel = string.Empty;
+            return;
+        }
+
+        var adres = await AdresyService.GetByIdAsync(Model.IdAdresu);
+        _adresLabel = adres is null ? Model.IdAdresu.ToString() : adres.AdresPelny;
+    }
+
+    private async Task OpenAdresLookupDialog()
+    {
+        if (_isReadOnly)
+        {
+            return;
+        }
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<AdresLookupDialog>("Wybierz adres", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not AdresLookupDto selected)
+            return;
+
+        Model.IdAdresu = selected.IdAdresu;
+        _adresLabel = selected.Label;
     }
 }

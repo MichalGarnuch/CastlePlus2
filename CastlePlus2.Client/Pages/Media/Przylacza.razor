@@ -10,7 +10,6 @@
 
 @inject IPrzylaczaService PrzylaczaService
 @inject IRodzajeMediowService RodzajeMediowService
-@inject INieruchomosciService NieruchomosciService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
@@ -103,7 +102,6 @@
     private bool _loading = true; // 2. DODANO ZMIENNĄ
 
     private List<RodzajMediumDto> _rodzaje = new();
-    private List<NieruchomoscDto> _nieruchomosci = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -121,16 +119,6 @@
         {
             Snackbar.Add($"Błąd pobierania rodzajów mediów: {ex.Message}", Severity.Error);
             _rodzaje = new();
-        }
-
-        try
-        {
-            _nieruchomosci = (await NieruchomosciService.GetAllAsync()) ?? new();
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Błąd pobierania nieruchomości: {ex.Message}", Severity.Error);
-            _nieruchomosci = new();
         }
     }
 
@@ -154,12 +142,8 @@
         }
     }
 
-    private string GetNieruchomoscLabel(Guid idEncji)
-    {
-        var n = _nieruchomosci.FirstOrDefault(x => x.Id == idEncji);
-        if (n is null) return idEncji.ToString();
-        return string.IsNullOrWhiteSpace(n.Nazwa) ? n.Id.ToString() : n.Nazwa;
-    }
+    private static string GetNieruchomoscLabel(Guid idEncji)
+        => idEncji.ToString();
 
     private bool FilterFunc(PrzylaczeDto item)
     {
@@ -182,8 +166,7 @@
         {
             ["Model"] = new PrzylaczeDto(),
             ["IsEdit"] = false,
-            ["Rodzaje"] = _rodzaje,
-            ["Nieruchomosci"] = _nieruchomosci
+            ["Rodzaje"] = _rodzaje
         };
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
@@ -228,8 +211,7 @@
         {
             ["Model"] = clone,
             ["IsEdit"] = true,
-            ["Rodzaje"] = _rodzaje,
-            ["Nieruchomosci"] = _nieruchomosci
+            ["Rodzaje"] = _rodzaje
         };
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
@@ -279,7 +261,6 @@
         {
             ["Model"] = clone,
             ["Rodzaje"] = _rodzaje,
-            ["Nieruchomosci"] = _nieruchomosci,
             ["IsEdit"] = true,
             ["IsReadOnly"] = true
         };

@@ -3,15 +3,12 @@
 
 @using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Finanse
-@using CastlePlus2.Contracts.DTOs.Podmioty
 @using CastlePlus2.Contracts.DTOs.Slowniki
 @using CastlePlus2.Contracts.Requests.Finanse
 @using CastlePlus2.Client.Services.Finanse
-@using CastlePlus2.Client.Services.Podmioty
 @using CastlePlus2.Client.Services.Slowniki
 
 @inject IFakturyService FakturyService
-@inject IPodmiotyService PodmiotyService
 @inject IWalutyService WalutyService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
@@ -107,7 +104,6 @@
 
 @code {
     private List<FakturaDto> _items = new();
-    private List<PodmiotDto> _podmioty = new();
     private List<WalutaDto> _waluty = new();
 
     private string _search = string.Empty;
@@ -124,7 +120,6 @@
         _loading = true;
         try
         {
-            _podmioty = await PodmiotyService.GetAllAsync();
             _waluty = await WalutyService.GetAllAsync();
             _items = await FakturyService.GetAllAsync();
             await InvokeAsync(StateHasChanged);
@@ -166,7 +161,6 @@
         {
             ["Model"] = model,
             ["IsEdit"] = false,
-            ["Podmioty"] = _podmioty,
             ["Waluty"] = _waluty
         };
 
@@ -218,7 +212,6 @@
         {
             ["Model"] = model,
             ["IsEdit"] = true,
-            ["Podmioty"] = _podmioty,
             ["Waluty"] = _waluty
         };
 
@@ -276,7 +269,6 @@
             ["Model"] = model,
             ["IsEdit"] = true,
             ["IsReadOnly"] = true,
-            ["Podmioty"] = _podmioty,
             ["Waluty"] = _waluty
         };
 

@@ -1,4 +1,6 @@
-﻿using CastlePlus2.Application.Interfaces.Najem;
+﻿using System;
+using System.Linq;
+using CastlePlus2.Application.Interfaces.Najem;
 using CastlePlus2.Domain.Entities.Najem;
 using CastlePlus2.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +66,42 @@ namespace CastlePlus2.Infrastructure.Repositories.Najem
         public Task<int> SaveChangesAsync(CancellationToken ct)
         {
             return _db.SaveChangesAsync(ct);
+        }
+
+        public async Task<(List<PrzedmiotNajmu> Items, int TotalCount)> SearchPagedAsync(
+            string? q,
+            Guid? idUmowyNajmu,
+            int page,
+            int pageSize,
+            CancellationToken ct)
+        {
+            var currentPage = page <= 0 ? 1 : page;
+            var currentPageSize = pageSize <= 0 ? 20 : Math.Min(pageSize, 200);
+
+            var query = _db.PrzedmiotyNajmu.AsNoTracking();
+
+            if (idUmowyNajmu.HasValue && idUmowyNajmu.Value != Guid.Empty)
+            {
+                query = query.Where(p => p.IdUmowyNajmu == idUmowyNajmu.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var s = q.Trim();
+                query = query.Where(p =>
+                    p.IdPrzedmiotuNajmu.ToString().Contains(s)
+                    || p.IdUmowyNajmu.ToString().Contains(s)
+                    || p.IdEncji.ToString().Contains(s));
+            }
+
+            var total = await query.CountAsync(ct);
+            var items = await query
+                .OrderByDescending(p => p.IdPrzedmiotuNajmu)
+                .Skip((currentPage - 1) * currentPageSize)
+                .Take(currentPageSize)
+                .ToListAsync(ct);
+
+            return (items, total);
         }
     }
 }

@@ -6,7 +6,6 @@
 @using CastlePlus2.Client.Services.Rdzen
 @using CastlePlus2.Contracts.Requests.Rdzen
 @inject IPomieszczeniaService PomieszczeniaService
-@inject ILokaleService LokaleService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
@@ -98,25 +97,9 @@
     private string _search = string.Empty;
     private bool _loading = true; // 2. DODANO ZMIENNĄ
 
-    private List<LokalDto> _lokale = new();
-
     protected override async Task OnInitializedAsync()
     {
-        await LoadLookupsAsync();
         await ReloadAsync();
-    }
-
-    private async Task LoadLookupsAsync()
-    {
-        try
-        {
-            _lokale = (await LokaleService.GetAllAsync()) ?? new();
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Błąd pobierania lokali: {ex.Message}", Severity.Error);
-            _lokale = new();
-        }
     }
 
     private async Task ReloadAsync()
@@ -139,13 +122,8 @@
         }
     }
 
-    private string GetLokalLabel(Guid idLokalu)
-    {
-        var l = _lokale.FirstOrDefault(x => x.Id == idLokalu);
-        if (l is null) return idLokalu.ToString();
-
-        return string.IsNullOrWhiteSpace(l.KodLokalu) ? l.Id.ToString() : l.KodLokalu;
-    }
+    private static string GetLokalLabel(Guid idLokalu)
+        => idLokalu.ToString();
 
     private bool FilterFunc(PomieszczenieDto item)
     {
@@ -165,8 +143,7 @@
         var parameters = new DialogParameters
         {
             ["Model"] = new PomieszczenieDto(),
-            ["IsEdit"] = false,
-            ["Lokale"] = _lokale
+            ["IsEdit"] = false
         };
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
@@ -209,8 +186,7 @@
         var parameters = new DialogParameters
         {
             ["Model"] = clone,
-            ["IsEdit"] = true,
-            ["Lokale"] = _lokale
+            ["IsEdit"] = true
         };
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
@@ -260,8 +236,7 @@
         {
             ["Model"] = clone,
             ["IsEdit"] = true,
-            ["IsReadOnly"] = true,
-            ["Lokale"] = _lokale
+            ["IsReadOnly"] = true
         };
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };

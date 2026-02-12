@@ -14,5 +14,10 @@ namespace CastlePlus2.Application.Interfaces.Rdzen
         Task RemoveAsync(Adres entity, CancellationToken cancellationToken = default);
 
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task<(List<Adres> Items, int TotalCount)> SearchPagedAsync(
+            string? q,
+            int page,
+            int pageSize,
+            CancellationToken cancellationToken = default);
     }
 }

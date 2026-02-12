@@ -10,5 +10,12 @@ namespace CastlePlus2.Application.Interfaces.Najem
         Task<UmowaNajmu?> GetForUpdateAsync(Guid idEncji, CancellationToken ct);
         void Remove(UmowaNajmu entity);
         Task<int> SaveChangesAsync(CancellationToken ct);
+
+        // Lookup / paged search (dla modal lookup)
+        Task<(List<UmowaNajmu> Items, int TotalCount)> SearchPagedAsync(
+            string? q,
+            int page,
+            int pageSize,
+            CancellationToken ct);
     }
 }

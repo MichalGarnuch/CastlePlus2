@@ -4,6 +4,8 @@ using CastlePlus2.Application.Rdzen.Encje.Commands.UpdateEncja;
 using CastlePlus2.Application.Rdzen.Encje.Queries.GetAllEncje;
 using CastlePlus2.Application.Rdzen.Encje.Queries.GetEncjaById;
 using CastlePlus2.Application.Rdzen.ProcesyRdzen.Queries.SearchEncjeLookup;
+using CastlePlus2.Application.Rdzen.ProcesyRdzen.Queries.SearchEncjeLookupPaged;
+using CastlePlus2.Contracts.DTOs.Common;
 using CastlePlus2.Contracts.DTOs.Rdzen;
 using CastlePlus2.Contracts.Requests.Rdzen;
 using MediatR;
@@ -53,6 +55,20 @@ namespace CastlePlus2.Api.Controllers.Rdzen
             CancellationToken ct = default)
         {
             var result = await _mediator.Send(new SearchEncjeLookupQuery(typEncji, q, take), ct);
+            return Ok(result);
+        }
+
+        // GET: api/Encje/lookup/paged?typEncji=...&q=...&page=1&pageSize=20
+        [HttpGet("lookup/paged")]
+        [ProducesResponseType(typeof(PagedResultDto<EncjaLookupDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<PagedResultDto<EncjaLookupDto>>> LookupPaged(
+            [FromQuery] string? typEncji,
+            [FromQuery] string? q,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            CancellationToken ct = default)
+        {
+            var result = await _mediator.Send(new SearchEncjeLookupPagedQuery(typEncji, q, page, pageSize), ct);
             return Ok(result);
         }
 

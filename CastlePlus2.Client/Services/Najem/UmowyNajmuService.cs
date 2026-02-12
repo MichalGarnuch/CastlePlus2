@@ -1,8 +1,10 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using CastlePlus2.Contracts.DTOs.Common;
 using CastlePlus2.Contracts.DTOs.Najem;
 using CastlePlus2.Contracts.Requests.Najem;
 
@@ -46,6 +48,23 @@ namespace CastlePlus2.Client.Services.Najem
 
             resp.EnsureSuccessStatusCode();
             return await resp.Content.ReadFromJsonAsync<UmowaNajmuDto>(cancellationToken: ct);
+        }
+
+        public async Task<PagedResultDto<UmowaNajmuLookupDto>> SearchLookupPagedAsync(
+            string? q,
+            int page,
+            int pageSize,
+            CancellationToken ct = default)
+        {
+            var currentPage = page <= 0 ? 1 : page;
+            var currentPageSize = pageSize <= 0 ? 20 : Math.Min(pageSize, 200);
+            var url = $"{BaseUrl}/lookup?page={currentPage}&pageSize={currentPageSize}";
+
+            if (!string.IsNullOrWhiteSpace(q))
+                url += $"&q={Uri.EscapeDataString(q)}";
+
+            return await _http.GetFromJsonAsync<PagedResultDto<UmowaNajmuLookupDto>>(url, ct)
+                   ?? new PagedResultDto<UmowaNajmuLookupDto>();
         }
 
         public async Task<UmowaNajmuDto> CreateAsync(CreateUmowaNajmuRequest request, CancellationToken ct = default)

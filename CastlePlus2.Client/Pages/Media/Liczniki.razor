@@ -9,7 +9,6 @@
 @using CastlePlus2.Client.Services.Slowniki
 
 @inject ILicznikiService LicznikiService
-@inject IPrzylaczaService PrzylaczaService
 @inject IJednostkiMiaryService JednostkiMiaryService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
@@ -106,7 +105,6 @@
     private string _search = string.Empty;
     private bool _loading = true; // 2. DODANO ZMIENNĄ
 
-    private List<PrzylaczeDto> _przylacza = new();
     private List<JednostkaMiaryDto> _jednostki = new();
 
     protected override async Task OnInitializedAsync()
@@ -117,16 +115,6 @@
 
     private async Task LoadLookupsAsync()
     {
-        try
-        {
-            _przylacza = (await PrzylaczaService.GetAllAsync()) ?? new();
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Błąd pobierania przyłączy: {ex.Message}", Severity.Error);
-            _przylacza = new();
-        }
-
         try
         {
             _jednostki = (await JednostkiMiaryService.GetAllAsync()) ?? new();
@@ -184,9 +172,7 @@
         {
             ["Model"] = model,
             ["IsEdit"] = false,
-            ["Przylacza"] = _przylacza,
-            ["Jednostki"] = _jednostki,
-            ["Liczniki"] = _items
+            ["Jednostki"] = _jednostki
         };
 
         var dialog = DialogService.Show<LicznikDialog>("Nowy licznik", parameters, new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true });
@@ -224,9 +210,7 @@
         {
             ["Model"] = item,
             ["IsEdit"] = true,
-            ["Przylacza"] = _przylacza,
-            ["Jednostki"] = _jednostki,
-            ["Liczniki"] = _items
+            ["Jednostki"] = _jednostki
         };
 
         var dialog = DialogService.Show<LicznikDialog>($"Edycja: {item.NumerNV}", parameters, new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true });
@@ -297,9 +281,7 @@
             ["Model"] = clone,
             ["IsEdit"] = true,
             ["IsReadOnly"] = true,
-            ["Przylacza"] = _przylacza,
-            ["Jednostki"] = _jednostki,
-            ["Liczniki"] = _items
+            ["Jednostki"] = _jednostki
         };
 
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };

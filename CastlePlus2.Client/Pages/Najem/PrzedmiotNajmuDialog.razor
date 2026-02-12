@@ -1,5 +1,13 @@
 ﻿@using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Najem
+@using CastlePlus2.Contracts.DTOs.Rdzen
+@using CastlePlus2.Client.Pages.Najem
+@using CastlePlus2.Client.Pages.Rdzen
+@using CastlePlus2.Client.Services.Najem
+@using CastlePlus2.Client.Services.Rdzen
+@inject IDialogService DialogService
+@inject IUmowyNajmuService UmowyNajmuService
+@inject IEncjeService EncjeService
 
 <MudDialog>
     <DialogContent>
@@ -20,21 +28,27 @@
                 }
 
                 <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="_idUmowyNajmuText"
-                                  Label="IdUmowyNajmu (GUID)"
+                    <MudTextField Label="Umowa najmu"
                                   Required="true"
-                                  RequiredError="IdUmowyNajmu jest wymagane"
-                                  Disabled="IsReadOnly"
-                                  Margin="Margin.Dense" />
+                                  RequiredError="Umowa jest wymagana"
+                                  ReadOnly="true"
+                                  Margin="Margin.Dense"
+                                  Value="@_umowaLabel"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  OnAdornmentClick="OpenUmowaLookupDialog" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="_idEncjiText"
-                                  Label="IdEncji (GUID)"
+                    <MudTextField Label="Encja"
                                   Required="true"
-                                  RequiredError="IdEncji jest wymagane"
-                                  Disabled="IsReadOnly"
-                                  Margin="Margin.Dense" />
+                                  RequiredError="Encja jest wymagana"
+                                  ReadOnly="true"
+                                  Margin="Margin.Dense"
+                                  Value="@_encjaLabel"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  OnAdornmentClick="OpenEncjaLookupDialog" />
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
@@ -85,20 +99,19 @@
     private bool _isEdit => IsEdit;
     private bool _isReadOnly => IsReadOnly;
 
-    private string _idUmowyNajmuText = string.Empty;
-    private string _idEncjiText = string.Empty;
+    private string _umowaLabel = string.Empty;
+    private string _encjaLabel = string.Empty;
     private DateTime? _odDnia;
     private DateTime? _doDnia;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        _idUmowyNajmuText = Model.IdUmowyNajmu == Guid.Empty ? string.Empty : Model.IdUmowyNajmu.ToString();
-        _idEncjiText = Model.IdEncji == Guid.Empty ? string.Empty : Model.IdEncji.ToString();
-
         _odDnia = new DateTime(Model.OdDnia.Year, Model.OdDnia.Month, Model.OdDnia.Day);
         _doDnia = Model.DoDnia is null
             ? null
             : new DateTime(Model.DoDnia.Value.Year, Model.DoDnia.Value.Month, Model.DoDnia.Value.Day);
+
+        await LoadLabelsAsync();
     }
 
     private void Cancel() => MudDialog.Cancel();
@@ -132,18 +145,75 @@
         await _form.Validate();
         if (!_form.IsValid) return;
 
-        if (!Guid.TryParse(_idUmowyNajmuText?.Trim(), out var umowaId))
-        {
-            return;
-        }
-
-        if (!Guid.TryParse(_idEncjiText?.Trim(), out var encjaId))
-        {
-            return;
-        }
-
-        Model.IdUmowyNajmu = umowaId;
-        Model.IdEncji = encjaId;
         MudDialog.Close(DialogResult.Ok(Model));
+    }
+
+    private async Task LoadLabelsAsync()
+    {
+        if (Model.IdUmowyNajmu != Guid.Empty)
+        {
+            var umowa = await UmowyNajmuService.GetByIdAsync(Model.IdUmowyNajmu);
+            _umowaLabel = umowa is null ? Model.IdUmowyNajmu.ToString() : $"{umowa.NumerUmowy} ({umowa.DataPoczatku:yyyy-MM-dd})";
+        }
+
+        if (Model.IdEncji != Guid.Empty)
+        {
+            var encja = await EncjeService.GetByIdAsync(Model.IdEncji);
+            _encjaLabel = encja is null
+                ? Model.IdEncji.ToString()
+                : string.IsNullOrWhiteSpace(encja.KodEncji)
+                    ? encja.TypEncji
+                    : $"{encja.TypEncji} / {encja.KodEncji}";
+        }
+    }
+
+    private async Task OpenUmowaLookupDialog()
+    {
+        if (_isReadOnly)
+            return;
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<UmowaNajmuLookupDialog>("Wybierz umowę", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not UmowaNajmuLookupDto selected)
+            return;
+
+        Model.IdUmowyNajmu = selected.IdUmowy;
+        _umowaLabel = selected.Label;
+    }
+
+    private async Task OpenEncjaLookupDialog()
+    {
+        if (_isReadOnly)
+            return;
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<EncjaLookupDialog>("Wybierz encję", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not EncjaLookupDto selected)
+            return;
+
+        Model.IdEncji = selected.IdEncji;
+        _encjaLabel = selected.Label;
     }
 }

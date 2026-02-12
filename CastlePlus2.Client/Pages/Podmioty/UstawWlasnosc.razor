@@ -5,6 +5,7 @@
 @using MudBlazor
 @using CastlePlus2.Client.Services.Podmioty
 @using CastlePlus2.Client.Pages.Rdzen
+@using CastlePlus2.Client.Pages.Podmioty
 @using CastlePlus2.Contracts.DTOs.Podmioty
 @using CastlePlus2.Contracts.DTOs.Rdzen
 @using CastlePlus2.Contracts.Requests.Podmioty
@@ -64,15 +65,15 @@
 
             <RowTemplate>
                 <MudTd DataLabel="Podmiot">
-                    <MudSelect T="long"
-                               Dense="true"
-                               @bind-Value="context.IdPodmiotu"
-                               Margin="Margin.Dense">
-                        @foreach (var podmiot in _context.Podmioty)
-                        {
-                            <MudSelectItem T="long" Value="@podmiot.IdPodmiotu">@GetPodmiotLabel(podmiot)</MudSelectItem>
-                        }
-                    </MudSelect>
+                    <MudTextField Dense="true"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Podmiot jest wymagany"
+                                  Margin="Margin.Dense"
+                                  Value="@GetRowPodmiotLabel(context)"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  OnAdornmentClick="@(() => OpenPodmiotLookupDialog(context))" />
                 </MudTd>
 
                 <MudTd DataLabel="Udział %">
@@ -125,6 +126,7 @@
 
     private Guid _idEncji;
     private string _encjaLabel = string.Empty;
+    private readonly Dictionary<UstawWlasnoscItemRequest, string> _podmiotLabels = new();
 
     private WlasnoscContextDto _context = new();
     private List<UstawWlasnoscItemRequest> _udzialy = new();
@@ -175,23 +177,48 @@
         StateHasChanged();
     }
 
-    private void AddRow()
+    private async Task OpenPodmiotLookupDialog(UstawWlasnoscItemRequest row)
     {
-        _udzialy.Add(new UstawWlasnoscItemRequest
+        var options = new DialogOptions
         {
-            OdDnia = DateOnly.FromDateTime(DateTime.Today)
-        });
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<PodmiotLookupDialog>("Wybierz podmiot", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not PodmiotLookupDto selected)
+            return;
+
+        row.IdPodmiotu = selected.IdPodmiotu;
+        _podmiotLabels[row] = selected.Label;
     }
 
-    private void RemoveRow(UstawWlasnoscItemRequest row) => _udzialy.Remove(row);
+    private void AddRow()
+    {
+        var row = new UstawWlasnoscItemRequest
+        {
+            OdDnia = DateOnly.FromDateTime(DateTime.Today)
+        };
+        _udzialy.Add(row);
+        _podmiotLabels[row] = string.Empty;
+    }
+
+    private void RemoveRow(UstawWlasnoscItemRequest row)
+    {
+        _udzialy.Remove(row);
+        _podmiotLabels.Remove(row);
+    }
 
     private decimal SumaUdzialow => _udzialy.Sum(x => x.UdzialProcent);
 
-    private static string GetPodmiotLabel(PodmiotDto podmiot)
-    {
-        var nip = string.IsNullOrWhiteSpace(podmiot.NIP) ? "-" : podmiot.NIP;
-        return $"{podmiot.Nazwa} (NIP: {nip})";
-    }
+    private string GetRowPodmiotLabel(UstawWlasnoscItemRequest row)
+        => _podmiotLabels.TryGetValue(row, out var label) ? label : string.Empty;
 
     private static DateTime? GetDateTime(DateOnly? value)
         => value is null ? null : new DateTime(value.Value.Year, value.Value.Month, value.Value.Day);
@@ -238,6 +265,9 @@
 
             await ProcesyPodmiotyService.UstawWlasnoscAsync(request);
             Snackbar.Add("Zapisano udziały właścicielskie.", Severity.Success);
+            _podmiotLabels.Clear();
+            _udzialy.Clear();
+            AddRow();
         }
         catch (Exception ex)
         {

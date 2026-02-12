@@ -5,7 +5,6 @@
 @using CastlePlus2.Contracts.DTOs.Podmioty
 @using CastlePlus2.Contracts.Requests.Podmioty
 @using CastlePlus2.Client.Services.Podmioty
-@inject IPodmiotyService PodmiotyService
 @inject IKontaktyService KontaktyService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
@@ -14,25 +13,20 @@
 
 <MudPaper Class="pa-4 mb-4">
     <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-        <MudSelect T="long?"
-                   Label="Podmiot"
-                   Dense="true"
-                   @bind-Value="_selectedPodmiotId"
-                   @bind-Value:after="ReloadAsync">
-            @if (_podmioty.Count == 0)
-            {
-                <MudSelectItem T="long?" Value="null">Brak podmiotów</MudSelectItem>
-            }
-            else
-            {
-                @foreach (var podmiot in _podmioty)
-                {
-                    <MudSelectItem T="long?" Value="@podmiot.IdPodmiotu">
-                        @($"Id={podmiot.IdPodmiotu} / {podmiot.Nazwa}")
-                    </MudSelectItem>
-                }
-            }
-        </MudSelect>
+        <MudTextField Label="Podmiot"
+                      Dense="true"
+                      ReadOnly="true"
+                      Value="@_selectedPodmiotLabel"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      OnAdornmentClick="OpenPodmiotLookupDialog" />
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Search"
+                   OnClick="OpenPodmiotLookupDialog">
+            Wybierz podmiot
+        </MudButton>
 
         <MudIconButton Icon="@Icons.Material.Filled.Refresh"
                        Color="Color.Info"
@@ -124,30 +118,15 @@
 </MudPaper>
 
 @code {
-    private List<PodmiotDto> _podmioty = new();
     private List<KontaktDto> _items = new();
     private long? _selectedPodmiotId;
+    private string _selectedPodmiotLabel = string.Empty;
     private string _search = string.Empty;
     private bool _loading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadPodmiotyAsync();
         await ReloadAsync();
-    }
-
-    private async Task LoadPodmiotyAsync()
-    {
-        try
-        {
-            var list = await PodmiotyService.GetAllAsync();
-            _podmioty = (list ?? new List<PodmiotDto>()).ToList();
-            _selectedPodmiotId ??= _podmioty.FirstOrDefault()?.IdPodmiotu;
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Błąd pobierania podmiotów: {ex.Message}", Severity.Error);
-        }
     }
 
     private async Task ReloadAsync()
@@ -200,8 +179,7 @@
         var parameters = new DialogParameters
         {
             ["Model"] = new KontaktDto { IdPodmiotu = _selectedPodmiotId.Value },
-            ["IsEdit"] = false,
-            ["Podmioty"] = _podmioty
+            ["IsEdit"] = false
         };
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
@@ -244,8 +222,7 @@
         var parameters = new DialogParameters
         {
             ["Model"] = clone,
-            ["IsEdit"] = true,
-            ["Podmioty"] = _podmioty
+            ["IsEdit"] = true
         };
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
@@ -294,7 +271,6 @@
         var parameters = new DialogParameters
         {
             ["Model"] = clone,
-            ["Podmioty"] = _podmioty,
             ["IsEdit"] = true,
             ["IsReadOnly"] = true
         };
@@ -336,5 +312,28 @@
         {
             Snackbar.Add($"Błąd usuwania: {ex.Message}", Severity.Error);
         }
+    }
+
+    private async Task OpenPodmiotLookupDialog()
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<PodmiotLookupDialog>("Wybierz podmiot", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not PodmiotLookupDto selected)
+            return;
+
+        _selectedPodmiotId = selected.IdPodmiotu;
+        _selectedPodmiotLabel = selected.Label;
+        await ReloadAsync();
     }
 }

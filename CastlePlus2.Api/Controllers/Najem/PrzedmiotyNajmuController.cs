@@ -1,8 +1,11 @@
-﻿using CastlePlus2.Application.Najem.PrzedmiotyNajmu.Commands.CreatePrzedmiotNajmu;
+﻿using System;
+using CastlePlus2.Application.Najem.PrzedmiotyNajmu.Commands.CreatePrzedmiotNajmu;
 using CastlePlus2.Application.Najem.PrzedmiotyNajmu.Commands.DeletePrzedmiotNajmu;
 using CastlePlus2.Application.Najem.PrzedmiotyNajmu.Commands.UpdatePrzedmiotNajmu;
 using CastlePlus2.Application.Najem.PrzedmiotyNajmu.Queries.GetAllPrzedmiotyNajmu;
 using CastlePlus2.Application.Najem.PrzedmiotyNajmu.Queries.GetPrzedmiotNajmuById;
+using CastlePlus2.Application.Najem.PrzedmiotyNajmu.Queries.SearchPrzedmiotyNajmuLookupPaged;
+using CastlePlus2.Contracts.DTOs.Common;
 using CastlePlus2.Contracts.DTOs.Najem;
 using CastlePlus2.Contracts.Requests.Najem;
 using MediatR;
@@ -28,6 +31,19 @@ namespace CastlePlus2.Api.Controllers.Najem
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
             var result = await _mediator.Send(new GetAllPrzedmiotyNajmuQuery(), ct);
+            return Ok(result);
+        }
+
+        [HttpGet("lookup")]
+        [ProducesResponseType(typeof(PagedResultDto<PrzedmiotNajmuLookupDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Lookup(
+            [FromQuery] string? q = null,
+            [FromQuery] Guid? idUmowyNajmu = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            CancellationToken ct = default)
+        {
+            var result = await _mediator.Send(new SearchPrzedmiotyNajmuLookupPagedQuery(q, idUmowyNajmu, page, pageSize), ct);
             return Ok(result);
         }
 

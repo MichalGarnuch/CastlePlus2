@@ -20,47 +20,10 @@ namespace CastlePlus2.Application.Utrzymanie.Zgloszenia.Queries.GetZglosUsterkeC
 
         public async Task<ZglosUsterkeContextDto> Handle(GetZglosUsterkeContextQuery request, CancellationToken ct)
         {
-            var budynki = await _budynekRepository.GetAllAsync(ct);
-            var lokale = await _lokalRepository.GetAllAsync(ct);
-
-            var budynekLookup = budynki
-                .Select(b => new BudynekLookupDto
-                {
-                    IdEncji = b.Id,
-                    KodBudynku = b.KodBudynku,
-                    Label = b.KodBudynku
-                })
-                .OrderBy(b => b.KodBudynku)
-                .ToList();
-
-            var budynkiById = budynki
-                .GroupBy(b => b.Id)
-                .ToDictionary(g => g.Key, g => g.First().KodBudynku);
-
-            var lokalLookup = lokale
-                .Select(l =>
-                {
-                    budynkiById.TryGetValue(l.IdBudynku, out var kodBudynku);
-                    var label = string.IsNullOrWhiteSpace(kodBudynku)
-                        ? l.KodLokalu
-                        : $"{kodBudynku} / {l.KodLokalu}";
-
-                    return new LokalLookupDto
-                    {
-                        IdEncji = l.Id,
-                        KodBudynku = kodBudynku ?? string.Empty,
-                        KodLokalu = l.KodLokalu,
-                        Label = label
-                    };
-                })
-                .OrderBy(l => l.KodBudynku)
-                .ThenBy(l => l.KodLokalu)
-                .ToList();
-
             return new ZglosUsterkeContextDto
             {
-                BudynkiLookup = budynekLookup,
-                LokaleLookup = lokalLookup
+                BudynkiLookup = new List<BudynekLookupDto>(),
+                LokaleLookup = new List<LokalLookupDto>()
             };
         }
     }

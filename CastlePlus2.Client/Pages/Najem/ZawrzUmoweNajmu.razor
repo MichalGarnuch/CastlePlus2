@@ -8,9 +8,12 @@
 @using CastlePlus2.Contracts.DTOs.Slowniki
 @using CastlePlus2.Contracts.Requests.Najem
 @using CastlePlus2.Client.Services.Najem
+@using CastlePlus2.Client.Pages.Podmioty
+@using CastlePlus2.Client.Pages.Rdzen
 @inject IUmowyNajmuService UmowyNajmuService
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudText Typo="Typo.h4" Class="fw-700 mb-4">Zawarcie umowy najmu</MudText>
 
@@ -23,46 +26,58 @@
     {
         <MudForm @ref="_form">
             <MudGrid Spacing="2">
-                <MudItem xs="12" sm="6">
-                    <MudSelect T="Guid"
-                               Label="Lokal"
-                               Required="true"
-                               RequiredError="Lokal jest wymagany"
-                               @bind-Value="_model.IdLokalu"
-                               Margin="Margin.Dense">
-                        @foreach (var lokal in _context.Lokale)
-                        {
-                            <MudSelectItem Value="@lokal.Id">@GetLokalLabel(lokal)</MudSelectItem>
-                        }
-                    </MudSelect>
+                <MudItem xs="12" sm="8">
+                    <MudTextField Label="Lokal"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Lokal jest wymagany"
+                                  Margin="Margin.Dense"
+                                  Value="@_lokalLabel" />
                 </MudItem>
 
-                <MudItem xs="12" sm="6">
-                    <MudSelect T="long"
-                               Label="Wynajmujący"
-                               Required="true"
-                               RequiredError="Wynajmujący jest wymagany"
-                               @bind-Value="_model.IdWynajmujacego"
-                               Margin="Margin.Dense">
-                        @foreach (var podmiot in _context.Podmioty)
-                        {
-                            <MudSelectItem Value="@podmiot.IdPodmiotu">@GetPodmiotLabel(podmiot)</MudSelectItem>
-                        }
-                    </MudSelect>
+                <MudItem xs="12" sm="4" Class="d-flex align-center justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Search"
+                               OnClick="OpenLokalLookupDialog">
+                        Wybierz lokal
+                    </MudButton>
                 </MudItem>
 
-                <MudItem xs="12" sm="6">
-                    <MudSelect T="long"
-                               Label="Najemca"
-                               Required="true"
-                               RequiredError="Najemca jest wymagany"
-                               @bind-Value="_model.IdNajemcy"
-                               Margin="Margin.Dense">
-                        @foreach (var podmiot in _context.Podmioty)
-                        {
-                            <MudSelectItem Value="@podmiot.IdPodmiotu">@GetPodmiotLabel(podmiot)</MudSelectItem>
-                        }
-                    </MudSelect>
+                <MudItem xs="12" sm="8">
+                    <MudTextField Label="Wynajmujący"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Wynajmujący jest wymagany"
+                                  Margin="Margin.Dense"
+                                  Value="@_wynajmujacyLabel" />
+                </MudItem>
+
+                <MudItem xs="12" sm="4" Class="d-flex align-center justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Search"
+                               OnClick="OpenWynajmujacyLookupDialog">
+                        Wybierz wynajmującego
+                    </MudButton>
+                </MudItem>
+
+                <MudItem xs="12" sm="8">
+                    <MudTextField Label="Najemca"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Najemca jest wymagany"
+                                  Margin="Margin.Dense"
+                                  Value="@_najemcaLabel" />
+                </MudItem>
+
+                <MudItem xs="12" sm="4" Class="d-flex align-center justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Search"
+                               OnClick="OpenNajemcaLookupDialog">
+                        Wybierz najemcę
+                    </MudButton>
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
@@ -198,6 +213,9 @@
     private bool _loading = true;
     private UmowaNajmuContextDto _context = new();
     private ZawrzUmoweNajmuRequest _model = new();
+    private string _lokalLabel = string.Empty;
+    private string _wynajmujacyLabel = string.Empty;
+    private string _najemcaLabel = string.Empty;
 
     private DateTime? _dataZawarcia;
     private DateTime? _dataPoczatku;
@@ -300,14 +318,75 @@
         }
     }
 
-    private static string GetLokalLabel(LokalDto lokal)
+    private async Task OpenLokalLookupDialog()
     {
-        return $"{lokal.KodLokalu} (Id={lokal.Id})";
+        var parameters = new DialogParameters
+        {
+            ["InitialTypEncji"] = "LOKAL"
+        };
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<EncjaLookupDialog>("Wybierz lokal", parameters, options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not EncjaLookupDto selected)
+            return;
+
+        _model.IdLokalu = selected.IdEncji;
+        _lokalLabel = selected.Label;
     }
 
-    private static string GetPodmiotLabel(PodmiotDto podmiot)
+    private async Task OpenWynajmujacyLookupDialog()
     {
-        return string.IsNullOrWhiteSpace(podmiot.Nazwa) ? podmiot.IdPodmiotu.ToString() : podmiot.Nazwa;
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<PodmiotLookupDialog>("Wybierz wynajmującego", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not PodmiotLookupDto selected)
+            return;
+
+        _model.IdWynajmujacego = selected.IdPodmiotu;
+        _wynajmujacyLabel = selected.Label;
+    }
+
+    private async Task OpenNajemcaLookupDialog()
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<PodmiotLookupDialog>("Wybierz najemcę", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not PodmiotLookupDto selected)
+            return;
+
+        _model.IdNajemcy = selected.IdPodmiotu;
+        _najemcaLabel = selected.Label;
     }
 
     private static string GetWalutaLabel(WalutaDto waluta)

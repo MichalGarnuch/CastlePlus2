@@ -3,6 +3,8 @@ using CastlePlus2.Application.Rdzen.Adresy.Commands.DeleteAdres;
 using CastlePlus2.Application.Rdzen.Adresy.Commands.UpdateAdres;
 using CastlePlus2.Application.Rdzen.Adresy.Queries.GetAllAdresy;
 using CastlePlus2.Application.Adresy.Queries.GetAdresById;
+using CastlePlus2.Application.Rdzen.Adresy.Queries.SearchAdresyLookupPaged;
+using CastlePlus2.Contracts.DTOs.Common;
 using CastlePlus2.Contracts.DTOs.Rdzen;
 using CastlePlus2.Contracts.Requests.Rdzen;
 using Microsoft.AspNetCore.Http;
@@ -30,6 +32,18 @@ namespace CastlePlus2.Api.Controllers.Rdzen
         {
             var list = await _mediator.Send(new GetAllAdresyQuery(), ct);
             return Ok(list);
+        }
+
+        [HttpGet("lookup")]
+        [ProducesResponseType(typeof(PagedResultDto<AdresLookupDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<PagedResultDto<AdresLookupDto>>> Lookup(
+            [FromQuery] string? q = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            CancellationToken ct = default)
+        {
+            var result = await _mediator.Send(new SearchAdresyLookupPagedQuery(q, page, pageSize), ct);
+            return Ok(result);
         }
 
         [HttpGet("{id:long}")]

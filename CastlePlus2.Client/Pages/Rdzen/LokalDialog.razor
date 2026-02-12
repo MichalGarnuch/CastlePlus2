@@ -1,35 +1,37 @@
 ﻿@using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Rdzen
+@using CastlePlus2.Client.Services.Rdzen
+@inject IDialogService DialogService
+@inject IEncjeService EncjeService
 
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
             <MudGrid Spacing="2">
                 <MudItem xs="12">
-                    @if (_isReadOnly)
-                    {
-                        <MudTextField Label="Budynek"
-                                      Dense="true"
-                                      Margin="Margin.Dense"
-                                      ReadOnly="true"
-                                      Value="@GetBudynekLabel(Model.IdBudynku)" />
-                    }
-                    else
-                    {
-                        <MudSelect T="Guid"
-                                   Label="Budynek"
-                                   Dense="true"
-                                   Margin="Margin.Dense"
-                                   Required="true"
-                                   @bind-Value="Model.IdBudynku">
-                            @foreach (var b in (Budynki ?? new()))
-                            {
-                                var label = !string.IsNullOrWhiteSpace(b.KodBudynku) ? b.KodBudynku : b.Id.ToString();
-                                <MudSelectItem T="Guid" Value="b.Id">@label</MudSelectItem>
-                            }
-                        </MudSelect>
-                    }
+                    <MudTextField Label="Budynek"
+                                  Dense="true"
+                                  Margin="Margin.Dense"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Budynek jest wymagany"
+                                  Value="@_budynekLabel"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  OnAdornmentClick="OpenBudynekLookupDialog" />
                 </MudItem>
+
+                @if (!_isReadOnly)
+                {
+                    <MudItem xs="12" Class="d-flex align-center justify-end">
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Search"
+                                   OnClick="OpenBudynekLookupDialog">
+                            Wybierz budynek
+                        </MudButton>
+                    </MudItem>
+                }
 
                 <MudItem xs="12" sm="6">
                     <MudTextField Label="Kod lokalu"
@@ -81,23 +83,19 @@
     [Parameter] public bool IsEdit { get; set; }
     [Parameter] public bool IsReadOnly { get; set; } = false;
 
-    [Parameter] public List<BudynekDto>? Budynki { get; set; }
-
     private MudForm? _form;
     private bool _isEdit => IsEdit;
     private bool _isReadOnly => IsReadOnly;
+    private string _budynekLabel = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBudynekLabelAsync();
+    }
 
     private void Cancel() => MudDialog.Cancel();
 
     private void Edit() => MudDialog.Close(DialogResult.Ok(new DialogActionResult(DialogAction.Edit)));
-
-    private string GetBudynekLabel(Guid idBudynku)
-    {
-        var budynek = (Budynki ?? new()).FirstOrDefault(b => b.Id == idBudynku);
-        return budynek is null
-            ? idBudynku.ToString()
-            : (!string.IsNullOrWhiteSpace(budynek.KodBudynku) ? budynek.KodBudynku : budynek.Id.ToString());
-    }
 
     private async Task Submit()
     {
@@ -112,6 +110,52 @@
 
         Model.KodLokalu = (Model.KodLokalu ?? string.Empty).Trim();
         MudDialog.Close(DialogResult.Ok(Model));
+    }
+
+    private async Task LoadBudynekLabelAsync()
+    {
+        if (Model.IdBudynku == Guid.Empty)
+        {
+            _budynekLabel = string.Empty;
+            return;
+        }
+
+        var encja = await EncjeService.GetByIdAsync(Model.IdBudynku);
+        _budynekLabel = encja is null
+            ? Model.IdBudynku.ToString()
+            : string.IsNullOrWhiteSpace(encja.KodEncji)
+                ? encja.TypEncji
+                : $"{encja.TypEncji} / {encja.KodEncji}";
+    }
+
+    private async Task OpenBudynekLookupDialog()
+    {
+        if (_isReadOnly)
+            return;
+
+        var parameters = new DialogParameters
+        {
+            ["InitialTypEncji"] = "BUDYNEK"
+        };
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<EncjaLookupDialog>("Wybierz budynek", parameters, options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not EncjaLookupDto selected)
+            return;
+
+        Model.IdBudynku = selected.IdEncji;
+        _budynekLabel = selected.Label;
     }
 }
 

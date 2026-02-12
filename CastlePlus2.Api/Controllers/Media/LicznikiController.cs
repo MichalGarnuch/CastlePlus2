@@ -6,6 +6,8 @@ using CastlePlus2.Application.Media.Liczniki.Commands.DeleteLicznik;
 using CastlePlus2.Application.Media.Liczniki.Commands.UpdateLicznik;
 using CastlePlus2.Application.Media.Liczniki.Queries.GetAllLiczniki;
 using CastlePlus2.Application.Media.Liczniki.Queries.GetLicznikById;
+using CastlePlus2.Application.Media.Liczniki.Queries.SearchLicznikiLookupPaged;
+using CastlePlus2.Contracts.DTOs.Common;
 using CastlePlus2.Contracts.DTOs.Media;
 using CastlePlus2.Contracts.Requests.Media;
 using MediatR;
@@ -32,6 +34,18 @@ namespace CastlePlus2.Api.Controllers.Media
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
             var result = await _mediator.Send(new GetAllLicznikiQuery(), ct);
+            return Ok(result);
+        }
+
+        [HttpGet("lookup")]
+        [ProducesResponseType(typeof(PagedResultDto<LicznikLookupDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Lookup(
+            [FromQuery] string? q = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            CancellationToken ct = default)
+        {
+            var result = await _mediator.Send(new SearchLicznikiLookupPagedQuery(q, page, pageSize), ct);
             return Ok(result);
         }
 

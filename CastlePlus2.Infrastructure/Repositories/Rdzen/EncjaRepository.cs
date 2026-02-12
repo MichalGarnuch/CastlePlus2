@@ -75,5 +75,42 @@ namespace CastlePlus2.Infrastructure.Repositories.Rdzen
                 .Take(take)
                 .ToListAsync(cancellationToken);
         }
+
+        public async Task<(List<Encja> Items, int TotalCount)> SearchPagedAsync(
+            string? typEncji,
+            string? q,
+            int page,
+            int pageSize,
+            CancellationToken cancellationToken = default)
+        {
+            var currentPage = page <= 0 ? 1 : page;
+            var currentPageSize = pageSize <= 0 ? 20 : Math.Min(pageSize, 200);
+
+            var query = _dbContext.Encje.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(typEncji))
+            {
+                var t = typEncji.Trim();
+                query = query.Where(e => e.TypEncji == t);
+            }
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var s = q.Trim();
+                query = query.Where(e =>
+                    e.TypEncji.Contains(s) ||
+                    (e.KodEncji != null && e.KodEncji.Contains(s)));
+            }
+
+            var total = await query.CountAsync(cancellationToken);
+            var items = await query
+                .OrderBy(e => e.TypEncji)
+                .ThenBy(e => e.KodEncji)
+                .Skip((currentPage - 1) * currentPageSize)
+                .Take(currentPageSize)
+                .ToListAsync(cancellationToken);
+
+            return (items, total);
+        }
     }
 }

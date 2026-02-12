@@ -8,12 +8,14 @@
 @using CastlePlus2.Contracts.Requests.Najem
 @using CastlePlus2.Client.Services.Najem
 @using CastlePlus2.Client.Services.Slowniki
+@using CastlePlus2.Client.Pages.Najem
 @inject IProcesyNajmuService ProcesyNajmuService
 @inject IUmowyNajmuService UmowyNajmuService
 @inject IJednostkiMiaryService JednostkiMiaryService
 @inject IIndeksacjeService IndeksacjeService
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudText Typo="Typo.h4" Class="fw-700 mb-4">Aneks czynszu</MudText>
 
@@ -30,23 +32,13 @@
 
             <MudGrid Spacing="2">
                 <MudItem xs="12" sm="8">
-                    <MudSelect T="Guid"
-                               Label="Wybierz umowę"
-                               @bind-Value="_selectedUmowaId"
-                               Dense="true"
-                               Margin="Margin.Dense">
-                        <MudSelectItem T="Guid" Value="@Guid.Empty">— wybierz —</MudSelectItem>
-
-                        @foreach (var u in _umowy)
-                        {
-                            <MudSelectItem T="Guid" Value="@u.Id">@GetUmowaLabel(u)</MudSelectItem>
-                        }
-                    </MudSelect>
-
-                    @if (_umowy.Count == 0)
-                    {
-                        <MudText Class="mt-2" Color="Color.Warning">Brak umów w bazie</MudText>
-                    }
+                    <MudTextField Label="Wybierz umowę"
+                                  Dense="true"
+                                  ReadOnly="true"
+                                  Value="@_umowaLabel"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  OnAdornmentClick="OpenUmowaLookupDialog" />
                 </MudItem>
 
                 <MudItem xs="12" sm="4" Class="d-flex align-center">
@@ -155,7 +147,6 @@
     private AneksujCzynszRequest _model = new();
     private DateTime? _odDnia;
 
-    private List<UmowaNajmuDto> _umowy = new();
     private List<JednostkaMiaryDto> _jednostki = new();
     private List<IndeksacjaDto> _indeksacje = new();
 
@@ -167,8 +158,6 @@
             _jednostki = await JednostkiMiaryService.GetAllAsync();
             _indeksacje = await IndeksacjeService.GetAllAsync();
 
-            // lista umów do dropdowna
-            _umowy = (await UmowyNajmuService.GetAllAsync()) ?? new();
 
             if (IdUmowy.HasValue && IdUmowy.Value != Guid.Empty)
             {
@@ -278,5 +267,27 @@
         {
             _saving = false;
         }
+    }
+
+    private async Task OpenUmowaLookupDialog()
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<UmowaNajmuLookupDialog>("Wybierz umowę", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not UmowaNajmuLookupDto selected)
+            return;
+
+        _selectedUmowaId = selected.IdUmowy;
+        _umowaLabel = selected.Label;
     }
 }

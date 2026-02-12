@@ -1,6 +1,8 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using CastlePlus2.Contracts.DTOs.Common;
 using CastlePlus2.Contracts.DTOs.Media;
 using CastlePlus2.Contracts.Requests.Media;
 
@@ -39,6 +41,23 @@ namespace CastlePlus2.Client.Services.Media
 
             resp.EnsureSuccessStatusCode();
             return await resp.Content.ReadFromJsonAsync<LicznikDto>(cancellationToken: ct);
+        }
+
+        public async Task<PagedResultDto<LicznikLookupDto>> SearchLookupPagedAsync(
+            string? q,
+            int page,
+            int pageSize,
+            CancellationToken ct = default)
+        {
+            var currentPage = page <= 0 ? 1 : page;
+            var currentPageSize = pageSize <= 0 ? 20 : Math.Min(pageSize, 200);
+            var url = $"{BaseUrl}/lookup?page={currentPage}&pageSize={currentPageSize}";
+
+            if (!string.IsNullOrWhiteSpace(q))
+                url += $"&q={Uri.EscapeDataString(q)}";
+
+            return await _http.GetFromJsonAsync<PagedResultDto<LicznikLookupDto>>(url, ct)
+                   ?? new PagedResultDto<LicznikLookupDto>();
         }
 
         public async Task<LicznikDto> CreateAsync(CreateLicznikRequest request, CancellationToken ct = default)

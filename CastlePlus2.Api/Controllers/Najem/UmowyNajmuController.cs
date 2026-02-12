@@ -6,6 +6,8 @@ using CastlePlus2.Application.Najem.UmowyNajmu.Commands.ZawrzUmoweNajmu;
 using CastlePlus2.Application.Najem.UmowyNajmu.Queries.GetAllUmowyNajmu;
 using CastlePlus2.Application.Najem.UmowyNajmu.Queries.GetUmowaNajmuContext;
 using CastlePlus2.Application.Najem.UmowyNajmu.Queries.GetUmowaNajmuById;
+using CastlePlus2.Application.Najem.UmowyNajmu.Queries.SearchUmowyNajmuLookupPaged;
+using CastlePlus2.Contracts.DTOs.Common;
 using CastlePlus2.Contracts.DTOs.Najem;
 using CastlePlus2.Contracts.Requests.Najem;
 using MediatR;
@@ -84,6 +86,19 @@ namespace CastlePlus2.Api.Controllers.Najem
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpGet("lookup")]
+        [ProducesResponseType(typeof(PagedResultDto<UmowaNajmuLookupDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Lookup(
+            [FromQuery] string? q = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            CancellationToken ct = default)
+        {
+            var result = await _mediator.Send(new SearchUmowyNajmuLookupPagedQuery(q, page, pageSize), ct);
+            return Ok(result);
+        }
+
 
         [HttpGet("context")]
         [ProducesResponseType(typeof(UmowaNajmuContextDto), StatusCodes.Status200OK)]

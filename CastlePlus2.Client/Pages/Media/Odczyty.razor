@@ -151,7 +151,6 @@
         var parameters = new DialogParameters
         {
             ["Model"] = new OdczytDto { DataOdczytu = DateTime.Today },
-            ["Liczniki"] = _liczniki,
             ["IsEdit"] = false
         };
 
@@ -195,7 +194,6 @@
         var parameters = new DialogParameters
         {
             ["Model"] = clone,
-            ["Liczniki"] = _liczniki,
             ["IsEdit"] = true
         };
 
@@ -245,7 +243,6 @@
         var parameters = new DialogParameters
         {
             ["Model"] = clone,
-            ["Liczniki"] = _liczniki,
             ["IsEdit"] = true,
             ["IsReadOnly"] = true
         };

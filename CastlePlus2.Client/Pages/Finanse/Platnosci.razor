@@ -3,15 +3,12 @@
 
 @using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Finanse
-@using CastlePlus2.Contracts.DTOs.Podmioty
 @using CastlePlus2.Contracts.DTOs.Slowniki
 @using CastlePlus2.Contracts.Requests.Finanse
 @using CastlePlus2.Client.Services.Finanse
-@using CastlePlus2.Client.Services.Podmioty
 @using CastlePlus2.Client.Services.Slowniki
 
 @inject IPlatnosciService PlatnosciService
-@inject IPodmiotyService PodmiotyService
 @inject IWalutyService WalutyService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
@@ -103,7 +100,6 @@
 
 @code {
     private List<PlatnoscDto> _items = new();
-    private List<PodmiotDto> _podmioty = new();
     private List<WalutaDto> _waluty = new();
     private string _search = string.Empty;
     private bool _loading = true; // 2. DODANO ZMIENNĄ
@@ -118,13 +114,11 @@
     {
         try
         {
-            _podmioty = (await PodmiotyService.GetAllAsync()) ?? new();
             _waluty = (await WalutyService.GetAllAsync()) ?? new();
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd ładowania słowników: {ex.Message}", Severity.Error);
-            _podmioty = new();
             _waluty = new();
         }
     }
@@ -149,11 +143,8 @@
         }
     }
 
-    private string GetPodmiotLabel(long idPodmiotu)
-    {
-        var p = _podmioty.FirstOrDefault(x => x.IdPodmiotu == idPodmiotu);
-        return p is null ? $"Id={idPodmiotu}" : $"Id={p.IdPodmiotu} / {p.Nazwa}";
-    }
+    private static string GetPodmiotLabel(long idPodmiotu)
+        => $"Id={idPodmiotu}";
 
     private bool FilterFunc(PlatnoscDto item)
     {
@@ -182,7 +173,6 @@
         {
             ["Model"] = model,
             ["IsEdit"] = false,
-            ["Podmioty"] = _podmioty,
             ["Waluty"] = _waluty
         };
 
@@ -228,7 +218,6 @@
         {
             ["Model"] = clone,
             ["IsEdit"] = true,
-            ["Podmioty"] = _podmioty,
             ["Waluty"] = _waluty
         };
 
@@ -297,7 +286,6 @@
             ["Model"] = clone,
             ["IsEdit"] = true,
             ["IsReadOnly"] = true,
-            ["Podmioty"] = _podmioty,
             ["Waluty"] = _waluty
         };
 

@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using CastlePlus2.Contracts.DTOs.Common;
 using CastlePlus2.Contracts.DTOs.Rdzen;
 using CastlePlus2.Contracts.Requests.Rdzen;
 
@@ -83,6 +84,28 @@ namespace CastlePlus2.Client.Services.Rdzen
                 url += $"&q={Uri.EscapeDataString(q)}";
 
             return await _http.GetFromJsonAsync<List<EncjaLookupDto>>(url, ct) ?? new List<EncjaLookupDto>();
+        }
+
+        public async Task<PagedResultDto<EncjaLookupDto>> SearchLookupPagedAsync(
+            string? typEncji,
+            string? q,
+            int page,
+            int pageSize,
+            CancellationToken ct = default)
+        {
+            var currentPage = page <= 0 ? 1 : page;
+            var currentPageSize = pageSize <= 0 ? 20 : Math.Min(pageSize, 200);
+
+            var url = $"{BaseUrl}/lookup/paged?page={currentPage}&pageSize={currentPageSize}";
+
+            if (!string.IsNullOrWhiteSpace(typEncji))
+                url += $"&typEncji={Uri.EscapeDataString(typEncji)}";
+
+            if (!string.IsNullOrWhiteSpace(q))
+                url += $"&q={Uri.EscapeDataString(q)}";
+
+            return await _http.GetFromJsonAsync<PagedResultDto<EncjaLookupDto>>(url, ct)
+                   ?? new PagedResultDto<EncjaLookupDto>();
         }
     }
 }

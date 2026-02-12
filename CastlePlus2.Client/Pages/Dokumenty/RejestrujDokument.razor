@@ -5,8 +5,12 @@
 @using CastlePlus2.Contracts.DTOs.Dokumenty
 @using CastlePlus2.Contracts.Requests.Dokumenty
 @using CastlePlus2.Client.Services.Dokumenty
+@using CastlePlus2.Client.Pages.Rdzen
+@using CastlePlus2.Contracts.DTOs.Rdzen
+@using RdzenEncjaLookupDto = CastlePlus2.Contracts.DTOs.Rdzen.EncjaLookupDto
 @inject IProcesyDokumentowService ProcesyDokumentowService
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudText Typo="Typo.h4" Class="fw-700 mb-4">Rejestracja dokumentu</MudText>
 
@@ -19,18 +23,22 @@
     {
         <MudForm @ref="_form" @bind-IsValid="_isFormValid">
             <MudGrid Spacing="2">
-                <MudItem xs="12" sm="6">
-                    <MudSelect T="Guid"
-                               Label="Encja"
-                               Required="true"
-                               RequiredError="Encja jest wymagana"
-                               @bind-Value="_model.IdEncji"
-                               Margin="Margin.Dense">
-                        @foreach (var encja in _context.EncjeLookup)
-                        {
-                            <MudSelectItem Value="@encja.IdEncji">@encja.Label</MudSelectItem>
-                        }
-                    </MudSelect>
+                <MudItem xs="12" sm="8">
+                    <MudTextField Label="Encja"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Encja jest wymagana"
+                                  Margin="Margin.Dense"
+                                  Value="@_encjaLabel" />
+                </MudItem>
+
+                <MudItem xs="12" sm="4" Class="d-flex align-center justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Search"
+                               OnClick="OpenEncjaLookupDialog">
+                        Wybierz encję
+                    </MudButton>
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
@@ -80,6 +88,7 @@
     private bool _isFormValid;
     private RegisterDokumentContextDto _context = new();
     private RegisterDokumentRequest _model = new();
+    private string _encjaLabel = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -116,6 +125,7 @@
             var result = await ProcesyDokumentowService.RegisterAsync(_model);
             Snackbar.Add($"Zarejestrowano dokument (Id: {result.IdDokumentu}).", Severity.Success);
             _model = new RegisterDokumentRequest();
+            _encjaLabel = string.Empty;
         }
         catch (Exception ex)
         {
@@ -125,5 +135,33 @@
         {
             _saving = false;
         }
+    }
+
+    private async Task OpenEncjaLookupDialog()
+    {
+        var parameters = new DialogParameters
+        {
+            ["InitialTypEncji"] = "BUDYNEK"
+        };
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<EncjaLookupDialog>("Wybierz encję", parameters, options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not RdzenEncjaLookupDto selected)
+            return;
+
+
+        _model.IdEncji = selected.IdEncji;
+        _encjaLabel = selected.Label;
     }
 }

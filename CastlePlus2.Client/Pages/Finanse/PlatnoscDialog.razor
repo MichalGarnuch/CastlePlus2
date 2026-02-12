@@ -2,6 +2,10 @@
 @using CastlePlus2.Contracts.DTOs.Finanse
 @using CastlePlus2.Contracts.DTOs.Podmioty
 @using CastlePlus2.Contracts.DTOs.Slowniki
+@using CastlePlus2.Client.Pages.Podmioty
+@using CastlePlus2.Client.Services.Podmioty
+@inject IDialogService DialogService
+@inject IPodmiotyService PodmiotyService
 
 <MudDialog>
     <DialogContent>
@@ -12,18 +16,25 @@
 
             <MudGrid Spacing="2">
                 <MudItem xs="12">
-                    <MudSelect T="long"
-                               Label="Podmiot (IdPodmiotu)"
-                               Dense="true"
-                               Required="true"
-                               Disabled="IsReadOnly"
-                               @bind-Value="_model.IdPodmiotu">
-                        @foreach (var p in _podmioty)
-                        {
-                            <MudSelectItem T="long" Value="@p.IdPodmiotu">@($"Id={p.IdPodmiotu} / {p.Nazwa}")</MudSelectItem>
-                        }
-                    </MudSelect>
+                    <MudTextField Label="Podmiot"
+                                  Dense="true"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Podmiot jest wymagany"
+                                  Value="@_podmiotLabel" />
                 </MudItem>
+
+                @if (!_isReadOnly)
+                {
+                    <MudItem xs="12" Class="d-flex align-center justify-end">
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Search"
+                                   OnClick="OpenPodmiotLookupDialog">
+                            Wybierz podmiot
+                        </MudButton>
+                    </MudItem>
+                }
 
                 <MudItem xs="12">
                     <MudDatePicker Label="Data płatności"
@@ -54,17 +65,10 @@
                                      Dense="true"
                                      Required="true"
                                      RequiredError="Kwota jest wymagana"
-                                     Disabled="IsReadOnly"
+                                     Disabled="_isReadOnly"
                                      @bind-Value="_model.Kwota" />
                 </MudItem>
 
-                @if (_isEdit)
-                {
-                    <MudItem xs="12">
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">
-                            IdPlatnosci: @_model.IdPlatnosci
-                        </MudText>
-                    </MudItem>
                 }
             </MudGrid>
         </MudForm>
@@ -85,7 +89,6 @@
     [Parameter] public PlatnoscDto Model { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; }
     [Parameter] public bool IsReadOnly { get; set; } = false;
-    [Parameter] public List<PodmiotDto> Podmioty { get; set; } = new();
     [Parameter] public List<WalutaDto> Waluty { get; set; } = new();
 
     private MudForm? _form;
@@ -93,14 +96,13 @@
     private bool _isReadOnly => IsReadOnly;
 
     private PlatnoscDto _model = new();
-    private List<PodmiotDto> _podmioty = new();
     private List<WalutaDto> _waluty = new();
 
     private DateTime? _dataPlatnosci;
+    private string _podmiotLabel = string.Empty;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        _podmioty = Podmioty ?? new();
         _waluty = Waluty ?? new();
 
         var defaultWaluta = (!IsEdit && !IsReadOnly) ? "PLN" : Model.KodWaluty;
@@ -117,6 +119,8 @@
         _dataPlatnosci = _model.DataPlatnosci == default && !IsReadOnly && !IsEdit
             ? DateTime.Today
             : _model.DataPlatnosci;
+
+        await LoadPodmiotLabelAsync();
     }
 
     private void Cancel() => MudDialog.Cancel();
@@ -140,5 +144,46 @@
         _model.DataPlatnosci = _dataPlatnosci.Value.Date;
 
         MudDialog.Close(DialogResult.Ok(_model));
+    }
+
+    private async Task LoadPodmiotLabelAsync()
+    {
+        if (_model.IdPodmiotu <= 0)
+        {
+            _podmiotLabel = string.Empty;
+            return;
+        }
+
+        var podmiot = await PodmiotyService.GetByIdAsync(_model.IdPodmiotu);
+        if (podmiot is null)
+        {
+            _podmiotLabel = _model.IdPodmiotu.ToString();
+            return;
+        }
+
+        var nip = string.IsNullOrWhiteSpace(podmiot.NIP) ? "-" : podmiot.NIP;
+        _podmiotLabel = $"{podmiot.Nazwa} (NIP: {nip})";
+    }
+
+    private async Task OpenPodmiotLookupDialog()
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<PodmiotLookupDialog>("Wybierz podmiot", new DialogParameters(), options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not PodmiotLookupDto selected)
+            return;
+
+        _model.IdPodmiotu = selected.IdPodmiotu;
+        _podmiotLabel = selected.Label;
     }
 }

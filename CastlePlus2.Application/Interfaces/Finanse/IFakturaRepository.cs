@@ -15,5 +15,11 @@ namespace CastlePlus2.Application.Interfaces.Finanse
         void Remove(Faktura entity);
 
         Task SaveChangesAsync(CancellationToken ct);
+        Task<(List<Faktura> Items, int TotalCount)> SearchPagedAsync(
+            string? q,
+            long? idPodmiotu,
+            int page,
+            int pageSize,
+            CancellationToken ct);
     }
 }

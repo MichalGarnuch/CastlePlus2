@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Linq;
 using CastlePlus2.Client.Services.Common;
+using CastlePlus2.Contracts.DTOs.Common;
 using CastlePlus2.Contracts.DTOs.Podmioty;
 using CastlePlus2.Contracts.Requests.Podmioty;
 using Microsoft.AspNetCore.Mvc;
@@ -63,6 +64,23 @@ namespace CastlePlus2.Client.Services.Podmioty
         {
             var result = await GetPagedAsync(1, take, searchTerm, "Nazwa", false, ct);
             return result.Items;
+        }
+
+        public async Task<PagedResultDto<PodmiotLookupDto>> SearchLookupPagedAsync(
+            string? q,
+            int page,
+            int pageSize,
+            CancellationToken ct = default)
+        {
+            var currentPage = page <= 0 ? 1 : page;
+            var currentPageSize = pageSize <= 0 ? 20 : Math.Min(pageSize, 200);
+            var url = $"{BaseUrl}/lookup?page={currentPage}&pageSize={currentPageSize}";
+
+            if (!string.IsNullOrWhiteSpace(q))
+                url += $"&q={Uri.EscapeDataString(q)}";
+
+            return await _http.GetFromJsonAsync<PagedResultDto<PodmiotLookupDto>>(url, ct)
+                   ?? new PagedResultDto<PodmiotLookupDto>();
         }
 
         public async Task<PodmiotDto?> GetByIdAsync(long id, CancellationToken ct = default)

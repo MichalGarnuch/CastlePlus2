@@ -7,8 +7,11 @@
 @using CastlePlus2.Contracts.DTOs.Finanse
 @using CastlePlus2.Contracts.DTOs.Podmioty
 @using CastlePlus2.Contracts.Requests.Finanse
+@using CastlePlus2.Client.Pages.Podmioty
+@using CastlePlus2.Client.Pages.Finanse
 @inject IProcesyFinanseService ProcesyFinanseService
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudText Typo="Typo.h4" Class="fw-700 mb-4">Rejestracja płatności</MudText>
 
@@ -21,18 +24,22 @@
     {
         <MudForm @ref="_form" @bind-IsValid="_isFormValid">
             <MudGrid Spacing="2">
-                <MudItem xs="12" sm="6">
-                    <MudSelect T="long"
-                               Label="Podmiot"
-                               Required="true"
-                               RequiredError="Podmiot jest wymagany"
-                               @bind-Value="_model.IdPodmiotu"
-                               Margin="Margin.Dense">
-                        @foreach (var podmiot in _context.Podmioty)
-                        {
-                            <MudSelectItem T="long" Value="@podmiot.IdPodmiotu">@GetPodmiotLabel(podmiot)</MudSelectItem>
-                        }
-                    </MudSelect>
+                <MudItem xs="12" sm="8">
+                    <MudTextField Label="Podmiot"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Podmiot jest wymagany"
+                                  Margin="Margin.Dense"
+                                  Value="@_podmiotLabel" />
+                </MudItem>
+
+                <MudItem xs="12" sm="4" Class="d-flex align-center justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Search"
+                               OnClick="OpenPodmiotLookupDialog">
+                        Wybierz podmiot
+                    </MudButton>
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
@@ -58,8 +65,6 @@
 
                 <MudItem xs="12" sm="6">
                     <MudNumericField T="decimal"
-                                     Label="Kwota płatności"
-                                     Required="true"
                                      RequiredError="Kwota płatności jest wymagana"
                                      @bind-Value="_model.Kwota" />
                 </MudItem>
@@ -85,18 +90,16 @@
 
                     <MudGrid Spacing="2" Class="mt-2">
                         <MudItem xs="12" sm="8">
-                            <MudSelect T="long"
-                                       Label="Faktura"
-                                       Required="true"
-                                       RequiredError="Faktura jest wymagana"
-                                       @bind-Value="rozliczenie.IdFaktury"
-                                       Margin="Margin.Dense">
-                                @foreach (var faktura in GetDostepneFaktury())
-                                {
-                                    <MudSelectItem T="long" Value="@faktura.IdFaktury">@GetFakturaLabel(faktura)</MudSelectItem>
-                                }
-                            </MudSelect>
-                            <MudText Typo="Typo.caption" Color="Color.Secondary">@GetFakturaInfo(rozliczenie.IdFaktury)</MudText>
+                            <MudTextField Label="Faktura"
+                                          ReadOnly="true"
+                                          Required="true"
+                                          RequiredError="Faktura jest wymagana"
+                                          Margin="Margin.Dense"
+                                          Value="@GetRozliczenieLabel(rozliczenie)"
+                                          Adornment="Adornment.End"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          OnAdornmentClick="@(() => OpenFakturaLookupDialog(rozliczenie))" />
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">@GetFakturaInfo(rozliczenie)</MudText>
                         </MudItem>
 
                         <MudItem xs="12" sm="4">
@@ -138,6 +141,9 @@
     private DateTime? _dataPlatnosci;
     private PlatnoscContextDto _context = new();
     private ZarejestrujPlatnoscRequest _model = new();
+    private string _podmiotLabel = string.Empty;
+    private readonly Dictionary<ZarejestrujPlatnoscRozliczenieRequest, string> _rozliczenieLabels = new();
+    private readonly Dictionary<ZarejestrujPlatnoscRozliczenieRequest, string> _rozliczenieInfos = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -168,6 +174,14 @@
         };
 
         _dataPlatnosci = _model.DataPlatnosci;
+        _podmiotLabel = string.Empty;
+        _rozliczenieLabels.Clear();
+        _rozliczenieInfos.Clear();
+        foreach (var rozliczenie in _model.Rozliczenia)
+        {
+            _rozliczenieLabels[rozliczenie] = string.Empty;
+            _rozliczenieInfos[rozliczenie] = "Wybierz fakturę do rozliczenia.";
+        }
     }
 
     private static ZarejestrujPlatnoscRozliczenieRequest CreateRozliczenie()
@@ -175,7 +189,10 @@
 
     private void AddRozliczenie()
     {
-        _model.Rozliczenia.Add(CreateRozliczenie());
+        var rozliczenie = CreateRozliczenie();
+        _model.Rozliczenia.Add(rozliczenie);
+        _rozliczenieLabels[rozliczenie] = string.Empty;
+        _rozliczenieInfos[rozliczenie] = "Wybierz fakturę do rozliczenia.";
     }
 
     private void RemoveRozliczenie(ZarejestrujPlatnoscRozliczenieRequest rozliczenie)
@@ -186,6 +203,8 @@
         }
 
         _model.Rozliczenia.Remove(rozliczenie);
+        _rozliczenieLabels.Remove(rozliczenie);
+        _rozliczenieInfos.Remove(rozliczenie);
     }
 
     private async Task SubmitAsync()
@@ -227,44 +246,59 @@
         }
     }
 
-    private IEnumerable<FakturaDoRozliczeniaDto> GetDostepneFaktury()
+    private string GetRozliczenieLabel(ZarejestrujPlatnoscRozliczenieRequest rozliczenie)
+        => _rozliczenieLabels.TryGetValue(rozliczenie, out var label) ? label : string.Empty;
+
+    private string GetFakturaInfo(ZarejestrujPlatnoscRozliczenieRequest rozliczenie)
+        => _rozliczenieInfos.TryGetValue(rozliczenie, out var info) ? info : "Wybierz fakturę do rozliczenia.";
+
+    private async Task OpenPodmiotLookupDialog()
     {
-        var faktury = _context.Faktury.AsEnumerable();
-
-        if (_model.IdPodmiotu > 0)
+        var options = new DialogOptions
         {
-            faktury = faktury.Where(x => x.IdPodmiotu == _model.IdPodmiotu);
-        }
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
 
-        if (!string.IsNullOrWhiteSpace(_model.KodWaluty))
-        {
-            faktury = faktury.Where(x => x.KodWaluty == _model.KodWaluty);
-        }
+        var dialog = DialogService.Show<PodmiotLookupDialog>("Wybierz podmiot", new DialogParameters(), options);
+        var result = await dialog.Result;
 
-        return faktury;
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not PodmiotLookupDto selected)
+            return;
+
+        _model.IdPodmiotu = selected.IdPodmiotu;
+        _podmiotLabel = selected.Label;
     }
 
-    private string GetFakturaLabel(FakturaDoRozliczeniaDto faktura)
+    private async Task OpenFakturaLookupDialog(ZarejestrujPlatnoscRozliczenieRequest rozliczenie)
     {
-        var podmiot = _context.Podmioty.FirstOrDefault(x => x.IdPodmiotu == faktura.IdPodmiotu);
-        var podmiotLabel = podmiot is null ? string.Empty : $" / {podmiot.Nazwa}";
-        return $"{faktura.NumerFaktury}{podmiotLabel} (pozostało {faktura.KwotaPozostala})";
-    }
-
-    private string GetFakturaInfo(long idFaktury)
-    {
-        var faktura = _context.Faktury.FirstOrDefault(x => x.IdFaktury == idFaktury);
-        if (faktura is null)
+        var parameters = new DialogParameters
         {
-            return "Wybierz fakturę do rozliczenia.";
-        }
+            ["IdPodmiotu"] = _model.IdPodmiotu > 0 ? _model.IdPodmiotu : null
+        };
 
-        return $"Pozostało do rozliczenia: {faktura.KwotaPozostala} {faktura.KodWaluty}";
-    }
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
 
-    private static string GetPodmiotLabel(PodmiotDto podmiot)
-    {
-        var nip = string.IsNullOrWhiteSpace(podmiot.NIP) ? string.Empty : $" (NIP {podmiot.NIP})";
-        return $"{podmiot.Nazwa}{nip}";
+        var dialog = DialogService.Show<FakturaLookupDialog>("Wybierz fakturę", parameters, options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not FakturaLookupDto selected)
+            return;
+
+        rozliczenie.IdFaktury = selected.IdFaktury;
+        _rozliczenieLabels[rozliczenie] = selected.Label;
+        _rozliczenieInfos[rozliczenie] = $"Kwota brutto: {selected.KwotaBrutto ?? 0} (data: {selected.DataWystawienia:yyyy-MM-dd})";
     }
 }

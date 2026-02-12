@@ -5,6 +5,8 @@ using CastlePlus2.Application.Media.Przylacza.Queries.GetPrzylaczeById;
 using CastlePlus2.Application.Media.Przylacza.Commands.DeletePrzylacze;
 using CastlePlus2.Application.Media.Przylacza.Commands.UpdatePrzylacze;
 using CastlePlus2.Application.Media.Przylacza.Queries.GetAllPrzylacza;
+using CastlePlus2.Application.Media.Przylacza.Queries.SearchPrzylaczaLookupPaged;
+using CastlePlus2.Contracts.DTOs.Common;
 using CastlePlus2.Contracts.Requests.Media;
 using CastlePlus2.Contracts.DTOs.Media;
 using MediatR;
@@ -41,6 +43,18 @@ namespace CastlePlus2.Api.Controllers.Media
         public async Task<ActionResult<List<PrzylaczeDto>>> GetAll(CancellationToken ct)
         {
             var result = await _mediator.Send(new GetAllPrzylaczaQuery(), ct);
+            return Ok(result);
+        }
+
+        [HttpGet("lookup")]
+        [ProducesResponseType(typeof(PagedResultDto<PrzylaczeLookupDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<PagedResultDto<PrzylaczeLookupDto>>> Lookup(
+            [FromQuery] string? q = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            CancellationToken ct = default)
+        {
+            var result = await _mediator.Send(new SearchPrzylaczaLookupPagedQuery(q, page, pageSize), ct);
             return Ok(result);
         }
 

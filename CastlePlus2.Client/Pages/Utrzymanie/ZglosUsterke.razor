@@ -5,8 +5,11 @@
 @using CastlePlus2.Contracts.DTOs.Utrzymanie
 @using CastlePlus2.Contracts.Requests.Utrzymanie
 @using CastlePlus2.Client.Services.Utrzymanie
+@using CastlePlus2.Client.Pages.Rdzen
+@using CastlePlus2.Contracts.DTOs.Rdzen
 @inject IZgloszeniaService ZgloszeniaService
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudText Typo="Typo.h4" Class="fw-700 mb-4">Zgłoszenie usterki</MudText>
 
@@ -29,35 +32,22 @@
                     </MudRadioGroup>
                 </MudItem>
 
-                <MudItem xs="12" sm="6">
-                    @if (_gospodarzTyp == GospodarzTypLokal)
-                    {
-                        <MudSelect T="Guid"
-                                   Label="Przedmiot zgłoszenia"
-                                   Required="true"
-                                   RequiredError="Wybór jest wymagany"
-                                   @bind-Value="_model.IdEncjiGospodarza"
-                                   Margin="Margin.Dense">
-                            @foreach (var lokal in _context.LokaleLookup)
-                            {
-                                <MudSelectItem Value="@lokal.IdEncji">@lokal.Label</MudSelectItem>
-                            }
-                        </MudSelect>
-                    }
-                    else
-                    {
-                        <MudSelect T="Guid"
-                                   Label="Przedmiot zgłoszenia"
-                                   Required="true"
-                                   RequiredError="Wybór jest wymagany"
-                                   @bind-Value="_model.IdEncjiGospodarza"
-                                   Margin="Margin.Dense">
-                            @foreach (var budynek in _context.BudynkiLookup)
-                            {
-                                <MudSelectItem Value="@budynek.IdEncji">@budynek.Label</MudSelectItem>
-                            }
-                        </MudSelect>
-                    }
+                <MudItem xs="12" sm="8">
+                    <MudTextField Label="Przedmiot zgłoszenia"
+                                  ReadOnly="true"
+                                  Required="true"
+                                  RequiredError="Wybór jest wymagany"
+                                  Margin="Margin.Dense"
+                                  Value="@_gospodarzLabel" />
+                </MudItem>
+
+                <MudItem xs="12" sm="4" Class="d-flex align-center justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Search"
+                               OnClick="OpenGospodarzLookupDialog">
+                        Wybierz
+                    </MudButton>
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
@@ -103,6 +93,7 @@
     private string _gospodarzTyp = GospodarzTypLokal;
     private ZglosUsterkeContextDto _context = new();
     private ZglosUsterkeRequest _model = new();
+    private string _gospodarzLabel = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -125,6 +116,7 @@
         _gospodarzTyp = selected;
         _model.IdEncjiGospodarza = Guid.Empty;
         return Task.CompletedTask;
+        _gospodarzLabel = string.Empty;
     }
 
     private async Task SubmitAsync()
@@ -147,6 +139,7 @@
             Snackbar.Add($"Zgłoszenie zostało zapisane (Id: {result.IdZlecenia}).", Severity.Success);
             _model = new ZglosUsterkeRequest();
             _gospodarzTyp = GospodarzTypLokal;
+            _gospodarzLabel = string.Empty;
         }
         catch (Exception ex)
         {
@@ -156,5 +149,34 @@
         {
             _saving = false;
         }
+    }
+
+    private async Task OpenGospodarzLookupDialog()
+    {
+        var typ = _gospodarzTyp == GospodarzTypLokal ? "LOKAL" : "BUDYNEK";
+
+        var parameters = new DialogParameters
+        {
+            ["InitialTypEncji"] = typ
+        };
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<EncjaLookupDialog>("Wybierz przedmiot zgłoszenia", parameters, options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        if (result.Data is not EncjaLookupDto selected)
+            return;
+
+        _model.IdEncjiGospodarza = selected.IdEncji;
+        _gospodarzLabel = selected.Label;
     }
 }

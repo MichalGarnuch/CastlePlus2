@@ -3,6 +3,8 @@ using CastlePlus2.Application.Finanse.Faktury.Commands.DeleteFaktura;
 using CastlePlus2.Application.Finanse.Faktury.Commands.UpdateFaktura;
 using CastlePlus2.Application.Finanse.Faktury.Queries.GetAllFaktury;
 using CastlePlus2.Application.Finanse.Faktury.Queries.GetFakturaById;
+using CastlePlus2.Application.Finanse.Faktury.Queries.SearchFakturyLookupPaged;
+using CastlePlus2.Contracts.DTOs.Common;
 using CastlePlus2.Contracts.DTOs.Finanse;
 using CastlePlus2.Contracts.Requests.Finanse;
 using MediatR;
@@ -29,6 +31,19 @@ namespace CastlePlus2.Api.Controllers.Finanse
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
             var result = await _mediator.Send(new GetAllFakturyQuery(), ct);
+            return Ok(result);
+        }
+
+        [HttpGet("lookup")]
+        [ProducesResponseType(typeof(PagedResultDto<FakturaLookupDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Lookup(
+            [FromQuery] string? q = null,
+            [FromQuery] long? idPodmiotu = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            CancellationToken ct = default)
+        {
+            var result = await _mediator.Send(new SearchFakturyLookupPagedQuery(q, idPodmiotu, page, pageSize), ct);
             return Ok(result);
         }
 
