@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using CastlePlus2.Application.Common.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,6 +34,11 @@ public class ExceptionHandlingMiddleware
             _logger.LogWarning(ex, "Błąd walidacji: {Message}", ex.Message);
             await HandleValidationExceptionAsync(context, ex);
         }
+        catch (BusinessConflictException ex)
+        {
+            _logger.LogWarning(ex, "Konflikt biznesowy: {Message}", ex.Message);
+            await HandleBusinessConflictExceptionAsync(context, ex);
+        }
         catch (Exception ex)
         {
             // 500 – log z pełnym wyjątkiem + traceId
@@ -40,6 +46,24 @@ public class ExceptionHandlingMiddleware
             await HandleGenericExceptionAsync(context, ex, _env);
         }
     }
+
+    private static async Task HandleBusinessConflictExceptionAsync(HttpContext context, BusinessConflictException ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status409Conflict;
+        context.Response.ContentType = "application/problem+json";
+
+        var problem = new ProblemDetails
+        {
+            Status = StatusCodes.Status409Conflict,
+            Title = "Konflikt danych",
+            Detail = ex.Message
+        };
+
+        problem.Extensions["traceId"] = context.TraceIdentifier;
+
+        await context.Response.WriteAsync(JsonSerializer.Serialize(problem, JsonOptions));
+    }
+
 
     private static async Task HandleValidationExceptionAsync(HttpContext context, ValidationException ex)
     {

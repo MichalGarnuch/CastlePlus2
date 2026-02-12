@@ -1,8 +1,6 @@
 ﻿@page "/aktualnosci"
 @page "/public/aktualnosci"
 
-@using System.Linq
-@using System.Net.Http
 @using CastlePlus2.Client.Services.Konfiguracja
 @using CastlePlus2.Contracts.DTOs.Konfiguracja
 @using MudBlazor
@@ -30,17 +28,21 @@
     else
     {
         <MudStack Class="mt-2" Spacing="2">
-            @foreach (var it in _items.OrderByDescending(x => x.Sort))
+            @foreach (var it in _items)
             {
-                <MudPaper Class="pa-3">
-                    <MudText Typo="Typo.h6">@it.KodZasobu</MudText>
+                var title = PickField(it, "Title") ?? it.KodZasobu;
+                var lead = PickField(it, "Lead");
+                var body = PickField(it, "Body") ?? PickField(it, "Value");
 
-                    @if (it.Teksty is not null)
+                <MudPaper Class="pa-3">
+                    <MudText Typo="Typo.h6">@title</MudText>
+                    @if (!string.IsNullOrWhiteSpace(lead))
                     {
-                        @foreach (var t in it.Teksty.OrderBy(x => x.Sort))
-                        {
-                            <MudText>@t.Wartosc</MudText>
-                        }
+                        <MudText Class="mt-1"><b>@lead</b></MudText>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(body))
+                    {
+                        <MudText Class="mt-2">@body</MudText>
                     }
                 </MudPaper>
             }
@@ -60,22 +62,39 @@
 
         try
         {
-            // Typ=NEWS, Kategoria=HOME – pod ekran „Aktualności”
             _items = await Service.GetPublicAsync("NEWS", "HOME", "pl-PL");
-        }
-        catch (HttpRequestException ex)
-        {
-            _error = $"Błąd pobierania aktualności: {ex.Message}";
-            Snackbar.Add(_error, Severity.Error);
         }
         catch (Exception ex)
         {
-            _error = $"Nie udało się pobrać aktualności: {ex.Message}";
+            _error = $"Błąd pobierania aktualności: {ex.Message}";
             Snackbar.Add(_error, Severity.Error);
         }
         finally
         {
             _loading = false;
         }
+    }
+
+    private static string? PickField(ZasobUIPublicDto dto, string field)
+    {
+        var exact = dto.Teksty
+            .Where(x => string.Equals(x.Pole, field, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(x => x.Sort)
+            .Select(x => x.Wartosc)
+            .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
+
+        if (!string.IsNullOrWhiteSpace(exact))
+            return exact;
+
+        if (string.Equals(field, "Body", StringComparison.OrdinalIgnoreCase))
+        {
+            return dto.Teksty
+                .Where(x => string.Equals(x.Pole, "Value", StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(x => x.Sort)
+                .Select(x => x.Wartosc)
+                .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
+        }
+
+        return null;
     }
 }

@@ -1,0 +1,75 @@
+﻿@page "/konfiguracja/aktualnosci"
+@attribute [Authorize(Roles = RoleCodes.Admin)]
+
+@using CastlePlus2.Client.Services.Konfiguracja
+@using CastlePlus2.Contracts.DTOs.Konfiguracja
+@using MudBlazor
+
+@inject IZasobyUIService Service
+@inject NavigationManager Nav
+@inject ISnackbar Snackbar
+
+<PageTitle>Aktualności (CMS)</PageTitle>
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Aktualności (CMS)</MudText>
+
+<MudPaper Class="pa-4">
+    <MudTable Items="_items" Dense="true" Hover="true" Bordered="true" Striped="true" Loading="_loading">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Lista newsów (Typ=NEWS)</MudText>
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Info" OnClick="ReloadAsync" />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="CreateNews">
+                Dodaj news
+            </MudButton>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Kod</MudTh>
+            <MudTh>Kategoria</MudTh>
+            <MudTh>Aktywny</MudTh>
+            <MudTh>Sort</MudTh>
+            <MudTh>Ważne od</MudTh>
+            <MudTh>Ważne do</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.KodZasobu</MudTd>
+            <MudTd>@context.Kategoria</MudTd>
+            <MudTd>@(context.CzyAktywny ? "Tak" : "Nie")</MudTd>
+            <MudTd>@context.Sort</MudTd>
+            <MudTd>@(context.WazneOdUtc?.ToString("yyyy-MM-dd") ?? "-")</MudTd>
+            <MudTd>@(context.WazneDoUtc?.ToString("yyyy-MM-dd") ?? "-")</MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => Edit(context.IdEncji))" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private bool _loading = true;
+    private List<ZasobUIDto> _items = new();
+
+    protected override async Task OnInitializedAsync() => await ReloadAsync();
+
+    private async Task ReloadAsync()
+    {
+        _loading = true;
+        try
+        {
+            _items = await Service.GetAllAsync(typ: "NEWS");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania aktualności: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void CreateNews() => Nav.NavigateTo("/konfiguracja/aktualnosci/new");
+
+    private void Edit(Guid idEncji) => Nav.NavigateTo($"/konfiguracja/aktualnosci/{idEncji}");
+}

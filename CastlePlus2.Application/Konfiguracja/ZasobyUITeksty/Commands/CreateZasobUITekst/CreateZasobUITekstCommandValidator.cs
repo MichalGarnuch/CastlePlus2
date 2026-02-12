@@ -14,7 +14,9 @@ namespace CastlePlus2.Application.Konfiguracja.ZasobyUITeksty.Commands.CreateZas
             // Rule from SQL: Wartosc nvarchar(max) NOT NULL
             RuleFor(x => x.Wartosc).NotEmpty();
             // Rule from SQL: Format nvarchar(20) NOT NULL (DEFAULT 'Plain')
-            RuleFor(x => x.Format).MaximumLength(20);
+            RuleFor(x => x.Format)
+                .NotEmpty()
+                .MaximumLength(20);
             // Rule from SQL: Sort int NOT NULL (DEFAULT 0)
             // technicznie bez ograniczeń zakresu w SQL → brak dodatkowych reguł
         }

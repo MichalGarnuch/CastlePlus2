@@ -45,7 +45,10 @@ namespace CastlePlus2.Application.Konfiguracja.ZasobyUI.Queries.GetPublicZasobyU
                     KodZasobu = zasob.KodZasobu,
                     Typ = zasob.Typ,
                     Kategoria = zasob.Kategoria,
+                    CzyAktywny = zasob.CzyAktywny,
                     Sort = zasob.Sort,
+                    WazneOdUtc = zasob.WazneOdUtc,
+                    WazneDoUtc = zasob.WazneDoUtc,
                     Teksty = teksty.Select(x => _mapper.Map<ZasobUITekstDto>(x)).ToList(),
                     Dokumenty = dokumenty.Select(x => new ZasobUIDokumentDto
                     {

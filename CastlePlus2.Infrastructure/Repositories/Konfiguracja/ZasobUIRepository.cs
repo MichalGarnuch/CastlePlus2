@@ -71,7 +71,7 @@ public class ZasobUIRepository : IZasobUIRepository
             q = q.Where(x => x.CzyAktywny);
 
         return q
-            .OrderBy(x => x.Sort)
+            .OrderByDescending(x => x.Sort)
             .ThenBy(x => x.KodZasobu)
             .ToListAsync(ct);
     }

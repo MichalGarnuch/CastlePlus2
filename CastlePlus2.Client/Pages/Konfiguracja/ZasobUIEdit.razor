@@ -1,5 +1,7 @@
 ﻿@page "/konfiguracja/zasoby-ui/new"
 @page "/konfiguracja/zasoby-ui/{IdEncji:guid?}"
+@page "/konfiguracja/aktualnosci/new"
+@page "/konfiguracja/aktualnosci/{IdEncji:guid?}"
 @attribute [Authorize(Roles = RoleCodes.Admin)]
 
 @using System.Linq
@@ -8,8 +10,8 @@
 @using CastlePlus2.Client.Services.Konfiguracja
 @using CastlePlus2.Contracts.DTOs.Dokumenty
 @using CastlePlus2.Contracts.DTOs.Konfiguracja
-@using CastlePlus2.Contracts.Requests.Konfiguracja
 @using CastlePlus2.Contracts.Requests.Dokumenty
+@using CastlePlus2.Contracts.Requests.Konfiguracja
 
 @using MudBlazor
 
@@ -28,137 +30,80 @@
         <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
             <MudText Typo="Typo.h5">@(_isNew ? "Nowy zasób UI" : "Edycja zasobu UI")</MudText>
             <MudStack Row="true" Spacing="1">
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           OnClick="SaveAsync"
-                           Disabled="_busy || _saving">
-                    Zapisz
-                </MudButton>
-                <MudButton Variant="Variant.Outlined"
-                           OnClick="Back"
-                           Disabled="_busy || _saving">
-                    Wróć
-                </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync" Disabled="_busy || _saving">Zapisz</MudButton>
+                <MudButton Variant="Variant.Outlined" OnClick="Back" Disabled="_busy || _saving">Wróć</MudButton>
             </MudStack>
         </MudStack>
 
         <MudDivider />
 
         <MudGrid>
-            <MudItem xs="12" md="6">
-                <MudTextField @bind-Value="_model.KodZasobu" Label="Kod zasobu" Required="true" Disabled="_busy || _saving" />
-            </MudItem>
-            <MudItem xs="12" md="6">
-                <MudTextField @bind-Value="_model.Typ" Label="Typ" Required="true" Disabled="_busy || _saving" />
-            </MudItem>
-
-            <MudItem xs="12" md="6">
-                <MudTextField @bind-Value="_model.Kategoria" Label="Kategoria" Disabled="_busy || _saving" />
-            </MudItem>
-            <MudItem xs="12" md="6">
-                <MudNumericField T="int" @bind-Value="_model.Sort" Label="Sort" Disabled="_busy || _saving" />
-            </MudItem>
-
-            <MudItem xs="12" md="6">
-                <MudDatePicker @bind-Date="_model.WazneOdUtc" Label="Ważne od (UTC)" Disabled="_busy || _saving" />
-            </MudItem>
-            <MudItem xs="12" md="6">
-                <MudDatePicker @bind-Date="_model.WazneDoUtc" Label="Ważne do (UTC)" Disabled="_busy || _saving" />
-            </MudItem>
-
-            <MudItem xs="12">
-                <MudCheckBox T="bool" @bind-Checked="_model.CzyAktywny" Label="Aktywny" Disabled="_busy || _saving" />
-            </MudItem>
+            <MudItem xs="12" md="6"><MudTextField @bind-Value="_model.KodZasobu" Label="Kod zasobu" Required="true" Disabled="_busy || _saving" /></MudItem>
+            <MudItem xs="12" md="6"><MudTextField @bind-Value="_model.Typ" Label="Typ" Required="true" Disabled="_busy || _saving" /></MudItem>
+            <MudItem xs="12" md="6"><MudTextField @bind-Value="_model.Kategoria" Label="Kategoria" Disabled="_busy || _saving" /></MudItem>
+            <MudItem xs="12" md="6"><MudNumericField T="int" @bind-Value="_model.Sort" Label="Sort" Disabled="_busy || _saving" /></MudItem>
+            <MudItem xs="12" md="6"><MudDatePicker @bind-Date="_model.WazneOdUtc" Label="Ważne od (UTC)" Disabled="_busy || _saving" /></MudItem>
+            <MudItem xs="12" md="6"><MudDatePicker @bind-Date="_model.WazneDoUtc" Label="Ważne do (UTC)" Disabled="_busy || _saving" /></MudItem>
+            <MudItem xs="12"><MudCheckBox T="bool" @bind-Checked="_model.CzyAktywny" Label="Aktywny" Disabled="_busy || _saving" /></MudItem>
         </MudGrid>
 
         <MudDivider Class="my-2" />
 
         <MudText Typo="Typo.h6">Teksty (CMS)</MudText>
-
-        <MudButton Variant="Variant.Outlined"
-                   OnClick="OpenAddTekstAsync"
-                   Disabled="_busy || _saving">
-            Dodaj tekst
-        </MudButton>
+        <MudGrid>
+            <MudItem xs="12" md="2"><MudTextField @bind-Value="_newTekst.Jezyk" Label="Język" /></MudItem>
+            <MudItem xs="12" md="2">
+                <MudSelect T="string" @bind-Value="_newTekst.Pole" Label="Pole">
+                    <MudSelectItem Value="@("Title")">Title</MudSelectItem>
+                    <MudSelectItem Value="@("Lead")">Lead</MudSelectItem>
+                    <MudSelectItem Value="@("Body")">Body</MudSelectItem>
+                    <MudSelectItem Value="@("Value")">Value</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudSelect T="string" @bind-Value="_newTekst.Format" Label="Format">
+                    <MudSelectItem Value="@("Plain")">Plain</MudSelectItem>
+                    <MudSelectItem Value="@("Markdown")">Markdown</MudSelectItem>
+                    <MudSelectItem Value="@("Html")">Html</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="2"><MudNumericField T="int" @bind-Value="_newTekst.Sort" Label="Sort" /></MudItem>
+            <MudItem xs="12" md="4"><MudTextField @bind-Value="_newTekst.Wartosc" Label="Wartość" Lines="2" /></MudItem>
+        </MudGrid>
+        <MudButton Variant="Variant.Outlined" OnClick="OpenAddTekstAsync" Disabled="_busy || _saving">Dodaj tekst</MudButton>
 
         <MudTable Items="_teksty" Dense="true" Hover="true">
-            <HeaderContent>
-                <MudTh>Język</MudTh>
-                <MudTh>Pole</MudTh>
-                <MudTh>Wartość</MudTh>
-                <MudTh>Format</MudTh>
-                <MudTh>Sort</MudTh>
-                <MudTh></MudTh>
-            </HeaderContent>
+            <HeaderContent><MudTh>Język</MudTh><MudTh>Pole</MudTh><MudTh>Wartość</MudTh><MudTh>Format</MudTh><MudTh>Sort</MudTh><MudTh></MudTh></HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="Język">@context.Jezyk</MudTd>
-                <MudTd DataLabel="Pole">@context.Pole</MudTd>
-                <MudTd DataLabel="Wartość">@context.Wartosc</MudTd>
-                <MudTd DataLabel="Format">@context.Format</MudTd>
-                <MudTd DataLabel="Sort">@context.Sort</MudTd>
-                <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                   Color="Color.Error"
-                                   OnClick="@(async () => await DeleteTekstAsync(context))"
-                                   Disabled="_busy || _saving" />
-                </MudTd>
+                <MudTd>@context.Jezyk</MudTd><MudTd>@context.Pole</MudTd><MudTd>@context.Wartosc</MudTd><MudTd>@context.Format</MudTd><MudTd>@context.Sort</MudTd>
+                <MudTd><MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(async () => await DeleteTekstAsync(context))" Disabled="_busy || _saving" /></MudTd>
             </RowTemplate>
         </MudTable>
 
         <MudDivider Class="my-2" />
 
         <MudText Typo="Typo.h6">Dokumenty (powiązania)</MudText>
-
         <MudGrid>
-            <MudItem xs="12" md="4">
-                <MudNumericField T="long?" @bind-Value="_powiazanieDokumentId" Label="IdDokumentu" Disabled="_busy || _saving" />
-            </MudItem>
-            <MudItem xs="12" md="4">
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Secondary"
-                           OnClick="AddPowiazanieAsync"
-                           Disabled="_busy || _saving || !_powiazanieDokumentId.HasValue">
-                    Powiąż dokument
-                </MudButton>
-            </MudItem>
+            <MudItem xs="12" md="4"><MudNumericField T="long?" @bind-Value="_powiazanieDokumentId" Label="IdDokumentu" Disabled="_busy || _saving" /></MudItem>
+            <MudItem xs="12" md="4"><MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="AddPowiazanieAsync" Disabled="_busy || _saving || !_powiazanieDokumentId.HasValue">Powiąż dokument</MudButton></MudItem>
+            <MudItem xs="12" md="4"><MudButton Variant="Variant.Outlined" OnClick="LoadDokumentyAsync" Disabled="_busy || _saving || !IdEncji.HasValue">Załaduj dokumenty powiązane</MudButton></MudItem>
         </MudGrid>
 
         <MudTable Items="_powiazania" Dense="true" Hover="true">
-            <HeaderContent>
-                <MudTh>IdDokumentu</MudTh>
-                <MudTh></MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd DataLabel="IdDokumentu">@context.IdDokumentu</MudTd>
-                <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                   Color="Color.Error"
-                                   OnClick="@(async () => await DeletePowiazanieAsync(context.IdPowiazania))"
-                                   Disabled="_busy || _saving" />
-                </MudTd>
-            </RowTemplate>
-        </MudTable>
-
-        <MudDivider Class="my-2" />
-
-        <MudText Typo="Typo.h6">Lista dokumentów (podgląd)</MudText>
-        <MudTable Items="_dokumenty" Dense="true" Hover="true">
-            <HeaderContent>
-                <MudTh>Id</MudTh>
-                <MudTh>Nazwa</MudTh>
-                <MudTh>Opis</MudTh>
-                <MudTh>Ścieżka</MudTh>
-                <MudTh>Data utworzenia</MudTh>
-            </HeaderContent>
+            <HeaderContent><MudTh>IdDokumentu</MudTh><MudTh></MudTh></HeaderContent>
             <RowTemplate>
                 <MudTd>@context.IdDokumentu</MudTd>
-                <MudTd>@context.Nazwa</MudTd>
-                <MudTd>@context.Opis</MudTd>
-                <MudTd>@context.SciezkaPliku</MudTd>
-                <MudTd>@context.DataUtworzenia</MudTd>
+                <MudTd><MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(async () => await DeletePowiazanieAsync(context.IdPowiazania))" Disabled="_busy || _saving" /></MudTd>
             </RowTemplate>
         </MudTable>
 
+        @if (_dokumentyLoaded)
+        {
+            <MudTable Items="_dokumenty" Dense="true" Hover="true">
+                <HeaderContent><MudTh>Id</MudTh><MudTh>Nazwa</MudTh><MudTh>Opis</MudTh><MudTh>Ścieżka</MudTh></HeaderContent>
+                <RowTemplate><MudTd>@context.IdDokumentu</MudTd><MudTd>@context.Nazwa</MudTd><MudTd>@context.Opis</MudTd><MudTd>@context.SciezkaPliku</MudTd></RowTemplate>
+            </MudTable>
+        }
     </MudStack>
 </MudPaper>
 
@@ -166,32 +111,26 @@
     [Parameter] public Guid? IdEncji { get; set; }
 
     private bool _isNew => !IdEncji.HasValue;
+    private bool _newsMode => Nav.Uri.Contains("/konfiguracja/aktualnosci", StringComparison.OrdinalIgnoreCase);
 
     private bool _busy;
     private bool _saving;
-    private ZasobUIDto? _dto;
-
     private readonly ZasobUIFormModel _model = new();
+    private readonly ZasobUITekstFormModel _newTekst = new();
 
     private List<ZasobUITekstDto> _teksty = new();
-
     private List<PowiazanieDokumentuDto> _powiazania = new();
     private long? _powiazanieDokumentId;
-
     private List<DokumentDto> _dokumenty = new();
+    private bool _dokumentyLoaded;
 
     protected override async Task OnParametersSetAsync()
     {
         _busy = true;
         try
         {
-            if (_isNew)
-            {
-                InitNew();
-                return;
-            }
-
-            await LoadAsync(IdEncji!.Value);
+            if (_isNew) InitNew();
+            else await LoadAsync(IdEncji!.Value);
         }
         finally
         {
@@ -201,43 +140,40 @@
 
     private void InitNew()
     {
-        _dto = null;
-        _model.KodZasobu = "";
-        _model.Typ = "";
-        _model.Kategoria = null;
+        _model.KodZasobu = _newsMode ? "NEWS_HOME_" : string.Empty;
+        _model.Typ = _newsMode ? "NEWS" : string.Empty;
+        _model.Kategoria = _newsMode ? "HOME" : null;
         _model.CzyAktywny = true;
         _model.Sort = 0;
-        _model.WazneOdUtc = null;
-        _model.WazneDoUtc = null;
-
         _teksty = new();
         _powiazania = new();
         _dokumenty = new();
-        _powiazanieDokumentId = null;
+        _dokumentyLoaded = false;
+        _newTekst.Reset();
     }
 
     private async Task LoadAsync(Guid idEncji)
     {
-        _dto = await Service.GetByIdAsync(idEncji);
-        if (_dto is null)
+        var dto = await Service.GetByIdAsync(idEncji);
+        if (dto is null)
         {
             Snackbar.Add("Nie znaleziono zasobu UI.", Severity.Error);
-            Nav.NavigateTo("/konfiguracja/zasoby-ui");
+            Back();
             return;
         }
 
-        _model.KodZasobu = _dto.KodZasobu;
-        _model.Typ = _dto.Typ;
-        _model.Kategoria = _dto.Kategoria;
-        _model.CzyAktywny = _dto.CzyAktywny;
-        _model.Sort = _dto.Sort;
-        _model.WazneOdUtc = _dto.WazneOdUtc;
-        _model.WazneDoUtc = _dto.WazneDoUtc;
+        _model.KodZasobu = dto.KodZasobu;
+        _model.Typ = dto.Typ;
+        _model.Kategoria = dto.Kategoria;
+        _model.CzyAktywny = dto.CzyAktywny;
+        _model.Sort = dto.Sort;
+        _model.WazneOdUtc = dto.WazneOdUtc;
+        _model.WazneDoUtc = dto.WazneDoUtc;
 
         _teksty = await TekstyService.GetByEncjaAsync(idEncji);
-
         await LoadPowiazaniaAsync(idEncji);
-        await LoadDokumentyAsync(idEncji);
+        _dokumenty = new();
+        _dokumentyLoaded = false;
     }
 
     private async Task LoadPowiazaniaAsync(Guid idEncji)
@@ -246,23 +182,22 @@
         _powiazania = all.Where(x => x.IdEncji == idEncji).ToList();
     }
 
-    private async Task LoadDokumentyAsync(Guid idEncji)
+    private async Task LoadDokumentyAsync()
     {
-        _dokumenty = await DokumentyService.GetAllAsync();
+        if (!IdEncji.HasValue) return;
+        _dokumenty = await DokumentyService.GetByEncjaIdAsync(IdEncji.Value);
+        _dokumentyLoaded = true;
     }
 
     private async Task SaveAsync()
     {
         if (_busy || _saving) return;
-
-        _busy = true;
-        _saving = true;
-
+        _busy = _saving = true;
         try
         {
             if (_isNew)
             {
-                var req = new CreateZasobUIRequest
+                var newId = await Service.CreateAsync(new CreateZasobUIRequest
                 {
                     KodZasobu = _model.KodZasobu,
                     Typ = _model.Typ,
@@ -271,15 +206,13 @@
                     Sort = _model.Sort,
                     WazneOdUtc = _model.WazneOdUtc,
                     WazneDoUtc = _model.WazneDoUtc
-                };
-
-                var newId = await Service.CreateAsync(req);
+                });
                 Snackbar.Add("Utworzono zasób UI.", Severity.Success);
-                Nav.NavigateTo($"/konfiguracja/zasoby-ui/{newId}");
+                Nav.NavigateTo(_newsMode ? $"/konfiguracja/aktualnosci/{newId}" : $"/konfiguracja/zasoby-ui/{newId}");
                 return;
             }
 
-            var updateReq = new UpdateZasobUIRequest
+            await Service.UpdateAsync(IdEncji!.Value, new UpdateZasobUIRequest
             {
                 KodZasobu = _model.KodZasobu,
                 Typ = _model.Typ,
@@ -288,35 +221,26 @@
                 Sort = _model.Sort,
                 WazneOdUtc = _model.WazneOdUtc,
                 WazneDoUtc = _model.WazneDoUtc
-            };
+            });
 
-            var ok = await Service.UpdateAsync(IdEncji!.Value, updateReq);
-            Snackbar.Add(ok ? "Zapisano zmiany." : "Nie udało się zapisać zmian.", ok ? Severity.Success : Severity.Error);
-
-            if (ok)
-                await LoadAsync(IdEncji!.Value);
+            Snackbar.Add("Zapisano zmiany.", Severity.Success);
+            await LoadAsync(IdEncji.Value);
         }
         catch (Exception ex)
         {
-            var message = string.IsNullOrWhiteSpace(ex.Message)
-                ? "Nie udało się zapisać zasobu UI."
-                : ex.Message;
-
-            Snackbar.Add($"Błąd zapisu: {message}", Severity.Error);
+            Snackbar.Add($"Błąd zapisu: {ex.Message}", Severity.Error);
         }
         finally
         {
-            _busy = false;
-            _saving = false;
+            _busy = _saving = false;
         }
     }
 
-    private void Back() => Nav.NavigateTo("/konfiguracja/zasoby-ui");
+    private void Back() => Nav.NavigateTo(_newsMode ? "/konfiguracja/aktualnosci" : "/konfiguracja/zasoby-ui");
 
     private async Task OpenAddTekstAsync()
     {
         if (_busy || _saving) return;
-
         if (_isNew)
         {
             Snackbar.Add("Najpierw zapisz zasób UI, aby dodać teksty.", Severity.Warning);
@@ -326,22 +250,19 @@
         _busy = true;
         try
         {
-            // Minimalnie: dodajemy zawsze domyślny tekst (możesz rozbudować o dialog)
-            await AddTekstAsync("pl-PL", "Value", "Nowy tekst", "Plain", 0);
+            await AddTekstAsync(_newTekst.Jezyk, _newTekst.Pole, _newTekst.Wartosc, _newTekst.Format, _newTekst.Sort);
+            _newTekst.Reset();
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd dodawania tekstu: {ex.Message}", Severity.Error);
         }
-        finally
-        {
-            _busy = false;
-        }
+        finally { _busy = false; }
     }
 
     private async Task AddTekstAsync(string jezyk, string pole, string wartosc, string format, int sort)
     {
-        var req = new CreateZasobUITekstRequest
+        var newId = await TekstyService.CreateAsync(new CreateZasobUITekstRequest
         {
             IdEncji = IdEncji!.Value,
             Jezyk = jezyk,
@@ -349,65 +270,45 @@
             Wartosc = wartosc,
             Format = format,
             Sort = sort
-        };
+        });
 
-        var newId = await TekstyService.CreateAsync(req);
         Snackbar.Add($"Dodano tekst (Id={newId}).", Severity.Success);
-
         _teksty = await TekstyService.GetByEncjaAsync(IdEncji!.Value);
-        await InvokeAsync(StateHasChanged);
     }
 
     private async Task DeleteTekstAsync(ZasobUITekstDto row)
     {
         if (_busy || _saving) return;
-
         _busy = true;
         try
         {
-            var ok = await TekstyService.DeleteAsync(row.IdZasobuTekstu);
-            Snackbar.Add(ok ? "Usunięto tekst." : "Nie udało się usunąć tekstu.", ok ? Severity.Success : Severity.Error);
-
-            if (ok && IdEncji.HasValue)
-                _teksty = await TekstyService.GetByEncjaAsync(IdEncji.Value);
+            await TekstyService.DeleteAsync(row.IdZasobuTekstu);
+            Snackbar.Add("Usunięto tekst.", Severity.Success);
+            if (IdEncji.HasValue) _teksty = await TekstyService.GetByEncjaAsync(IdEncji.Value);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd usuwania tekstu: {ex.Message}", Severity.Error);
         }
-        finally
-        {
-            _busy = false;
-        }
+        finally { _busy = false; }
     }
 
     private async Task AddPowiazanieAsync()
     {
-        if (_busy || _saving) return;
-        if (_isNew || !IdEncji.HasValue || !_powiazanieDokumentId.HasValue) return;
+        if (_busy || _saving || _isNew || !IdEncji.HasValue || !_powiazanieDokumentId.HasValue) return;
 
         _busy = true;
         try
         {
-            var req = new CreatePowiazanieDokumentuRequest
-            {
-                IdEncji = IdEncji.Value,
-                IdDokumentu = _powiazanieDokumentId.Value
-            };
-
-            var newId = await PowiazaniaService.CreateAsync(req);
-            Snackbar.Add($"Dodano powiązanie (Id={newId}).", Severity.Success);
-
+            await PowiazaniaService.CreateAsync(new CreatePowiazanieDokumentuRequest { IdEncji = IdEncji.Value, IdDokumentu = _powiazanieDokumentId.Value });
+            Snackbar.Add("Dodano powiązanie.", Severity.Success);
             await LoadPowiazaniaAsync(IdEncji.Value);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd dodawania powiązania: {ex.Message}", Severity.Error);
         }
-        finally
-        {
-            _busy = false;
-        }
+        finally { _busy = false; }
     }
 
     private async Task DeletePowiazanieAsync(long idPowiazania)
@@ -417,20 +318,15 @@
         _busy = true;
         try
         {
-            var ok = await PowiazaniaService.DeleteAsync(idPowiazania);
-            Snackbar.Add(ok ? "Usunięto powiązanie." : "Nie udało się usunąć powiązania.", ok ? Severity.Success : Severity.Error);
-
-            if (ok && IdEncji.HasValue)
-                await LoadPowiazaniaAsync(IdEncji.Value);
+            await PowiazaniaService.DeleteAsync(idPowiazania);
+            Snackbar.Add("Usunięto powiązanie.", Severity.Success);
+            if (IdEncji.HasValue) await LoadPowiazaniaAsync(IdEncji.Value);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd usuwania powiązania: {ex.Message}", Severity.Error);
         }
-        finally
-        {
-            _busy = false;
-        }
+        finally { _busy = false; }
     }
 
     private sealed class ZasobUIFormModel
@@ -443,4 +339,23 @@
         public DateTime? WazneOdUtc { get; set; }
         public DateTime? WazneDoUtc { get; set; }
     }
+
+    private sealed class ZasobUITekstFormModel
+    {
+        public string Jezyk { get; set; } = "pl-PL";
+        public string Pole { get; set; } = "Title";
+        public string Wartosc { get; set; } = string.Empty;
+        public string Format { get; set; } = "Plain";
+        public int Sort { get; set; }
+
+        public void Reset()
+        {
+            Jezyk = "pl-PL";
+            Pole = "Title";
+            Wartosc = string.Empty;
+            Format = "Plain";
+            Sort = 0;
+        }
+    }
 }
+
