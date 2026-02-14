@@ -4,6 +4,7 @@ using CastlePlus2.Application.Interfaces.Konfiguracja;
 using CastlePlus2.Contracts.DTOs.Konfiguracja;
 using CastlePlus2.Domain.Entities.Konfiguracja;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace CastlePlus2.Application.Konfiguracja.ZasobyUI.Queries.GetPublicZasobyUI
 {
@@ -12,21 +13,33 @@ namespace CastlePlus2.Application.Konfiguracja.ZasobyUI.Queries.GetPublicZasobyU
         private readonly IZasobUIRepository _repo;
         private readonly IPowiazanieDokumentuRepository _powiazanieRepo;
         private readonly IMapper _mapper;
+        private readonly ILogger<GetPublicZasobyUIQueryHandler> _logger;
 
         public GetPublicZasobyUIQueryHandler(
             IZasobUIRepository repo,
             IPowiazanieDokumentuRepository powiazanieRepo,
-            IMapper mapper)
+            IMapper mapper,
+            ILogger<GetPublicZasobyUIQueryHandler> logger)
         {
             _repo = repo;
             _powiazanieRepo = powiazanieRepo;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<List<ZasobUIPublicDto>> Handle(GetPublicZasobyUIQuery request, CancellationToken ct)
         {
             var nowUtc = DateTime.UtcNow;
             var zasoby = await _repo.GetPublicAsync(request.Typ, request.Kategoria, request.IncludeInactive, nowUtc, ct);
+
+            _logger.LogInformation(
+                "GetPublic ZasobyUI: Typ={Typ}, Kategoria={Kategoria}, Jezyk={Jezyk}, IncludeInactive={IncludeInactive}, Count={Count}, Ids={Ids}.",
+                request.Typ,
+                request.Kategoria,
+                request.Jezyk,
+                request.IncludeInactive,
+                zasoby.Count,
+                string.Join(",", zasoby.Select(x => $"{x.IdEncji}:{x.CzyAktywny}")));
 
             var encje = zasoby.Select(x => x.IdEncji).ToList();
             var dokumentyMap = await _powiazanieRepo.GetDokumentyByEncjeIdsAsync(encje, ct);

@@ -123,6 +123,7 @@ namespace CastlePlus2.Api.Controllers.Konfiguracja
 
         [HttpGet("public")]
         [AllowAnonymous]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
         public async Task<ActionResult<List<ZasobUIPublicDto>>> GetPublic(
             [FromQuery] string typ,
             [FromQuery] string? kategoria,
@@ -132,6 +133,9 @@ namespace CastlePlus2.Api.Controllers.Konfiguracja
         {
             if (string.IsNullOrWhiteSpace(typ))
                 return BadRequest("Parametr 'typ' jest wymagany.");
+
+            Response.Headers.CacheControl = "no-store, no-cache, max-age=0";
+            Response.Headers.Pragma = "no-cache";
 
             var list = await _mediator.Send(new GetPublicZasobyUIQuery
             {

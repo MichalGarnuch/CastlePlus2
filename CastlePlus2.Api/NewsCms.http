@@ -70,10 +70,36 @@ Content-Type: application/json
   "sort": 20
 }
 
-### 5) Get public list
+### 5) Get public list (aktywny ma siê pojawiæ)
 GET {{baseUrl}}/api/konfiguracja/zasobyui/public?typ=NEWS&kategoria=HOME&jezyk=pl-PL&includeInactive=false
 
-### 6) Update Title
+### 6) Update news -> deactivate (CzyAktywny=false)
+PUT {{baseUrl}}/api/konfiguracja/zasobyui/{{newsId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "kodZasobu": "NEWS_HOME_001",
+  "typ": "NEWS",
+  "kategoria": "HOME",
+  "czyAktywny": false,
+  "sort": 100,
+  "wazneOdUtc": null,
+  "wazneDoUtc": null
+}
+
+### 7) DB check (uruchom rêcznie w SQL Server)
+# SELECT [IdEncji], [CzyAktywny], [ZmienionoUtc]
+# FROM [konfiguracja].[ZasobUI]
+# WHERE [IdEncji] = '{{newsId}}';
+
+### 8) Public includeInactive=false -> rekord NIE powinien wróciæ
+GET {{baseUrl}}/api/konfiguracja/zasobyui/public?typ=NEWS&kategoria=HOME&jezyk=pl-PL&includeInactive=false
+
+### 9) Public includeInactive=true -> rekord powinien wróciæ
+GET {{baseUrl}}/api/konfiguracja/zasobyui/public?typ=NEWS&kategoria=HOME&jezyk=pl-PL&includeInactive=true
+
+### 10) Update Title
 PUT {{baseUrl}}/api/konfiguracja/zasobyuiteksty/{{textId}}
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
@@ -88,10 +114,10 @@ Content-Type: application/json
   "sort": 0
 }
 
-### 7) Delete text
+### 11) Delete text
 DELETE {{baseUrl}}/api/konfiguracja/zasobyuiteksty/{{textId}}
 Authorization: Bearer {{accessToken}}
 
-### 8) Delete news
+### 12) Delete news
 DELETE {{baseUrl}}/api/konfiguracja/zasobyui/{{newsId}}
 Authorization: Bearer {{accessToken}}
