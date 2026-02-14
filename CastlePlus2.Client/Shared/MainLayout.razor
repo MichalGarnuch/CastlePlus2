@@ -207,7 +207,7 @@
             </AuthorizeView>
 
             <AuthorizeView Roles="@RoleCodes.Admin">
-                <MudNavGroup Title="Konfiguracja / CMS" Expanded="@IsGroupExpanded("/konfiguracja", "/public", "/aktualnosci")">
+                <MudNavGroup Title="Konfiguracja / CMS" Expanded="@IsGroupExpanded("/konfiguracja", "/aktualnosci")">
                     @* Ma podstrony /new i /{guid} -> Prefix *@
                     <MudNavLink Href="/konfiguracja/zasoby-ui" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Tune">Zasoby UI</MudNavLink>
 
@@ -215,7 +215,7 @@
                     <MudNavLink Href="/konfiguracja/aktualnosci" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Newspaper">Aktualności</MudNavLink>
 
                     @* Publiczny podgląd *@
-                    <MudNavLink Href="/public/aktualnosci" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Public">Aktualności (public)</MudNavLink>
+                    <MudNavLink Href="/aktualnosci" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Public">Aktualności (public)</MudNavLink>
                 </MudNavGroup>
             </AuthorizeView>
 

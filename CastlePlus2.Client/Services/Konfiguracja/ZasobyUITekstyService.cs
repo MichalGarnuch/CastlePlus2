@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Net.Http.Json;
+using CastlePlus2.Client.Services.Common;
 using CastlePlus2.Contracts.DTOs.Konfiguracja;
 using CastlePlus2.Contracts.Requests.Konfiguracja;
 using Microsoft.AspNetCore.Mvc;
@@ -68,12 +69,14 @@ public class ZasobyUITekstyService(HttpClient http) : IZasobyUITekstyService
     private static async Task ThrowForErrorAsync(HttpResponseMessage response, string fallbackMessage, CancellationToken ct)
     {
         string? message = null;
+        IReadOnlyDictionary<string, string[]>? validationErrors = null;
 
         try
         {
             var validation = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>(cancellationToken: ct);
             if (validation?.Errors?.Count > 0)
             {
+                validationErrors = validation.Errors.ToDictionary(e => e.Key, e => e.Value);
                 message = string.Join("; ", validation.Errors.SelectMany(x => x.Value).Distinct());
             }
             else if (!string.IsNullOrWhiteSpace(validation?.Detail))
@@ -99,6 +102,11 @@ public class ZasobyUITekstyService(HttpClient http) : IZasobyUITekstyService
             {
                 // ignore
             }
+        }
+
+        if (response.StatusCode == System.Net.HttpStatusCode.BadRequest && validationErrors is not null)
+        {
+            throw new ApiValidationException(message ?? fallbackMessage, validationErrors);
         }
 
         throw new InvalidOperationException(message ?? fallbackMessage);

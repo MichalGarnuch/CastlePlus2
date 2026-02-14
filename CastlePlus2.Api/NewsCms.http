@@ -1,11 +1,21 @@
-@host = http://localhost:5208
-@jwt = REPLACE_WITH_BEARER_TOKEN
+@baseUrl = http://localhost:5208
+@accessToken = REPLACE_WITH_BEARER_TOKEN
 @newsId = 00000000-0000-0000-0000-000000000000
 @textId = 0
 
-### 1) Create news (admin)
-POST {{host}}/api/konfiguracja/zasobyui
-Authorization: Bearer {{jwt}}
+### [AUTH] login admin (opcjonalnie) - skopiuj accessToken do @accessToken
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "loginOrEmail": "admin",
+  "password": "admin123",
+  "deviceInfo": "NewsCms.http"
+}
+
+### 1) Create ZasobUI NEWS (admin)
+POST {{baseUrl}}/api/konfiguracja/zasobyui
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -18,9 +28,9 @@ Content-Type: application/json
   "wazneDoUtc": null
 }
 
-### 2) Add title text
-POST {{host}}/api/konfiguracja/zasobyuiteksty
-Authorization: Bearer {{jwt}}
+### 2) Add Title
+POST {{baseUrl}}/api/konfiguracja/zasobyuiteksty
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -32,9 +42,9 @@ Content-Type: application/json
   "sort": 0
 }
 
-### 3) Add lead text
-POST {{host}}/api/konfiguracja/zasobyuiteksty
-Authorization: Bearer {{jwt}}
+### 3) Add Lead
+POST {{baseUrl}}/api/konfiguracja/zasobyuiteksty
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -46,12 +56,26 @@ Content-Type: application/json
   "sort": 10
 }
 
-### 4) Get public news list
-GET {{host}}/api/konfiguracja/zasobyui/public?typ=NEWS&kategoria=HOME&jezyk=pl-PL&includeInactive=false
+### 4) Add Body
+POST {{baseUrl}}/api/konfiguracja/zasobyuiteksty
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
 
-### 5) Update text
-PUT {{host}}/api/konfiguracja/zasobyuiteksty/{{textId}}
-Authorization: Bearer {{jwt}}
+{
+  "idEncji": "{{newsId}}",
+  "jezyk": "pl-PL",
+  "pole": "Body",
+  "wartosc": "Pe³na treœæ aktualnoœci z CMS.",
+  "format": "Markdown",
+  "sort": 20
+}
+
+### 5) Get public list
+GET {{baseUrl}}/api/konfiguracja/zasobyui/public?typ=NEWS&kategoria=HOME&jezyk=pl-PL&includeInactive=false
+
+### 6) Update Title
+PUT {{baseUrl}}/api/konfiguracja/zasobyuiteksty/{{textId}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -64,10 +88,10 @@ Content-Type: application/json
   "sort": 0
 }
 
-### 6) Delete text
-DELETE {{host}}/api/konfiguracja/zasobyuiteksty/{{textId}}
-Authorization: Bearer {{jwt}}
+### 7) Delete text
+DELETE {{baseUrl}}/api/konfiguracja/zasobyuiteksty/{{textId}}
+Authorization: Bearer {{accessToken}}
 
-### 7) Delete news
-DELETE {{host}}/api/konfiguracja/zasobyui/{{newsId}}
-Authorization: Bearer {{jwt}}
+### 8) Delete news
+DELETE {{baseUrl}}/api/konfiguracja/zasobyui/{{newsId}}
+Authorization: Bearer {{accessToken}}

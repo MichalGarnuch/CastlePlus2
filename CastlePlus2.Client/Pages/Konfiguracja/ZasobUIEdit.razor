@@ -7,6 +7,7 @@
 @using System.Linq
 
 @using CastlePlus2.Client.Services.Dokumenty
+@using CastlePlus2.Client.Services.Common
 @using CastlePlus2.Client.Services.Konfiguracja
 @using CastlePlus2.Contracts.DTOs.Dokumenty
 @using CastlePlus2.Contracts.DTOs.Konfiguracja
@@ -68,9 +69,17 @@
                 </MudSelect>
             </MudItem>
             <MudItem xs="12" md="2"><MudNumericField T="int" @bind-Value="_newTekst.Sort" Label="Sort" /></MudItem>
-            <MudItem xs="12" md="4"><MudTextField @bind-Value="_newTekst.Wartosc" Label="Wartość" Lines="2" /></MudItem>
+            <MudItem xs="12" md="12">
+                <MudTextField @bind-Value="_newTekst.Wartosc"
+                              Label="Wartość"
+                              Required="true"
+                              Immediate="true"
+                              Lines="3"
+                              Error="@HasTekstError(nameof(ZasobUITekstFormModel.Wartosc))"
+                              ErrorText="@GetTekstErrorText(nameof(ZasobUITekstFormModel.Wartosc))" />
+            </MudItem>
         </MudGrid>
-        <MudButton Variant="Variant.Outlined" OnClick="OpenAddTekstAsync" Disabled="_busy || _saving">Dodaj tekst</MudButton>
+        <MudButton Variant="Variant.Outlined" OnClick="OpenAddTekstAsync" Disabled="_busy || _saving || IsNewTekstInvalid">Dodaj tekst</MudButton>
 
         <MudTable Items="_teksty" Dense="true" Hover="true">
             <HeaderContent><MudTh>Język</MudTh><MudTh>Pole</MudTh><MudTh>Wartość</MudTh><MudTh>Format</MudTh><MudTh>Sort</MudTh><MudTh></MudTh></HeaderContent>
@@ -117,6 +126,7 @@
     private bool _saving;
     private readonly ZasobUIFormModel _model = new();
     private readonly ZasobUITekstFormModel _newTekst = new();
+    private readonly Dictionary<string, string> _newTekstFieldErrors = new(StringComparer.OrdinalIgnoreCase);
 
     private List<ZasobUITekstDto> _teksty = new();
     private List<PowiazanieDokumentuDto> _powiazania = new();
@@ -247,17 +257,64 @@
             return;
         }
 
+        _newTekstFieldErrors.Clear();
+        if (string.IsNullOrWhiteSpace(_newTekst.Wartosc))
+        {
+            _newTekstFieldErrors[nameof(ZasobUITekstFormModel.Wartosc)] = "Pole 'Wartość' jest wymagane.";
+            return;
+        }
+
         _busy = true;
         try
         {
             await AddTekstAsync(_newTekst.Jezyk, _newTekst.Pole, _newTekst.Wartosc, _newTekst.Format, _newTekst.Sort);
             _newTekst.Reset();
+            _newTekstFieldErrors.Clear();
+        }
+        catch (ApiValidationException ex)
+        {
+            ApplyTekstFieldErrors(ex.Errors);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd dodawania tekstu: {ex.Message}", Severity.Error);
         }
         finally { _busy = false; }
+    }
+
+    private bool IsNewTekstInvalid => string.IsNullOrWhiteSpace(_newTekst.Wartosc);
+
+    private bool HasTekstError(string field)
+        => _newTekstFieldErrors.ContainsKey(field);
+
+    private string? GetTekstErrorText(string field)
+        => _newTekstFieldErrors.TryGetValue(field, out var text) ? text : null;
+
+    private void ApplyTekstFieldErrors(IReadOnlyDictionary<string, string[]> errors)
+    {
+        _newTekstFieldErrors.Clear();
+
+        foreach (var (key, messages) in errors)
+        {
+            if (messages.Length == 0)
+            {
+                continue;
+            }
+
+            var normalizedKey = NormalizeTekstErrorField(key);
+            _newTekstFieldErrors[normalizedKey] = string.Join(" ", messages);
+        }
+    }
+
+    private static string NormalizeTekstErrorField(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return nameof(ZasobUITekstFormModel.Wartosc);
+        }
+
+        var normalized = key.Contains('.') ? key[(key.LastIndexOf('.') + 1)..] : key;
+        return normalized;
     }
 
     private async Task AddTekstAsync(string jezyk, string pole, string wartosc, string format, int sort)
