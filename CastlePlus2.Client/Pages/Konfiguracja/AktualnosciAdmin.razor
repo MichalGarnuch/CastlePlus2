@@ -1,4 +1,5 @@
-﻿@page "/konfiguracja/aktualnosci"
+﻿@using CastlePlus2.Contracts.Requests.Konfiguracja
+@page "/konfiguracja/aktualnosci"
 @attribute [Authorize(Roles = RoleCodes.Admin)]
 
 @using CastlePlus2.Client.Services.Konfiguracja
@@ -35,7 +36,15 @@
         <RowTemplate>
             <MudTd>@context.KodZasobu</MudTd>
             <MudTd>@context.Kategoria</MudTd>
-            <MudTd>@(context.CzyAktywny ? "Tak" : "Nie")</MudTd>
+
+            <MudTd>
+                <MudSwitch T="bool"
+                           Value="@context.CzyAktywny"
+                           ValueChanged="@(value => ToggleActiveAsync(context, value))"
+                           Color="Color.Primary"
+                           Disabled="_loading || _updatingIds.Contains(context.IdEncji)"
+                           Label="@(context.CzyAktywny ? "Tak" : "Nie")" />
+            </MudTd>
             <MudTd>@context.Sort</MudTd>
             <MudTd>@(context.WazneOdUtc?.ToString("yyyy-MM-dd") ?? "-")</MudTd>
             <MudTd>@(context.WazneDoUtc?.ToString("yyyy-MM-dd") ?? "-")</MudTd>
@@ -49,6 +58,7 @@
 @code {
     private bool _loading = true;
     private List<ZasobUIDto> _items = new();
+    private readonly HashSet<Guid> _updatingIds = new();
 
     protected override async Task OnInitializedAsync() => await ReloadAsync();
 
@@ -72,4 +82,41 @@
     private void CreateNews() => Nav.NavigateTo("/konfiguracja/aktualnosci/new");
 
     private void Edit(Guid idEncji) => Nav.NavigateTo($"/konfiguracja/aktualnosci/{idEncji}");
+
+    private async Task ToggleActiveAsync(ZasobUIDto item, bool isActive)
+    {
+        if (_updatingIds.Contains(item.IdEncji) || item.CzyAktywny == isActive)
+        {
+            return;
+        }
+
+        _updatingIds.Add(item.IdEncji);
+        var previousValue = item.CzyAktywny;
+        item.CzyAktywny = isActive;
+
+        try
+        {
+            await Service.UpdateAsync(item.IdEncji, new UpdateZasobUIRequest
+            {
+                KodZasobu = item.KodZasobu,
+                Typ = item.Typ,
+                Kategoria = item.Kategoria,
+                CzyAktywny = isActive,
+                Sort = item.Sort,
+                WazneOdUtc = item.WazneOdUtc,
+                WazneDoUtc = item.WazneDoUtc
+            });
+
+            Snackbar.Add($"Zmieniono status publikacji: {(isActive ? "aktywny" : "nieaktywny")}", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            item.CzyAktywny = previousValue;
+            Snackbar.Add($"Nie udało się zmienić statusu: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _updatingIds.Remove(item.IdEncji);
+        }
+    }
 }
