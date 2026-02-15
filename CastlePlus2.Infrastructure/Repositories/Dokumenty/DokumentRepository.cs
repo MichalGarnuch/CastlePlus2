@@ -28,10 +28,20 @@ namespace CastlePlus2.Infrastructure.Repositories.Dokumenty
                 .FirstOrDefaultAsync(d => d.IdDokumentu == id, cancellationToken);
         }
 
-        public async Task<List<Dokument>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<List<Dokument>> GetAllAsync(string? search = null, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Dokumenty
-                .AsNoTracking()
+            var query = _dbContext.Dokumenty.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var filter = search.Trim();
+                query = query.Where(d =>
+                    (d.Nazwa != null && d.Nazwa.Contains(filter))
+                    || (d.Opis != null && d.Opis.Contains(filter))
+                    || (d.SciezkaPliku != null && d.SciezkaPliku.Contains(filter)));
+            }
+
+            return await query
                 .OrderByDescending(d => d.IdDokumentu)
                 .ToListAsync(cancellationToken);
         }

@@ -18,7 +18,7 @@ namespace CastlePlus2.Application.Dokumenty.Dokumenty.Queries.GetAllDokumenty
 
         public async Task<List<DokumentDto>> Handle(GetAllDokumentyQuery request, CancellationToken ct)
         {
-            var list = await _repo.GetAllAsync(ct);
+            var list = await _repo.GetAllAsync(request.Search, ct);
             return list.Select(x => _mapper.Map<DokumentDto>(x)).ToList();
         }
     }

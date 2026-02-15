@@ -19,9 +19,13 @@ public sealed class DokumentyService : IDokumentyService
         _logger = logger;
     }
 
-    public async Task<List<DokumentDto>> GetAllAsync(CancellationToken ct = default)
+    public async Task<List<DokumentDto>> GetAllAsync(string? search = null, CancellationToken ct = default)
     {
-        return await _http.GetFromJsonAsync<List<DokumentDto>>(BaseUrl, ct) ?? new();
+        var url = string.IsNullOrWhiteSpace(search)
+            ? BaseUrl
+            : $"{BaseUrl}?search={Uri.EscapeDataString(search.Trim())}";
+
+        return await _http.GetFromJsonAsync<List<DokumentDto>>(url, ct) ?? new();
     }
 
     public async Task<DokumentDto?> GetByIdAsync(long idDokumentu, CancellationToken ct = default)

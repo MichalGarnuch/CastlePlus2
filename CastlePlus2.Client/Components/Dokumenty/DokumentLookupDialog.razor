@@ -1,0 +1,137 @@
+﻿@using CastlePlus2.Client.Services.Dokumenty
+@using CastlePlus2.Contracts.DTOs.Dokumenty
+
+@inject IDokumentyService DokumentyService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="2">
+            <MudText Typo="Typo.h6">Wybierz dokument</MudText>
+
+            <MudTextField T="string"
+                          Value="@_searchText"
+                          ValueChanged="@(async (string v) => await OnSearchChangedAsync(v))"
+                          Label="Szukaj (nazwa / opis / ścieżka)"
+                          Placeholder="Wpisz fragment nazwy, opisu lub ścieżki"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Disabled="_loading" />
+
+
+            <MudTable T="DokumentDto"
+                      Items="_dokumenty"
+                      Dense="true"
+                      Hover="true"
+                      Bordered="true"
+                      Striped="true"
+                      Loading="_loading">
+                <HeaderContent>
+                    <MudTh>
+                        <MudTableSortLabel T="DokumentDto" SortBy="@(d => d.IdDokumentu)">Id</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel T="DokumentDto" SortBy="@(d => d.Nazwa)">Nazwa</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel T="DokumentDto" SortBy="@(d => d.Opis)">Opis</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel T="DokumentDto" SortBy="@(d => d.SciezkaPliku)">Ścieżka</MudTableSortLabel>
+                    </MudTh>
+
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="Id">@context.IdDokumentu</MudTd>
+                    <MudTd DataLabel="Nazwa">@context.Nazwa</MudTd>
+                    <MudTd DataLabel="Opis">@context.Opis</MudTd>
+                    <MudTd DataLabel="Ścieżka">@context.SciezkaPliku</MudTd>
+                    <MudTd DataLabel="Akcja">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   OnClick="@(() => SelectDokument(context.IdDokumentu))">
+                            Wybierz
+                        </MudButton>
+                    </MudTd>
+                </RowTemplate>
+
+                <NoRecordsContent>
+                    <MudText Class="pa-4">Brak dokumentów spełniających filtr.</MudText>
+                </NoRecordsContent>
+
+                <PagerContent>
+                    <MudTablePager RowsPerPageString="Wierszy na stronę" />
+                </PagerContent>
+            </MudTable>
+        </MudStack>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Anuluj</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    private readonly List<DokumentDto> _dokumenty = new();
+    private bool _loading;
+    private string _searchText = string.Empty;
+    private CancellationTokenSource? _searchCts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDokumentyAsync();
+    }
+
+    private async Task OnSearchChangedAsync(string value)
+    {
+        _searchText = value;
+
+        _searchCts?.Cancel();
+        _searchCts = new CancellationTokenSource();
+        var token = _searchCts.Token;
+
+        try
+        {
+            await Task.Delay(250, token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
+        await LoadDokumentyAsync(token);
+    }
+
+    private async Task LoadDokumentyAsync(CancellationToken ct = default)
+    {
+        _loading = true;
+        try
+        {
+            var items = await DokumentyService.GetAllAsync(_searchText, ct);
+            _dokumenty.Clear();
+            _dokumenty.AddRange(items);
+        }
+        catch (TaskCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania dokumentów: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void SelectDokument(long idDokumentu)
+        => MudDialog.Close(DialogResult.Ok(idDokumentu));
+
+    private void Cancel()
+        => MudDialog.Cancel();
+}

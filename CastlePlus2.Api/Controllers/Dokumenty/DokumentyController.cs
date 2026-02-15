@@ -26,9 +26,9 @@ namespace CastlePlus2.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<DokumentDto>>> GetAll(CancellationToken cancellationToken)
+        public async Task<ActionResult<List<DokumentDto>>> GetAll([FromQuery] string? search, CancellationToken cancellationToken)
         {
-            var list = await _mediator.Send(new GetAllDokumentyQuery(), cancellationToken);
+            var list = await _mediator.Send(new GetAllDokumentyQuery(search), cancellationToken);
             return Ok(list);
         }
 

@@ -7,6 +7,7 @@
 @using System.Linq
 
 @using CastlePlus2.Client.Services.Dokumenty
+@using CastlePlus2.Client.Components.Dokumenty
 @using CastlePlus2.Client.Services.Common
 @using CastlePlus2.Client.Services.Konfiguracja
 @using CastlePlus2.Contracts.DTOs.Dokumenty
@@ -21,6 +22,7 @@
 @inject IPowiazaniaDokumentuService PowiazaniaService
 @inject IDokumentyService DokumentyService
 @inject NavigationManager Nav
+@inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
 <PageTitle>Zasób UI</PageTitle>
@@ -93,8 +95,7 @@
 
         <MudText Typo="Typo.h6">Dokumenty (powiązania)</MudText>
         <MudGrid>
-            <MudItem xs="12" md="4"><MudNumericField T="long?" @bind-Value="_powiazanieDokumentId" Label="IdDokumentu" Disabled="_busy || _saving" /></MudItem>
-            <MudItem xs="12" md="4"><MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="AddPowiazanieAsync" Disabled="_busy || _saving || !_powiazanieDokumentId.HasValue">Powiąż dokument</MudButton></MudItem>
+            <MudItem xs="12" md="4"><MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="OpenDokumentLookupAsync" Disabled="_busy || _saving || _isNew">Wybierz dokument…</MudButton></MudItem>
             <MudItem xs="12" md="4"><MudButton Variant="Variant.Outlined" OnClick="LoadDokumentyAsync" Disabled="_busy || _saving || !IdEncji.HasValue">Załaduj dokumenty powiązane</MudButton></MudItem>
         </MudGrid>
 
@@ -130,7 +131,6 @@
 
     private List<ZasobUITekstDto> _teksty = new();
     private List<PowiazanieDokumentuDto> _powiazania = new();
-    private long? _powiazanieDokumentId;
     private List<DokumentDto> _dokumenty = new();
     private bool _dokumentyLoaded;
 
@@ -350,16 +350,39 @@
         finally { _busy = false; }
     }
 
-    private async Task AddPowiazanieAsync()
+    private async Task OpenDokumentLookupAsync()
     {
-        if (_busy || _saving || _isNew || !IdEncji.HasValue || !_powiazanieDokumentId.HasValue) return;
+        if (_busy || _saving || _isNew || !IdEncji.HasValue) return;
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge
+        };
+
+        var dialog = DialogService.Show<DokumentLookupDialog>("Wybierz dokument", options: options);
+        var result = await dialog.Result;
+
+        if (result.Canceled || result.Data is not long idDokumentu)
+        {
+            return;
+        }
+
+        await AddPowiazanieAsync(idDokumentu);
+    }
+
+    private async Task AddPowiazanieAsync(long idDokumentu)
+    {
+        if (_busy || _saving || _isNew || !IdEncji.HasValue) return;
 
         _busy = true;
         try
         {
-            await PowiazaniaService.CreateAsync(new CreatePowiazanieDokumentuRequest { IdEncji = IdEncji.Value, IdDokumentu = _powiazanieDokumentId.Value });
+            await PowiazaniaService.CreateAsync(new CreatePowiazanieDokumentuRequest { IdEncji = IdEncji.Value, IdDokumentu = idDokumentu });
             Snackbar.Add("Dodano powiązanie.", Severity.Success);
             await LoadPowiazaniaAsync(IdEncji.Value);
+            await LoadDokumentyAsync();
         }
         catch (Exception ex)
         {

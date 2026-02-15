@@ -3,5 +3,5 @@ using MediatR;
 
 namespace CastlePlus2.Application.Dokumenty.Dokumenty.Queries.GetAllDokumenty
 {
-    public record GetAllDokumentyQuery() : IRequest<List<DokumentDto>>;
+    public record GetAllDokumentyQuery(string? Search = null) : IRequest<List<DokumentDto>>;
 }

@@ -5,7 +5,7 @@ namespace CastlePlus2.Client.Services.Dokumenty;
 
 public interface IDokumentyService
 {
-    Task<List<DokumentDto>> GetAllAsync(CancellationToken ct = default);
+    Task<List<DokumentDto>> GetAllAsync(string? search = null, CancellationToken ct = default);
     Task<DokumentDto?> GetByIdAsync(long idDokumentu, CancellationToken ct = default);
     Task<DokumentDto> CreateAsync(CreateDokumentRequest request, CancellationToken ct = default);
 

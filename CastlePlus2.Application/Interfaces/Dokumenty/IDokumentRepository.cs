@@ -7,7 +7,7 @@ namespace CastlePlus2.Application.Interfaces.Dokumenty
     {
         Task<Dokument?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
         Task<Dokument?> GetForUpdateAsync(long id, CancellationToken cancellationToken = default);
-        Task<List<Dokument>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<List<Dokument>> GetAllAsync(string? search = null, CancellationToken cancellationToken = default);
 
         Task AddAsync(Dokument entity, CancellationToken cancellationToken = default);
 
