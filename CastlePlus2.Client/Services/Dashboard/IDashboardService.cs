@@ -1,4 +1,5 @@
 ﻿using CastlePlus2.Contracts.DTOs.Dashboard;
+using CastlePlus2.Contracts.Requests.Dashboard;
 
 namespace CastlePlus2.Client.Services.Dashboard
 {
@@ -9,6 +10,10 @@ namespace CastlePlus2.Client.Services.Dashboard
             CancellationToken ct = default);
 
         Task<DashboardV1NajemDto> GetDashboardV1NajemAsync(
+            CancellationToken ct = default);
+
+        Task<NajemPowerDashboardDto> GetNajemPowerDashboardAsync(
+            GetNajemPowerDashboardRequest request,
             CancellationToken ct = default);
     }
 }

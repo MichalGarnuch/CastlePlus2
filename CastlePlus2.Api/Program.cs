@@ -47,6 +47,7 @@ using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using CastlePlus2.Shared.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -177,6 +178,8 @@ builder.Services.AddScoped<IUmowaNajmuKodGenerator, UmowaNajmuKodGenerator>();
 builder.Services.AddScoped<IWlasnoscRepository, WlasnoscRepository>();
 builder.Services.AddScoped<INajemDashboardQueryService, NajemDashboardQueryService>();
 builder.Services.AddScoped<IDashboardV1NajemQueryService, DashboardV1NajemQueryService>();
+builder.Services.AddScoped<INajemPowerDashboardDataService, NajemPowerDashboardDataService>();
+
 
 // MEDIA
 builder.Services.AddScoped<IRodzajMediumRepository, RodzajMediumRepository>();
@@ -280,7 +283,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("EmployerOrAdmin", policy =>
+        policy.RequireRole(RoleCodes.Admin, RoleCodes.Employee, RoleCodes.Manager));
+});
 builder.Services.AddTransient<IClaimsTransformation, RoleClaimsTransformation>();
 
 var app = builder.Build();

@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using CastlePlus2.Contracts.DTOs.Dashboard;
+using CastlePlus2.Contracts.Requests.Dashboard;
 
 namespace CastlePlus2.Client.Services.Dashboard
 {
@@ -8,6 +9,7 @@ namespace CastlePlus2.Client.Services.Dashboard
         private readonly HttpClient _http;
         private const string BaseUrl = "api/dashboard/najem";
         private const string V1BaseUrl = "api/dashboard/v1/najem";
+        private const string NajemPowerUrl = "api/dashboard/najem-power";
 
         public DashboardService(HttpClient http)
         {
@@ -29,6 +31,17 @@ namespace CastlePlus2.Client.Services.Dashboard
         {
             return await _http.GetFromJsonAsync<DashboardV1NajemDto>(V1BaseUrl, ct)
                    ?? new DashboardV1NajemDto();
+        }
+
+        public async Task<NajemPowerDashboardDto> GetNajemPowerDashboardAsync(
+            GetNajemPowerDashboardRequest request,
+            CancellationToken ct = default)
+        {
+            var response = await _http.PostAsJsonAsync(NajemPowerUrl, request, ct);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<NajemPowerDashboardDto>(cancellationToken: ct)
+                   ?? new NajemPowerDashboardDto();
         }
     }
 }

@@ -1,0 +1,402 @@
+﻿@page "/dashboard/najem"
+@attribute [Authorize(Roles = RoleCodes.AdminOrManagerOrEmployee)]
+
+@using CastlePlus2.Client.Services.Dashboard
+@using CastlePlus2.Contracts.DTOs.Dashboard
+@using CastlePlus2.Contracts.Requests.Dashboard
+@using MudBlazor
+@inject IDashboardService DashboardService
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Dashboard najmu (Power)</MudText>
+
+<MudPaper Class="pa-4 mb-4 glass-panel">
+    <MudGrid Spacing="2">
+        <MudItem xs="12" md="3">
+            <MudDatePicker Label="Date from" Date="_dateFrom" DateChanged="OnDateFromChanged" />
+        </MudItem>
+        <MudItem xs="12" md="3">
+            <MudDatePicker Label="Date to" Date="_dateTo" DateChanged="OnDateToChanged" />
+        </MudItem>
+        <MudItem xs="12" md="2">
+            <MudSwitch T="bool" Value="_onlyOverdue" ValueChanged="OnOnlyOverdueChanged" Color="Color.Error">
+                Tylko zaległe
+            </MudSwitch>
+        </MudItem>
+        <MudItem xs="12" md="2">
+            <MudSwitch T="bool" Value="_useEndingInDays" ValueChanged="OnUseEndingInDaysChanged" Color="Color.Primary">
+                Kończące się w X dniach
+            </MudSwitch>
+        </MudItem>
+
+        @* Szybki wybór X dni *@
+        <MudItem xs="12" md="2">
+            <MudSelect T="int"
+                       Label="Szybki wybór"
+                       Dense="true"
+                       Value="_endingInDaysPreset"
+                       ValueChanged="OnEndingInDaysPresetChanged"
+                       Disabled="@(!_useEndingInDays)">
+                <MudSelectItem Value="7">7 dni</MudSelectItem>
+                <MudSelectItem Value="14">14 dni</MudSelectItem>
+                <MudSelectItem Value="30">30 dni</MudSelectItem>
+                <MudSelectItem Value="60">60 dni</MudSelectItem>
+                <MudSelectItem Value="90">90 dni</MudSelectItem>
+                <MudSelectItem Value="365">1 rok</MudSelectItem>
+                <MudSelectItem Value="1825">5 lat</MudSelectItem>
+                <MudSelectItem Value="0">Własne</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+
+        @* Własne X dni (wpisywane) — to pole może zwinąć się do 2. wiersza, to OK *@
+        <MudItem xs="12" md="2">
+            <MudNumericField T="int"
+                             Label="X dni"
+                             Value="_endingInDays"
+                             ValueChanged="OnEndingInDaysChanged"
+                             Min="1"
+                             Max="3650"
+                             Immediate="true"
+                             Disabled="@(!_useEndingInDays)" />
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" Class="mb-4" />
+}
+else if (!string.IsNullOrWhiteSpace(_error))
+{
+    <MudAlert Severity="Severity.Error">@_error</MudAlert>
+}
+else
+{
+    <MudText Typo="Typo.subtitle1" Class="mb-2">@_dashboard.ActiveFilters.RangeLabel</MudText>
+
+    <MudPaper Class="pa-3 mb-4">
+        <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1">
+            <MudChip T="string">OnlyOverdue: @_dashboard.ActiveFilters.OnlyOverdue</MudChip>
+            <MudChip T="string">UseEndingInDays: @_dashboard.ActiveFilters.UseEndingInDays</MudChip>
+            <MudChip T="string">X dni: @_dashboard.ActiveFilters.EndingInDays</MudChip>
+
+            @foreach (var selection in _dashboard.ActiveFilters.ActiveSelections)
+            {
+                <MudChip T="string" Color="Color.Info">@selection</MudChip>
+            }
+
+            <MudButton Variant="Variant.Text" OnClick="ClearDrillDown" Disabled="@(!_hasDrillDown)">Wyczyść wybór</MudButton>
+        </MudStack>
+    </MudPaper>
+
+    @if (!_dashboard.HasDataOverall)
+    {
+        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+            <MudText>Brak danych dla wybranych filtrów.</MudText>
+        </MudAlert>
+    }
+    else
+    {
+        <MudGrid Spacing="2" Class="mb-4">
+            <MudItem xs="12" md="3"><MudPaper Class="pa-3"><MudText>Obłożenie</MudText><MudText Typo="Typo.h5">@_dashboard.Kpi.OccupancyPercent.ToString("N2")%</MudText></MudPaper></MudItem>
+            <MudItem xs="12" md="3"><MudPaper Class="pa-3"><MudText>Aktywne umowy</MudText><MudText Typo="Typo.h5">@_dashboard.Kpi.ActiveContractsCount</MudText></MudPaper></MudItem>
+            <MudItem xs="12" md="3"><MudPaper Class="pa-3"><MudText>Suma zaległości</MudText><MudText Typo="Typo.h5">@_dashboard.Kpi.OverdueAmount.ToString("N2")</MudText></MudPaper></MudItem>
+            <MudItem xs="12" md="3"><MudPaper Class="pa-3"><MudText>Kończące się umowy</MudText><MudText Typo="Typo.h5">@_dashboard.Kpi.EndingContractsCount</MudText></MudPaper></MudItem>
+        </MudGrid>
+
+        <MudGrid Spacing="2">
+            <MudItem xs="12" md="6">
+                <MudPaper Class="pa-3">
+                    <MudText Typo="Typo.h6">Obłożenie</MudText>
+                    <MudStack Row="true" Spacing="1" Class="mt-2">
+                        @foreach (var segment in _dashboard.OccupancySeries)
+                        {
+                            <MudChip T="string"
+                                     Clickable="true"
+                                     Disabled="_loading"
+                                     OnClick="@(() => SelectOccupancySegment(segment.Key))"
+                                     Color="@GetSegmentColor(segment.Key)">
+                                @segment.Label (@segment.Value)
+                            </MudChip>
+                        }
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12" md="6">
+                <MudPaper Class="pa-3">
+                    <MudText Typo="Typo.h6">Zaległości (aging)</MudText>
+                    <MudStack Row="true" Spacing="1" Class="mt-2">
+                        @foreach (var bucket in _dashboard.OverdueAgingSeries)
+                        {
+                            <MudChip T="string"
+                                     Clickable="true"
+                                     Disabled="_loading"
+                                     OnClick="@(() => SelectBucket(bucket.Key))">
+                                @bucket.Label (@bucket.Value.ToString("N2"))
+                            </MudChip>
+                        }
+                    </MudStack>
+
+                    @if (!_dashboard.HasOverdueData)
+                    {
+                        <MudAlert Severity="Severity.Info" Dense="true" Class="mt-2">@_dashboard.OverdueMessage</MudAlert>
+                    }
+
+                    <MudText Typo="Typo.caption" Class="mt-1">@_dashboard.OverdueAgeBasisDescription</MudText>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+
+        <MudText Typo="Typo.h6" Class="mt-4">Lokale wg obłożenia</MudText>
+        <MudTable Items="_dashboard.OccupancyItems"
+                  Dense="true"
+                  Hover="true"
+                  Bordered="true"
+                  Striped="true"
+                  FixedHeader="true"
+                  Height="420px"
+                  Virtualize="true"
+                  Loading="_loading">
+            <HeaderContent>
+                <MudTh>Lokal</MudTh>
+                <MudTh>Segment</MudTh>
+                <MudTh>Umowa</MudTh>
+            </HeaderContent>
+
+            @* UWAGA: RowTemplate = tylko MudTd, bez MudTr *@
+            <RowTemplate>
+                <MudTd DataLabel="Lokal">@context.LokalCode</MudTd>
+                <MudTd DataLabel="Segment">@((context.OccupancySegment == "rented") ? "Wynajęte" : "Wolne")</MudTd>
+                <MudTd DataLabel="Umowa">@(context.ContractCode ?? "-")</MudTd>
+            </RowTemplate>
+
+            <NoRecordsContent>
+                <MudText>Brak danych.</MudText>
+            </NoRecordsContent>
+        </MudTable>
+
+        <MudText Typo="Typo.h6" Class="mt-4">Kończące się umowy</MudText>
+        @if (!_dashboard.HasEndingContractsData)
+        {
+            <MudAlert Severity="Severity.Info" Dense="true">@_dashboard.EndingContractsMessage</MudAlert>
+        }
+        else
+        {
+            <MudTable Items="_dashboard.EndingContracts"
+                      Dense="true"
+                      Hover="true"
+                      RowsPerPage="20"
+                      RowsPerPageOptions="new int[] { 20, 50, 100 }">
+                <HeaderContent>
+                    <MudTh>Umowa</MudTh><MudTh>Najemca</MudTh><MudTh>Lokal</MudTh><MudTh>Data końca</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Umowa">
+                        <MudLink Href="#" OnClick="@(() => SelectContract(context.IdUmowy))">
+                            @(context.KodUmowy ?? context.IdUmowy.ToString()[..8])
+                        </MudLink>
+                    </MudTd>
+                    <MudTd DataLabel="Najemca">@context.Najemca</MudTd>
+                    <MudTd DataLabel="Lokal">@context.PrzedmiotNajmu</MudTd>
+                    <MudTd DataLabel="Data końca">@context.DataZakonczenia?.ToString("yyyy-MM-dd")</MudTd>
+                </RowTemplate>
+
+                <NoRecordsContent>
+                    <MudText>Brak danych.</MudText>
+                </NoRecordsContent>
+
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+            </MudTable>
+        }
+
+        <MudText Typo="Typo.h6" Class="mt-4">Największe zaległe faktury</MudText>
+        <MudTable Items="_dashboard.TopOverdueInvoices"
+                  Dense="true"
+                  Hover="true"
+                  RowsPerPage="20"
+                  RowsPerPageOptions="new int[] { 20, 50, 100 }">
+            <HeaderContent><MudTh>Faktura</MudTh><MudTh>Data</MudTh><MudTh>Kwota pozostała</MudTh></HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Faktura">@context.NumerFaktury</MudTd>
+                <MudTd DataLabel="Data">@context.DataWystawienia.ToString("yyyy-MM-dd")</MudTd>
+                <MudTd DataLabel="Kwota">@context.KwotaPozostala.ToString("N2")</MudTd>
+            </RowTemplate>
+
+            <NoRecordsContent>
+                <MudText>Brak danych.</MudText>
+            </NoRecordsContent>
+
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    }
+}
+
+@code {
+    private static readonly HashSet<int> EndingPresets = new() { 7, 14, 30, 60, 90, 365, 1825 };
+
+    private NajemPowerDashboardDto _dashboard = new();
+    private DateTime? _dateFrom;
+    private DateTime? _dateTo;
+    private bool _onlyOverdue;
+    private bool _useEndingInDays = true;
+
+    private int _endingInDays = 30;
+    private int _endingInDaysPreset = 30;
+
+    private NajemPowerDrillDownRequest _drillDown = new();
+    private bool _loading = true;
+    private string? _error;
+
+    private CancellationTokenSource? _debounceCts;
+    private CancellationTokenSource? _requestCts;
+
+    private bool _hasDrillDown => !string.IsNullOrWhiteSpace(_drillDown.SelectedBucket)
+        || _drillDown.SelectedNajemcaId.HasValue
+        || _drillDown.SelectedUmowaId.HasValue
+        || !string.IsNullOrWhiteSpace(_drillDown.SelectedOccupancySegment);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+
+    public void Dispose()
+    {
+        _debounceCts?.Cancel();
+        _debounceCts?.Dispose();
+        _requestCts?.Cancel();
+        _requestCts?.Dispose();
+    }
+
+    private async Task OnDateFromChanged(DateTime? value)
+    {
+        _dateFrom = value;
+        await DebouncedReloadAsync();
+    }
+
+    private async Task OnDateToChanged(DateTime? value)
+    {
+        _dateTo = value;
+        await DebouncedReloadAsync();
+    }
+
+    private async Task OnOnlyOverdueChanged(bool value)
+    {
+        _onlyOverdue = value;
+        await DebouncedReloadAsync();
+    }
+
+    private async Task OnUseEndingInDaysChanged(bool value)
+    {
+        _useEndingInDays = value;
+        await DebouncedReloadAsync();
+    }
+
+    private async Task OnEndingInDaysPresetChanged(int value)
+    {
+        _endingInDaysPreset = value;
+
+        if (value > 0)
+        {
+            _endingInDays = value;
+        }
+
+        await DebouncedReloadAsync();
+    }
+
+    private async Task OnEndingInDaysChanged(int value)
+    {
+        _endingInDays = value < 1 ? 1 : value;
+
+        _endingInDaysPreset = EndingPresets.Contains(_endingInDays) ? _endingInDays : 0;
+
+        await DebouncedReloadAsync();
+    }
+
+    private async Task SelectBucket(string bucket)
+    {
+        _drillDown.SelectedBucket = _drillDown.SelectedBucket == bucket ? null : bucket;
+        await ReloadAsync();
+    }
+
+    private async Task SelectContract(Guid contractId)
+    {
+        _drillDown.SelectedUmowaId = _drillDown.SelectedUmowaId == contractId ? null : contractId;
+        await ReloadAsync();
+    }
+
+    private async Task SelectOccupancySegment(string segment)
+    {
+        _drillDown.SelectedOccupancySegment = _drillDown.SelectedOccupancySegment == segment ? null : segment;
+        await ReloadAsync();
+    }
+
+    private async Task ClearDrillDown()
+    {
+        _drillDown = new NajemPowerDrillDownRequest();
+        await ReloadAsync();
+    }
+
+    private Color GetSegmentColor(string key) => key == "rented" ? Color.Success : Color.Warning;
+
+    private async Task DebouncedReloadAsync()
+    {
+        _debounceCts?.Cancel();
+        _debounceCts?.Dispose();
+        _debounceCts = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(400, _debounceCts.Token);
+            await ReloadAsync(_debounceCts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            // ignore
+        }
+    }
+
+    private async Task ReloadAsync(CancellationToken ct = default)
+    {
+        _requestCts?.Cancel();
+        _requestCts?.Dispose();
+        _requestCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        var requestCt = _requestCts.Token;
+
+        _loading = true;
+        _error = null;
+        StateHasChanged();
+
+        try
+        {
+            var request = new GetNajemPowerDashboardRequest
+            {
+                DateFrom = _dateFrom.HasValue ? DateOnly.FromDateTime(_dateFrom.Value) : null,
+                DateTo = _dateTo.HasValue ? DateOnly.FromDateTime(_dateTo.Value) : null,
+                OnlyOverdue = _onlyOverdue,
+                UseEndingInDays = _useEndingInDays,
+                EndingInDays = _useEndingInDays ? _endingInDays : null,
+                DrillDown = _drillDown
+            };
+
+            _dashboard = await DashboardService.GetNajemPowerDashboardAsync(request, requestCt);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        catch
+        {
+            _error = "Nie udało się wczytać dashboardu najmu.";
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+}

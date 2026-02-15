@@ -559,3 +559,39 @@ DELETE {{CastlePlus2.Api_HostAddress}}/api/slowniki/Indeksacje/IND_TEST
 ### [SLOWNIKI] INDEKSACJA - GET po DELETE
 GET {{CastlePlus2.Api_HostAddress}}/api/slowniki/Indeksacje/IND_TEST
 Accept: application/json
+### [DASHBOARD] POST najem-power bez dat (domyœlny zakres)
+POST {{CastlePlus2.Api_HostAddress}}/api/dashboard/najem-power
+Content-Type: application/json
+Accept: application/json
+
+{
+  "onlyOverdue": false,
+  "useEndingInDays": true,
+  "endingInDays": 30,
+  "drillDown": {}
+}
+
+### [DASHBOARD] POST najem-power zakres bez danych
+POST {{CastlePlus2.Api_HostAddress}}/api/dashboard/najem-power
+Content-Type: application/json
+Accept: application/json
+
+{
+  "dateFrom": "1900-01-01",
+  "dateTo": "1900-01-02",
+  "onlyOverdue": false,
+  "useEndingInDays": false,
+  "drillDown": {}
+}
+
+### [DASHBOARD] POST najem-power onlyOverdue=true
+POST {{CastlePlus2.Api_HostAddress}}/api/dashboard/najem-power
+Content-Type: application/json
+Accept: application/json
+
+{
+  "onlyOverdue": true,
+  "useEndingInDays": true,
+  "endingInDays": 30,
+  "drillDown": {}
+}

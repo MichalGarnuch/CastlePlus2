@@ -1,4 +1,4 @@
-﻿@page "/dashboard/najem"
+﻿@page "/dashboard/najem-legacy"
 @attribute [Authorize(Roles = RoleCodes.AdminOrManagerOrEmployee)]
 
 @using CastlePlus2.Client.Services.Dashboard
@@ -6,7 +6,7 @@
 @using MudBlazor
 @inject IDashboardService DashboardService
 
-<MudText Typo="Typo.h4" Class="fw-700 mb-6">Dashboard najmu</MudText>
+<MudText Typo="Typo.h4" Class="fw-700 mb-6">Dashboard najmu (Legacy)</MudText>
 
 @if (_loading)
 {
