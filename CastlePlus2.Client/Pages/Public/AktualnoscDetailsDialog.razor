@@ -1,0 +1,151 @@
+﻿@using CastlePlus2.Contracts.DTOs.Konfiguracja
+@using MudBlazor
+
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@Title</MudText>
+    </TitleContent>
+
+    <DialogContent>
+        @if (!string.IsNullOrWhiteSpace(Lead))
+        {
+            <MudText Class="mb-2"><b>@Lead</b></MudText>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Body))
+        {
+            <MudText Class="mb-4">@Body</MudText>
+        }
+
+        <MudDivider Class="mb-3" />
+        <MudText Typo="Typo.h6" Class="mb-2">Załączniki</MudText>
+
+        @if (Model.Dokumenty is null || Model.Dokumenty.Count == 0)
+        {
+            <MudText>Brak załączników.</MudText>
+        }
+        else
+        {
+            <MudStack Spacing="2">
+                @foreach (var doc in Model.Dokumenty)
+                {
+                    var docDescription = string.IsNullOrWhiteSpace(doc.Opis) ? "Brak opisu" : doc.Opis;
+
+                    <MudPaper Class="pa-3">
+                        <MudText Typo="Typo.subtitle1">@doc.Nazwa</MudText>
+                        <MudText Typo="Typo.body2" Class="mb-2">@docDescription</MudText>
+
+                        <MudStack Row="true" Spacing="1">
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.OpenInNew"
+                                       OnClick="@(() => OpenDocumentAsync(doc))">
+                                Otwórz
+                            </MudButton>
+
+                            <MudButton Variant="Variant.Text"
+                                       Color="Color.Secondary"
+                                       StartIcon="@Icons.Material.Filled.Description"
+                                       OnClick="@(() => GoToDocuments(doc))">
+                                Dokumenty
+                            </MudButton>
+                        </MudStack>
+                    </MudPaper>
+                }
+            </MudStack>
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="@Close">Zamknij</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter, EditorRequired] public ZasobUIPublicDto Model { get; set; } = default!;
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    private string Title => PickField("Title") ?? Model.KodZasobu;
+    private string? Lead => PickField("Lead");
+    private string? Body => PickField("Body") ?? PickField("Value");
+
+    private void Close() => MudDialog.Close();
+
+    private async Task OpenDocumentAsync(ZasobUIDokumentDto doc)
+    {
+        if (doc is null || string.IsNullOrWhiteSpace(doc.SciezkaPliku))
+            return;
+
+        var target = BuildDocumentUrl(doc.SciezkaPliku);
+        await JSRuntime.InvokeVoidAsync("open", target, "_blank");
+    }
+
+    private void GoToDocuments(ZasobUIDokumentDto doc)
+    {
+        // 1) DOKŁADNIE JEDEN DOKUMENT
+        if (doc.IdDokumentu > 0)
+        {
+            NavigationManager.NavigateTo($"/dokumenty?id={doc.IdDokumentu}");
+            MudDialog.Close();
+            return;
+        }
+
+        // 2) Fallback: fuzzy search po nazwie/opisie
+        var query = !string.IsNullOrWhiteSpace(doc.Nazwa) ? doc.Nazwa : doc.Opis;
+        var encoded = Uri.EscapeDataString(query ?? string.Empty);
+        NavigationManager.NavigateTo($"/dokumenty?search={encoded}");
+        MudDialog.Close();
+    }
+
+    // Jedna, poprawna metoda – normalizuje \ oraz \\ i buduje URL pod localhost
+    private string BuildDocumentUrl(string path)
+    {
+        path = path.Trim();
+
+        // pełny URL http/https -> zostaw
+        if (Uri.TryCreate(path, UriKind.Absolute, out var abs) &&
+            (abs.Scheme == Uri.UriSchemeHttp || abs.Scheme == Uri.UriSchemeHttps))
+        {
+            return abs.ToString();
+        }
+
+        // normalizacja: \ -> /
+        var p = path.Replace('\\', '/');
+
+        // UNC \\files\share\... po replace daje //files/share/... -> zbij do /files/share/...
+        while (p.StartsWith("//", StringComparison.Ordinal))
+            p = p.Substring(1);
+
+        // dopilnuj wiodącego /
+        if (!p.StartsWith("/", StringComparison.Ordinal))
+            p = "/" + p;
+
+        return new Uri(new Uri(NavigationManager.BaseUri), p).ToString();
+    }
+
+    private string? PickField(string field)
+    {
+        var exact = Model.Teksty
+            .Where(x => string.Equals(x.Pole, field, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(x => x.Sort)
+            .Select(x => x.Wartosc)
+            .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
+
+        if (!string.IsNullOrWhiteSpace(exact))
+            return exact;
+
+        if (string.Equals(field, "Body", StringComparison.OrdinalIgnoreCase))
+        {
+            return Model.Teksty
+                .Where(x => string.Equals(x.Pole, "Value", StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(x => x.Sort)
+                .Select(x => x.Wartosc)
+                .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
+        }
+
+        return null;
+    }
+}

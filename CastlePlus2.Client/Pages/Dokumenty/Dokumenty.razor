@@ -2,6 +2,8 @@
 @attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
 
 @using MudBlazor
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Routing
 @using CastlePlus2.Client.Services.Dokumenty
 @using CastlePlus2.Contracts.DTOs.Dokumenty
 @using CastlePlus2.Contracts.Requests.Dokumenty
@@ -37,7 +39,7 @@
                            Color="Color.Info"
                            AriaLabel="Odśwież"
                            Title="Odśwież"
-                           OnClick="ReloadAsync"
+                           OnClick="@ReloadFromUrlAsync"
                            Class="mr-2" />
 
             <MudButton Variant="Variant.Filled"
@@ -90,28 +92,70 @@
         <PagerContent>
             <MudTablePager />
         </PagerContent>
-
     </MudTable>
 </MudPaper>
 
 @code {
     private List<DokumentDto> _items = new();
     private string _search = string.Empty;
-    private bool _loading = true; // 2. DODANO ZMIENNĄ
+    private bool _loading = true;
+
+    // Klucz ostatnio załadowanego "stanu URL", żeby nie przeładowywać w kółko
+    private string? _loadedUrlKey;
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "search")]
+    public string? SearchQuery { get; set; }
+
+    // NOWE: exact-id – ma zwrócić dokładnie 1 dokument
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "id")]
+    public long? DokumentId { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        await ReloadAsync();
+        await ReloadFromUrlAsync();
     }
 
-    private async Task ReloadAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        // 3. OBSŁUGA STANU ŁADOWANIA
+        var currentKey = BuildUrlKey();
+        if (!string.Equals(_loadedUrlKey, currentKey, StringComparison.Ordinal))
+        {
+            await ReloadFromUrlAsync();
+        }
+    }
+
+    private string BuildUrlKey()
+        => $"{(DokumentId.HasValue ? DokumentId.Value.ToString() : "")}|{(SearchQuery ?? "")}";
+
+    private async Task ReloadFromUrlAsync()
+    {
         _loading = true;
+
         try
         {
-            var data = await DokumentyService.GetAllAsync();
+            _loadedUrlKey = BuildUrlKey();
+
+            // 1) TRYB EXACT: /dokumenty?id=2004 -> tylko dokument 2004 (albo 0 rekordów)
+            if (DokumentId.HasValue && DokumentId.Value > 0)
+            {
+                _search = DokumentId.Value.ToString();
+
+                var doc = await DokumentyService.GetByIdAsync(DokumentId.Value);
+                _items = doc is null ? new List<DokumentDto>() : new List<DokumentDto> { doc };
+
+                await InvokeAsync(StateHasChanged);
+                return;
+            }
+
+            // 2) TRYB SEARCH: /dokumenty?search=...
+            if (!string.IsNullOrWhiteSpace(SearchQuery))
+                _search = SearchQuery;
+
+            var data = await DokumentyService.GetAllAsync(SearchQuery);
             _items = (data ?? new List<DokumentDto>()).ToList();
+
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
@@ -120,10 +164,11 @@
         }
         finally
         {
-            _loading = false; // Zawsze wyłącz na końcu
+            _loading = false;
         }
     }
 
+    // Pozostawiamy lokalny filtr tabeli (działa na już pobranych _items)
     private bool FilterFunc(DokumentDto item)
     {
         if (string.IsNullOrWhiteSpace(_search))
@@ -136,6 +181,32 @@
                || (item.SciezkaPliku?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
                || (item.Opis?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
                || (item.IdEncjiOwner?.ToString().Contains(s, StringComparison.OrdinalIgnoreCase) ?? false);
+    }
+
+    // Nadal możesz ręcznie przeładować wyniki po wpisaniu w pole _search:
+    // to jest "fuzzy" po backendzie, więc może zwrócić więcej rekordów (tak jak chciałeś uniknąć przy klikaniu z newsów)
+    private async Task ReloadAsync(string? searchOverride = null)
+    {
+        _loading = true;
+
+        try
+        {
+            if (searchOverride is not null)
+                _search = searchOverride;
+
+            var data = await DokumentyService.GetAllAsync(searchOverride);
+            _items = (data ?? new List<DokumentDto>()).ToList();
+
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd pobierania dokumentów: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     private async Task CreateAsync()
@@ -163,7 +234,7 @@
                 });
 
                 Snackbar.Add($"Dodano dokument (Id={created.IdDokumentu}).", Severity.Success);
-                await ReloadAsync();
+                await ReloadFromUrlAsync();
             }
             catch (Exception ex)
             {
@@ -213,7 +284,7 @@
                 }
 
                 Snackbar.Add("Zapisano zmiany.", Severity.Success);
-                await ReloadAsync();
+                await ReloadFromUrlAsync();
             }
             catch (Exception ex)
             {
@@ -271,7 +342,7 @@
             }
 
             Snackbar.Add("Usunięto.", Severity.Success);
-            await ReloadAsync();
+            await ReloadFromUrlAsync();
         }
         catch (Exception ex)
         {

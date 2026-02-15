@@ -6,6 +6,7 @@
 
 @inject IZasobyUIService Service
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <PageTitle>Aktualności</PageTitle>
 
@@ -26,26 +27,34 @@
     }
     else
     {
-        <MudStack Class="mt-2" Spacing="2">
+        <MudGrid Class="mt-2">
             @foreach (var it in _items)
             {
                 var title = PickField(it, "Title") ?? it.KodZasobu;
                 var lead = PickField(it, "Lead");
                 var body = PickField(it, "Body") ?? PickField(it, "Value");
+                var attachmentsCount = it.Dokumenty?.Count ?? 0;
 
-                <MudPaper Class="pa-3">
-                    <MudText Typo="Typo.h6">@title</MudText>
-                    @if (!string.IsNullOrWhiteSpace(lead))
-                    {
-                        <MudText Class="mt-1"><b>@lead</b></MudText>
-                    }
-                    @if (!string.IsNullOrWhiteSpace(body))
-                    {
-                        <MudText Class="mt-2">@body</MudText>
-                    }
-                </MudPaper>
+                <MudItem xs="12" sm="6" md="4" lg="3">
+                    <MudCard Class="pa-3 h-100 d-flex flex-column" Style="cursor:pointer;"
+                             @onclick="() => OpenDetailsDialogAsync(it)">
+                        <MudText Typo="Typo.h6">@title</MudText>
+                        @if (!string.IsNullOrWhiteSpace(lead))
+                        {
+                            <MudText Class="mt-1"><b>@lead</b></MudText>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(body))
+                        {
+                            <MudText Class="mt-2">@TrimForCard(body)</MudText>
+                        }
+                        <MudSpacer />
+                        <MudChip T="string" Class="mt-2" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">
+                            Załączniki: @attachmentsCount
+                        </MudChip>
+                    </MudCard>
+                </MudItem>
             }
-        </MudStack>
+        </MudGrid>
     }
 </MudPaper>
 
@@ -61,7 +70,11 @@
 
         try
         {
-            _items = await Service.GetPublicAsync("NEWS", "HOME", "pl-PL");
+            _items = (await Service.GetPublicAsync("NEWS", "HOME", "pl-PL", includeInactive: false))
+                .OrderBy(x => x.Sort)
+                .ThenByDescending(x => x.WazneOdUtc.HasValue)
+                .ThenByDescending(x => x.WazneOdUtc)
+                .ToList();
         }
         catch (Exception ex)
         {
@@ -95,5 +108,32 @@
         }
 
         return null;
+    }
+
+    private Task OpenDetailsDialogAsync(ZasobUIPublicDto item)
+    {
+        var parameters = new DialogParameters
+        {
+            [nameof(AktualnoscDetailsDialog.Model)] = item
+        };
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.Medium
+        };
+
+        DialogService.Show<AktualnoscDetailsDialog>("Szczegóły aktualności", parameters, options);
+        return Task.CompletedTask;
+    }
+
+    private static string TrimForCard(string value)
+    {
+        const int maxLength = 180;
+        if (value.Length <= maxLength)
+            return value;
+
+        return $"{value[..maxLength]}...";
     }
 }

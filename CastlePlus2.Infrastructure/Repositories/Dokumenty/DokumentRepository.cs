@@ -35,8 +35,11 @@ namespace CastlePlus2.Infrastructure.Repositories.Dokumenty
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var filter = search.Trim();
+                var hasId = long.TryParse(filter, out var id);
+
                 query = query.Where(d =>
-                    (d.Nazwa != null && d.Nazwa.Contains(filter))
+                    (hasId && d.IdDokumentu == id)
+                    || (d.Nazwa != null && d.Nazwa.Contains(filter))
                     || (d.Opis != null && d.Opis.Contains(filter))
                     || (d.SciezkaPliku != null && d.SciezkaPliku.Contains(filter)));
             }
