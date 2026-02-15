@@ -55,6 +55,17 @@ namespace CastlePlus2.Infrastructure.Repositories.Najem
                             && (x.DoDnia == null || x.DoDnia > dataZakonczenia))
                 .ToListAsync(ct);
         }
+        public Task<List<SkladnikCzynszu>> GetActiveInRangeByUmowaIdAsync(Guid idUmowyNajmu, DateOnly from, DateOnly to, CancellationToken ct)
+        {
+            return _db.SkladnikiCzynszu
+                .AsNoTracking()
+                .Where(x => x.IdUmowyNajmu == idUmowyNajmu
+                            && x.OdDnia <= to
+                            && (x.DoDnia == null || x.DoDnia >= from))
+                .OrderBy(x => x.Nazwa)
+                .ThenBy(x => x.OdDnia)
+                .ToListAsync(ct);
+        }
         public void Remove(SkladnikCzynszu entity)
         {
             _db.SkladnikiCzynszu.Remove(entity);

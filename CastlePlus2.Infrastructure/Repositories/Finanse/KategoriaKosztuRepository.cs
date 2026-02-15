@@ -35,6 +35,13 @@ namespace CastlePlus2.Infrastructure.Repositories.Finanse
                 .ToListAsync(ct);
         }
 
+        public async Task<KategoriaKosztu?> GetByKodAsync(string kod, CancellationToken ct)
+        {
+            return await _db.KategorieKosztow
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Kod == kod, ct);
+        }
+
         public async Task<bool> ExistsByKodAsync(string kod, CancellationToken ct)
         {
             return await _db.KategorieKosztow

@@ -3,6 +3,7 @@ using CastlePlus2.Api.Middleware;
 using CastlePlus2.Api.Services;
 using CastlePlus2.Api.Services.Auth;
 using CastlePlus2.Application.Common.Behaviors;
+using CastlePlus2.Application.Finanse.ProcesyFaktury.Common;
 using CastlePlus2.Application.Interfaces.Auth;
 using CastlePlus2.Application.Interfaces.Dashboard;
 using CastlePlus2.Application.Interfaces.Dokumenty;
@@ -100,6 +101,7 @@ builder.Services.AddMediatR(cfg =>
 
 builder.Services.AddValidatorsFromAssembly(typeof(CastlePlus2.Application.Auth.ProcesyAuth.Commands.Login.LoginCommand).Assembly);
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+builder.Services.AddScoped<IFakturaCreationService, FakturaCreationService>();
 
 // -------------------------------------------------------------------------
 // 2b. AutoMapper – ręczna konfiguracja (jedno źródło prawdy)

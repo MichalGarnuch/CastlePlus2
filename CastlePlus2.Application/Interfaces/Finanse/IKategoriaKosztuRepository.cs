@@ -7,6 +7,7 @@ namespace CastlePlus2.Application.Interfaces.Finanse
         Task<KategoriaKosztu?> GetByIdAsync(long id, CancellationToken ct);
         Task<KategoriaKosztu?> GetForUpdateAsync(long id, CancellationToken ct);
         Task<List<KategoriaKosztu>> GetAllAsync(CancellationToken ct);
+        Task<KategoriaKosztu?> GetByKodAsync(string kod, CancellationToken ct);
 
         Task<bool> ExistsByKodAsync(string kod, CancellationToken ct);
         Task<bool> ExistsOtherByKodAsync(string kod, long excludeIdKategoriiKosztu, CancellationToken ct);

@@ -7,6 +7,7 @@ namespace CastlePlus2.Client.Services.Finanse
     {
         Task<WystawFaktureContextDto> GetWystawFaktureContextAsync(CancellationToken ct = default);
         Task<WystawFaktureResultDto> WystawFaktureAsync(WystawFaktureRequest request, CancellationToken ct = default);
+        Task<GenerateNajemFakturyResultDto> GenerateNajemFakturyAsync(GenerateNajemFakturyRequest request, CancellationToken ct = default);
         Task<PlatnoscContextDto> GetPlatnoscContextAsync(CancellationToken ct = default);
         Task<ZarejestrujPlatnoscResultDto> ZarejestrujPlatnoscAsync(ZarejestrujPlatnoscRequest request, CancellationToken ct = default);
     }

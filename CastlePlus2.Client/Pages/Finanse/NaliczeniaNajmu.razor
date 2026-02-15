@@ -1,0 +1,132 @@
+﻿@page "/finanse/faktury/naliczenia-najmu"
+@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+
+@using MudBlazor
+@using CastlePlus2.Client.Services.Finanse
+@using CastlePlus2.Contracts.DTOs.Finanse
+@using CastlePlus2.Contracts.Requests.Finanse
+@inject IProcesyFinanseService ProcesyFinanseService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Naliczenia najmu (Billing Engine)</MudText>
+
+<MudPaper Class="pa-4 mb-4">
+    <MudGrid Spacing="2">
+        <MudItem xs="12" sm="4">
+            <MudTextField @bind-Value="_month"
+                          Label="Miesiąc (YYYY-MM)"
+                          Required="true"
+                          Margin="Margin.Dense" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudDatePicker Label="Data wystawienia"
+                           Date="_invoiceDate"
+                           DateChanged="OnInvoiceDateChanged"
+                           Margin="Margin.Dense" />
+        </MudItem>
+        <MudItem xs="12" sm="4" Class="d-flex align-end">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Disabled="_loading"
+                       OnClick="GenerateAsync">
+                Generuj faktury
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@if (_loading)
+{
+    <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+}
+else if (_result is null)
+{
+    <MudAlert Severity="Severity.Info">Wybierz miesiąc i uruchom proces.</MudAlert>
+}
+else if (_result.Items.Count == 0)
+{
+    <MudAlert Severity="Severity.Info">Brak danych/Brak aktywnych umów.</MudAlert>
+}
+else
+{
+    <MudTable Items="_result.Items" Dense="true" Hover="true" Striped="true">
+        <HeaderContent>
+            <MudTh>Umowa</MudTh>
+            <MudTh>Najemca</MudTh>
+            <MudTh>Numer</MudTh>
+            <MudTh>Netto</MudTh>
+            <MudTh>Brutto</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh>Warnings/Error</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Umowa">@context.IdUmowyNajmu</MudTd>
+            <MudTd DataLabel="Najemca">@context.IdNajemcy</MudTd>
+            <MudTd DataLabel="Numer">@context.NumerFaktury</MudTd>
+            <MudTd DataLabel="Netto">@context.KwotaNetto</MudTd>
+            <MudTd DataLabel="Brutto">@context.KwotaBrutto</MudTd>
+            <MudTd DataLabel="Status">@context.Status</MudTd>
+            <MudTd DataLabel="Warnings/Error">
+                @if (!string.IsNullOrWhiteSpace(context.Error))
+                {
+                    <span>@context.Error</span>
+                }
+                else if (context.Warnings.Count > 0)
+                {
+                    <span>@string.Join(" | ", context.Warnings)</span>
+                }
+                else
+                {
+                    <span>-</span>
+                }
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    private bool _loading;
+    private string _month = DateTime.Today.ToString("yyyy-MM");
+    private DateTime? _invoiceDate = DateTime.Today;
+    private GenerateNajemFakturyResultDto? _result;
+
+    private void OnInvoiceDateChanged(DateTime? value)
+    {
+        _invoiceDate = value;
+    }
+
+    private async Task GenerateAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_month))
+        {
+            Snackbar.Add("Miesiąc jest wymagany.", Severity.Warning);
+            return;
+        }
+
+        if (!_invoiceDate.HasValue)
+        {
+            Snackbar.Add("Data wystawienia jest wymagana.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            _loading = true;
+            _result = await ProcesyFinanseService.GenerateNajemFakturyAsync(new GenerateNajemFakturyRequest
+            {
+                Miesiac = _month,
+                DataWystawienia = _invoiceDate.Value.Date
+            });
+
+            Snackbar.Add("Proces naliczeń najmu zakończony.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd procesu: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

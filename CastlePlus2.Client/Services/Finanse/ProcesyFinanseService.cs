@@ -34,6 +34,19 @@ namespace CastlePlus2.Client.Services.Finanse
             return (await resp.Content.ReadFromJsonAsync<WystawFaktureResultDto>(cancellationToken: ct))!;
         }
 
+        public async Task<GenerateNajemFakturyResultDto> GenerateNajemFakturyAsync(GenerateNajemFakturyRequest request, CancellationToken ct = default)
+        {
+            var resp = await _http.PostAsJsonAsync($"{FakturyBaseUrl}/najem/generate", request, ct);
+            if (!resp.IsSuccessStatusCode)
+            {
+                var body = await resp.Content.ReadAsStringAsync(ct);
+                _logger.LogError("Generowanie faktur najmu nie powiodło się: {Status} {Body}", resp.StatusCode, body);
+                resp.EnsureSuccessStatusCode();
+            }
+
+            return (await resp.Content.ReadFromJsonAsync<GenerateNajemFakturyResultDto>(cancellationToken: ct))!;
+        }
+
         public async Task<PlatnoscContextDto> GetPlatnoscContextAsync(CancellationToken ct = default)
             => await _http.GetFromJsonAsync<PlatnoscContextDto>($"{PlatnosciBaseUrl}/context", ct) ?? new();
 

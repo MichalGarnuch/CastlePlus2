@@ -45,6 +45,15 @@ namespace CastlePlus2.Infrastructure.Repositories.Najem
                 .FirstOrDefaultAsync(x => x.Id == idEncji, ct);
         }
 
+        public Task<List<UmowaNajmu>> GetActiveInRangeAsync(DateTime from, DateTime to, CancellationToken ct)
+        {
+            return _db.UmowyNajmu
+                .AsNoTracking()
+                .Where(x => x.DataPoczatku <= to && (x.DataZakonczenia == null || x.DataZakonczenia >= from))
+                .OrderBy(x => x.DataPoczatku)
+                .ToListAsync(ct);
+        }
+
         public void Remove(UmowaNajmu entity)
         {
             _db.UmowyNajmu.Remove(entity);

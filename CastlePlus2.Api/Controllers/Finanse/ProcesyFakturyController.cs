@@ -1,12 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CastlePlus2.Application.Finanse.ProcesyFaktury.Commands.GenerateNajemFaktury;
 using CastlePlus2.Application.Finanse.ProcesyFaktury.Commands.WystawFakture;
 using CastlePlus2.Application.Finanse.ProcesyFaktury.Queries.GetWystawFaktureContext;
 using CastlePlus2.Contracts.DTOs.Finanse;
 using CastlePlus2.Contracts.Requests.Finanse;
+using CastlePlus2.Shared.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CastlePlus2.Api.Controllers.Finanse
 {
@@ -60,6 +63,21 @@ namespace CastlePlus2.Api.Controllers.Finanse
             }, ct);
 
             return StatusCode(StatusCodes.Status201Created, result);
+        }
+
+        [HttpPost("najem/generate")]
+        [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+        [ProducesResponseType(typeof(GenerateNajemFakturyResultDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GenerateNajem([FromBody] GenerateNajemFakturyRequest request, CancellationToken ct)
+        {
+            var result = await _mediator.Send(new GenerateNajemFakturyCommand
+            {
+                Miesiac = request.Miesiac,
+                DataWystawienia = request.DataWystawienia
+            }, ct);
+
+            return Ok(result);
         }
     }
 }
