@@ -1,0 +1,139 @@
+﻿@page "/finanse/faktury/wydruki"
+@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+
+@using MudBlazor
+@using CastlePlus2.Client.Services.Exports
+@using CastlePlus2.Client.Services.Finanse
+@using CastlePlus2.Contracts.DTOs.Finanse
+@using CastlePlus2.Contracts.Exports
+@using CastlePlus2.Contracts.Requests.Finanse
+
+@inject IFakturyService FakturyService
+@inject IProcesyFinanseService ProcesyFinanseService
+@inject IReportExportUrlService ReportExportUrlService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Wydruki faktur (DOCX)</MudText>
+
+<MudPaper Class="pa-4">
+    <MudGrid Spacing="2">
+        <MudItem xs="12" md="6">
+            <MudAutocomplete T="FakturaLookupDto"
+                             Label="Wybierz fakturę"
+                             Margin="Margin.Dense"
+                             ToStringFunc="@(x => x is null ? string.Empty : x.Label)"
+                             SearchFunc="SearchFakturyAsync"
+                             Value="_selectedFaktura"
+                             ValueChanged="OnFakturaChanged"
+                             Clearable="true"
+                             ResetValueOnEmptyText="true" />
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudSelect T="long" Label="Szablon DOCX" Margin="Margin.Dense" Value="_selectedTemplateId" ValueChanged="OnTemplateChanged">
+                @foreach (var template in _templates)
+                {
+                    <MudSelectItem Value="@template.IdDokumentu">@template.Label</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudCheckBox @bind-Value="_includeAllocations" Label="Uwzględnij listę alokacji/lokali" />
+        </MudItem>
+
+        <MudItem xs="12" md="6" Class="d-flex align-end">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Disabled="@(_loading || _selectedFaktura is null || _selectedTemplateId <= 0)"
+                       OnClick="GenerateAsync">
+                Generuj wydruk (DOCX)
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@if (_warnings.Count > 0)
+{
+    <MudAlert Severity="Severity.Warning" Class="mt-3">
+        @foreach (var warning in _warnings)
+        {
+            <div>@warning</div>
+        }
+    </MudAlert>
+}
+
+@code {
+    private bool _loading;
+    private bool _includeAllocations;
+    private long _selectedTemplateId;
+    private FakturaLookupDto? _selectedFaktura;
+    private List<FakturaWydrukTemplateDto> _templates = new();
+    private List<string> _warnings = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _templates = await ProcesyFinanseService.GetFakturaWydrukTemplatesAsync();
+        _selectedTemplateId = _templates.FirstOrDefault()?.IdDokumentu ?? 0;
+    }
+
+    private Task OnFakturaChanged(FakturaLookupDto? value)
+    {
+        _selectedFaktura = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnTemplateChanged(long value)
+    {
+        _selectedTemplateId = value;
+        return Task.CompletedTask;
+    }
+
+    private async Task<IEnumerable<FakturaLookupDto>> SearchFakturyAsync(string value, CancellationToken ct)
+    {
+        var query = string.IsNullOrWhiteSpace(value) ? null : value;
+        var result = await FakturyService.SearchLookupPagedAsync(query, null, 1, 20, ct);
+        return result.Items;
+    }
+
+    private async Task GenerateAsync()
+    {
+        if (_selectedFaktura is null)
+        {
+            Snackbar.Add("Wybierz fakturę.", Severity.Warning);
+            return;
+        }
+
+        if (_selectedTemplateId <= 0)
+        {
+            Snackbar.Add("Wybierz szablon.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            _loading = true;
+            _warnings.Clear();
+
+            var response = await ProcesyFinanseService.GenerateFakturaWydrukAsync(new GenerateFakturaWydrukRequest
+            {
+                IdFaktury = _selectedFaktura.IdFaktury,
+                TemplateDokumentId = _selectedTemplateId,
+                Format = ExportFormat.Docx,
+                IncludeAllocations = _includeAllocations
+            });
+
+            _warnings = response.Warnings;
+            ReportExportUrlService.OpenExportUrl(response.DownloadUrl);
+            Snackbar.Add("Wydruk faktury został wygenerowany.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd generowania wydruku: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

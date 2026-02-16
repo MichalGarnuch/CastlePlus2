@@ -191,6 +191,8 @@ builder.Services.AddScoped<IOdczytRepository, OdczytRepository>();
 
 // EXPORT / REPORTS
 builder.Services.AddScoped<IReportExportService, ReportExportService>();
+builder.Services.AddScoped<IFakturaDocxTemplateRenderer, FakturaDocxTemplateRenderer>();
+builder.Services.AddScoped<IDokumentFileStorage, DokumentFileStorage>();
 builder.Services.AddScoped<IExportArchiveService, ExportArchiveService>();
 builder.Services.AddScoped<IReportsReadService, ReportsReadService>();
 

@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using CastlePlus2.Application.Finanse.ProcesyFaktury.Commands.GenerateFakturaWydruk;
 using CastlePlus2.Application.Finanse.ProcesyFaktury.Commands.GenerateNajemFaktury;
 using CastlePlus2.Application.Finanse.ProcesyFaktury.Commands.WystawFakture;
+using CastlePlus2.Application.Finanse.ProcesyFaktury.Queries.GetFakturaWydrukTemplates;
 using CastlePlus2.Application.Finanse.ProcesyFaktury.Queries.GetWystawFaktureContext;
 using CastlePlus2.Contracts.DTOs.Finanse;
 using CastlePlus2.Contracts.Requests.Finanse;
 using CastlePlus2.Shared.Auth;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CastlePlus2.Api.Controllers.Finanse
 {
@@ -19,10 +19,12 @@ namespace CastlePlus2.Api.Controllers.Finanse
     public class ProcesyFakturyController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IMemoryCache _cache;
 
-        public ProcesyFakturyController(IMediator mediator)
+        public ProcesyFakturyController(IMediator mediator, IMemoryCache cache)
         {
             _mediator = mediator;
+            _cache = cache;
         }
 
         [HttpGet("context")]
@@ -31,6 +33,56 @@ namespace CastlePlus2.Api.Controllers.Finanse
         {
             var context = await _mediator.Send(new GetWystawFaktureContextQuery(), ct);
             return Ok(context);
+        }
+
+        [HttpGet("wydruk/templates")]
+        [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+        [ProducesResponseType(typeof(List<FakturaWydrukTemplateDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetWydrukTemplates(CancellationToken ct)
+        {
+            var templates = await _mediator.Send(new GetFakturaWydrukTemplatesQuery(), ct);
+            return Ok(templates);
+        }
+
+        [HttpPost("wydruk")]
+        [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+        [ProducesResponseType(typeof(GenerateFakturaWydrukResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GenerateWydruk([FromBody] GenerateFakturaWydrukRequest request, CancellationToken ct)
+        {
+            var generated = await _mediator.Send(new GenerateFakturaWydrukCommand
+            {
+                IdFaktury = request.IdFaktury,
+                TemplateDokumentId = request.TemplateDokumentId,
+                Format = request.Format,
+                IncludeAllocations = request.IncludeAllocations
+            }, ct);
+
+            var downloadId = Guid.NewGuid().ToString("N");
+            var expiresAt = DateTime.UtcNow.AddMinutes(10);
+
+            _cache.Set(
+                $"faktura-wydruk:{downloadId}",
+                (generated.Bytes, generated.FileName, generated.ContentType),
+                expiresAt);
+
+            return Ok(new GenerateFakturaWydrukResponse
+            {
+                DownloadUrl = $"/api/finanse/procesy/faktury/wydruk/{downloadId}",
+                ExpiresAtUtc = expiresAt,
+                Warnings = generated.Warnings
+            });
+        }
+
+        [HttpGet("wydruk/{id}")]
+        [AllowAnonymous]
+        public IActionResult DownloadWydruk([FromRoute] string id)
+        {
+            if (!_cache.TryGetValue($"faktura-wydruk:{id}", out (byte[] Bytes, string FileName, string ContentType) entry))
+                return NotFound();
+
+            Response.Headers["Cache-Control"] = "no-store";
+            return File(entry.Bytes, entry.ContentType, entry.FileName);
         }
 
         [HttpPost("wystaw")]

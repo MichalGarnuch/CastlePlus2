@@ -47,6 +47,23 @@ namespace CastlePlus2.Client.Services.Finanse
             return (await resp.Content.ReadFromJsonAsync<GenerateNajemFakturyResultDto>(cancellationToken: ct))!;
         }
 
+
+        public async Task<List<FakturaWydrukTemplateDto>> GetFakturaWydrukTemplatesAsync(CancellationToken ct = default)
+            => await _http.GetFromJsonAsync<List<FakturaWydrukTemplateDto>>($"{FakturyBaseUrl}/wydruk/templates", ct) ?? new();
+
+        public async Task<GenerateFakturaWydrukResponse> GenerateFakturaWydrukAsync(GenerateFakturaWydrukRequest request, CancellationToken ct = default)
+        {
+            var resp = await _http.PostAsJsonAsync($"{FakturyBaseUrl}/wydruk", request, ct);
+            if (!resp.IsSuccessStatusCode)
+            {
+                var body = await resp.Content.ReadAsStringAsync(ct);
+                _logger.LogError("Generowanie wydruku faktury nie powiodło się: {Status} {Body}", resp.StatusCode, body);
+                resp.EnsureSuccessStatusCode();
+            }
+
+            return (await resp.Content.ReadFromJsonAsync<GenerateFakturaWydrukResponse>(cancellationToken: ct))!;
+        }
+
         public async Task<PlatnoscContextDto> GetPlatnoscContextAsync(CancellationToken ct = default)
             => await _http.GetFromJsonAsync<PlatnoscContextDto>($"{PlatnosciBaseUrl}/context", ct) ?? new();
 
