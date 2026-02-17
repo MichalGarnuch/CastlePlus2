@@ -190,19 +190,20 @@ namespace CastlePlus2.Application.Finanse.ProcesyFaktury.Commands.GenerateFaktur
         }
 
         private static Dictionary<string, string> BuildPlaceholders(
-            Faktura faktura,
-            Podmiot nabywca,
-            List<Kontakt> nabywcaKontakty,
-            Podmiot? seller,
-            List<Kontakt> sellerKontakty,
-            List<string> warnings,
-            CultureInfo culture)
+    Faktura faktura,
+    Podmiot nabywca,
+    List<Kontakt> nabywcaKontakty,
+    Podmiot? seller,
+    List<Kontakt> sellerKontakty,
+    List<string> warnings,
+    CultureInfo culture)
         {
             string FindContact(List<Kontakt> contacts, string marker)
                 => contacts.FirstOrDefault(x => x.Rodzaj.Contains(marker, StringComparison.OrdinalIgnoreCase))?.Wartosc ?? string.Empty;
 
             var map = new Dictionary<string, string>
             {
+                // UPPER_SNAKE_CASE (wspierane szablony legacy)
                 ["NUMER_FAKTURY"] = faktura.NumerFaktury,
                 ["DATA_WYSTAWIENIA"] = faktura.DataWystawienia.ToString("yyyy-MM-dd", culture),
                 ["DATA_SPRZEDAZY"] = faktura.DataSprzedazy?.ToString("yyyy-MM-dd", culture) ?? string.Empty,
@@ -227,20 +228,42 @@ namespace CastlePlus2.Application.Finanse.ProcesyFaktury.Commands.GenerateFaktur
                 ["SPRZEDAWCA_EMAIL"] = FindContact(sellerKontakty, "email"),
                 ["SPRZEDAWCA_TELEFON"] = FindContact(sellerKontakty, "telefon"),
                 ["SPRZEDAWCA_RACHUNEK"] = FindContact(sellerKontakty, "rachunek"),
+
                 ["WARNINGS"] = string.Join(" | ", warnings)
             };
+
+            // CamelCase aliasy (dla nowych szablonów DOCX)
+            static void Alias(Dictionary<string, string> dict, string fromKey, string aliasKey)
+            {
+                if (dict.TryGetValue(fromKey, out var v) && !dict.ContainsKey(aliasKey))
+                    dict[aliasKey] = v;
+            }
+
+            Alias(map, "NUMER_FAKTURY", "NumerFaktury");
+            Alias(map, "DATA_WYSTAWIENIA", "DataWystawienia");
+            Alias(map, "DATA_SPRZEDAZY", "DataSprzedazy");
+            Alias(map, "KOD_WALUTY", "KodWaluty");
+            Alias(map, "KWOTA_NETTO", "KwotaNetto");
+            Alias(map, "KWOTA_BRUTTO", "KwotaBrutto");
+
+            Alias(map, "NABYWCA_NAZWA", "NabywcaNazwa");
+            Alias(map, "NABYWCA_NIP", "NabywcaNIP");
+
+            // (opcjonalnie – jeśli kiedyś dodasz to do szablonu)
+            Alias(map, "SPRZEDAWCA_NAZWA", "SprzedawcaNazwa");
+            Alias(map, "SPRZEDAWCA_NIP", "SprzedawcaNIP");
 
             return map;
         }
 
         private static List<IReadOnlyDictionary<string, string>> BuildRows(
-            List<PozycjaKosztu> pozycje,
-            Dictionary<long, KategoriaKosztu> kategorie,
-            Dictionary<long, List<AlokacjaKosztu>> alokacjeByPozycja,
-            Dictionary<Guid, Lokal> lokaleById,
-            Dictionary<Guid, Encja> encjeById,
-            bool includeAllocations,
-            CultureInfo culture)
+    List<PozycjaKosztu> pozycje,
+    Dictionary<long, KategoriaKosztu> kategorie,
+    Dictionary<long, List<AlokacjaKosztu>> alokacjeByPozycja,
+    Dictionary<Guid, Lokal> lokaleById,
+    Dictionary<Guid, Encja> encjeById,
+    bool includeAllocations,
+    CultureInfo culture)
         {
             var rows = new List<IReadOnlyDictionary<string, string>>();
 
@@ -267,15 +290,29 @@ namespace CastlePlus2.Application.Finanse.ProcesyFaktury.Commands.GenerateFaktur
                     allocationsText = string.Join(", ", names);
                 }
 
+                var lp = (i + 1).ToString(culture);
+                var kat = kategoria?.Nazwa ?? string.Empty;
+                var opis = pozycja.Opis ?? string.Empty;
+                var netto = pozycja.KwotaNetto.ToString("0.00", culture);
+                var brutto = pozycja.KwotaBrutto.ToString("0.00", culture);
+
                 rows.Add(new Dictionary<string, string>
                 {
-                    ["LP"] = (i + 1).ToString(culture),
-                    ["KATEGORIA"] = kategoria?.Nazwa ?? string.Empty,
+                    // legacy / UPPER
+                    ["LP"] = lp,
+                    ["KATEGORIA"] = kat,
                     ["KATEGORIA_KOD"] = kategoria?.Kod ?? string.Empty,
-                    ["OPIS"] = pozycja.Opis ?? string.Empty,
-                    ["NETTO"] = pozycja.KwotaNetto.ToString("0.00", culture),
-                    ["BRUTTO"] = pozycja.KwotaBrutto.ToString("0.00", culture),
-                    ["ALOKACJE"] = allocationsText
+                    ["OPIS"] = opis,
+                    ["NETTO"] = netto,
+                    ["BRUTTO"] = brutto,
+                    ["ALOKACJE"] = allocationsText,
+
+                    // CamelCase (dla Twojego szablonu)
+                    ["Kategoria"] = kat,
+                    ["Opis"] = opis,
+                    ["Netto"] = netto,
+                    ["Brutto"] = brutto,
+                    ["Alokacje"] = allocationsText
                 });
             }
 
