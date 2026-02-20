@@ -1,0 +1,248 @@
+﻿@page "/dashboard/najem-analityka"
+@attribute [Authorize(Roles = RoleCodes.AdminOrManagerOrEmployee)]
+
+@using CastlePlus2.Client.Services.Najem
+@using CastlePlus2.Contracts.DTOs.Najem
+@using CastlePlus2.Contracts.Requests.Najem
+@using MudBlazor
+@inject INajemAnalitykaService NajemAnalitykaService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="fw-700 mb-4">Analityka najmu</MudText>
+
+<MudPaper Class="pa-4 mb-4 glass-panel">
+    <MudText Typo="Typo.h6" Class="mb-2">Obłożenie dziś (UTC)</MudText>
+
+    <MudTextField T="string"
+                  Value="@_occupancySearch"
+                  ValueChanged="OnOccupancySearchChanged"
+                  Placeholder="Filtruj: nieruchomość / budynek / lokal / najemca"
+                  Immediate="true"
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Class="mb-3" />
+
+    @if (_isOccupancyLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="mb-2" />
+    }
+
+    <MudTable Items="_occupancyItems"
+              Dense="true"
+              Hover="true"
+              Bordered="true"
+              Striped="true"
+              Filter="OccupancyFilter"
+              Loading="_isOccupancyLoading">
+        <HeaderContent>
+            <MudTh>Nieruchomość</MudTh>
+            <MudTh>Budynek</MudTh>
+            <MudTh>Lokal</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh>Najemca</MudTh>
+            <MudTh>Umowa od</MudTh>
+            <MudTh>Umowa do</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Nieruchomość">@context.NazwaNieruchomosci</MudTd>
+            <MudTd DataLabel="Budynek">@context.KodBudynku</MudTd>
+            <MudTd DataLabel="Lokal">@context.KodLokalu</MudTd>
+            <MudTd DataLabel="Status">
+                <MudChip T="string" Size="Size.Small" Color="@(context.CzyZajety? Color.Success: Color.Default)">
+                    @(context.CzyZajety ? "Zajęty" : "Wolny")
+                </MudChip>
+            </MudTd>
+            <MudTd DataLabel="Najemca">@(context.NajemcaNazwa ?? "-")</MudTd>
+            <MudTd DataLabel="Umowa od">@FormatDate(context.UmowaOd)</MudTd>
+            <MudTd DataLabel="Umowa do">@FormatDate(context.UmowaDo)</MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudAlert Severity="Severity.Info" Dense="true">Brak danych dla wybranego zakresu</MudAlert>
+        </NoRecordsContent>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+</MudPaper>
+
+<MudPaper Class="pa-4 glass-panel">
+    <MudText Typo="Typo.h6" Class="mb-2">Raport miesięczny</MudText>
+
+    <MudGrid Spacing="2" Class="mb-3">
+        <MudItem xs="12" sm="3" md="2">
+            <MudNumericField T="int"
+                             Label="Rok"
+                             Value="_selectedYear"
+                             ValueChanged="OnYearChanged"
+                             Min="2000"
+                             Max="2100"
+                             Immediate="true" />
+        </MudItem>
+
+        <MudItem xs="12" sm="3" md="2">
+            <MudSelect T="int"
+                       Label="Miesiąc"
+                       Value="_selectedMonth"
+                       ValueChanged="OnMonthChanged">
+                @* FIX: unikamy @for (closure -> wszystkie pozycje potrafią wyświetlać „13”) *@
+                @foreach (var m in Enumerable.Range(1, 12))
+                {
+                    <MudSelectItem T="int" Value="m">@m</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+
+        <MudItem xs="12" sm="3" md="2" Class="d-flex align-end">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="LoadMonthlyReportAsync"
+                       Disabled="_isReportLoading">
+                Pobierz
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+
+    @if (_isReportLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="mb-2" />
+    }
+
+    <MudTable Items="_monthlyReportItems"
+              Dense="true"
+              Hover="true"
+              Bordered="true"
+              Striped="true"
+              Loading="_isReportLoading">
+        <HeaderContent>
+            <MudTh>Najemca</MudTh>
+            <MudTh>Wynajmujący</MudTh>
+            <MudTh>Data początku</MudTh>
+            <MudTh>Data zakończenia</MudTh>
+            <MudTh>Kwota bazowa</MudTh>
+            <MudTh>Waluta</MudTh>
+            <MudTh>Liczba składników</MudTh>
+            <MudTh>Liczba przedmiotów</MudTh>
+            <MudTh>Przedmioty</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Najemca">@(context.Najemca ?? "-")</MudTd>
+            <MudTd DataLabel="Wynajmujący">@(context.Wynajmujacy ?? "-")</MudTd>
+            <MudTd DataLabel="Data początku">@context.DataPoczatku.ToString("yyyy-MM-dd")</MudTd>
+            <MudTd DataLabel="Data zakończenia">@FormatDate(context.DataZakonczenia)</MudTd>
+            <MudTd DataLabel="Kwota bazowa">@context.KwotaMiesiecznaBazowa.ToString("N2")</MudTd>
+            <MudTd DataLabel="Waluta">@context.KodWaluty</MudTd>
+            <MudTd DataLabel="Liczba składników">@context.LiczbaSkladnikow</MudTd>
+            <MudTd DataLabel="Liczba przedmiotów">@context.LiczbaPrzedmiotow</MudTd>
+            <MudTd DataLabel="Przedmioty">@(context.Przedmioty ?? "-")</MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudAlert Severity="Severity.Info" Dense="true">Brak danych dla wybranego zakresu</MudAlert>
+        </NoRecordsContent>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<OblozenieLokaluDto> _occupancyItems = new();
+    private List<RaportNajmuZaMiesiacRowDto> _monthlyReportItems = new();
+
+    private string _occupancySearch = string.Empty;
+    private bool _isOccupancyLoading = true;
+    private bool _isReportLoading;
+
+    private int _selectedYear = DateTime.UtcNow.Year;
+    private int _selectedMonth = DateTime.UtcNow.Month;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Safety: miesiąc zawsze 1..12 (gdyby wcześniej był już „13”)
+        _selectedMonth = Math.Clamp(_selectedMonth, 1, 12);
+
+        await LoadOccupancyAsync();
+    }
+
+    private async Task LoadOccupancyAsync()
+    {
+        _isOccupancyLoading = true;
+
+        try
+        {
+            var response = await NajemAnalitykaService.GetOblozenieLokaliUtcDzisAsync();
+            _occupancyItems = response?.ToList() ?? new();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się pobrać obłożenia: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isOccupancyLoading = false;
+        }
+    }
+
+    private async Task LoadMonthlyReportAsync()
+    {
+        _isReportLoading = true;
+
+        try
+        {
+            _selectedMonth = Math.Clamp(_selectedMonth, 1, 12);
+
+            var request = new GetRaportNajmuZaMiesiacRequest
+            {
+                Rok = _selectedYear,
+                Miesiac = _selectedMonth
+            };
+
+            var response = await NajemAnalitykaService.GetRaportNajmuZaMiesiacAsync(request);
+            _monthlyReportItems = response?.ToList() ?? new();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się pobrać raportu miesięcznego: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isReportLoading = false;
+        }
+    }
+
+    private bool OccupancyFilter(OblozenieLokaluDto item)
+    {
+        if (string.IsNullOrWhiteSpace(_occupancySearch))
+            return true;
+
+        var needle = _occupancySearch.Trim();
+
+        return ContainsIgnoreCase(item.NazwaNieruchomosci, needle)
+            || ContainsIgnoreCase(item.KodBudynku, needle)
+            || ContainsIgnoreCase(item.KodLokalu, needle)
+            || ContainsIgnoreCase(item.NajemcaNazwa, needle);
+    }
+
+    private static bool ContainsIgnoreCase(string? value, string needle)
+        => value?.Contains(needle, StringComparison.OrdinalIgnoreCase) == true;
+
+    private Task OnOccupancySearchChanged(string? value)
+    {
+        _occupancySearch = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnYearChanged(int value)
+    {
+        _selectedYear = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnMonthChanged(int value)
+    {
+        _selectedMonth = value;
+        return Task.CompletedTask;
+    }
+
+    private static string FormatDate(DateTime? value)
+        => value?.ToString("yyyy-MM-dd") ?? "-";
+}
