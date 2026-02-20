@@ -53,6 +53,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "exports", "exports", "{8141
 		EXPORT_ENGINE.md = EXPORT_ENGINE.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "versions", "versions", "{86C5CBC2-57A2-4888-AA2D-EE2BAEAF981B}"
+	ProjectSection(SolutionItems) = preProject
+		V008__ZSI8_AnalitykaNajmu.txt = V008__ZSI8_AnalitykaNajmu.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,6 +120,7 @@ Global
 		{68AA134A-D008-4F6B-899C-EC88B80A300C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{7DE0B209-D537-4E24-B200-07FC761152CB} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{8141F72C-92B5-4FA8-BA25-A8C01E46BF54} = {40D73BFA-2BC0-426E-9857-E433FBEAFF41}
+		{86C5CBC2-57A2-4888-AA2D-EE2BAEAF981B} = {6AC00F83-0432-4F60-B203-7C0132F2B672}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1F0AE135-BEAE-42BD-975C-43697AA31E69}

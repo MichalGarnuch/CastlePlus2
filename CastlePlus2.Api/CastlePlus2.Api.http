@@ -595,3 +595,16 @@ Accept: application/json
   "endingInDays": 30,
   "drillDown": {}
 }
+### Najem analityka - ob³o¿enie lokali (UTC dziœ)
+GET {{CastlePlus2.Api_HostAddress}}/api/najem/analityka/oblozenie-utc-dzis
+Accept: application/json
+
+### Najem analityka - raport najmu za miesi¹c
+POST {{CastlePlus2.Api_HostAddress}}/api/najem/analityka/raport-miesiac
+Content-Type: application/json
+Accept: application/json
+
+{
+  "rok": 2026,
+  "miesiac": 2
+}

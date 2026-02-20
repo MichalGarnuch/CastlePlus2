@@ -181,6 +181,7 @@ builder.Services.AddScoped<IWlasnoscRepository, WlasnoscRepository>();
 builder.Services.AddScoped<INajemDashboardQueryService, NajemDashboardQueryService>();
 builder.Services.AddScoped<IDashboardV1NajemQueryService, DashboardV1NajemQueryService>();
 builder.Services.AddScoped<INajemPowerDashboardDataService, NajemPowerDashboardDataService>();
+builder.Services.AddScoped<INajemAnalitykaQueryService, NajemAnalitykaQueryService>();
 
 
 // MEDIA

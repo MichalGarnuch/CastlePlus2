@@ -85,6 +85,7 @@ public static class DependencyInjection
         services.AddScoped<ISkladnikiCzynszuService, SkladnikiCzynszuService>();
         services.AddScoped<IUmowyNajmuService, UmowyNajmuService>();
         services.AddScoped<IProcesyNajmuService, ProcesyNajmuService>();
+        services.AddScoped<INajemAnalitykaService, NajemAnalitykaService>();
 
         // UTRZYMANIE
         services.AddScoped<IZleceniaPracyService, ZleceniaPracyService>();

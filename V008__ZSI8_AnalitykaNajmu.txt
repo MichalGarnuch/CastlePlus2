@@ -1,0 +1,198 @@
+--------------------------------------------------------------------------------
+-- CastlePlus2 / ZSI8
+-- Analityka Najmu: VIEW + FUNCTION + PROCEDURE
+-- Idempotent: tworzy stuby, potem ALTER do w³aœciwych definicji
+--------------------------------------------------------------------------------
+
+/* ---------------------------------------------------------------------------
+   VIEW: rdzen.vw_OblozenieLokali_UtcDzis
+--------------------------------------------------------------------------- */
+IF OBJECT_ID(N'[rdzen].[vw_OblozenieLokali_UtcDzis]', N'V') IS NULL
+BEGIN
+    EXEC(N'CREATE VIEW [rdzen].[vw_OblozenieLokali_UtcDzis] AS SELECT 1 AS Dummy;');
+END
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER VIEW [rdzen].[vw_OblozenieLokali_UtcDzis]
+AS
+WITH Dzis AS
+(
+    SELECT CONVERT(date, SYSUTCDATETIME()) AS Dzien
+),
+Aktywne AS
+(
+    SELECT
+        pn.IdEncji            AS IdLokalu,
+        un.IdEncji            AS IdUmowyNajmu,
+        un.IdNajemcy          AS IdNajemcy,
+        un.DataPoczatku       AS UmowaOd,
+        un.DataZakonczenia    AS UmowaDo,
+        pn.OdDnia             AS PrzedmiotOd,
+        pn.DoDnia             AS PrzedmiotDo
+    FROM [najem].[PrzedmiotNajmu] pn
+    INNER JOIN [najem].[UmowaNajmu] un
+        ON un.IdEncji = pn.IdUmowyNajmu
+    CROSS JOIN Dzis d
+    WHERE
+        pn.OdDnia <= d.Dzien
+        AND ISNULL(pn.DoDnia, '99991231') >= d.Dzien
+        AND un.DataPoczatku <= d.Dzien
+        AND ISNULL(un.DataZakonczenia, '99991231') >= d.Dzien
+)
+SELECT
+    n.IdEncji   AS IdNieruchomosci,
+    n.Nazwa     AS NazwaNieruchomosci,
+    b.IdEncji   AS IdBudynku,
+    b.KodBudynku,
+    l.IdEncji   AS IdLokalu,
+    l.KodLokalu,
+    CAST(CASE WHEN a.IdUmowyNajmu IS NULL THEN 0 ELSE 1 END AS bit) AS CzyZajety,
+    a.IdUmowyNajmu,
+    pNaj.Nazwa  AS NajemcaNazwa,
+    a.UmowaOd,
+    a.UmowaDo
+FROM [rdzen].[Lokal] l
+INNER JOIN [rdzen].[Budynek] b
+    ON b.IdEncji = l.IdBudynku
+INNER JOIN [rdzen].[Nieruchomosc] n
+    ON n.IdEncji = b.IdNieruchomosci
+LEFT JOIN Aktywne a
+    ON a.IdLokalu = l.IdEncji
+LEFT JOIN [podmioty].[Podmiot] pNaj
+    ON pNaj.IdPodmiotu = a.IdNajemcy;
+GO
+
+/* ---------------------------------------------------------------------------
+   FUNCTION: najem.fn_SumaCzynszuNaDzien
+--------------------------------------------------------------------------- */
+IF OBJECT_ID(N'[najem].[fn_SumaCzynszuNaDzien]', N'IF') IS NULL
+BEGIN
+    EXEC(N'
+CREATE FUNCTION [najem].[fn_SumaCzynszuNaDzien]
+(
+    @IdUmowyNajmu uniqueidentifier,
+    @AsOfDate date
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT 1 AS Dummy
+);');
+END
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER FUNCTION [najem].[fn_SumaCzynszuNaDzien]
+(
+    @IdUmowyNajmu uniqueidentifier,
+    @AsOfDate date
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT
+        un.IdEncji AS IdUmowyNajmu,
+        @AsOfDate  AS AsOfDate,
+        un.KodWaluty,
+        CAST(COALESCE(SUM(sc.Stawka * ISNULL(sc.IloscBazowa, 1)), 0) AS decimal(18,2)) AS KwotaMiesiecznaBazowa,
+        COUNT_BIG(sc.IdSkladnikaCzynszu) AS LiczbaSkladnikow
+    FROM [najem].[UmowaNajmu] un
+    LEFT JOIN [najem].[SkladnikCzynszu] sc
+        ON sc.IdUmowyNajmu = un.IdEncji
+        AND sc.OdDnia <= @AsOfDate
+        AND ISNULL(sc.DoDnia, '99991231') >= @AsOfDate
+    WHERE un.IdEncji = @IdUmowyNajmu
+    GROUP BY un.IdEncji, un.KodWaluty
+);
+GO
+
+/* ---------------------------------------------------------------------------
+   PROCEDURE: najem.usp_RaportNajmuZaMiesiac
+--------------------------------------------------------------------------- */
+IF OBJECT_ID(N'[najem].[usp_RaportNajmuZaMiesiac]', N'P') IS NULL
+BEGIN
+    EXEC(N'
+CREATE PROCEDURE [najem].[usp_RaportNajmuZaMiesiac]
+    @Rok int,
+    @Miesiac int
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT 1 AS Dummy;
+END');
+END
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [najem].[usp_RaportNajmuZaMiesiac]
+    @Rok int,
+    @Miesiac int
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @Od date = DATEFROMPARTS(@Rok, @Miesiac, 1);
+    DECLARE @Do date = EOMONTH(@Od);
+
+    ;WITH UmowyAktywne AS
+    (
+        SELECT un.*
+        FROM [najem].[UmowaNajmu] un
+        WHERE un.DataPoczatku <= @Do
+          AND ISNULL(un.DataZakonczenia, '99991231') >= @Od
+    ),
+    PrzedmiotyWOkresie AS
+    (
+        SELECT
+            pn.IdUmowyNajmu,
+            pn.IdEncji
+        FROM [najem].[PrzedmiotNajmu] pn
+        WHERE pn.OdDnia <= @Do
+          AND ISNULL(pn.DoDnia, '99991231') >= @Od
+    )
+    SELECT
+        un.IdEncji AS IdUmowyNajmu,
+        un.DataPoczatku,
+        un.DataZakonczenia,
+        un.KodWaluty,
+
+        wyn.Nazwa AS Wynajmujacy,
+        naj.Nazwa AS Najemca,
+
+        cs.KwotaMiesiecznaBazowa,
+        cs.LiczbaSkladnikow,
+
+        COUNT(DISTINCT pw.IdEncji) AS LiczbaPrzedmiotow,
+        STRING_AGG(
+            COALESCE(l.KodLokalu, e.KodEncji, CONVERT(nvarchar(36), pw.IdEncji)),
+            ', '
+        ) WITHIN GROUP (ORDER BY COALESCE(l.KodLokalu, e.KodEncji, CONVERT(nvarchar(36), pw.IdEncji))) AS Przedmioty
+    FROM UmowyAktywne un
+    LEFT JOIN [podmioty].[Podmiot] wyn ON wyn.IdPodmiotu = un.IdWynajmujacego
+    LEFT JOIN [podmioty].[Podmiot] naj ON naj.IdPodmiotu = un.IdNajemcy
+    OUTER APPLY [najem].[fn_SumaCzynszuNaDzien](un.IdEncji, @Od) cs
+    LEFT JOIN PrzedmiotyWOkresie pw ON pw.IdUmowyNajmu = un.IdEncji
+    LEFT JOIN [rdzen].[Lokal] l     ON l.IdEncji = pw.IdEncji
+    LEFT JOIN [rdzen].[Encja] e     ON e.IdEncji = pw.IdEncji
+    GROUP BY
+        un.IdEncji, un.DataPoczatku, un.DataZakonczenia, un.KodWaluty,
+        wyn.Nazwa, naj.Nazwa,
+        cs.KwotaMiesiecznaBazowa, cs.LiczbaSkladnikow
+    ORDER BY naj.Nazwa, un.IdEncji;
+END
+GO
