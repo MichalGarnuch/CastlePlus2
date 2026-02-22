@@ -4,6 +4,7 @@
 
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
+
 @inject IAuthService AuthService
 @inject CustomAuthStateProvider AuthStateProvider
 @inject NavigationManager Nav
@@ -59,9 +60,7 @@
     private bool _showPassword;
 
     private void TogglePasswordVisibility()
-    {
-        _showPassword = !_showPassword;
-    }
+        => _showPassword = !_showPassword;
 
     private async Task HandlePasswordKeyDown(KeyboardEventArgs args)
     {
@@ -73,15 +72,8 @@
 
     private async Task HandleLoginAsync()
     {
-        if (_isSubmitting)
-        {
+        if (_isSubmitting || _form is null)
             return;
-        }
-
-        if (_form is null)
-        {
-            return;
-        }
 
         await _form.Validate();
         if (!_form.IsValid)
@@ -95,6 +87,7 @@
         {
             await AuthService.LoginAsync(_loginOrEmail, _password, "client");
             await AuthStateProvider.MarkUserAsAuthenticatedFromTokenAsync();
+
             var redirectUrl = ResolveReturnUrl();
             Nav.NavigateTo(redirectUrl, replace: true);
         }
@@ -107,25 +100,23 @@
             _isSubmitting = false;
         }
     }
+
     private string ResolveReturnUrl()
     {
+        // Domyślnie idziemy na "/" i Home.razor przekieruje po roli
         if (string.IsNullOrWhiteSpace(ReturnUrl))
-        {
-            return "/dashboard/najem";
-        }
+            return "/";
 
+        // Nie zawracamy na login
         if (ReturnUrl.Equals("/auth/login", StringComparison.OrdinalIgnoreCase)
             || ReturnUrl.Equals("/login", StringComparison.OrdinalIgnoreCase))
-        {
-            return "/dashboard/najem";
-        }
+            return "/";
 
+        // Security: tylko lokalne ścieżki
         if (ReturnUrl.StartsWith("/", StringComparison.Ordinal)
             && !ReturnUrl.StartsWith("//", StringComparison.Ordinal))
-        {
             return ReturnUrl;
-        }
 
-        return "/dashboard/najem";
+        return "/";
     }
 }
