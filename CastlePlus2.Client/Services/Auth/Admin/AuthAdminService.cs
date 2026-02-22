@@ -21,9 +21,7 @@ public sealed class AuthAdminService : IAuthAdminService
     {
         var response = await _httpClient.GetFromJsonAsync<AdminUserDto[]>("api/auth/admin/users");
         if (response is null)
-        {
             throw new InvalidOperationException("Brak listy użytkowników w odpowiedzi.");
-        }
 
         return response;
     }
@@ -32,9 +30,7 @@ public sealed class AuthAdminService : IAuthAdminService
     {
         var response = await _httpClient.GetFromJsonAsync<RoleDto[]>("api/auth/admin/roles");
         if (response is null)
-        {
             throw new InvalidOperationException("Brak listy ról w odpowiedzi.");
-        }
 
         return response;
     }
@@ -49,11 +45,8 @@ public sealed class AuthAdminService : IAuthAdminService
         var response = await _httpClient.PutAsJsonAsync($"api/auth/admin/users/{userId}/roles", request);
 
         if (response.IsSuccessStatusCode)
-        {
             return;
-        }
 
-        // zamiast EnsureSuccessStatusCode() -> czytelny błąd z body
         var body = await response.Content.ReadAsStringAsync();
         var message = TryExtractProblemMessage(body);
 
@@ -61,23 +54,24 @@ public sealed class AuthAdminService : IAuthAdminService
             $"Błąd zapisu ról: {(int)response.StatusCode} ({response.ReasonPhrase}). {message}");
     }
 
-    public async Task CreateUserAsync(string login, string email, string[] roleCodes)
+    public async Task CreateUserAsync(string login, string email, string password, string confirmPassword, string[] roleCodes)
     {
         var request = new CreateUserRequest
         {
-            Login = login,
-            Email = email,
+            Login = (login ?? string.Empty).Trim(),
+            Email = (email ?? string.Empty).Trim(),
+            Password = password ?? string.Empty,
+            ConfirmPassword = confirmPassword ?? string.Empty,
             RoleCodes = roleCodes ?? Array.Empty<string>()
         };
 
         var response = await _httpClient.PostAsJsonAsync("api/auth/admin/users", request);
         if (response.IsSuccessStatusCode)
-        {
             return;
-        }
 
         var body = await response.Content.ReadAsStringAsync();
         var message = TryExtractProblemMessage(body);
+
         throw new InvalidOperationException(
             $"Błąd tworzenia konta: {(int)response.StatusCode} ({response.ReasonPhrase}). {message}");
     }
@@ -85,21 +79,16 @@ public sealed class AuthAdminService : IAuthAdminService
     private static string TryExtractProblemMessage(string body)
     {
         if (string.IsNullOrWhiteSpace(body))
-        {
             return "Brak treści odpowiedzi.";
-        }
 
         try
         {
             using var doc = JsonDocument.Parse(body);
             if (doc.RootElement.ValueKind != JsonValueKind.Object)
-            {
                 return body;
-            }
 
             var root = doc.RootElement;
 
-            // ProblemDetails: title/detail
             string? title = null;
             string? detail = null;
             string? traceId = null;
@@ -113,7 +102,6 @@ public sealed class AuthAdminService : IAuthAdminService
             if (root.TryGetProperty("traceId", out var traceEl) && traceEl.ValueKind == JsonValueKind.String)
                 traceId = traceEl.GetString();
 
-            // ValidationProblemDetails: errors
             string? firstError = null;
             if (root.TryGetProperty("errors", out var errorsEl) && errorsEl.ValueKind == JsonValueKind.Object)
             {
@@ -134,19 +122,13 @@ public sealed class AuthAdminService : IAuthAdminService
             var msg = "";
 
             if (!string.IsNullOrWhiteSpace(title) || !string.IsNullOrWhiteSpace(detail))
-            {
                 msg = $"{title} - {detail}".Trim(' ', '-');
-            }
 
             if (!string.IsNullOrWhiteSpace(firstError))
-            {
                 msg = string.IsNullOrWhiteSpace(msg) ? firstError : $"{msg} | {firstError}";
-            }
 
             if (!string.IsNullOrWhiteSpace(traceId))
-            {
                 msg = string.IsNullOrWhiteSpace(msg) ? $"TraceId={traceId}" : $"{msg} | TraceId={traceId}";
-            }
 
             return string.IsNullOrWhiteSpace(msg) ? body : msg;
         }

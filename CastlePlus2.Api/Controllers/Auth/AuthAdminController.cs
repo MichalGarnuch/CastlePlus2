@@ -69,6 +69,8 @@ namespace CastlePlus2.Api.Controllers.Auth
                 CreatedBy = createdBy,
                 Login = request.Login,
                 Email = request.Email,
+                Password = request.Password,
+                ConfirmPassword = request.ConfirmPassword,
                 RoleCodes = request.RoleCodes
             }, ct);
 

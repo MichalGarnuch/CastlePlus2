@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using CastlePlus2.Application.Auth.ProcesyAuth.Commands.ChangePassword;
 using CastlePlus2.Application.Auth.ProcesyAuth.Commands.Login;
 using CastlePlus2.Application.Auth.ProcesyAuth.Commands.Refresh;
 using CastlePlus2.Application.Auth.ProcesyAuth.Commands.Register;
@@ -32,6 +33,9 @@ namespace CastlePlus2.Api.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct)
         {
+            if (request is null)
+                return BadRequest("Brak danych wejściowych.");
+
             try
             {
                 var result = await _mediator.Send(new LoginCommand
@@ -43,9 +47,12 @@ namespace CastlePlus2.Api.Controllers.Auth
 
                 return Ok(result.Tokens);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized();
+                return Unauthorized(BuildProblemDetails(
+                    StatusCodes.Status401Unauthorized,
+                    "Błąd autoryzacji",
+                    ex.Message));
             }
         }
 
@@ -56,6 +63,9 @@ namespace CastlePlus2.Api.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Refresh([FromBody] RefreshRequest request, CancellationToken ct)
         {
+            if (request is null)
+                return BadRequest("Brak danych wejściowych.");
+
             try
             {
                 var result = await _mediator.Send(new RefreshCommand
@@ -66,12 +76,14 @@ namespace CastlePlus2.Api.Controllers.Auth
 
                 return Ok(result.Tokens);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized();
+                return Unauthorized(BuildProblemDetails(
+                    StatusCodes.Status401Unauthorized,
+                    "Błąd autoryzacji",
+                    ex.Message));
             }
         }
-
 
         [HttpPost("register")]
         [Authorize(Roles = RoleCodes.Admin)]
@@ -79,6 +91,9 @@ namespace CastlePlus2.Api.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken ct)
         {
+            if (request is null)
+                return BadRequest("Brak danych wejściowych.");
+
             var result = await _mediator.Send(new RegisterCommand
             {
                 Login = request.Login,
@@ -96,6 +111,9 @@ namespace CastlePlus2.Api.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RequestAccess([FromBody] CreateRequestAccessRequest request, CancellationToken ct)
         {
+            if (request is null)
+                return BadRequest("Brak danych wejściowych.");
+
             var result = await _mediator.Send(new CreateRequestAccessCommand
             {
                 FullName = request.FullName,
@@ -115,6 +133,9 @@ namespace CastlePlus2.Api.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Activate([FromBody] ActivateAccountRequest request, CancellationToken ct)
         {
+            if (request is null)
+                return BadRequest("Brak danych wejściowych.");
+
             await _mediator.Send(new ActivateAccountCommand
             {
                 Token = request.Token,
@@ -125,6 +146,51 @@ namespace CastlePlus2.Api.Controllers.Auth
             return NoContent();
         }
 
+        [HttpPost("change-password")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken ct)
+        {
+            if (request is null)
+                return BadRequest("Brak danych wejściowych.");
+
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdValue, out var userId))
+            {
+                return Unauthorized(BuildProblemDetails(
+                    StatusCodes.Status401Unauthorized,
+                    "Błąd autoryzacji",
+                    "Brak identyfikatora użytkownika w tokenie."));
+            }
+
+            try
+            {
+                await _mediator.Send(new ChangePasswordCommand(
+                    userId,
+                    request.CurrentPassword,
+                    request.NewPassword,
+                    request.ConfirmNewPassword), ct);
+
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(BuildProblemDetails(
+                    StatusCodes.Status401Unauthorized,
+                    "Błąd autoryzacji",
+                    ex.Message));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(BuildProblemDetails(
+                    StatusCodes.Status404NotFound,
+                    "Nie znaleziono zasobu",
+                    ex.Message));
+            }
+        }
+
         [HttpGet("me")]
         [ProducesResponseType(typeof(CurrentUserDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -132,10 +198,32 @@ namespace CastlePlus2.Api.Controllers.Auth
         {
             var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(userIdValue, out var userId))
-                return Unauthorized();
+            {
+                return Unauthorized(BuildProblemDetails(
+                    StatusCodes.Status401Unauthorized,
+                    "Błąd autoryzacji",
+                    "Brak identyfikatora użytkownika w tokenie."));
+            }
 
             var result = await _mediator.Send(new GetMeQuery(userId), ct);
-            return result is null ? Unauthorized() : Ok(result);
+            return result is null
+                ? Unauthorized(BuildProblemDetails(StatusCodes.Status401Unauthorized, "Błąd autoryzacji", "Brak użytkownika."))
+                : Ok(result);
+        }
+
+        private ProblemDetails BuildProblemDetails(int status, string title, string detail)
+        {
+            var problem = new ProblemDetails
+            {
+                Status = status,
+                Title = title,
+                Detail = detail
+            };
+
+            // żeby klient widział traceId (u Ciebie TryExtractProblemMessage go obsługuje)
+            problem.Extensions["traceId"] = HttpContext.TraceIdentifier;
+
+            return problem;
         }
     }
 }

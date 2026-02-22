@@ -39,6 +39,11 @@ public class ExceptionHandlingMiddleware
             _logger.LogWarning(ex, "Konflikt biznesowy: {Message}", ex.Message);
             await HandleBusinessConflictExceptionAsync(context, ex);
         }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Nie znaleziono zasobu: {Message}", ex.Message);
+            await HandleNotFoundExceptionAsync(context, ex);
+        }
         catch (Exception ex)
         {
             // 500 – log z pełnym wyjątkiem + traceId
@@ -83,6 +88,24 @@ public class ExceptionHandlingMiddleware
             Status = StatusCodes.Status400BadRequest,
             Title = "Błąd walidacji",
             Detail = "Dane wejściowe nie spełniają wymagań."
+        };
+
+        problem.Extensions["traceId"] = context.TraceIdentifier;
+
+        await context.Response.WriteAsync(JsonSerializer.Serialize(problem, JsonOptions));
+    }
+
+
+    private static async Task HandleNotFoundExceptionAsync(HttpContext context, KeyNotFoundException ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status404NotFound;
+        context.Response.ContentType = "application/problem+json";
+
+        var problem = new ProblemDetails
+        {
+            Status = StatusCodes.Status404NotFound,
+            Title = "Nie znaleziono zasobu",
+            Detail = ex.Message
         };
 
         problem.Extensions["traceId"] = context.TraceIdentifier;

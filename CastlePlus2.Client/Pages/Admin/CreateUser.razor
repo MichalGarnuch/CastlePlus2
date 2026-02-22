@@ -1,6 +1,7 @@
 ﻿@page "/admin/create-user"
 @attribute [Authorize(Roles = RoleCodes.Admin)]
 
+@using CastlePlus2.Shared.Auth
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Web
 @using CastlePlus2.Client.Services.Auth.Admin
@@ -15,7 +16,7 @@
     <MudStack Spacing="3">
         <MudText Typo="Typo.h5" Class="fw-700">Dodaj konto</MudText>
         <MudText Typo="Typo.body2" Class="opacity-80">
-            Konto zostanie utworzone przez administratora, a użytkownik dostanie link aktywacyjny do ustawienia hasła.
+            Konto zostanie utworzone przez administratora z hasłem startowym. Użytkownik może zalogować się od razu.
         </MudText>
 
         <MudForm @ref="_form">
@@ -32,13 +33,25 @@
                               Required="true"
                               RequiredError="Email jest wymagany" />
 
-                <!-- WAŻNE: bez @bind-SelectedValues (bo generuje SelectedValuesChanged z HashSet<T>) -->
-                <!-- W Twojej wersji MudBlazor SelectedValuesChanged jest EventCallback (niegeneryczny) -->
+                <MudTextField @bind-Value="_password"
+                              Label="Hasło"
+                              Variant="Variant.Outlined"
+                              InputType="InputType.Password"
+                              Required="true"
+                              RequiredError="Hasło jest wymagane" />
+
+                <MudTextField @bind-Value="_confirmPassword"
+                              Label="Potwierdź hasło"
+                              Variant="Variant.Outlined"
+                              InputType="InputType.Password"
+                              Required="true"
+                              RequiredError="Potwierdzenie hasła jest wymagane" />
+
                 <MudSelect T="string"
                            Label="Role"
                            Variant="Variant.Outlined"
                            MultiSelection="true"
-                           SelectedValues="_rolesSelected"
+                           SelectedValues="@_rolesSelected"
                            SelectedValuesChanged="OnRolesSelectedChanged">
                     @foreach (var role in _roles)
                     {
@@ -74,10 +87,10 @@
     private MudForm? _form;
     private string _login = string.Empty;
     private string _email = string.Empty;
+    private string _password = string.Empty;
+    private string _confirmPassword = string.Empty;
 
-    // Trzymamy HashSet – MudSelect przy MultiSelection zwykle mutuje przekazaną kolekcję
     private HashSet<string> _rolesSelected = new(StringComparer.OrdinalIgnoreCase);
-
     private List<RoleDto> _roles = new();
     private bool _isSubmitting;
 
@@ -99,10 +112,9 @@
         }
     }
 
-    // W Twojej wersji MudBlazor to jest EventCallback (bez typu), więc handler też musi być bez parametru.
-    private Task OnRolesSelectedChanged()
+    private Task OnRolesSelectedChanged(IEnumerable<string> values)
     {
-        // jeśli MudSelect mutuje HashSet, to tylko odświeżamy UI
+        _rolesSelected = new HashSet<string>(values ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase);
         StateHasChanged();
         return Task.CompletedTask;
     }
@@ -127,6 +139,18 @@
             return;
         }
 
+        if (string.IsNullOrWhiteSpace(_password) || _password.Length < 8)
+        {
+            Snackbar.Add("Hasło musi mieć co najmniej 8 znaków.", Severity.Warning);
+            return;
+        }
+
+        if (!string.Equals(_password, _confirmPassword, StringComparison.Ordinal))
+        {
+            Snackbar.Add("Potwierdzenie hasła musi być zgodne z hasłem.", Severity.Warning);
+            return;
+        }
+
         if (_rolesSelected.Count == 0)
         {
             Snackbar.Add("Wybierz co najmniej jedną rolę.", Severity.Warning);
@@ -136,7 +160,7 @@
         _isSubmitting = true;
         try
         {
-            await AuthAdminService.CreateUserAsync(_login, _email, _rolesSelected.ToArray());
+            await AuthAdminService.CreateUserAsync(_login, _email, _password, _confirmPassword, _rolesSelected.ToArray());
             Snackbar.Add("Konto zostało utworzone.", Severity.Success);
             Nav.NavigateTo("/admin/uzytkownicy-role");
         }

@@ -48,5 +48,24 @@ namespace CastlePlus2.Infrastructure.Repositories.Auth
 
             await _dbContext.SaveChangesAsync(ct);
         }
+
+        public async Task RevokeAllForUserAsync(int userId, DateTime revokedAtUtc, CancellationToken ct)
+        {
+            var tokens = await _dbContext.RefreshTokens
+                .Where(x => x.IdUzytkownika == userId && !x.RevokedAtUtc.HasValue)
+                .ToListAsync(ct);
+
+            if (tokens.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var token in tokens)
+            {
+                token.RevokedAtUtc = revokedAtUtc;
+            }
+
+            await _dbContext.SaveChangesAsync(ct);
+        }
     }
 }

@@ -26,12 +26,16 @@ namespace CastlePlus2.Application.Auth.ProcesyAuth.Commands.Login
 
         public async Task<LoginResult> Handle(LoginCommand request, CancellationToken ct)
         {
-            var user = await _uzytkownikRepository.FindByLoginOrEmailAsync(request.LoginOrEmail, ct);
-            if (user == null || !user.CzyAktywny)
-                throw new UnauthorizedAccessException("Niepoprawne dane logowania.");
+            var loginOrEmail = request.LoginOrEmail?.Trim() ?? string.Empty;
+            var user = await _uzytkownikRepository.FindByLoginOrEmailAsync(loginOrEmail, ct);
+            if (user == null)
+                throw new UnauthorizedAccessException("Nieprawidłowy login/email lub hasło.");
+
+            if (!user.CzyAktywny)
+                throw new UnauthorizedAccessException("Konto jest zablokowane.");
 
             if (!_passwordHashService.Verify(request.Password, user.HasloHash))
-                throw new UnauthorizedAccessException("Niepoprawne dane logowania.");
+                throw new UnauthorizedAccessException("Nieprawidłowy login/email lub hasło.");
 
             var utcNow = DateTime.UtcNow;
 

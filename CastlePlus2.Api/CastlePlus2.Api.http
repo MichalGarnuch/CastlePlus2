@@ -608,3 +608,56 @@ Accept: application/json
   "rok": 2026,
   "miesiac": 2
 }
+### [AUTH][ADMIN] create user z has³em
+POST {{baseUrl}}/api/auth/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "login": "user.test",
+  "email": "user.test@local",
+  "password": "HasloTest123!",
+  "confirmPassword": "HasloTest123!",
+  "roleCodes": ["User"]
+}
+
+### [AUTH] login utworzonego usera
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "loginOrEmail": "user.test",
+  "password": "HasloTest123!",
+  "deviceInfo": "api.http"
+}
+
+### [AUTH] change password
+POST {{baseUrl}}/api/auth/change-password
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "currentPassword": "HasloTest123!",
+  "newPassword": "NoweHaslo123!",
+  "confirmNewPassword": "NoweHaslo123!"
+}
+
+### [AUTH] login starym has³em (powinien fail)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "loginOrEmail": "user.test",
+  "password": "HasloTest123!",
+  "deviceInfo": "api.http"
+}
+
+### [AUTH] login nowym has³em (powinien OK)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "loginOrEmail": "user.test",
+  "password": "NoweHaslo123!",
+  "deviceInfo": "api.http"
+}

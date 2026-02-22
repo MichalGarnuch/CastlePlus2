@@ -21,9 +21,10 @@ namespace CastlePlus2.Infrastructure.Repositories.Auth
 
         public Task<Uzytkownik?> FindByLoginOrEmailAsync(string loginOrEmail, CancellationToken ct)
         {
+            var normalized = (loginOrEmail ?? string.Empty).Trim();
             return _dbContext.Uzytkownicy
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Login == loginOrEmail || x.Email == loginOrEmail, ct);
+                .FirstOrDefaultAsync(x => x.Login == normalized || x.Email == normalized, ct);
         }
 
         public Task<Uzytkownik?> FindByIdAsync(int idUzytkownika, CancellationToken ct)

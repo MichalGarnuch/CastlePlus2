@@ -7,6 +7,9 @@ public interface IAuthAdminService
 {
     Task<AdminUserDto[]> GetUsersAsync();
     Task<RoleDto[]> GetRolesAsync();
+
     Task SetUserRolesAsync(int userId, string[] roleCodes);
-    Task CreateUserAsync(string login, string email, string[] roleCodes);
+
+    // Docelowa metoda: admin tworzy konto i nadaje hasło od razu
+    Task CreateUserAsync(string login, string email, string password, string confirmPassword, string[] roleCodes);
 }
