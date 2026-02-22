@@ -54,6 +54,48 @@ public sealed class AuthAdminService : IAuthAdminService
             $"Błąd zapisu ról: {(int)response.StatusCode} ({response.ReasonPhrase}). {message}");
     }
 
+
+    public async Task SetUserActiveAsync(int userId, bool isActive)
+    {
+        var request = new SetUserActiveRequest
+        {
+            IdUzytkownika = userId,
+            CzyAktywny = isActive
+        };
+
+        var response = await _httpClient.PutAsJsonAsync($"api/auth/admin/users/{userId}/active", request);
+        if (response.IsSuccessStatusCode)
+            return;
+
+        var body = await response.Content.ReadAsStringAsync();
+        var message = TryExtractProblemMessage(body);
+        throw new InvalidOperationException($"Błąd zmiany statusu konta: {(int)response.StatusCode} ({response.ReasonPhrase}). {message}");
+    }
+
+    public async Task DeleteUserAsync(int userId)
+    {
+        var request = new DeleteUserRequest { IdUzytkownika = userId };
+        var response = await _httpClient.PutAsJsonAsync($"api/auth/admin/users/{userId}/delete", request);
+        if (response.IsSuccessStatusCode)
+            return;
+
+        var body = await response.Content.ReadAsStringAsync();
+        var message = TryExtractProblemMessage(body);
+        throw new InvalidOperationException($"Błąd usuwania konta: {(int)response.StatusCode} ({response.ReasonPhrase}). {message}");
+    }
+
+    public async Task RestoreUserAsync(int userId)
+    {
+        var request = new RestoreUserRequest { IdUzytkownika = userId };
+        var response = await _httpClient.PutAsJsonAsync($"api/auth/admin/users/{userId}/restore", request);
+        if (response.IsSuccessStatusCode)
+            return;
+
+        var body = await response.Content.ReadAsStringAsync();
+        var message = TryExtractProblemMessage(body);
+        throw new InvalidOperationException($"Błąd przywracania konta: {(int)response.StatusCode} ({response.ReasonPhrase}). {message}");
+    }
+
     public async Task CreateUserAsync(string login, string email, string password, string confirmPassword, string[] roleCodes)
     {
         var request = new CreateUserRequest

@@ -102,6 +102,7 @@ namespace CastlePlus2.Infrastructure.Repositories.Auth
                     u.Login,
                     u.Email,
                     u.CzyAktywny,
+                    u.CzyUsuniety,
                     RoleCodes = u.UzytkownikRole.Select(ur => ur.Rola.Kod)
                 })
                 .ToListAsync(ct);
@@ -113,6 +114,7 @@ namespace CastlePlus2.Infrastructure.Repositories.Auth
                     Login = u.Login,
                     Email = u.Email,
                     CzyAktywny = u.CzyAktywny,
+                    CzyUsuniety = u.CzyUsuniety,
                     RoleCodes = u.RoleCodes.Distinct(StringComparer.OrdinalIgnoreCase).ToArray()
                 })
                 .ToArray();
@@ -174,6 +176,59 @@ namespace CastlePlus2.Infrastructure.Repositories.Auth
                 await _dbContext.SaveChangesAsync(ct);
                 await transaction.CommitAsync(ct);
             });
+        }
+
+        public async Task<bool> SetUserActiveAsync(int userId, bool isActive, DateTime utcNow, CancellationToken ct)
+        {
+            var user = await _dbContext.Uzytkownicy.FirstOrDefaultAsync(x => x.IdUzytkownika == userId, ct);
+            if (user is null)
+            {
+                return false;
+            }
+
+            user.CzyAktywny = isActive;
+            user.DataModyfikacjiUtc = utcNow;
+            _dbContext.Uzytkownicy.Update(user);
+            await _dbContext.SaveChangesAsync(ct);
+            return true;
+        }
+
+        public async Task<bool> SoftDeleteUserAsync(int userId, string deletedBy, DateTime utcNow, CancellationToken ct)
+        {
+            var user = await _dbContext.Uzytkownicy.FirstOrDefaultAsync(x => x.IdUzytkownika == userId, ct);
+            if (user is null)
+            {
+                return false;
+            }
+
+            user.CzyUsuniety = true;
+            user.UsunietoUtc = utcNow;
+            user.UsunietoPrzez = deletedBy;
+            user.DataModyfikacjiUtc = utcNow;
+            _dbContext.Uzytkownicy.Update(user);
+            await _dbContext.SaveChangesAsync(ct);
+            return true;
+        }
+
+        public async Task<bool> RestoreUserAsync(int userId, DateTime utcNow, CancellationToken ct)
+        {
+            var user = await _dbContext.Uzytkownicy.FirstOrDefaultAsync(x => x.IdUzytkownika == userId, ct);
+            if (user is null)
+            {
+                return false;
+            }
+
+            user.CzyUsuniety = false;
+            user.UsunietoUtc = null;
+            user.UsunietoPrzez = null;
+
+            // Zalecane: restore odblokowuje konto
+            user.CzyAktywny = true;
+
+            user.DataModyfikacjiUtc = utcNow;
+            _dbContext.Uzytkownicy.Update(user);
+            await _dbContext.SaveChangesAsync(ct);
+            return true;
         }
 
         public async Task UpdatePasswordAsync(int userId, string passwordHash, DateTime utcNow, CancellationToken ct)

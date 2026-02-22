@@ -12,12 +12,12 @@ using CastlePlus2.Application.Interfaces.Finanse;
 using CastlePlus2.Application.Interfaces.Konfiguracja;
 using CastlePlus2.Application.Interfaces.Media;
 using CastlePlus2.Application.Interfaces.Najem;
+using CastlePlus2.Application.Interfaces.Notifications;
 using CastlePlus2.Application.Interfaces.Podmioty;
 using CastlePlus2.Application.Interfaces.Rdzen;
 using CastlePlus2.Application.Interfaces.Reports;
 using CastlePlus2.Application.Interfaces.Slowniki;
 using CastlePlus2.Application.Interfaces.Utrzymanie;
-using CastlePlus2.Application.Interfaces.Notifications;
 using CastlePlus2.Application.Mappings.Rdzen;
 using CastlePlus2.Application.Rdzen.Nieruchomosci.Commands.CreateNieruchomosc;
 using CastlePlus2.Domain.Entities.Auth;
@@ -36,8 +36,9 @@ using CastlePlus2.Infrastructure.Services.Auth;
 using CastlePlus2.Infrastructure.Services.Dashboard;
 using CastlePlus2.Infrastructure.Services.Exports;
 using CastlePlus2.Infrastructure.Services.Najem;
-using CastlePlus2.Infrastructure.Services.Reports;
 using CastlePlus2.Infrastructure.Services.Notifications;
+using CastlePlus2.Infrastructure.Services.Reports;
+using CastlePlus2.Shared.Auth;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
@@ -45,10 +46,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
-using CastlePlus2.Shared.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -274,6 +275,10 @@ var audience = jwtSection["Audience"];
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        // KLUCZOWE: mapuj "role"/"nameid" z JWT na ClaimTypes.*
+        options.MapInboundClaims = true;
+        JwtSecurityTokenHandler.DefaultMapInboundClaims = true;
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
@@ -284,6 +289,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = audience,
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromMinutes(1),
+
+            // zostaw jak masz – po MapInboundClaims role będą jako ClaimTypes.Role
             RoleClaimType = ClaimTypes.Role
         };
     });
@@ -293,7 +300,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("EmployerOrAdmin", policy =>
         policy.RequireRole(RoleCodes.Admin, RoleCodes.Employee, RoleCodes.Manager));
 });
-builder.Services.AddTransient<IClaimsTransformation, RoleClaimsTransformation>();
+//builder.Services.AddTransient<IClaimsTransformation, RoleClaimsTransformation>();
 
 var app = builder.Build();
 

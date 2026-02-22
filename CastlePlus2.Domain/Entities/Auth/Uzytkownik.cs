@@ -13,6 +13,9 @@ namespace CastlePlus2.Domain.Entities.Auth
         public string? Email { get; set; }
         public string HasloHash { get; set; } = string.Empty;
         public bool CzyAktywny { get; set; }
+        public bool CzyUsuniety { get; set; }
+        public DateTime? UsunietoUtc { get; set; }
+        public string? UsunietoPrzez { get; set; }
         public DateTime DataUtworzeniaUtc { get; set; }
         public DateTime DataModyfikacjiUtc { get; set; }
         public DateTime? OstatnieLogowanieUtc { get; set; }

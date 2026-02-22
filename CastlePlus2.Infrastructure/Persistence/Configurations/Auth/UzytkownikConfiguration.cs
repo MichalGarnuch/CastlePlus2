@@ -38,6 +38,20 @@ namespace CastlePlus2.Infrastructure.Persistence.Configurations.Auth
                    .HasColumnName("CzyAktywny")
                    .IsRequired();
 
+            builder.Property(x => x.CzyUsuniety)
+                   .HasColumnName("CzyUsuniety")
+                   .IsRequired();
+
+            builder.Property(x => x.UsunietoUtc)
+                   .HasColumnName("UsunietoUtc")
+                   .HasColumnType("datetime2(6)")
+                   .IsRequired(false);
+
+            builder.Property(x => x.UsunietoPrzez)
+                   .HasColumnName("UsunietoPrzez")
+                   .HasMaxLength(200)
+                   .IsRequired(false);
+
             builder.Property(x => x.DataUtworzeniaUtc)
                    .HasColumnName("DataUtworzeniaUtc")
                    .HasColumnType("datetime2(0)")

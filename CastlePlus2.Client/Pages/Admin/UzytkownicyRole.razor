@@ -1,22 +1,28 @@
 ﻿@page "/admin/uzytkownicy-role"
 @attribute [Authorize(Roles = RoleCodes.Admin)]
+
 @using System
+@using CastlePlus2.Client.Components.Crud
+@using CastlePlus2.Client.Services.Auth
 @using CastlePlus2.Client.Services.Auth.Admin
 @using CastlePlus2.Contracts.DTOs.Auth
+@using CastlePlus2.Shared.Auth
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Web
 @using MudBlazor
+
 @inject IAuthAdminService AuthAdminService
 @inject IAuthService AuthService
 @inject CustomAuthStateProvider AuthStateProvider
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 @inject NavigationManager Nav
 
 <MudText Typo="Typo.h4" Class="fw-700 mb-4">Administracja: użytkownicy i role</MudText>
 
 <MudPaper Class="pa-4 users-role-page">
     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
-        <MudText Typo="Typo.h6">Zarządzanie rolami</MudText>
+        <MudText Typo="Typo.h6">Zarządzanie kontami i rolami</MudText>
         <MudStack Row="true" Spacing="2">
 
             <MudButton Variant="Variant.Filled"
@@ -56,9 +62,9 @@
             <HeaderContent>
                 <MudTh>Login</MudTh>
                 <MudTh>Email</MudTh>
-                <MudTh>Aktywny</MudTh>
+                <MudTh>Status</MudTh>
                 <MudTh Style="min-width:320px;">Role</MudTh>
-                <MudTh></MudTh>
+                <MudTh Class="text-right">Akcje</MudTh>
             </HeaderContent>
 
             <RowTemplate>
@@ -70,14 +76,18 @@
                     <span class="truncate" title="@context.Email">@context.Email</span>
                 </MudTd>
 
-                <MudTd DataLabel="Aktywny">
-                    @if (context.CzyAktywny)
+                <MudTd DataLabel="Status">
+                    @if (context.CzyUsuniety)
                     {
-                        <MudChip T="string" Color="Color.Success" Size="Size.Small">Tak</MudChip>
+                        <MudChip T="string" Color="Color.Dark" Size="Size.Small">Usunięty</MudChip>
+                    }
+                    else if (context.CzyAktywny)
+                    {
+                        <MudChip T="string" Color="Color.Success" Size="Size.Small">Aktywny</MudChip>
                     }
                     else
                     {
-                        <MudChip T="string" Color="Color.Error" Size="Size.Small">Nie</MudChip>
+                        <MudChip T="string" Color="Color.Warning" Size="Size.Small">Zablokowany</MudChip>
                     }
                 </MudTd>
 
@@ -85,6 +95,7 @@
                     <MudSelect T="string"
                                Dense="true"
                                MultiSelection="true"
+                               Disabled="@context.CzyUsuniety"
                                Class="role-select"
                                Style="min-width:320px; max-width:520px;"
                                SelectedValues="@GetSelectedRolesSet(context.IdUzytkownika)"
@@ -98,13 +109,41 @@
                     </MudSelect>
                 </MudTd>
 
+                <!-- BRAKUJĄCA KOLUMNA AKCJI: to naprawia RZ1034/RZ9981 -->
                 <MudTd DataLabel="Akcje" Class="text-right">
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               Disabled="@IsSaving(context.IdUzytkownika)"
-                               OnClick="@(args => SaveClickAsync(args, context))">
-                        Zapisz
-                    </MudButton>
+                    <MudStack Row="true" Spacing="1" Justify="Justify.FlexEnd">
+
+                        <MudIconButton Icon="@(context.CzyAktywny ? Icons.Material.Filled.Lock : Icons.Material.Filled.LockOpen)"
+                                       Color="Color.Warning"
+                                       Disabled="@(IsSaving(context.IdUzytkownika) || context.CzyUsuniety)"
+                                       OnClick="@(async (MouseEventArgs _) => await ToggleActiveAsync(context))"
+                                       Title="@(context.CzyAktywny ? "Zablokuj" : "Odblokuj")" />
+
+                        @if (context.CzyUsuniety)
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.RestoreFromTrash"
+                                           Color="Color.Info"
+                                           Disabled="@(IsSaving(context.IdUzytkownika))"
+                                           OnClick="@(async (MouseEventArgs _) => await RestoreUserAsync(context))"
+                                           Title="Przywróć konto" />
+                        }
+                        else
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           Disabled="@(IsSaving(context.IdUzytkownika))"
+                                           OnClick="@(async (MouseEventArgs _) => await ConfirmDeleteAsync(context))"
+                                           Title="Usuń konto" />
+                        }
+
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Disabled="@(IsSaving(context.IdUzytkownika) || context.CzyUsuniety)"
+                                   OnClick="@(async (MouseEventArgs _) => await SaveClickAsync(_, context))">
+                            Zapisz
+                        </MudButton>
+
+                    </MudStack>
                 </MudTd>
             </RowTemplate>
 
@@ -127,8 +166,6 @@
         await ReloadAsync();
     }
 
-    // --- kliknięcia (sygnatury pasujące do EventCallback<MouseEventArgs>) ---
-
     private void GoCreateUser(MouseEventArgs _)
         => Nav.NavigateTo("/admin/create-user");
 
@@ -140,8 +177,6 @@
 
     private async Task SaveClickAsync(MouseEventArgs _, AdminUserDto user)
         => await SaveRolesAsync(user);
-
-    // --- data load ---
 
     private async Task ReloadAsync()
     {
@@ -182,7 +217,6 @@
         return created;
     }
 
-    // UWAGA: IEnumerable<string> zamiast HashSet<string> (pasuje do MudSelect)
     private void OnRolesChanged(int userId, IEnumerable<string> values)
     {
         _selectedRoles[userId] = new HashSet<string>(values ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase);
@@ -209,6 +243,82 @@
         catch (Exception ex)
         {
             Snackbar.Add($"Błąd zapisu ról: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _savingUsers.Remove(user.IdUzytkownika);
+        }
+    }
+
+    private async Task ToggleActiveAsync(AdminUserDto user)
+    {
+        _savingUsers.Add(user.IdUzytkownika);
+        try
+        {
+            var targetState = !user.CzyAktywny;
+            await AuthAdminService.SetUserActiveAsync(user.IdUzytkownika, targetState);
+            await ReloadAsync();
+            Snackbar.Add(targetState ? "Konto odblokowane." : "Konto zablokowane.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd zmiany statusu konta: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _savingUsers.Remove(user.IdUzytkownika);
+        }
+    }
+
+    private async Task ConfirmDeleteAsync(AdminUserDto user)
+    {
+        var parameters = new DialogParameters<ConfirmDeleteDialog>
+        {
+            { x => x.Title, "Usuń konto" },
+            { x => x.Message, $"Czy na pewno usunąć konto {user.Login}?" }
+        };
+
+        var dialog = await DialogService.ShowAsync<ConfirmDeleteDialog>("Potwierdzenie", parameters);
+        var result = await dialog.Result;
+        if (result is null || result.Canceled)
+        {
+            return;
+        }
+
+        await DeleteUserAsync(user);
+    }
+
+    private async Task DeleteUserAsync(AdminUserDto user)
+    {
+        _savingUsers.Add(user.IdUzytkownika);
+        try
+        {
+            await AuthAdminService.DeleteUserAsync(user.IdUzytkownika);
+            await ReloadAsync();
+            Snackbar.Add("Konto zostało oznaczone jako usunięte.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd usuwania konta: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _savingUsers.Remove(user.IdUzytkownika);
+        }
+    }
+
+    private async Task RestoreUserAsync(AdminUserDto user)
+    {
+        _savingUsers.Add(user.IdUzytkownika);
+        try
+        {
+            await AuthAdminService.RestoreUserAsync(user.IdUzytkownika);
+            await ReloadAsync();
+            Snackbar.Add("Konto zostało przywrócone.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd przywracania konta: {ex.Message}", Severity.Error);
         }
         finally
         {

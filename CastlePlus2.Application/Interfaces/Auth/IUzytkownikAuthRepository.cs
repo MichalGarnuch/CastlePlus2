@@ -23,5 +23,8 @@ namespace CastlePlus2.Application.Interfaces.Auth
         Task<bool> RoleExistsByCodeAsync(string code, CancellationToken ct);
         Task ReplaceUserRolesAsync(int userId, string[] roleCodes, CancellationToken ct);
         Task UpdatePasswordAsync(int userId, string passwordHash, DateTime utcNow, CancellationToken ct);
+        Task<bool> SetUserActiveAsync(int userId, bool isActive, DateTime utcNow, CancellationToken ct);
+        Task<bool> SoftDeleteUserAsync(int userId, string deletedBy, DateTime utcNow, CancellationToken ct);
+        Task<bool> RestoreUserAsync(int userId, DateTime utcNow, CancellationToken ct);
     }
 }

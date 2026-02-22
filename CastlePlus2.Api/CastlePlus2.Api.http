@@ -684,3 +684,80 @@ Content-Type: application/json
   "password": "AdminSetPass123!",
   "deviceInfo": "api.http-request-access-approve"
 }
+### [AUTH][ADMIN] soft-delete user
+PUT {{baseUrl}}/api/auth/admin/users/{{userId}}/delete
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "idUzytkownika": {{userId}}
+}
+
+### [AUTH] login po soft-delete -> 401 "Konto zosta³o usuniête."
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "loginOrEmail": "{{userLogin}}",
+  "password": "{{userPassword}}",
+  "deviceInfo": "api.http-soft-delete"
+}
+
+### [AUTH][ADMIN] restore user
+PUT {{baseUrl}}/api/auth/admin/users/{{userId}}/restore
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "idUzytkownika": {{userId}}
+}
+
+### [AUTH] login po restore -> dzia³a
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "loginOrEmail": "{{userLogin}}",
+  "password": "{{userPassword}}",
+  "deviceInfo": "api.http-restore"
+}
+
+### [AUTH][ADMIN] block user (CzyAktywny=false)
+PUT {{baseUrl}}/api/auth/admin/users/{{userId}}/active
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "idUzytkownika": {{userId}},
+  "czyAktywny": false
+}
+
+### [AUTH] login po block -> 401 "Konto jest zablokowane."
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "loginOrEmail": "{{userLogin}}",
+  "password": "{{userPassword}}",
+  "deviceInfo": "api.http-block"
+}
+
+### [AUTH][ADMIN] unblock user (CzyAktywny=true)
+PUT {{baseUrl}}/api/auth/admin/users/{{userId}}/active
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "idUzytkownika": {{userId}},
+  "czyAktywny": true
+}
+
+### [AUTH] login po unblock -> dzia³a
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "loginOrEmail": "{{userLogin}}",
+  "password": "{{userPassword}}",
+  "deviceInfo": "api.http-unblock"
+}

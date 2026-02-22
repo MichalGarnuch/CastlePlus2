@@ -31,6 +31,9 @@ namespace CastlePlus2.Application.Auth.ProcesyAuth.Commands.Login
             if (user == null)
                 throw new UnauthorizedAccessException("Nieprawidłowy login/email lub hasło.");
 
+            if (user.CzyUsuniety)
+                throw new UnauthorizedAccessException("Konto zostało usunięte.");
+
             if (!user.CzyAktywny)
                 throw new UnauthorizedAccessException("Konto jest zablokowane.");
 
