@@ -47,6 +47,8 @@ namespace CastlePlus2.Api.Controllers.Admin
                 ApprovedBy = approvedBy,
                 Login = request.Login,
                 Email = request.Email,
+                Password = request.Password,
+                ConfirmPassword = request.ConfirmPassword,
                 RoleCodes = request.RoleCodes
             }, ct);
 

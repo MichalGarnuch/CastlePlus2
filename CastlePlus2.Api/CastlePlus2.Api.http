@@ -661,3 +661,26 @@ Content-Type: application/json
   "password": "NoweHaslo123!",
   "deviceInfo": "api.http"
 }
+### [AUTH][REQUEST-ACCESS] approve z has³em (admin)
+# Wymaga istniej¹cego zg³oszenia Pending oraz tokenu admina.
+POST {{baseUrl}}/api/admin/request-access/{{requestAccessId}}/approve
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "login": "request.approved.user",
+  "email": "request.approved.user@local",
+  "password": "AdminSetPass123!",
+  "confirmPassword": "AdminSetPass123!",
+  "roleCodes": ["User"]
+}
+
+### [AUTH][REQUEST-ACCESS] login nowo zatwierdzonym kontem
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "loginOrEmail": "request.approved.user",
+  "password": "AdminSetPass123!",
+  "deviceInfo": "api.http-request-access-approve"
+}

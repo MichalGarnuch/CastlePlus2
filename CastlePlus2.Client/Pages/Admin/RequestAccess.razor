@@ -70,14 +70,32 @@
                     <MudTextField @bind-Value="_approveLogin" Label="Login" Variant="Variant.Outlined" />
                     <MudTextField @bind-Value="_approveEmail" Label="Email" Variant="Variant.Outlined" />
 
-                    <!-- Klucz: @ref + odczyt SelectedValues w callbacku bez parametru -->
+                    <MudTextField @bind-Value="_approvePassword"
+                                  Label="Hasło"
+                                  Variant="Variant.Outlined"
+                                  InputType="@(_showApprovePassword? InputType.Text: InputType.Password)"
+                                  Error="@(!string.IsNullOrEmpty(_approvePassword) && _approvePassword.Length < 8)"
+                                  HelperText="@(_approvePassword.Length > 0 && _approvePassword.Length < 8 ? "Hasło musi mieć co najmniej 8 znaków." : string.Empty)"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@(_showApprovePassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                  OnAdornmentClick="ToggleApprovePasswordVisibility" />
+
+                    <MudTextField @bind-Value="_approveConfirmPassword"
+                                  Label="Powtórz hasło"
+                                  Variant="Variant.Outlined"
+                                  InputType="@(_showApproveConfirmPassword? InputType.Text: InputType.Password)"
+                                  Error="@(!string.IsNullOrEmpty(_approveConfirmPassword) && _approveConfirmPassword != _approvePassword)"
+                                  HelperText="@(!string.IsNullOrEmpty(_approveConfirmPassword) && _approveConfirmPassword != _approvePassword ? "Hasła muszą być identyczne." : string.Empty)"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@(_showApproveConfirmPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                  OnAdornmentClick="ToggleApproveConfirmPasswordVisibility" />
+
                     <MudSelect T="string"
-                               @ref="_rolesSelect"
                                Label="Role"
                                Variant="Variant.Outlined"
                                MultiSelection="true"
-                               SelectedValues="_approveRoles"
-                               SelectedValuesChanged="@(() => OnApproveRolesChanged())">
+                               SelectedValues="@_approveRoles"
+                               SelectedValuesChanged="OnApproveRolesChanged">
                         @foreach (var role in _roles)
                         {
                             <MudSelectItem Value="@role.Kod">@role.Kod</MudSelectItem>
@@ -121,9 +139,12 @@
 
     private string _approveLogin = string.Empty;
     private string _approveEmail = string.Empty;
+    private string _approvePassword = string.Empty;
+    private string _approveConfirmPassword = string.Empty;
     private HashSet<string> _approveRoles = new(StringComparer.OrdinalIgnoreCase);
 
-    private MudSelect<string>? _rolesSelect;
+    private bool _showApprovePassword;
+    private bool _showApproveConfirmPassword;
 
     private bool _isLoading;
 
@@ -182,8 +203,10 @@
 
         _approveLogin = _selectedRequest.Login ?? string.Empty;
         _approveEmail = _selectedRequest.Email;
-
-        // startujemy od pustej listy ról do wybrania przez admina
+        _approvePassword = string.Empty;
+        _approveConfirmPassword = string.Empty;
+        _showApprovePassword = false;
+        _showApproveConfirmPassword = false;
         _approveRoles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     }
 
@@ -193,17 +216,18 @@
         ApplySelectedDefaults();
     }
 
-    private Task OnApproveRolesChanged()
+    private Task OnApproveRolesChanged(IEnumerable<string> values)
     {
-        // MudSelect nie przekazuje wartości w argumencie (EventCallback bez typu),
-        // więc pobieramy stan bezpośrednio z kontrolki.
-        var selected = _rolesSelect?.SelectedValues;
-        _approveRoles = selected is null
-            ? new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            : new HashSet<string>(selected, StringComparer.OrdinalIgnoreCase);
-
+        _approveRoles = new HashSet<string>(values ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+        StateHasChanged();
         return Task.CompletedTask;
     }
+
+    private void ToggleApprovePasswordVisibility()
+        => _showApprovePassword = !_showApprovePassword;
+
+    private void ToggleApproveConfirmPasswordVisibility()
+        => _showApproveConfirmPassword = !_showApproveConfirmPassword;
 
     private async Task ApproveAsync()
     {
@@ -213,6 +237,18 @@
         if (string.IsNullOrWhiteSpace(_approveLogin) || string.IsNullOrWhiteSpace(_approveEmail))
         {
             Snackbar.Add("Login i email są wymagane.", Severity.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_approvePassword) || _approvePassword.Length < 8)
+        {
+            Snackbar.Add("Hasło musi mieć co najmniej 8 znaków.", Severity.Warning);
+            return;
+        }
+
+        if (_approvePassword != _approveConfirmPassword)
+        {
+            Snackbar.Add("Hasła muszą być identyczne.", Severity.Warning);
             return;
         }
 
@@ -229,9 +265,11 @@
                 _selectedRequest.IdRequestAccess,
                 _approveLogin,
                 _approveEmail,
+                _approvePassword,
+                _approveConfirmPassword,
                 _approveRoles.ToArray());
 
-            Snackbar.Add("Zgłoszenie zostało zatwierdzone.", Severity.Success);
+            Snackbar.Add("Zgłoszenie zaakceptowane – konto utworzone", Severity.Success);
             await LoadAsync();
         }
         catch (Exception ex)

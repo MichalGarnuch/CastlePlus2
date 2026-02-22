@@ -27,12 +27,14 @@ namespace CastlePlus2.Client.Services.Auth.RequestAccess
             return response;
         }
 
-        public async Task ApproveAsync(int requestId, string login, string email, string[] roleCodes)
+        public async Task ApproveAsync(int requestId, string login, string email, string password, string confirmPassword, string[] roleCodes)
         {
             var request = new ApproveRequestAccessRequest
             {
                 Login = login,
                 Email = email,
+                Password = password,
+                ConfirmPassword = confirmPassword,
                 RoleCodes = roleCodes ?? Array.Empty<string>()
             };
 
