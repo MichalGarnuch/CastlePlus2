@@ -1,5 +1,5 @@
 ﻿@page "/podmioty/kontakty"
-@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+@attribute [Authorize(Roles = RoleCodes.AdminOrManagerOrEmployee)]
 
 @using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Podmioty
@@ -21,12 +21,14 @@
                       AdornmentIcon="@Icons.Material.Filled.Search"
                       OnAdornmentClick="OpenPodmiotLookupDialog" />
 
-        <MudButton Variant="Variant.Outlined"
-                   Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Search"
-                   OnClick="OpenPodmiotLookupDialog">
-            Wybierz podmiot
-        </MudButton>
+        <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Search"
+                       OnClick="OpenPodmiotLookupDialog">
+                Wybierz podmiot
+            </MudButton>
+        </AuthorizeView>
 
         <MudIconButton Icon="@Icons.Material.Filled.Refresh"
                        Color="Color.Info"
@@ -64,6 +66,8 @@
                            OnClick="ReloadAsync"
                            Class="mr-2" />
 
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
+
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
                        StartIcon="@Icons.Material.Filled.Add"
@@ -71,6 +75,8 @@
                        OnClick="CreateAsync">
                 Dodaj
             </MudButton>
+
+        </AuthorizeView>
         </ToolBarContent>
 
         <HeaderContent>
@@ -78,7 +84,9 @@
             <MudTh>IdPodmiotu</MudTh>
             <MudTh>Rodzaj</MudTh>
             <MudTh>Wartość</MudTh>
-            <MudTh></MudTh>
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
+                <MudTh></MudTh>
+            </AuthorizeView>
         </HeaderContent>
 
         <RowTemplate>
@@ -87,7 +95,10 @@
             <MudTd DataLabel="Rodzaj">@context.Rodzaj</MudTd>
             <MudTd DataLabel="Wartość">@context.Wartosc</MudTd>
 
-            <MudTd DataLabel="Akcje" Class="text-right">
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee" Context="authContext">
+
+
+                <MudTd DataLabel="Akcje" Class="text-right">
                 <MudIconButton Icon="@Icons.Material.Filled.Visibility"
                                Color="Color.Info"
                                Size="Size.Small"
@@ -103,7 +114,10 @@
                                Color="Color.Error"
                                Size="Size.Small"
                                OnClick="@(() => DeleteAsync(context))" />
-            </MudTd>
+                </MudTd>
+
+
+            </AuthorizeView>
         </RowTemplate>
 
         <NoRecordsContent>

@@ -77,27 +77,19 @@
 
             <AuthorizeView Roles="@RoleCodes.AdminOrManagerOrEmployee">
                 <MudNavGroup Title="Dashboard" Expanded="@IsGroupExpanded("/dashboard")">
-                    <MudNavLink Href="/dashboard/najem"
-                                Match="NavLinkMatch.All"
-                                Icon="@Icons.Material.Filled.Dashboard">
+                    <MudNavLink Href="/dashboard/najem" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
                         Dashboard najmu (Power)
                     </MudNavLink>
 
-                    <MudNavLink Href="/dashboard/najem-analityka"
-                                Match="NavLinkMatch.All"
-                                Icon="@Icons.Material.Filled.Analytics">
+                    <MudNavLink Href="/dashboard/najem-analityka" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Analytics">
                         Analityka najmu
                     </MudNavLink>
 
-                    <MudNavLink Href="/dashboard/najem-legacy"
-                                Match="NavLinkMatch.All"
-                                Icon="@Icons.Material.Filled.History">
+                    <MudNavLink Href="/dashboard/najem-legacy" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.History">
                         Dashboard najmu (Legacy)
                     </MudNavLink>
 
-                    <MudNavLink Href="/dashboard/v1"
-                                Match="NavLinkMatch.All"
-                                Icon="@Icons.Material.Filled.DashboardCustomize">
+                    <MudNavLink Href="/dashboard/v1" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.DashboardCustomize">
                         Dashboard V1 (najem)
                     </MudNavLink>
                 </MudNavGroup>
@@ -141,7 +133,6 @@
 
                     <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
                     <MudNavLink Href="/najem/umowy/zawrz" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.EditNote">Zawarcie umowy najmu</MudNavLink>
-                    @* Te procesy mają warianty routów z ID -> Prefix, żeby link był aktywny także na podstronach *@
                     <MudNavLink Href="/najem/umowy/czynsz/aneks" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.RequestQuote">Aneks czynszu</MudNavLink>
                     <MudNavLink Href="/najem/umowy/zakoncz" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AssignmentTurnedIn">Zakończenie umowy najmu</MudNavLink>
                 </MudNavGroup>
@@ -165,20 +156,35 @@
                 </MudNavGroup>
             </AuthorizeView>
 
-            @* FIX RZ9999: unikamy konfliktu nazwy "context" przy zagnieżdżonych AuthorizeView *@
-            <AuthorizeView Roles="@RoleCodes.AdminOrEmployeeOrUser" Context="authUtrzymanie">
+            @* UTRZYMANIE = BIURO (Admin/Employee/Manager). User nie ma tu wchodzić. *@
+            <AuthorizeView Roles="@RoleCodes.AdminOrManagerOrEmployee" Context="authUtrzymanie">
                 <MudNavGroup Title="Utrzymanie" Expanded="@IsGroupExpanded("/utrzymanie")">
-                    <AuthorizeView Roles="@RoleCodes.AdminOrEmployee" Context="authUtrzymanieCrud">
-                        <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
-                        <MudNavLink Href="/utrzymanie/zlecenia-pracy" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Build">Zlecenia pracy</MudNavLink>
-                        <MudNavLink Href="/utrzymanie/powiazania-zlecenia" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Link">Powiązania zleceń</MudNavLink>
-                    </AuthorizeView>
+                    <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (LISTY)</MudText>
+                    <MudNavLink Href="/utrzymanie/zlecenia-pracy" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Build">Zlecenia pracy</MudNavLink>
+                    <MudNavLink Href="/utrzymanie/powiazania-zlecenia" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Link">Powiązania zleceń</MudNavLink>
 
-                    <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
-                    <MudNavLink Href="/utrzymanie/zgloszenia/nowe" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ReportProblem">Zgłoszenie usterki</MudNavLink>
+                    <AuthorizeView Roles="@RoleCodes.AdminOrEmployee" Context="authUtrzymanieProcesses">
+                        <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Procesy</MudText>
+                        <MudNavLink Href="/utrzymanie/zgloszenia/nowe" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ReportProblem">
+                            Zgłoszenie usterki
+                        </MudNavLink>
+                    </AuthorizeView>
                 </MudNavGroup>
             </AuthorizeView>
 
+            @* TEREN = USER (wpisy z terenu). Tylko to ma widzieć User. *@
+            <AuthorizeView Roles="@RoleCodes.User">
+                <MudNavGroup Title="Teren" Expanded="@IsGroupExpanded("/utrzymanie/zgloszenia", "/media/odczyty/dodaj")">
+                    <MudNavLink Href="/utrzymanie/zgloszenia/nowe" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ReportProblem">
+                        Zgłoszenie usterki
+                    </MudNavLink>
+                    <MudNavLink Href="/media/odczyty/dodaj" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AddCircle">
+                        Dodaj odczyt
+                    </MudNavLink>
+                </MudNavGroup>
+            </AuthorizeView>
+
+            @* MEDIA = BIURO (Admin/Employee). User ma tylko "Dodaj odczyt" w sekcji Teren. *@
             <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
                 <MudNavGroup Title="Media" Expanded="@IsGroupExpanded("/media")">
                     <MudText Typo="Typo.caption" Class="px-4 mt-2 text-secondary">Ewidencja (CRUD)</MudText>
@@ -211,7 +217,6 @@
                 </MudNavGroup>
             </AuthorizeView>
 
-
             <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
                 <MudNavGroup Title="Słowniki" Expanded="@IsGroupExpanded("/slowniki")">
                     <MudNavLink Href="/slowniki/jednostki-miary" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Scale">Jednostki miary</MudNavLink>
@@ -222,13 +227,8 @@
 
             <AuthorizeView Roles="@RoleCodes.Admin">
                 <MudNavGroup Title="Konfiguracja / CMS" Expanded="@IsGroupExpanded("/konfiguracja", "/aktualnosci")">
-                    @* Ma podstrony /new i /{guid} -> Prefix *@
                     <MudNavLink Href="/konfiguracja/zasoby-ui" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Tune">Zasoby UI</MudNavLink>
-
-                    @* Jeśli istnieje panel admin aktualności *@
                     <MudNavLink Href="/konfiguracja/aktualnosci" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Newspaper">Aktualności</MudNavLink>
-
-                    @* Publiczny podgląd *@
                     <MudNavLink Href="/aktualnosci" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Public">Aktualności (public)</MudNavLink>
                 </MudNavGroup>
             </AuthorizeView>
@@ -311,25 +311,20 @@
     {
         await AuthService.LogoutAsync();
         await AuthStateProvider.MarkUserAsLoggedOutAsync();
-
-        // forceLoad resetuje stan auth po stronie hosta
         Nav.NavigateTo("/auth/login", forceLoad: true);
     }
 
     private static string GetDisplayName(ClaimsPrincipal user)
     {
-        // 1) standard: Identity.Name (najczęściej login)
         var name = user.Identity?.Name;
         if (!string.IsNullOrWhiteSpace(name))
             return name;
 
-        // 2) claim z loginem (jeśli ktoś tak nazwał)
         name = user.FindFirst("login")?.Value
                ?? user.FindFirst("Login")?.Value;
         if (!string.IsNullOrWhiteSpace(name))
             return name;
 
-        // 3) email
         name = user.FindFirst(ClaimTypes.Email)?.Value
                ?? user.FindFirst("email")?.Value;
         if (!string.IsNullOrWhiteSpace(name))

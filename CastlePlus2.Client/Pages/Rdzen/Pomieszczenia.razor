@@ -1,5 +1,5 @@
 ﻿@page "/rdzen/pomieszczenia"
-@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+@attribute [Authorize(Roles = RoleCodes.AdminOrManagerOrEmployee)]
 
 @using MudBlazor
 @using CastlePlus2.Contracts.DTOs.Rdzen
@@ -40,12 +40,16 @@
                            OnClick="ReloadAsync"
                            Class="mr-2" />
 
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
+
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
                        StartIcon="@Icons.Material.Filled.Add"
                        OnClick="CreateAsync">
                 Dodaj
-            </MudButton>
+                </MudButton>
+
+            </AuthorizeView>
         </ToolBarContent>
 
         <HeaderContent>
@@ -53,7 +57,9 @@
             <MudTh>Lokal</MudTh>
             <MudTh>Kod</MudTh>
             <MudTh>Pow.</MudTh>
-            <MudTh></MudTh>
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
+                <MudTh></MudTh>
+            </AuthorizeView>
         </HeaderContent>
 
         <RowTemplate>
@@ -62,7 +68,10 @@
             <MudTd DataLabel="Kod">@context.KodPomieszczenia</MudTd>
             <MudTd DataLabel="Pow.">@context.Powierzchnia</MudTd>
 
-            <MudTd DataLabel="Akcje" Class="text-right">
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee" Context="authContext">
+
+
+                <MudTd DataLabel="Akcje" Class="text-right">
                 <MudIconButton Icon="@Icons.Material.Filled.Visibility"
                                Color="Color.Info"
                                Size="Size.Small"
@@ -78,7 +87,10 @@
                                Color="Color.Error"
                                Size="Size.Small"
                                OnClick="@(() => DeleteAsync(context))" />
-            </MudTd>
+                </MudTd>
+
+
+            </AuthorizeView>
         </RowTemplate>
 
         <NoRecordsContent>

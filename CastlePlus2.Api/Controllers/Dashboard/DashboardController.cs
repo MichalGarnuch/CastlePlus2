@@ -23,6 +23,7 @@ namespace CastlePlus2.Api.Controllers.Dashboard
         }
 
         [HttpGet("najem")]
+        [Authorize(Policy = "EmployerOrAdmin")]
         [ProducesResponseType(typeof(NajemDashboardDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetNajemDashboard([FromQuery] int? zakresDni, CancellationToken ct)
         {
@@ -42,6 +43,7 @@ namespace CastlePlus2.Api.Controllers.Dashboard
         }
 
         [HttpGet("v1/najem")]
+        [Authorize(Policy = "EmployerOrAdmin")]
         [ProducesResponseType(typeof(DashboardV1NajemDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetDashboardV1Najem(CancellationToken ct)
         {

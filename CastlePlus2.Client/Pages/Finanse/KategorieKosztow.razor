@@ -1,5 +1,5 @@
 ﻿@page "/finanse/kategorie-kosztow"
-@attribute [Authorize(Roles = RoleCodes.AdminOrEmployee)]
+@attribute [Authorize(Roles = RoleCodes.AdminOrManagerOrEmployee)]
 
 @using MudBlazor
 @using CastlePlus2.Client.Services.Finanse
@@ -52,7 +52,9 @@
             <MudTh>Id</MudTh>
             <MudTh>Kod</MudTh>
             <MudTh>Nazwa</MudTh>
-            <MudTh></MudTh>
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee">
+                <MudTh></MudTh>
+            </AuthorizeView>
         </HeaderContent>
 
         <RowTemplate>
@@ -60,7 +62,10 @@
             <MudTd DataLabel="Kod">@context.Kod</MudTd>
             <MudTd DataLabel="Nazwa">@context.Nazwa</MudTd>
 
-            <MudTd DataLabel="Akcje" Class="text-right">
+            <AuthorizeView Roles="@RoleCodes.AdminOrEmployee" Context="authContext">
+
+
+                <MudTd DataLabel="Akcje" Class="text-right">
                 <MudIconButton Icon="@Icons.Material.Filled.Visibility"
                                Color="Color.Info"
                                Size="Size.Small"
@@ -76,7 +81,10 @@
                                Color="Color.Error"
                                Size="Size.Small"
                                OnClick="@(() => DeleteAsync(context))" />
-            </MudTd>
+                </MudTd>
+
+
+            </AuthorizeView>
         </RowTemplate>
 
         <NoRecordsContent>

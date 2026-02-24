@@ -11,4 +11,5 @@ public static class RoleCodes
     public const string AdminOrEmployee = Admin + "," + Employee;
     public const string AdminOrManagerOrEmployee = Admin + "," + Manager + "," + Employee;
     public const string AdminOrEmployeeOrUser = Admin + "," + Employee + "," + User;
+
 }

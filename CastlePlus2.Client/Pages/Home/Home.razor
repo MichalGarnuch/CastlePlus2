@@ -28,7 +28,7 @@
             return;
         }
 
-        // Role-based landing (jedno miejsce sterujące stroną startową)
+        // [RBAC-LANDING] Admin/Employee/Manager -> dashboardy operacyjne.
         string targetUrl;
 
         if (user.IsInRole(RoleCodes.Admin) || user.IsInRole(RoleCodes.Employee) || user.IsInRole(RoleCodes.Manager))
@@ -37,7 +37,7 @@
         }
         else if (user.IsInRole(RoleCodes.User))
         {
-            // User ma dostęp do tej strony (Authorize: AdminOrEmployeeOrUser)
+            // [RBAC-LANDING] User -> self-service (zgłoszenia usterek).
             targetUrl = "/utrzymanie/zgloszenia/nowe";
         }
         else

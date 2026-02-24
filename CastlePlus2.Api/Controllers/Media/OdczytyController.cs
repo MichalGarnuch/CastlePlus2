@@ -10,10 +10,11 @@ using CastlePlus2.Application.Media.Odczyty.Queries.GetOdczytById;
 using CastlePlus2.Application.Media.Odczyty.Queries.GetOdczytContext;
 using CastlePlus2.Contracts.DTOs.Media;
 using CastlePlus2.Contracts.Requests.Media;
+using CastlePlus2.Shared.Auth;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Media
 {
@@ -29,7 +30,9 @@ namespace CastlePlus2.Api.Controllers.Media
             _mediator = mediator;
         }
 
+        // Formularz (self-service): Admin/Employee/User
         [HttpGet("context")]
+        [Authorize(Roles = RoleCodes.AdminOrEmployeeOrUser)]
         [ProducesResponseType(typeof(OdczytContextDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetContext(CancellationToken ct)
         {
@@ -37,7 +40,9 @@ namespace CastlePlus2.Api.Controllers.Media
             return Ok(context);
         }
 
+        // Lista (biuro / podgląd): Admin/Employee/Manager
         [HttpGet]
+        [Authorize(Roles = RoleCodes.AdminOrManagerOrEmployee)]
         [ProducesResponseType(typeof(List<OdczytDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
@@ -46,6 +51,7 @@ namespace CastlePlus2.Api.Controllers.Media
         }
 
         [HttpGet("{id:long}")]
+        [Authorize(Roles = RoleCodes.AdminOrManagerOrEmployee)]
         [ProducesResponseType(typeof(OdczytDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById([FromRoute] long id, CancellationToken ct)
@@ -54,7 +60,9 @@ namespace CastlePlus2.Api.Controllers.Media
             return result is null ? NotFound() : Ok(result);
         }
 
+        // Self-service dodawania: Admin/Employee/User
         [HttpPost]
+        [Authorize(Roles = RoleCodes.AdminOrEmployeeOrUser)]
         [ProducesResponseType(typeof(OdczytDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Create([FromBody] CreateOdczytRequest request, CancellationToken ct)
@@ -78,7 +86,9 @@ namespace CastlePlus2.Api.Controllers.Media
             }
         }
 
+        // Edycja/usuwanie tylko biuro: Admin/Employee
         [HttpPut("{id:long}")]
+        [Authorize(Roles = RoleCodes.AdminOrEmployee)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdateOdczytRequest request, CancellationToken ct)
@@ -96,6 +106,7 @@ namespace CastlePlus2.Api.Controllers.Media
         }
 
         [HttpDelete("{id:long}")]
+        [Authorize(Roles = RoleCodes.AdminOrEmployee)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken ct)

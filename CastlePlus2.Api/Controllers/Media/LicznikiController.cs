@@ -10,10 +10,11 @@ using CastlePlus2.Application.Media.Liczniki.Queries.SearchLicznikiLookupPaged;
 using CastlePlus2.Contracts.DTOs.Common;
 using CastlePlus2.Contracts.DTOs.Media;
 using CastlePlus2.Contracts.Requests.Media;
+using CastlePlus2.Shared.Auth;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 
 namespace CastlePlus2.Api.Controllers.Media
 {
@@ -29,7 +30,9 @@ namespace CastlePlus2.Api.Controllers.Media
             _mediator = mediator;
         }
 
+        // LISTY (biuro / podgląd): Admin/Employee/Manager
         [HttpGet]
+        [Authorize(Roles = RoleCodes.AdminOrManagerOrEmployee)]
         [ProducesResponseType(typeof(List<LicznikDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
@@ -37,7 +40,9 @@ namespace CastlePlus2.Api.Controllers.Media
             return Ok(result);
         }
 
+        // Lookup do selekcji licznika w formularzu odczytu: Admin/Employee/User
         [HttpGet("lookup")]
+        [Authorize(Roles = RoleCodes.AdminOrEmployeeOrUser)]
         [ProducesResponseType(typeof(PagedResultDto<LicznikLookupDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Lookup(
             [FromQuery] string? q = null,
@@ -50,6 +55,7 @@ namespace CastlePlus2.Api.Controllers.Media
         }
 
         [HttpGet("{id:long}")]
+        [Authorize(Roles = RoleCodes.AdminOrManagerOrEmployee)]
         [ProducesResponseType(typeof(LicznikDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById([FromRoute] long id, CancellationToken ct)
@@ -58,7 +64,9 @@ namespace CastlePlus2.Api.Controllers.Media
             return result is null ? NotFound() : Ok(result);
         }
 
+        // WRITE: tylko Admin/Employee
         [HttpPost]
+        [Authorize(Roles = RoleCodes.AdminOrEmployee)]
         [ProducesResponseType(typeof(LicznikDto), StatusCodes.Status201Created)]
         public async Task<IActionResult> Create([FromBody] CreateLicznikRequest request, CancellationToken ct)
         {
@@ -77,6 +85,7 @@ namespace CastlePlus2.Api.Controllers.Media
         }
 
         [HttpPut("{id:long}")]
+        [Authorize(Roles = RoleCodes.AdminOrEmployee)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdateLicznikRequest request, CancellationToken ct)
@@ -98,6 +107,7 @@ namespace CastlePlus2.Api.Controllers.Media
         }
 
         [HttpDelete("{id:long}")]
+        [Authorize(Roles = RoleCodes.AdminOrEmployee)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken ct)
