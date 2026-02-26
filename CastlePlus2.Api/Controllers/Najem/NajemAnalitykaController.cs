@@ -12,7 +12,7 @@ namespace CastlePlus2.Api.Controllers.Najem
 {
     [ApiController]
     [Route("api/najem/analityka")]
-    [Authorize(Roles = RoleCodes.AdminOrManagerOrEmployee))]
+    [Authorize(Roles = RoleCodes.AdminOrManagerOrEmployee)]
     public class NajemAnalitykaController : ControllerBase
     {
         private readonly IMediator _mediator;
