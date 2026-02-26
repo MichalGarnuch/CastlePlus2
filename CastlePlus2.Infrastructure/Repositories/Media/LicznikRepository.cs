@@ -1,7 +1,4 @@
-﻿// PLIK: CastlePlus2.Infrastructure/Repositories/Media/LicznikRepository.cs
-// (CAŁY PLIK - bo dodajemy GetAll/GetForUpdate/Remove + overload NumerExists)
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;

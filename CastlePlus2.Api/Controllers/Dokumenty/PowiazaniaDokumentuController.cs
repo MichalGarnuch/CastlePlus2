@@ -1,5 +1,4 @@
-﻿// PLIK: CastlePlus2.Api/Controllers/Dokumenty/PowiazaniaDokumentuController.cs
-using CastlePlus2.Application.Dokumenty.PowiazaniaDokumentu.Commands.CreatePowiazanieDokumentu;
+﻿using CastlePlus2.Application.Dokumenty.PowiazaniaDokumentu.Commands.CreatePowiazanieDokumentu;
 using CastlePlus2.Application.Dokumenty.PowiazaniaDokumentu.Commands.DeletePowiazanieDokumentu;
 using CastlePlus2.Application.Dokumenty.PowiazaniaDokumentu.Commands.UpdatePowiazanieDokumentu;
 using CastlePlus2.Application.Dokumenty.PowiazaniaDokumentu.Queries.GetAllPowiazaniaDokumentu;

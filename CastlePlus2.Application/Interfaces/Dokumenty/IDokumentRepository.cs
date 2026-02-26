@@ -1,5 +1,4 @@
-﻿// PLIK: CastlePlus2.Application/Interfaces/Dokumenty/IDokumentRepository.cs
-using CastlePlus2.Domain.Entities.Dokumenty;
+﻿using CastlePlus2.Domain.Entities.Dokumenty;
 
 namespace CastlePlus2.Application.Interfaces.Dokumenty
 {

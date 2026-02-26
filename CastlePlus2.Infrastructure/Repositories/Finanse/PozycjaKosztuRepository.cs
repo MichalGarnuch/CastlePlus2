@@ -1,5 +1,4 @@
-﻿// PLIK: CastlePlus2.Infrastructure/Repositories/Finanse/PozycjaKosztuRepository.cs
-using CastlePlus2.Application.Interfaces.Finanse;
+﻿using CastlePlus2.Application.Interfaces.Finanse;
 using CastlePlus2.Domain.Entities.Finanse;
 using CastlePlus2.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

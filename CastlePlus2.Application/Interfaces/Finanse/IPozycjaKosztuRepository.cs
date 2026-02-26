@@ -1,5 +1,4 @@
-﻿// PLIK: CastlePlus2.Application/Interfaces/Finanse/IPozycjaKosztuRepository.cs
-using CastlePlus2.Domain.Entities.Finanse;
+﻿using CastlePlus2.Domain.Entities.Finanse;
 
 namespace CastlePlus2.Application.Interfaces.Finanse
 {

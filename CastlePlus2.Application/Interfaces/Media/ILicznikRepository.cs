@@ -1,7 +1,4 @@
-﻿// PLIK: CastlePlus2.Application/Interfaces/Media/ILicznikRepository.cs
-// (CAŁY PLIK - bo rozszerzamy kontrakt CRUD)
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CastlePlus2.Domain.Entities.Media;

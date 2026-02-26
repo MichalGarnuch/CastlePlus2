@@ -1,5 +1,4 @@
-﻿// PLIK: CastlePlus2.Infrastructure/Repositories/Dokumenty/DokumentRepository.cs
-using CastlePlus2.Application.Interfaces.Dokumenty;
+﻿using CastlePlus2.Application.Interfaces.Dokumenty;
 using CastlePlus2.Domain.Entities.Dokumenty;
 using CastlePlus2.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

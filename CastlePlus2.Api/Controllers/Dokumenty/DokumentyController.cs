@@ -1,5 +1,4 @@
-﻿// PLIK: CastlePlus2.Api/Controllers/Dokumenty/DokumentyController.cs
-using CastlePlus2.Application.Dokumenty.Dokumenty.Commands.CreateDokument;
+﻿using CastlePlus2.Application.Dokumenty.Dokumenty.Commands.CreateDokument;
 using CastlePlus2.Application.Dokumenty.Dokumenty.Commands.DeleteDokument;
 using CastlePlus2.Application.Dokumenty.Dokumenty.Commands.UpdateDokument;
 using CastlePlus2.Application.Dokumenty.Dokumenty.Queries.GetAllDokumenty;
