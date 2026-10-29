@@ -1,0 +1,19 @@
+{
+  "repository": "CastlePlus2",
+  "branch": "wersja-inzynierska-2026",
+  "base_ref": "master",
+  "base_commit": "6a9b42d378ef6463313e6ef2fa961fb74cc44106",
+  "date": "2026-10-29",
+  "checks": [
+    {
+      "command_or_scope": "Bezpośrednia kompilacja Roslyn i wykonanie engineering-tests/Program.cs",
+      "result": "PASS: Password hash contracts passed"
+    },
+    {
+      "command_or_scope": "dotnet run / pełny build",
+      "result": "NIEWYKONANY: awaria inicjalizacji MSBuild w środowisku"
+    }
+  ],
+  "limitations": "Nie wykonano pełnej solucji, testów obciążenia logowania ani integracji kont z bazą. Nie wdrożono automatycznego rehash historycznych rekordów; ograniczenie kosztu akceptuje nadal poprawne starsze hashe.",
+  "production_deployment_performed": false
+}

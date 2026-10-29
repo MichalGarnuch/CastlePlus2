@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Security.Cryptography;
 using CastlePlus2.Application.Interfaces.Auth;
 
@@ -8,25 +8,26 @@ namespace CastlePlus2.Infrastructure.Services.Auth
     {
         private const int SaltSize = 16;
         private const int KeySize = 32;
-        private const int DefaultIterations = 100_000;
+        private const int DefaultIterations = 600_000;
 
         public bool Verify(string password, string passwordHash)
         {
-            if (string.IsNullOrWhiteSpace(passwordHash))
+            if (password is null || string.IsNullOrWhiteSpace(passwordHash) || passwordHash.Length > 256)
                 return false;
-
-            var parts = passwordHash.Split('|', StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length != 4 || parts[0] != "v1")
+            var parts = passwordHash.Split('|');
+            if (parts.Length != 4 || parts[0] != "v1" ||
+                !int.TryParse(parts[1], out var iterations) || iterations < 1 || iterations > 2_000_000)
                 return false;
+            try
+            {
+                var salt = Convert.FromBase64String(parts[2]);
+                var storedHash = Convert.FromBase64String(parts[3]);
+                if (salt.Length != SaltSize || storedHash.Length != KeySize) return false;
+                var computed = HashInternal(password, salt, iterations);
+                return CryptographicOperations.FixedTimeEquals(storedHash, computed);
+            }
+            catch (FormatException) { return false; }
 
-            if (!int.TryParse(parts[1], out var iterations))
-                return false;
-
-            var salt = Convert.FromBase64String(parts[2]);
-            var storedHash = Convert.FromBase64String(parts[3]);
-
-            var computed = HashInternal(password, salt, iterations);
-            return CryptographicOperations.FixedTimeEquals(storedHash, computed);
         }
         
         public string Hash(string password)
