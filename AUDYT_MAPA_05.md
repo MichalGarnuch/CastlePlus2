@@ -1,0 +1,117 @@
+# CastlePlus2 — mapa plików (5/5)
+
+Wykaz śledzonych plików z badanego commita. Liczba wierszy i nazwy deklaracji są wyciągane automatycznie z dostępnej kopii tekstowej; nie oznaczają ręcznej oceny pliku. Brak opisu oznacza, że zawartość nie była analizowana tą metodą (np. plik binarny, zasób lub pominięty plik).
+
+[Wróć do audytu](AUDYT_EDUKACYJNY.md) · [1](AUDYT_MAPA_01.md) · [2](AUDYT_MAPA_02.md) · [3](AUDYT_MAPA_03.md) · [4](AUDYT_MAPA_04.md) · [5](AUDYT_MAPA_05.md)
+
+- [CastlePlus2.Infrastructure/Repositories/Konfiguracja/ZasobUITekstRepository.cs](CastlePlus2.Infrastructure/Repositories/Konfiguracja/ZasobUITekstRepository.cs) — 48 wierszy; deklaracje: `ZasobUITekstRepository:13`
+- [CastlePlus2.Infrastructure/Repositories/Media/LicznikRepository.cs](CastlePlus2.Infrastructure/Repositories/Media/LicznikRepository.cs) — 133 wierszy; deklaracje: `LicznikRepository:13`
+- [CastlePlus2.Infrastructure/Repositories/Media/OdczytRepository.cs](CastlePlus2.Infrastructure/Repositories/Media/OdczytRepository.cs) — 72 wierszy; deklaracje: `OdczytRepository:13`
+- [CastlePlus2.Infrastructure/Repositories/Media/PrzylaczeRepository.cs](CastlePlus2.Infrastructure/Repositories/Media/PrzylaczeRepository.cs) — 99 wierszy; deklaracje: `PrzylaczeRepository:11`
+- [CastlePlus2.Infrastructure/Repositories/Media/RodzajMediumRepository.cs](CastlePlus2.Infrastructure/Repositories/Media/RodzajMediumRepository.cs) — 55 wierszy; deklaracje: `RodzajMediumRepository:12`
+- [CastlePlus2.Infrastructure/Repositories/Najem/KaucjaRepository.cs](CastlePlus2.Infrastructure/Repositories/Najem/KaucjaRepository.cs) — 47 wierszy; deklaracje: `KaucjaRepository:8`
+- [CastlePlus2.Infrastructure/Repositories/Najem/PrzedmiotNajmuRepository.cs](CastlePlus2.Infrastructure/Repositories/Najem/PrzedmiotNajmuRepository.cs) — 117 wierszy; deklaracje: `PrzedmiotNajmuRepository:10`
+- [CastlePlus2.Infrastructure/Repositories/Najem/SkladnikCzynszuRepository.cs](CastlePlus2.Infrastructure/Repositories/Najem/SkladnikCzynszuRepository.cs) — 78 wierszy; deklaracje: `SkladnikCzynszuRepository:8`
+- [CastlePlus2.Infrastructure/Repositories/Najem/UmowaNajmuRepository.cs](CastlePlus2.Infrastructure/Repositories/Najem/UmowaNajmuRepository.cs) — 99 wierszy; deklaracje: `UmowaNajmuRepository:13`
+- [CastlePlus2.Infrastructure/Repositories/Podmioty/KontaktRepository.cs](CastlePlus2.Infrastructure/Repositories/Podmioty/KontaktRepository.cs) — 61 wierszy; deklaracje: `KontaktRepository:12`
+- [CastlePlus2.Infrastructure/Repositories/Podmioty/PodmiotRepository.cs](CastlePlus2.Infrastructure/Repositories/Podmioty/PodmiotRepository.cs) — 80 wierszy; deklaracje: `PodmiotRepository:8`
+- [CastlePlus2.Infrastructure/Repositories/Podmioty/WlasnoscRepository.cs](CastlePlus2.Infrastructure/Repositories/Podmioty/WlasnoscRepository.cs) — 92 wierszy; deklaracje: `WlasnoscRepository:14`
+- [CastlePlus2.Infrastructure/Repositories/Rdzen/AdresRepository.cs](CastlePlus2.Infrastructure/Repositories/Rdzen/AdresRepository.cs) — 86 wierszy; deklaracje: `AdresRepository:10`
+- [CastlePlus2.Infrastructure/Repositories/Rdzen/BudynekRepository.cs](CastlePlus2.Infrastructure/Repositories/Rdzen/BudynekRepository.cs) — 60 wierszy; deklaracje: `BudynekRepository:14`
+- [CastlePlus2.Infrastructure/Repositories/Rdzen/EncjaRepository.cs](CastlePlus2.Infrastructure/Repositories/Rdzen/EncjaRepository.cs) — 116 wierszy; deklaracje: `EncjaRepository:8`
+- [CastlePlus2.Infrastructure/Repositories/Rdzen/LokalRepository.cs](CastlePlus2.Infrastructure/Repositories/Rdzen/LokalRepository.cs) — 82 wierszy; deklaracje: `LokalRepository:16`
+- [CastlePlus2.Infrastructure/Repositories/Rdzen/NieruchomoscRepository.cs](CastlePlus2.Infrastructure/Repositories/Rdzen/NieruchomoscRepository.cs) — 68 wierszy; deklaracje: `NieruchomoscRepository:16`
+- [CastlePlus2.Infrastructure/Repositories/Rdzen/PomieszczenieRepository.cs](CastlePlus2.Infrastructure/Repositories/Rdzen/PomieszczenieRepository.cs) — 81 wierszy; deklaracje: `PomieszczenieRepository:16`
+- [CastlePlus2.Infrastructure/Repositories/Rdzen/PrzypisanieAdresuRepository.cs](CastlePlus2.Infrastructure/Repositories/Rdzen/PrzypisanieAdresuRepository.cs) — 71 wierszy; deklaracje: `PrzypisanieAdresuRepository:8`
+- [CastlePlus2.Infrastructure/Repositories/Slowniki/IndeksacjaRepository.cs](CastlePlus2.Infrastructure/Repositories/Slowniki/IndeksacjaRepository.cs) — 43 wierszy; deklaracje: `IndeksacjaRepository:8`
+- [CastlePlus2.Infrastructure/Repositories/Slowniki/JednostkaMiaryRepository.cs](CastlePlus2.Infrastructure/Repositories/Slowniki/JednostkaMiaryRepository.cs) — 35 wierszy; deklaracje: `JednostkaMiaryRepository:8`
+- [CastlePlus2.Infrastructure/Repositories/Slowniki/WalutaRepository.cs](CastlePlus2.Infrastructure/Repositories/Slowniki/WalutaRepository.cs) — 42 wierszy; deklaracje: `WalutaRepository:8`
+- [CastlePlus2.Infrastructure/Repositories/Utrzymanie/PowiazanieZleceniaRepository.cs](CastlePlus2.Infrastructure/Repositories/Utrzymanie/PowiazanieZleceniaRepository.cs) — 58 wierszy; deklaracje: `PowiazanieZleceniaRepository:13`
+- [CastlePlus2.Infrastructure/Repositories/Utrzymanie/ZleceniePracyRepository.cs](CastlePlus2.Infrastructure/Repositories/Utrzymanie/ZleceniePracyRepository.cs) — 61 wierszy; deklaracje: `ZleceniePracyRepository:15`
+- [CastlePlus2.Infrastructure/Services/Auth/AuthTokenService.cs](CastlePlus2.Infrastructure/Services/Auth/AuthTokenService.cs) — 79 wierszy; deklaracje: `AuthTokenService:13`
+- [CastlePlus2.Infrastructure/Services/Auth/PasswordHashService.cs](CastlePlus2.Infrastructure/Services/Auth/PasswordHashService.cs) — 50 wierszy; deklaracje: `PasswordHashService:7`
+- [CastlePlus2.Infrastructure/Services/Dashboard/DashboardV1NajemQueryService.cs](CastlePlus2.Infrastructure/Services/Dashboard/DashboardV1NajemQueryService.cs) — 161 wierszy; deklaracje: `DashboardV1NajemQueryService:8`
+- [CastlePlus2.Infrastructure/Services/Dashboard/NajemDashboardQueryService.cs](CastlePlus2.Infrastructure/Services/Dashboard/NajemDashboardQueryService.cs) — 163 wierszy; deklaracje: `NajemDashboardQueryService:8`
+- [CastlePlus2.Infrastructure/Services/Dashboard/NajemPowerDashboardDataService.cs](CastlePlus2.Infrastructure/Services/Dashboard/NajemPowerDashboardDataService.cs) — 130 wierszy; deklaracje: `NajemPowerDashboardDataService:7`
+- [CastlePlus2.Infrastructure/Services/Exports/CsvReportExporter.cs](CastlePlus2.Infrastructure/Services/Exports/CsvReportExporter.cs) — 44 wierszy; deklaracje: `CsvReportExporter:8`
+- [CastlePlus2.Infrastructure/Services/Exports/DocxReportExporter.cs](CastlePlus2.Infrastructure/Services/Exports/DocxReportExporter.cs) — 137 wierszy; deklaracje: `DocxReportExporter:8`
+- [CastlePlus2.Infrastructure/Services/Exports/DokumentFileStorage.cs](CastlePlus2.Infrastructure/Services/Exports/DokumentFileStorage.cs) — 34 wierszy; deklaracje: `DokumentFileStorage:5`
+- [CastlePlus2.Infrastructure/Services/Exports/ExportArchiveService.cs](CastlePlus2.Infrastructure/Services/Exports/ExportArchiveService.cs) — 121 wierszy; deklaracje: `ExportArchiveService:5`
+- [CastlePlus2.Infrastructure/Services/Exports/ExportStorageOptions.cs](CastlePlus2.Infrastructure/Services/Exports/ExportStorageOptions.cs) — 8 wierszy; deklaracje: `ExportStorageOptions:3`
+- [CastlePlus2.Infrastructure/Services/Exports/FakturaDocxTemplateRenderer.cs](CastlePlus2.Infrastructure/Services/Exports/FakturaDocxTemplateRenderer.cs) — 91 wierszy; deklaracje: `FakturaDocxTemplateRenderer:7`
+- [CastlePlus2.Infrastructure/Services/Exports/PdfReportExporter.cs](CastlePlus2.Infrastructure/Services/Exports/PdfReportExporter.cs) — 64 wierszy; deklaracje: `PdfReportExporter:7`
+- [CastlePlus2.Infrastructure/Services/Exports/ReportExportService.cs](CastlePlus2.Infrastructure/Services/Exports/ReportExportService.cs) — 103 wierszy; deklaracje: `ReportExportService:7`
+- [CastlePlus2.Infrastructure/Services/Exports/XlsxReportExporter.cs](CastlePlus2.Infrastructure/Services/Exports/XlsxReportExporter.cs) — 42 wierszy; deklaracje: `XlsxReportExporter:5`
+- [CastlePlus2.Infrastructure/Services/Najem/NajemAnalitykaQueryService.cs](CastlePlus2.Infrastructure/Services/Najem/NajemAnalitykaQueryService.cs) — 55 wierszy; deklaracje: `NajemAnalitykaQueryService:9`
+- [CastlePlus2.Infrastructure/Services/Najem/UmowaNajmuKodGenerator.cs](CastlePlus2.Infrastructure/Services/Najem/UmowaNajmuKodGenerator.cs) — 57 wierszy; deklaracje: `UmowaNajmuKodGenerator:12`
+- [CastlePlus2.Infrastructure/Services/Notifications/AppUrlProvider.cs](CastlePlus2.Infrastructure/Services/Notifications/AppUrlProvider.cs) — 21 wierszy; deklaracje: `AppUrlProvider:6`
+- [CastlePlus2.Infrastructure/Services/Notifications/EmailOptions.cs](CastlePlus2.Infrastructure/Services/Notifications/EmailOptions.cs) — 14 wierszy; deklaracje: `EmailOptions:3`
+- [CastlePlus2.Infrastructure/Services/Notifications/SmtpEmailSender.cs](CastlePlus2.Infrastructure/Services/Notifications/SmtpEmailSender.cs) — 71 wierszy; deklaracje: `SmtpEmailSender:10`
+- [CastlePlus2.Infrastructure/Services/Reports/Definitions/FakturyReportDefinition.cs](CastlePlus2.Infrastructure/Services/Reports/Definitions/FakturyReportDefinition.cs) — 36 wierszy; deklaracje: `FakturyReportDefinition:11`
+- [CastlePlus2.Infrastructure/Services/Reports/Definitions/PodsumowanieOperacyjneReportDefinition.cs](CastlePlus2.Infrastructure/Services/Reports/Definitions/PodsumowanieOperacyjneReportDefinition.cs) — 29 wierszy; deklaracje: `PodsumowanieOperacyjneReportDefinition:10`
+- [CastlePlus2.Infrastructure/Services/Reports/ReportDataPreviewService.cs](CastlePlus2.Infrastructure/Services/Reports/ReportDataPreviewService.cs) — 147 wierszy; deklaracje: `ReportDataPreviewService:13`
+- [CastlePlus2.Infrastructure/Services/Reports/ReportDocumentPreviewService.cs](CastlePlus2.Infrastructure/Services/Reports/ReportDocumentPreviewService.cs) — 106 wierszy; deklaracje: `ReportDocumentPreviewService:15`
+- [CastlePlus2.Infrastructure/Services/Reports/ReportsReadService.cs](CastlePlus2.Infrastructure/Services/Reports/ReportsReadService.cs) — 55 wierszy; deklaracje: `ReportsReadService:13`
+- [CastlePlus2.Infrastructure/libman.json](CastlePlus2.Infrastructure/libman.json) — 5 wierszy
+- [CastlePlus2.Mobile/App.xaml](CastlePlus2.Mobile/App.xaml) — 17 wierszy
+- [CastlePlus2.Mobile/App.xaml.cs](CastlePlus2.Mobile/App.xaml.cs) — 12 wierszy; deklaracje: `App:3`
+- [CastlePlus2.Mobile/CastlePlus2.Mobile.csproj](CastlePlus2.Mobile/CastlePlus2.Mobile.csproj) — 52 wierszy
+- [CastlePlus2.Mobile/Components/Layout/MainLayout.razor](CastlePlus2.Mobile/Components/Layout/MainLayout.razor) — 17 wierszy
+- [CastlePlus2.Mobile/Components/Layout/MainLayout.razor.css](CastlePlus2.Mobile/Components/Layout/MainLayout.razor.css) — 77 wierszy
+- [CastlePlus2.Mobile/Components/Layout/NavMenu.razor](CastlePlus2.Mobile/Components/Layout/NavMenu.razor) — 27 wierszy
+- [CastlePlus2.Mobile/Components/Layout/NavMenu.razor.css](CastlePlus2.Mobile/Components/Layout/NavMenu.razor.css) — 101 wierszy
+- [CastlePlus2.Mobile/Components/_Imports.razor](CastlePlus2.Mobile/Components/_Imports.razor) — 11 wierszy
+- [CastlePlus2.Mobile/MainPage.xaml](CastlePlus2.Mobile/MainPage.xaml) — 15 wierszy
+- [CastlePlus2.Mobile/MainPage.xaml.cs](CastlePlus2.Mobile/MainPage.xaml.cs) — 10 wierszy; deklaracje: `MainPage:3`
+- [CastlePlus2.Mobile/MauiProgram.cs](CastlePlus2.Mobile/MauiProgram.cs) — 63 wierszy; deklaracje: `MauiProgram:9`
+- [CastlePlus2.Mobile/Platforms/Android/AndroidManifest.xml](CastlePlus2.Mobile/Platforms/Android/AndroidManifest.xml) — 6 wierszy
+- [CastlePlus2.Mobile/Platforms/Android/MainActivity.cs](CastlePlus2.Mobile/Platforms/Android/MainActivity.cs) — 11 wierszy; deklaracje: `MainActivity:8`
+- [CastlePlus2.Mobile/Platforms/Android/MainApplication.cs](CastlePlus2.Mobile/Platforms/Android/MainApplication.cs) — 16 wierszy; deklaracje: `MainApplication:7`
+- [CastlePlus2.Mobile/Platforms/Android/Resources/values/colors.xml](CastlePlus2.Mobile/Platforms/Android/Resources/values/colors.xml) — 6 wierszy
+- [CastlePlus2.Mobile/Platforms/MacCatalyst/AppDelegate.cs](CastlePlus2.Mobile/Platforms/MacCatalyst/AppDelegate.cs) — 10 wierszy; deklaracje: `AppDelegate:6`
+- [CastlePlus2.Mobile/Platforms/MacCatalyst/Entitlements.plist](CastlePlus2.Mobile/Platforms/MacCatalyst/Entitlements.plist)
+- [CastlePlus2.Mobile/Platforms/MacCatalyst/Info.plist](CastlePlus2.Mobile/Platforms/MacCatalyst/Info.plist)
+- [CastlePlus2.Mobile/Platforms/MacCatalyst/Program.cs](CastlePlus2.Mobile/Platforms/MacCatalyst/Program.cs) — 16 wierszy; deklaracje: `Program:6`
+- [CastlePlus2.Mobile/Platforms/Tizen/Main.cs](CastlePlus2.Mobile/Platforms/Tizen/Main.cs) — 17 wierszy
+- [CastlePlus2.Mobile/Platforms/Tizen/tizen-manifest.xml](CastlePlus2.Mobile/Platforms/Tizen/tizen-manifest.xml) — 15 wierszy
+- [CastlePlus2.Mobile/Platforms/Windows/App.xaml](CastlePlus2.Mobile/Platforms/Windows/App.xaml) — 8 wierszy
+- [CastlePlus2.Mobile/Platforms/Windows/App.xaml.cs](CastlePlus2.Mobile/Platforms/Windows/App.xaml.cs) — 25 wierszy; deklaracje: `App:11`
+- [CastlePlus2.Mobile/Platforms/Windows/Package.appxmanifest](CastlePlus2.Mobile/Platforms/Windows/Package.appxmanifest)
+- [CastlePlus2.Mobile/Platforms/Windows/app.manifest](CastlePlus2.Mobile/Platforms/Windows/app.manifest)
+- [CastlePlus2.Mobile/Platforms/iOS/AppDelegate.cs](CastlePlus2.Mobile/Platforms/iOS/AppDelegate.cs) — 10 wierszy; deklaracje: `AppDelegate:6`
+- [CastlePlus2.Mobile/Platforms/iOS/Info.plist](CastlePlus2.Mobile/Platforms/iOS/Info.plist)
+- [CastlePlus2.Mobile/Platforms/iOS/Program.cs](CastlePlus2.Mobile/Platforms/iOS/Program.cs) — 16 wierszy; deklaracje: `Program:6`
+- [CastlePlus2.Mobile/Platforms/iOS/Resources/PrivacyInfo.xcprivacy](CastlePlus2.Mobile/Platforms/iOS/Resources/PrivacyInfo.xcprivacy)
+- [CastlePlus2.Mobile/Properties/launchSettings.json](CastlePlus2.Mobile/Properties/launchSettings.json) — 8 wierszy
+- [CastlePlus2.Mobile/Resources/AppIcon/appicon.svg](CastlePlus2.Mobile/Resources/AppIcon/appicon.svg)
+- [CastlePlus2.Mobile/Resources/AppIcon/appiconfg.svg](CastlePlus2.Mobile/Resources/AppIcon/appiconfg.svg)
+- [CastlePlus2.Mobile/Resources/Fonts/OpenSans-Regular.ttf](CastlePlus2.Mobile/Resources/Fonts/OpenSans-Regular.ttf)
+- [CastlePlus2.Mobile/Resources/Images/dotnet_bot.svg](CastlePlus2.Mobile/Resources/Images/dotnet_bot.svg)
+- [CastlePlus2.Mobile/Resources/Raw/AboutAssets.txt](CastlePlus2.Mobile/Resources/Raw/AboutAssets.txt)
+- [CastlePlus2.Mobile/Resources/Splash/splash.svg](CastlePlus2.Mobile/Resources/Splash/splash.svg)
+- [CastlePlus2.Mobile/Services/Auth/SecureStorageTokenStore.cs](CastlePlus2.Mobile/Services/Auth/SecureStorageTokenStore.cs) — 34 wierszy; deklaracje: `SecureStorageTokenStore:8`
+- [CastlePlus2.Mobile/wwwroot/css/app.css](CastlePlus2.Mobile/wwwroot/css/app.css) — 33 wierszy
+- [CastlePlus2.Mobile/wwwroot/css/bootstrap/bootstrap.min.css](CastlePlus2.Mobile/wwwroot/css/bootstrap/bootstrap.min.css)
+- [CastlePlus2.Mobile/wwwroot/css/bootstrap/bootstrap.min.css.map](CastlePlus2.Mobile/wwwroot/css/bootstrap/bootstrap.min.css.map)
+- [CastlePlus2.Mobile/wwwroot/favicon.png](CastlePlus2.Mobile/wwwroot/favicon.png)
+- [CastlePlus2.Mobile/wwwroot/index.html](CastlePlus2.Mobile/wwwroot/index.html) — 42 wierszy
+- [CastlePlus2.Shared/Auth/RoleCodes.cs](CastlePlus2.Shared/Auth/RoleCodes.cs) — 15 wierszy; deklaracje: `RoleCodes:3`
+- [CastlePlus2.Shared/CastlePlus2.Shared.csproj](CastlePlus2.Shared/CastlePlus2.Shared.csproj) — 13 wierszy
+- [CastlePlus2.Shared/Class1.cs](CastlePlus2.Shared/Class1.cs) — 7 wierszy; deklaracje: `Class1:3`
+- [CastlePlus2.Web.App/CastlePlus2.Web.App.csproj](CastlePlus2.Web.App/CastlePlus2.Web.App.csproj) — 17 wierszy
+- [CastlePlus2.Web.App/Components/App.razor](CastlePlus2.Web.App/Components/App.razor) — 33 wierszy
+- [CastlePlus2.Web.App/Components/_Imports.razor](CastlePlus2.Web.App/Components/_Imports.razor) — 13 wierszy
+- [CastlePlus2.Web.App/Program.cs](CastlePlus2.Web.App/Program.cs) — 62 wierszy
+- [CastlePlus2.Web.App/Properties/launchSettings.json](CastlePlus2.Web.App/Properties/launchSettings.json) — 38 wierszy
+- [CastlePlus2.Web.App/Services/Auth/ProtectedLocalStorageTokenStore.cs](CastlePlus2.Web.App/Services/Auth/ProtectedLocalStorageTokenStore.cs) — 55 wierszy; deklaracje: `ProtectedLocalStorageTokenStore:8`
+- [CastlePlus2.Web.App/appsettings.Development.json](CastlePlus2.Web.App/appsettings.Development.json) — 8 wierszy
+- [CastlePlus2.Web.App/appsettings.json](CastlePlus2.Web.App/appsettings.json) — 9 wierszy
+- [CastlePlus2.Web.App/wwwroot/app.css](CastlePlus2.Web.App/wwwroot/app.css) — 51 wierszy
+- [CastlePlus2.Web.App/wwwroot/bootstrap/bootstrap.min.css](CastlePlus2.Web.App/wwwroot/bootstrap/bootstrap.min.css)
+- [CastlePlus2.Web.App/wwwroot/bootstrap/bootstrap.min.css.map](CastlePlus2.Web.App/wwwroot/bootstrap/bootstrap.min.css.map)
+- [CastlePlus2.Web.App/wwwroot/favicon.png](CastlePlus2.Web.App/wwwroot/favicon.png)
+- [CastlePlus2.sln](CastlePlus2.sln)
+- [EXPORT_ENGINE.md](EXPORT_ENGINE.md) — 31 wierszy
+- [README.md](README.md) — 1 wierszy
+- [V008__ZSI8_AnalitykaNajmu.txt](V008__ZSI8_AnalitykaNajmu.txt)
+- [global.json](global.json) — 5 wierszy

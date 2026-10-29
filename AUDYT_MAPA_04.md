@@ -1,0 +1,306 @@
+# CastlePlus2 — mapa plików (4/5)
+
+Wykaz śledzonych plików z badanego commita. Liczba wierszy i nazwy deklaracji są wyciągane automatycznie z dostępnej kopii tekstowej; nie oznaczają ręcznej oceny pliku. Brak opisu oznacza, że zawartość nie była analizowana tą metodą (np. plik binarny, zasób lub pominięty plik).
+
+[Wróć do audytu](AUDYT_EDUKACYJNY.md) · [1](AUDYT_MAPA_01.md) · [2](AUDYT_MAPA_02.md) · [3](AUDYT_MAPA_03.md) · [4](AUDYT_MAPA_04.md) · [5](AUDYT_MAPA_05.md)
+
+- [CastlePlus2.Client/Services/Reports/ReportDataPreviewService.cs](CastlePlus2.Client/Services/Reports/ReportDataPreviewService.cs) — 31 wierszy; deklaracje: `ReportDataPreviewService:10`
+- [CastlePlus2.Client/Services/Reports/ReportDocumentPreviewService.cs](CastlePlus2.Client/Services/Reports/ReportDocumentPreviewService.cs) — 34 wierszy; deklaracje: `ReportDocumentPreviewService:10`
+- [CastlePlus2.Client/Services/Slowniki/IIndeksacjeService.cs](CastlePlus2.Client/Services/Slowniki/IIndeksacjeService.cs) — 14 wierszy; deklaracje: `IIndeksacjeService:6`
+- [CastlePlus2.Client/Services/Slowniki/IJednostkiMiaryService.cs](CastlePlus2.Client/Services/Slowniki/IJednostkiMiaryService.cs) — 15 wierszy; deklaracje: `IJednostkiMiaryService:6`
+- [CastlePlus2.Client/Services/Slowniki/IWalutyService.cs](CastlePlus2.Client/Services/Slowniki/IWalutyService.cs) — 14 wierszy; deklaracje: `IWalutyService:6`
+- [CastlePlus2.Client/Services/Slowniki/IndeksacjeService.cs](CastlePlus2.Client/Services/Slowniki/IndeksacjeService.cs) — 124 wierszy; deklaracje: `IndeksacjeService:12`
+- [CastlePlus2.Client/Services/Slowniki/JednostkiMiaryService.cs](CastlePlus2.Client/Services/Slowniki/JednostkiMiaryService.cs) — 118 wierszy; deklaracje: `JednostkiMiaryService:12`
+- [CastlePlus2.Client/Services/Slowniki/WalutyService.cs](CastlePlus2.Client/Services/Slowniki/WalutyService.cs) — 132 wierszy; deklaracje: `WalutyService:12`
+- [CastlePlus2.Client/Services/Utrzymanie/IPowiazanieZleceniaService.cs](CastlePlus2.Client/Services/Utrzymanie/IPowiazanieZleceniaService.cs) — 14 wierszy; deklaracje: `IPowiazaniaZleceniaService:6`
+- [CastlePlus2.Client/Services/Utrzymanie/IZgloszeniaService.cs](CastlePlus2.Client/Services/Utrzymanie/IZgloszeniaService.cs) — 11 wierszy; deklaracje: `IZgloszeniaService:6`
+- [CastlePlus2.Client/Services/Utrzymanie/IZleceniaPracyService.cs](CastlePlus2.Client/Services/Utrzymanie/IZleceniaPracyService.cs) — 14 wierszy; deklaracje: `IZleceniaPracyService:6`
+- [CastlePlus2.Client/Services/Utrzymanie/PowiazanieZleceniaService.cs](CastlePlus2.Client/Services/Utrzymanie/PowiazanieZleceniaService.cs) — 107 wierszy; deklaracje: `PowiazaniaZleceniaService:13`
+- [CastlePlus2.Client/Services/Utrzymanie/ZgloszeniaService.cs](CastlePlus2.Client/Services/Utrzymanie/ZgloszeniaService.cs) — 37 wierszy; deklaracje: `ZgloszeniaService:8`
+- [CastlePlus2.Client/Services/Utrzymanie/ZleceniaPracyService.cs](CastlePlus2.Client/Services/Utrzymanie/ZleceniaPracyService.cs) — 75 wierszy; deklaracje: `ZleceniaPracyService:8`
+- [CastlePlus2.Client/Shared/AuthLayout.razor](CastlePlus2.Client/Shared/AuthLayout.razor) — 15 wierszy
+- [CastlePlus2.Client/Shared/MainLayout.razor](CastlePlus2.Client/Shared/MainLayout.razor) — 340 wierszy
+- [CastlePlus2.Client/Shared/MainLayout.razor.css](CastlePlus2.Client/Shared/MainLayout.razor.css) — 96 wierszy
+- [CastlePlus2.Client/Shared/RedirectToLogin.razor](CastlePlus2.Client/Shared/RedirectToLogin.razor) — 29 wierszy
+- [CastlePlus2.Client/Theme/CastleTheme.cs](CastlePlus2.Client/Theme/CastleTheme.cs) — 41 wierszy; deklaracje: `CastleTheme:5`
+- [CastlePlus2.Client/_Imports.razor](CastlePlus2.Client/_Imports.razor) — 22 wierszy
+- [CastlePlus2.Client/wwwroot/appsettings.Development.json](CastlePlus2.Client/wwwroot/appsettings.Development.json) — 5 wierszy
+- [CastlePlus2.Client/wwwroot/assets/brand/logo.png](CastlePlus2.Client/wwwroot/assets/brand/logo.png)
+- [CastlePlus2.Client/wwwroot/assets/wallpaper/wallpaper.jpg](CastlePlus2.Client/wwwroot/assets/wallpaper/wallpaper.jpg)
+- [CastlePlus2.Client/wwwroot/css/app.css](CastlePlus2.Client/wwwroot/css/app.css) — 373 wierszy
+- [CastlePlus2.Contracts/CastlePlus2.Contracts.csproj](CastlePlus2.Contracts/CastlePlus2.Contracts.csproj) — 13 wierszy
+- [CastlePlus2.Contracts/Class1.cs](CastlePlus2.Contracts/Class1.cs) — 7 wierszy; deklaracje: `Class1:3`
+- [CastlePlus2.Contracts/DTOs/Auth/AdminUserDto.cs](CastlePlus2.Contracts/DTOs/Auth/AdminUserDto.cs) — 14 wierszy; deklaracje: `AdminUserDto:5`
+- [CastlePlus2.Contracts/DTOs/Auth/AuthTokensDto.cs](CastlePlus2.Contracts/DTOs/Auth/AuthTokensDto.cs) — 11 wierszy; deklaracje: `AuthTokensDto:5`
+- [CastlePlus2.Contracts/DTOs/Auth/CurrentUserDto.cs](CastlePlus2.Contracts/DTOs/Auth/CurrentUserDto.cs) — 12 wierszy; deklaracje: `CurrentUserDto:5`
+- [CastlePlus2.Contracts/DTOs/Auth/RequestAccessDto.cs](CastlePlus2.Contracts/DTOs/Auth/RequestAccessDto.cs) — 24 wierszy; deklaracje: `RequestAccessDto:3`
+- [CastlePlus2.Contracts/DTOs/Auth/RoleDto.cs](CastlePlus2.Contracts/DTOs/Auth/RoleDto.cs) — 9 wierszy; deklaracje: `RoleDto:3`
+- [CastlePlus2.Contracts/DTOs/Common/PagedResultDto.cs](CastlePlus2.Contracts/DTOs/Common/PagedResultDto.cs) — 12 wierszy; deklaracje: `PagedResultDto:5`
+- [CastlePlus2.Contracts/DTOs/Dashboard/DashboardV1NajemDto.cs](CastlePlus2.Contracts/DTOs/Dashboard/DashboardV1NajemDto.cs) — 12 wierszy; deklaracje: `DashboardV1NajemDto:3`
+- [CastlePlus2.Contracts/DTOs/Dashboard/DashboardV1NajemUmowaDto.cs](CastlePlus2.Contracts/DTOs/Dashboard/DashboardV1NajemUmowaDto.cs) — 11 wierszy; deklaracje: `DashboardV1NajemUmowaDto:3`
+- [CastlePlus2.Contracts/DTOs/Dashboard/DashboardV1ZaleglaFakturaDto.cs](CastlePlus2.Contracts/DTOs/Dashboard/DashboardV1ZaleglaFakturaDto.cs) — 12 wierszy; deklaracje: `DashboardV1ZaleglaFakturaDto:3`
+- [CastlePlus2.Contracts/DTOs/Dashboard/NajemDashboardDto.cs](CastlePlus2.Contracts/DTOs/Dashboard/NajemDashboardDto.cs) — 10 wierszy; deklaracje: `NajemDashboardDto:3`
+- [CastlePlus2.Contracts/DTOs/Dashboard/NajemPowerDashboardDto.cs](CastlePlus2.Contracts/DTOs/Dashboard/NajemPowerDashboardDto.cs) — 75 wierszy; deklaracje: `NajemPowerDashboardDto:3`, `NajemPowerAppliedRangeDto:27`, `NajemPowerActiveFiltersDto:33`, `NajemPowerDrillDownStateDto:43`, `NajemPowerKpiDto:51`
+- [CastlePlus2.Contracts/DTOs/Dashboard/WygasajacaUmowaDto.cs](CastlePlus2.Contracts/DTOs/Dashboard/WygasajacaUmowaDto.cs) — 16 wierszy; deklaracje: `WygasajacaUmowaDto:3`
+- [CastlePlus2.Contracts/DTOs/Dokumenty/DokumentDto.cs](CastlePlus2.Contracts/DTOs/Dokumenty/DokumentDto.cs) — 14 wierszy; deklaracje: `DokumentDto:5`
+- [CastlePlus2.Contracts/DTOs/Dokumenty/PowiazanieDokumentuDto.cs](CastlePlus2.Contracts/DTOs/Dokumenty/PowiazanieDokumentuDto.cs) — 11 wierszy; deklaracje: `PowiazanieDokumentuDto:5`
+- [CastlePlus2.Contracts/DTOs/Dokumenty/RegisterDokumentContextDto.cs](CastlePlus2.Contracts/DTOs/Dokumenty/RegisterDokumentContextDto.cs) — 18 wierszy; deklaracje: `RegisterDokumentContextDto:6`, `EncjaLookupDto:11`
+- [CastlePlus2.Contracts/DTOs/Dokumenty/RegisterDokumentResultDto.cs](CastlePlus2.Contracts/DTOs/Dokumenty/RegisterDokumentResultDto.cs) — 7 wierszy; deklaracje: `RegisterDokumentResultDto:3`
+- [CastlePlus2.Contracts/DTOs/Finanse/AlokacjaKosztuDto.cs](CastlePlus2.Contracts/DTOs/Finanse/AlokacjaKosztuDto.cs) — 13 wierszy; deklaracje: `AlokacjaKosztuDto:5`
+- [CastlePlus2.Contracts/DTOs/Finanse/FakturaDto.cs](CastlePlus2.Contracts/DTOs/Finanse/FakturaDto.cs) — 16 wierszy; deklaracje: `FakturaDto:5`
+- [CastlePlus2.Contracts/DTOs/Finanse/FakturaLookupDto.cs](CastlePlus2.Contracts/DTOs/Finanse/FakturaLookupDto.cs) — 14 wierszy; deklaracje: `FakturaLookupDto:5`
+- [CastlePlus2.Contracts/DTOs/Finanse/FakturaWydrukTemplateDto.cs](CastlePlus2.Contracts/DTOs/Finanse/FakturaWydrukTemplateDto.cs) — 11 wierszy; deklaracje: `FakturaWydrukTemplateDto:3`
+- [CastlePlus2.Contracts/DTOs/Finanse/GenerateFakturaWydrukRequest.cs](CastlePlus2.Contracts/DTOs/Finanse/GenerateFakturaWydrukRequest.cs) — 12 wierszy; deklaracje: `GenerateFakturaWydrukRequest:5`
+- [CastlePlus2.Contracts/DTOs/Finanse/GenerateFakturaWydrukResponse.cs](CastlePlus2.Contracts/DTOs/Finanse/GenerateFakturaWydrukResponse.cs) — 9 wierszy; deklaracje: `GenerateFakturaWydrukResponse:3`
+- [CastlePlus2.Contracts/DTOs/Finanse/GenerateNajemFakturyResultDto.cs](CastlePlus2.Contracts/DTOs/Finanse/GenerateNajemFakturyResultDto.cs) — 24 wierszy; deklaracje: `GenerateNajemFakturyResultDto:6`, `GenerateNajemFakturyItemDto:13`
+- [CastlePlus2.Contracts/DTOs/Finanse/KategoriaKosztuDto.cs](CastlePlus2.Contracts/DTOs/Finanse/KategoriaKosztuDto.cs) — 9 wierszy; deklaracje: `KategoriaKosztuDto:3`
+- [CastlePlus2.Contracts/DTOs/Finanse/PlatnoscContextDto.cs](CastlePlus2.Contracts/DTOs/Finanse/PlatnoscContextDto.cs) — 26 wierszy; deklaracje: `PlatnoscContextDto:8`, `FakturaDoRozliczeniaDto:15`
+- [CastlePlus2.Contracts/DTOs/Finanse/PlatnoscDto.cs](CastlePlus2.Contracts/DTOs/Finanse/PlatnoscDto.cs) — 13 wierszy; deklaracje: `PlatnoscDto:5`
+- [CastlePlus2.Contracts/DTOs/Finanse/PozycjaKosztuDto.cs](CastlePlus2.Contracts/DTOs/Finanse/PozycjaKosztuDto.cs) — 12 wierszy; deklaracje: `PozycjaKosztuDto:3`
+- [CastlePlus2.Contracts/DTOs/Finanse/RozliczeniePlatnosciDto.cs](CastlePlus2.Contracts/DTOs/Finanse/RozliczeniePlatnosciDto.cs) — 10 wierszy; deklaracje: `RozliczeniePlatnosciDto:3`
+- [CastlePlus2.Contracts/DTOs/Finanse/WystawFaktureContextDto.cs](CastlePlus2.Contracts/DTOs/Finanse/WystawFaktureContextDto.cs) — 23 wierszy; deklaracje: `WystawFaktureContextDto:8`, `EncjaLookupDto:16`
+- [CastlePlus2.Contracts/DTOs/Finanse/WystawFaktureResultDto.cs](CastlePlus2.Contracts/DTOs/Finanse/WystawFaktureResultDto.cs) — 9 wierszy; deklaracje: `WystawFaktureResultDto:3`
+- [CastlePlus2.Contracts/DTOs/Finanse/ZarejestrujPlatnoscResultDto.cs](CastlePlus2.Contracts/DTOs/Finanse/ZarejestrujPlatnoscResultDto.cs) — 8 wierszy; deklaracje: `ZarejestrujPlatnoscResultDto:3`
+- [CastlePlus2.Contracts/DTOs/Konfiguracja/ZasobUIDokumentDto.cs](CastlePlus2.Contracts/DTOs/Konfiguracja/ZasobUIDokumentDto.cs) — 11 wierszy; deklaracje: `ZasobUIDokumentDto:5`
+- [CastlePlus2.Contracts/DTOs/Konfiguracja/ZasobUIDto.cs](CastlePlus2.Contracts/DTOs/Konfiguracja/ZasobUIDto.cs) — 22 wierszy; deklaracje: `ZasobUIDto:6`
+- [CastlePlus2.Contracts/DTOs/Konfiguracja/ZasobUIPublicDto.cs](CastlePlus2.Contracts/DTOs/Konfiguracja/ZasobUIPublicDto.cs) — 19 wierszy; deklaracje: `ZasobUIPublicDto:6`
+- [CastlePlus2.Contracts/DTOs/Konfiguracja/ZasobUITekstDto.cs](CastlePlus2.Contracts/DTOs/Konfiguracja/ZasobUITekstDto.cs) — 14 wierszy; deklaracje: `ZasobUITekstDto:5`
+- [CastlePlus2.Contracts/DTOs/Media/CreateRodzajMediumRequest.cs](CastlePlus2.Contracts/DTOs/Media/CreateRodzajMediumRequest.cs) — 8 wierszy; deklaracje: `CreateRodzajMediumRequest:3`
+- [CastlePlus2.Contracts/DTOs/Media/LicznikDto.cs](CastlePlus2.Contracts/DTOs/Media/LicznikDto.cs) — 15 wierszy; deklaracje: `LicznikDto:3`
+- [CastlePlus2.Contracts/DTOs/Media/LicznikLookupDto.cs](CastlePlus2.Contracts/DTOs/Media/LicznikLookupDto.cs) — 11 wierszy; deklaracje: `LicznikLookupDto:3`
+- [CastlePlus2.Contracts/DTOs/Media/OdczytContextDto.cs](CastlePlus2.Contracts/DTOs/Media/OdczytContextDto.cs) — 16 wierszy; deklaracje: `OdczytContextDto:5`, `LicznikOdczytLookupDto:10`
+- [CastlePlus2.Contracts/DTOs/Media/OdczytDto.cs](CastlePlus2.Contracts/DTOs/Media/OdczytDto.cs) — 13 wierszy; deklaracje: `OdczytDto:5`
+- [CastlePlus2.Contracts/DTOs/Media/PrzylaczeDto.cs](CastlePlus2.Contracts/DTOs/Media/PrzylaczeDto.cs) — 15 wierszy; deklaracje: `PrzylaczeDto:5`
+- [CastlePlus2.Contracts/DTOs/Media/PrzylaczeLookupDto.cs](CastlePlus2.Contracts/DTOs/Media/PrzylaczeLookupDto.cs) — 13 wierszy; deklaracje: `PrzylaczeLookupDto:5`
+- [CastlePlus2.Contracts/DTOs/Media/RodzajMediumDto.cs](CastlePlus2.Contracts/DTOs/Media/RodzajMediumDto.cs) — 8 wierszy; deklaracje: `RodzajMediumDto:3`
+- [CastlePlus2.Contracts/DTOs/Media/UpdateRodzajMediumRequest.cs](CastlePlus2.Contracts/DTOs/Media/UpdateRodzajMediumRequest.cs) — 7 wierszy; deklaracje: `UpdateRodzajMediumRequest:3`
+- [CastlePlus2.Contracts/DTOs/Najem/AneksujCzynszResult.cs](CastlePlus2.Contracts/DTOs/Najem/AneksujCzynszResult.cs) — 11 wierszy; deklaracje: `AneksujCzynszResult:5`
+- [CastlePlus2.Contracts/DTOs/Najem/KaucjaDto.cs](CastlePlus2.Contracts/DTOs/Najem/KaucjaDto.cs) — 12 wierszy; deklaracje: `KaucjaDto:3`
+- [CastlePlus2.Contracts/DTOs/Najem/OblozenieLokaluDto.cs](CastlePlus2.Contracts/DTOs/Najem/OblozenieLokaluDto.cs) — 17 wierszy; deklaracje: `OblozenieLokaluDto:3`
+- [CastlePlus2.Contracts/DTOs/Najem/PrzedmiotNajmuDto.cs](CastlePlus2.Contracts/DTOs/Najem/PrzedmiotNajmuDto.cs) — 12 wierszy; deklaracje: `PrzedmiotNajmuDto:3`
+- [CastlePlus2.Contracts/DTOs/Najem/PrzedmiotNajmuLookupDto.cs](CastlePlus2.Contracts/DTOs/Najem/PrzedmiotNajmuLookupDto.cs) — 13 wierszy; deklaracje: `PrzedmiotNajmuLookupDto:5`
+- [CastlePlus2.Contracts/DTOs/Najem/RaportNajmuZaMiesiacRowDto.cs](CastlePlus2.Contracts/DTOs/Najem/RaportNajmuZaMiesiacRowDto.cs) — 16 wierszy; deklaracje: `RaportNajmuZaMiesiacRowDto:3`
+- [CastlePlus2.Contracts/DTOs/Najem/SkladnikCzynszuDto.cs](CastlePlus2.Contracts/DTOs/Najem/SkladnikCzynszuDto.cs) — 19 wierszy; deklaracje: `SkladnikCzynszuDto:3`
+- [CastlePlus2.Contracts/DTOs/Najem/UmowaNajmuContextDto.cs](CastlePlus2.Contracts/DTOs/Najem/UmowaNajmuContextDto.cs) — 20 wierszy; deklaracje: `UmowaNajmuContextDto:12`
+- [CastlePlus2.Contracts/DTOs/Najem/UmowaNajmuDto.cs](CastlePlus2.Contracts/DTOs/Najem/UmowaNajmuDto.cs) — 15 wierszy; deklaracje: `UmowaNajmuDto:3`
+- [CastlePlus2.Contracts/DTOs/Najem/UmowaNajmuLookupDto.cs](CastlePlus2.Contracts/DTOs/Najem/UmowaNajmuLookupDto.cs) — 13 wierszy; deklaracje: `UmowaNajmuLookupDto:5`
+- [CastlePlus2.Contracts/DTOs/Najem/ZakonczUmoweNajmuResult.cs](CastlePlus2.Contracts/DTOs/Najem/ZakonczUmoweNajmuResult.cs) — 12 wierszy; deklaracje: `ZakonczUmoweNajmuResult:5`
+- [CastlePlus2.Contracts/DTOs/Najem/ZawrzUmoweNajmuResult.cs](CastlePlus2.Contracts/DTOs/Najem/ZawrzUmoweNajmuResult.cs) — 14 wierszy; deklaracje: `ZawrzUmoweNajmuResult:9`
+- [CastlePlus2.Contracts/DTOs/Podmioty/KontaktDto.cs](CastlePlus2.Contracts/DTOs/Podmioty/KontaktDto.cs) — 10 wierszy; deklaracje: `KontaktDto:3`
+- [CastlePlus2.Contracts/DTOs/Podmioty/PodmiotDto.cs](CastlePlus2.Contracts/DTOs/Podmioty/PodmiotDto.cs) — 12 wierszy; deklaracje: `PodmiotDto:3`
+- [CastlePlus2.Contracts/DTOs/Podmioty/PodmiotLookupDto.cs](CastlePlus2.Contracts/DTOs/Podmioty/PodmiotLookupDto.cs) — 13 wierszy; deklaracje: `PodmiotLookupDto:3`
+- [CastlePlus2.Contracts/DTOs/Podmioty/PodmiotPagedResultDto.cs](CastlePlus2.Contracts/DTOs/Podmioty/PodmiotPagedResultDto.cs) — 8 wierszy; deklaracje: `PodmiotPagedResultDto:3`
+- [CastlePlus2.Contracts/DTOs/Podmioty/WlasnoscContextDto.cs](CastlePlus2.Contracts/DTOs/Podmioty/WlasnoscContextDto.cs) — 11 wierszy; deklaracje: `WlasnoscContextDto:6`
+- [CastlePlus2.Contracts/DTOs/Podmioty/WlasnoscDto.cs](CastlePlus2.Contracts/DTOs/Podmioty/WlasnoscDto.cs) — 15 wierszy; deklaracje: `WlasnoscDto:5`
+- [CastlePlus2.Contracts/DTOs/Rdzen/AdresDto.cs](CastlePlus2.Contracts/DTOs/Rdzen/AdresDto.cs) — 31 wierszy; deklaracje: `AdresDto:12`
+- [CastlePlus2.Contracts/DTOs/Rdzen/BudynekDto.cs](CastlePlus2.Contracts/DTOs/Rdzen/BudynekDto.cs) — 15 wierszy; deklaracje: `BudynekDto:3`
+- [CastlePlus2.Contracts/DTOs/Rdzen/EncjaDto.cs](CastlePlus2.Contracts/DTOs/Rdzen/EncjaDto.cs) — 16 wierszy; deklaracje: `EncjaDto:8`
+- [CastlePlus2.Contracts/DTOs/Rdzen/LokalDto.cs](CastlePlus2.Contracts/DTOs/Rdzen/LokalDto.cs) — 29 wierszy; deklaracje: `LokalDto:8`
+- [CastlePlus2.Contracts/DTOs/Rdzen/NieruchomoscDto.cs](CastlePlus2.Contracts/DTOs/Rdzen/NieruchomoscDto.cs) — 28 wierszy; deklaracje: `NieruchomoscDto:13`
+- [CastlePlus2.Contracts/DTOs/Rdzen/PomieszczenieDto.cs](CastlePlus2.Contracts/DTOs/Rdzen/PomieszczenieDto.cs) — 18 wierszy; deklaracje: `PomieszczenieDto:8`
+- [CastlePlus2.Contracts/DTOs/Rdzen/PrzypisanieAdresuContextDto.cs](CastlePlus2.Contracts/DTOs/Rdzen/PrzypisanieAdresuContextDto.cs) — 25 wierszy; deklaracje: `PrzypisanieAdresuContextDto:6`, `EncjaLookupDto:12`, `AdresLookupDto:20`
+- [CastlePlus2.Contracts/DTOs/Rdzen/PrzypisanieAdresuDto.cs](CastlePlus2.Contracts/DTOs/Rdzen/PrzypisanieAdresuDto.cs) — 13 wierszy; deklaracje: `PrzypisanieAdresuDto:5`
+- [CastlePlus2.Contracts/DTOs/Rdzen/PrzypiszAdresResultDto.cs](CastlePlus2.Contracts/DTOs/Rdzen/PrzypiszAdresResultDto.cs) — 13 wierszy; deklaracje: `PrzypiszAdresResultDto:5`
+- [CastlePlus2.Contracts/DTOs/Slownik/IndeksacjaDto.cs](CastlePlus2.Contracts/DTOs/Slownik/IndeksacjaDto.cs) — 9 wierszy; deklaracje: `IndeksacjaDto:3`
+- [CastlePlus2.Contracts/DTOs/Slownik/JednostkaMiaryDto.cs](CastlePlus2.Contracts/DTOs/Slownik/JednostkaMiaryDto.cs) — 8 wierszy; deklaracje: `JednostkaMiaryDto:3`
+- [CastlePlus2.Contracts/DTOs/Slownik/WalutaDto.cs](CastlePlus2.Contracts/DTOs/Slownik/WalutaDto.cs) — 8 wierszy; deklaracje: `WalutaDto:3`
+- [CastlePlus2.Contracts/DTOs/Utrzymanie/PowiazanieZleceniaDto.cs](CastlePlus2.Contracts/DTOs/Utrzymanie/PowiazanieZleceniaDto.cs) — 11 wierszy; deklaracje: `PowiazanieZleceniaDto:5`
+- [CastlePlus2.Contracts/DTOs/Utrzymanie/ZglosUsterkeContextDto.cs](CastlePlus2.Contracts/DTOs/Utrzymanie/ZglosUsterkeContextDto.cs) — 26 wierszy; deklaracje: `ZglosUsterkeContextDto:6`, `LokalLookupDto:12`, `BudynekLookupDto:20`
+- [CastlePlus2.Contracts/DTOs/Utrzymanie/ZglosUsterkeResult.cs](CastlePlus2.Contracts/DTOs/Utrzymanie/ZglosUsterkeResult.cs) — 7 wierszy; deklaracje: `ZglosUsterkeResult:3`
+- [CastlePlus2.Contracts/DTOs/Utrzymanie/ZleceniePracyDto.cs](CastlePlus2.Contracts/DTOs/Utrzymanie/ZleceniePracyDto.cs) — 21 wierszy; deklaracje: `ZleceniePracyDto:5`
+- [CastlePlus2.Contracts/Exports/ExportFormat.cs](CastlePlus2.Contracts/Exports/ExportFormat.cs) — 9 wierszy; deklaracje: `ExportFormat:3`
+- [CastlePlus2.Contracts/Exports/ExportFormatExtensions.cs](CastlePlus2.Contracts/Exports/ExportFormatExtensions.cs) — 28 wierszy; deklaracje: `ExportFormatExtensions:3`
+- [CastlePlus2.Contracts/Exports/ExportStorageMode.cs](CastlePlus2.Contracts/Exports/ExportStorageMode.cs) — 7 wierszy; deklaracje: `ExportStorageMode:3`
+- [CastlePlus2.Contracts/Exports/ReportExportLinkResponse.cs](CastlePlus2.Contracts/Exports/ReportExportLinkResponse.cs) — 6 wierszy; deklaracje: `ReportExportLinkResponse:3`
+- [CastlePlus2.Contracts/Reports/FakturyStatRow.cs](CastlePlus2.Contracts/Reports/FakturyStatRow.cs) — 11 wierszy; deklaracje: `FakturyStatRow:5`
+- [CastlePlus2.Contracts/Reports/PodsumowanieOperacyjneRow.cs](CastlePlus2.Contracts/Reports/PodsumowanieOperacyjneRow.cs) — 11 wierszy; deklaracje: `PodsumowanieOperacyjneRow:5`
+- [CastlePlus2.Contracts/Reports/ReportDataPreviewResponse.cs](CastlePlus2.Contracts/Reports/ReportDataPreviewResponse.cs) — 12 wierszy; deklaracje: `ReportDataPreviewResponse:6`
+- [CastlePlus2.Contracts/Reports/ReportDocumentPreviewCreateResponse.cs](CastlePlus2.Contracts/Reports/ReportDocumentPreviewCreateResponse.cs) — 10 wierszy; deklaracje: `ReportDocumentPreviewCreateResponse:5`
+- [CastlePlus2.Contracts/Requests/Auth/ActivateAccountRequest.cs](CastlePlus2.Contracts/Requests/Auth/ActivateAccountRequest.cs) — 9 wierszy; deklaracje: `ActivateAccountRequest:3`
+- [CastlePlus2.Contracts/Requests/Auth/ApproveRequestAccessRequest.cs](CastlePlus2.Contracts/Requests/Auth/ApproveRequestAccessRequest.cs) — 11 wierszy; deklaracje: `ApproveRequestAccessRequest:3`
+- [CastlePlus2.Contracts/Requests/Auth/ChangePasswordRequest.cs](CastlePlus2.Contracts/Requests/Auth/ChangePasswordRequest.cs) — 9 wierszy; deklaracje: `ChangePasswordRequest:3`
+- [CastlePlus2.Contracts/Requests/Auth/CreateRequestAccessRequest.cs](CastlePlus2.Contracts/Requests/Auth/CreateRequestAccessRequest.cs) — 12 wierszy; deklaracje: `CreateRequestAccessRequest:3`
+- [CastlePlus2.Contracts/Requests/Auth/CreateUserRequest.cs](CastlePlus2.Contracts/Requests/Auth/CreateUserRequest.cs) — 11 wierszy; deklaracje: `CreateUserRequest:3`
+- [CastlePlus2.Contracts/Requests/Auth/DeleteUserRequest.cs](CastlePlus2.Contracts/Requests/Auth/DeleteUserRequest.cs) — 7 wierszy; deklaracje: `DeleteUserRequest:3`
+- [CastlePlus2.Contracts/Requests/Auth/LoginRequest.cs](CastlePlus2.Contracts/Requests/Auth/LoginRequest.cs) — 9 wierszy; deklaracje: `LoginRequest:3`
+- [CastlePlus2.Contracts/Requests/Auth/RefreshRequest.cs](CastlePlus2.Contracts/Requests/Auth/RefreshRequest.cs) — 8 wierszy; deklaracje: `RefreshRequest:3`
+- [CastlePlus2.Contracts/Requests/Auth/RegisterRequest.cs](CastlePlus2.Contracts/Requests/Auth/RegisterRequest.cs) — 10 wierszy; deklaracje: `RegisterRequest:3`
+- [CastlePlus2.Contracts/Requests/Auth/RejectRequestAccessRequest.cs](CastlePlus2.Contracts/Requests/Auth/RejectRequestAccessRequest.cs) — 7 wierszy; deklaracje: `RejectRequestAccessRequest:3`
+- [CastlePlus2.Contracts/Requests/Auth/RestoreUserRequest.cs](CastlePlus2.Contracts/Requests/Auth/RestoreUserRequest.cs) — 7 wierszy; deklaracje: `RestoreUserRequest:3`
+- [CastlePlus2.Contracts/Requests/Auth/SetUserActiveRequest.cs](CastlePlus2.Contracts/Requests/Auth/SetUserActiveRequest.cs) — 8 wierszy; deklaracje: `SetUserActiveRequest:3`
+- [CastlePlus2.Contracts/Requests/Auth/SetUserRolesRequest.cs](CastlePlus2.Contracts/Requests/Auth/SetUserRolesRequest.cs) — 9 wierszy; deklaracje: `SetUserRolesRequest:5`
+- [CastlePlus2.Contracts/Requests/Dashboard/GetNajemPowerDashboardRequest.cs](CastlePlus2.Contracts/Requests/Dashboard/GetNajemPowerDashboardRequest.cs) — 21 wierszy; deklaracje: `GetNajemPowerDashboardRequest:3`, `NajemPowerDrillDownRequest:14`
+- [CastlePlus2.Contracts/Requests/Dokumenty/CreateDokumentRequest.cs](CastlePlus2.Contracts/Requests/Dokumenty/CreateDokumentRequest.cs) — 19 wierszy; deklaracje: `CreateDokumentRequest:6`
+- [CastlePlus2.Contracts/Requests/Dokumenty/CreatePowiazanieDokumentuRequest.cs](CastlePlus2.Contracts/Requests/Dokumenty/CreatePowiazanieDokumentuRequest.cs) — 7 wierszy; deklaracje: `CreatePowiazanieDokumentuRequest:3`
+- [CastlePlus2.Contracts/Requests/Dokumenty/RegisterDokumentRequest.cs](CastlePlus2.Contracts/Requests/Dokumenty/RegisterDokumentRequest.cs) — 20 wierszy; deklaracje: `RegisterDokumentRequest:6`
+- [CastlePlus2.Contracts/Requests/Dokumenty/UpdateDokumentRequest.cs](CastlePlus2.Contracts/Requests/Dokumenty/UpdateDokumentRequest.cs) — 19 wierszy; deklaracje: `UpdateDokumentRequest:6`
+- [CastlePlus2.Contracts/Requests/Dokumenty/UpdatePowiazanieDokumentuRequest.cs](CastlePlus2.Contracts/Requests/Dokumenty/UpdatePowiazanieDokumentuRequest.cs) — 14 wierszy; deklaracje: `UpdatePowiazanieDokumentuRequest:6`
+- [CastlePlus2.Contracts/Requests/Finanse/CreateAlokacjaKosztuRequest.cs](CastlePlus2.Contracts/Requests/Finanse/CreateAlokacjaKosztuRequest.cs) — 20 wierszy; deklaracje: `CreateAlokacjaKosztuRequest:6`
+- [CastlePlus2.Contracts/Requests/Finanse/CreateFakturaRequest.cs](CastlePlus2.Contracts/Requests/Finanse/CreateFakturaRequest.cs) — 24 wierszy; deklaracje: `CreateFakturaRequest:6`
+- [CastlePlus2.Contracts/Requests/Finanse/CreateKategoriaKosztuRequest.cs](CastlePlus2.Contracts/Requests/Finanse/CreateKategoriaKosztuRequest.cs) — 13 wierszy; deklaracje: `CreateKategoriaKosztuRequest:5`
+- [CastlePlus2.Contracts/Requests/Finanse/CreatePlatnoscRequest.cs](CastlePlus2.Contracts/Requests/Finanse/CreatePlatnoscRequest.cs) — 20 wierszy; deklaracje: `CreatePlatnoscRequest:6`
+- [CastlePlus2.Contracts/Requests/Finanse/CreatePozycjaKosztuRequest.cs](CastlePlus2.Contracts/Requests/Finanse/CreatePozycjaKosztuRequest.cs) — 22 wierszy; deklaracje: `CreatePozycjaKosztuRequest:5`
+- [CastlePlus2.Contracts/Requests/Finanse/CreateRozliczeniePlatnosciRequest.cs](CastlePlus2.Contracts/Requests/Finanse/CreateRozliczeniePlatnosciRequest.cs) — 16 wierszy; deklaracje: `CreateRozliczeniePlatnosciRequest:5`
+- [CastlePlus2.Contracts/Requests/Finanse/GenerateNajemFakturyRequest.cs](CastlePlus2.Contracts/Requests/Finanse/GenerateNajemFakturyRequest.cs) — 15 wierszy; deklaracje: `GenerateNajemFakturyRequest:6`
+- [CastlePlus2.Contracts/Requests/Finanse/UpdateAlokacjaKosztuRequest.cs](CastlePlus2.Contracts/Requests/Finanse/UpdateAlokacjaKosztuRequest.cs) — 20 wierszy; deklaracje: `UpdateAlokacjaKosztuRequest:6`
+- [CastlePlus2.Contracts/Requests/Finanse/UpdateFakturaRequest.cs](CastlePlus2.Contracts/Requests/Finanse/UpdateFakturaRequest.cs) — 24 wierszy; deklaracje: `UpdateFakturaRequest:6`
+- [CastlePlus2.Contracts/Requests/Finanse/UpdateKategoriaKosztuRequest.cs](CastlePlus2.Contracts/Requests/Finanse/UpdateKategoriaKosztuRequest.cs) — 13 wierszy; deklaracje: `UpdateKategoriaKosztuRequest:5`
+- [CastlePlus2.Contracts/Requests/Finanse/UpdatePlatnoscRequest.cs](CastlePlus2.Contracts/Requests/Finanse/UpdatePlatnoscRequest.cs) — 20 wierszy; deklaracje: `UpdatePlatnoscRequest:6`
+- [CastlePlus2.Contracts/Requests/Finanse/UpdatePozycjaKosztuRequest.cs](CastlePlus2.Contracts/Requests/Finanse/UpdatePozycjaKosztuRequest.cs) — 22 wierszy; deklaracje: `UpdatePozycjaKosztuRequest:5`
+- [CastlePlus2.Contracts/Requests/Finanse/UpdateRozliczeniePlatnosciRequest.cs](CastlePlus2.Contracts/Requests/Finanse/UpdateRozliczeniePlatnosciRequest.cs) — 16 wierszy; deklaracje: `UpdateRozliczeniePlatnosciRequest:5`
+- [CastlePlus2.Contracts/Requests/Finanse/WystawFaktureRequest.cs](CastlePlus2.Contracts/Requests/Finanse/WystawFaktureRequest.cs) — 56 wierszy; deklaracje: `WystawFaktureRequest:7`, `WystawFakturePozycjaRequest:27`, `WystawFaktureAlokacjaRequest:45`
+- [CastlePlus2.Contracts/Requests/Finanse/ZarejestrujPlatnoscRequest.cs](CastlePlus2.Contracts/Requests/Finanse/ZarejestrujPlatnoscRequest.cs) — 33 wierszy; deklaracje: `ZarejestrujPlatnoscRequest:7`, `ZarejestrujPlatnoscRozliczenieRequest:25`
+- [CastlePlus2.Contracts/Requests/Konfiguracja/CreateZasobUIRequest.cs](CastlePlus2.Contracts/Requests/Konfiguracja/CreateZasobUIRequest.cs) — 14 wierszy; deklaracje: `CreateZasobUIRequest:5`
+- [CastlePlus2.Contracts/Requests/Konfiguracja/CreateZasobUITekstRequest.cs](CastlePlus2.Contracts/Requests/Konfiguracja/CreateZasobUITekstRequest.cs) — 16 wierszy; deklaracje: `CreateZasobUITekstRequest:5`
+- [CastlePlus2.Contracts/Requests/Konfiguracja/UpdateZasobUIRequest.cs](CastlePlus2.Contracts/Requests/Konfiguracja/UpdateZasobUIRequest.cs) — 14 wierszy; deklaracje: `UpdateZasobUIRequest:5`
+- [CastlePlus2.Contracts/Requests/Konfiguracja/UpdateZasobUITekstRequest.cs](CastlePlus2.Contracts/Requests/Konfiguracja/UpdateZasobUITekstRequest.cs) — 17 wierszy; deklaracje: `UpdateZasobUITekstRequest:5`
+- [CastlePlus2.Contracts/Requests/Media/CreateLicznikRequest.cs](CastlePlus2.Contracts/Requests/Media/CreateLicznikRequest.cs) — 23 wierszy; deklaracje: `CreateLicznikRequest:5`
+- [CastlePlus2.Contracts/Requests/Media/CreateOdczytRequest.cs](CastlePlus2.Contracts/Requests/Media/CreateOdczytRequest.cs) — 20 wierszy; deklaracje: `CreateOdczytRequest:6`
+- [CastlePlus2.Contracts/Requests/Media/CreatePrzylaczeRequest.cs](CastlePlus2.Contracts/Requests/Media/CreatePrzylaczeRequest.cs) — 17 wierszy; deklaracje: `CreatePrzylaczeRequest:6`
+- [CastlePlus2.Contracts/Requests/Media/UpdateLicznikRequest.cs](CastlePlus2.Contracts/Requests/Media/UpdateLicznikRequest.cs) — 23 wierszy; deklaracje: `UpdateLicznikRequest:5`
+- [CastlePlus2.Contracts/Requests/Media/UpdateOdczytRequest.cs](CastlePlus2.Contracts/Requests/Media/UpdateOdczytRequest.cs) — 20 wierszy; deklaracje: `UpdateOdczytRequest:6`
+- [CastlePlus2.Contracts/Requests/Media/UpdatePrzylaczeRequest.cs](CastlePlus2.Contracts/Requests/Media/UpdatePrzylaczeRequest.cs) — 17 wierszy; deklaracje: `UpdatePrzylaczeRequest:6`
+- [CastlePlus2.Contracts/Requests/Najem/AneksujCzynszRequest.cs](CastlePlus2.Contracts/Requests/Najem/AneksujCzynszRequest.cs) — 25 wierszy; deklaracje: `AneksujCzynszRequest:6`
+- [CastlePlus2.Contracts/Requests/Najem/CreateKaucjaRequest.cs](CastlePlus2.Contracts/Requests/Najem/CreateKaucjaRequest.cs) — 23 wierszy; deklaracje: `CreateKaucjaRequest:6`
+- [CastlePlus2.Contracts/Requests/Najem/CreatePrzedmiotNajmuRequest.cs](CastlePlus2.Contracts/Requests/Najem/CreatePrzedmiotNajmuRequest.cs) — 13 wierszy; deklaracje: `CreatePrzedmiotNajmuRequest:5`
+- [CastlePlus2.Contracts/Requests/Najem/CreateSkladnikCzynszuRequest.cs](CastlePlus2.Contracts/Requests/Najem/CreateSkladnikCzynszuRequest.cs) — 30 wierszy; deklaracje: `CreateSkladnikCzynszuRequest:6`
+- [CastlePlus2.Contracts/Requests/Najem/CreateUmowaNajmuRequest.cs](CastlePlus2.Contracts/Requests/Najem/CreateUmowaNajmuRequest.cs) — 28 wierszy; deklaracje: `CreateUmowaNajmuRequest:6`
+- [CastlePlus2.Contracts/Requests/Najem/GetRaportNajmuZaMiesiacRequest.cs](CastlePlus2.Contracts/Requests/Najem/GetRaportNajmuZaMiesiacRequest.cs) — 8 wierszy; deklaracje: `GetRaportNajmuZaMiesiacRequest:3`
+- [CastlePlus2.Contracts/Requests/Najem/UpdateKaucjaRequest.cs](CastlePlus2.Contracts/Requests/Najem/UpdateKaucjaRequest.cs) — 23 wierszy; deklaracje: `UpdateKaucjaRequest:6`
+- [CastlePlus2.Contracts/Requests/Najem/UpdatePrzedmiotNajmuRequest.cs](CastlePlus2.Contracts/Requests/Najem/UpdatePrzedmiotNajmuRequest.cs) — 13 wierszy; deklaracje: `UpdatePrzedmiotNajmuRequest:5`
+- [CastlePlus2.Contracts/Requests/Najem/UpdateSkladnikCzynszuRequest.cs](CastlePlus2.Contracts/Requests/Najem/UpdateSkladnikCzynszuRequest.cs) — 30 wierszy; deklaracje: `UpdateSkladnikCzynszuRequest:6`
+- [CastlePlus2.Contracts/Requests/Najem/UpdateUmowaNajmuRequest.cs](CastlePlus2.Contracts/Requests/Najem/UpdateUmowaNajmuRequest.cs) — 28 wierszy; deklaracje: `UpdateUmowaNajmuRequest:6`
+- [CastlePlus2.Contracts/Requests/Najem/ZakonczUmoweNajmuRequest.cs](CastlePlus2.Contracts/Requests/Najem/ZakonczUmoweNajmuRequest.cs) — 14 wierszy; deklaracje: `ZakonczUmoweNajmuRequest:6`
+- [CastlePlus2.Contracts/Requests/Najem/ZawrzUmoweNajmuRequest.cs](CastlePlus2.Contracts/Requests/Najem/ZawrzUmoweNajmuRequest.cs) — 23 wierszy; deklaracje: `ZawrzUmoweNajmuRequest:5`
+- [CastlePlus2.Contracts/Requests/Podmioty/CreateKontaktRequest.cs](CastlePlus2.Contracts/Requests/Podmioty/CreateKontaktRequest.cs) — 9 wierszy; deklaracje: `CreateKontaktRequest:3`
+- [CastlePlus2.Contracts/Requests/Podmioty/CreatePodmiotRequest.cs](CastlePlus2.Contracts/Requests/Podmioty/CreatePodmiotRequest.cs) — 22 wierszy; deklaracje: `CreatePodmiotRequest:5`
+- [CastlePlus2.Contracts/Requests/Podmioty/CreateWlasnoscRequest.cs](CastlePlus2.Contracts/Requests/Podmioty/CreateWlasnoscRequest.cs) — 14 wierszy; deklaracje: `CreateWlasnoscRequest:5`
+- [CastlePlus2.Contracts/Requests/Podmioty/UpdateKontaktRequest.cs](CastlePlus2.Contracts/Requests/Podmioty/UpdateKontaktRequest.cs) — 9 wierszy; deklaracje: `UpdateKontaktRequest:3`
+- [CastlePlus2.Contracts/Requests/Podmioty/UpdatePodmiotRequest.cs](CastlePlus2.Contracts/Requests/Podmioty/UpdatePodmiotRequest.cs) — 22 wierszy; deklaracje: `UpdatePodmiotRequest:5`
+- [CastlePlus2.Contracts/Requests/Podmioty/UpdateWlasnoscRequest.cs](CastlePlus2.Contracts/Requests/Podmioty/UpdateWlasnoscRequest.cs) — 18 wierszy; deklaracje: `UpdateWlasnoscRequest:9`
+- [CastlePlus2.Contracts/Requests/Podmioty/UstawWlasnoscRequest.cs](CastlePlus2.Contracts/Requests/Podmioty/UstawWlasnoscRequest.cs) — 29 wierszy; deklaracje: `UstawWlasnoscRequest:7`, `UstawWlasnoscItemRequest:16`
+- [CastlePlus2.Contracts/Requests/Rdzen/CreateAdresRequest.cs](CastlePlus2.Contracts/Requests/Rdzen/CreateAdresRequest.cs) — 34 wierszy; deklaracje: `CreateAdresRequest:5`
+- [CastlePlus2.Contracts/Requests/Rdzen/CreateBudynekRequest.cs](CastlePlus2.Contracts/Requests/Rdzen/CreateBudynekRequest.cs) — 18 wierszy; deklaracje: `CreateBudynekRequest:5`
+- [CastlePlus2.Contracts/Requests/Rdzen/CreateEncjaRequest.cs](CastlePlus2.Contracts/Requests/Rdzen/CreateEncjaRequest.cs) — 13 wierszy; deklaracje: `CreateEncjaRequest:5`
+- [CastlePlus2.Contracts/Requests/Rdzen/CreateLokalRequest.cs](CastlePlus2.Contracts/Requests/Rdzen/CreateLokalRequest.cs) — 18 wierszy; deklaracje: `CreateLokalRequest:5`
+- [CastlePlus2.Contracts/Requests/Rdzen/CreateNieruchomoscRequest.cs](CastlePlus2.Contracts/Requests/Rdzen/CreateNieruchomoscRequest.cs) — 15 wierszy; deklaracje: `CreateNieruchomoscRequest:5`
+- [CastlePlus2.Contracts/Requests/Rdzen/CreatePomieszczenieRequest.cs](CastlePlus2.Contracts/Requests/Rdzen/CreatePomieszczenieRequest.cs) — 17 wierszy; deklaracje: `CreatePomieszczenieRequest:6`
+- [CastlePlus2.Contracts/Requests/Rdzen/CreatePrzypisanieAdresuRequest.cs](CastlePlus2.Contracts/Requests/Rdzen/CreatePrzypisanieAdresuRequest.cs) — 16 wierszy; deklaracje: `CreatePrzypisanieAdresuRequest:5`
+- [CastlePlus2.Contracts/Requests/Rdzen/PrzypiszAdresRequest.cs](CastlePlus2.Contracts/Requests/Rdzen/PrzypiszAdresRequest.cs) — 19 wierszy; deklaracje: `PrzypiszAdresRequest:6`
+- [CastlePlus2.Contracts/Requests/Rdzen/UpdateAdresRequest.cs](CastlePlus2.Contracts/Requests/Rdzen/UpdateAdresRequest.cs) — 34 wierszy; deklaracje: `UpdateAdresRequest:5`
+- [CastlePlus2.Contracts/Requests/Rdzen/UpdateBudynekRequest.cs](CastlePlus2.Contracts/Requests/Rdzen/UpdateBudynekRequest.cs) — 18 wierszy; deklaracje: `UpdateBudynekRequest:5`
+- [CastlePlus2.Contracts/Requests/Rdzen/UpdateEncjaRequest.cs](CastlePlus2.Contracts/Requests/Rdzen/UpdateEncjaRequest.cs) — 13 wierszy; deklaracje: `UpdateEncjaRequest:5`
+- [CastlePlus2.Contracts/Requests/Rdzen/UpdateLokalRequest.cs](CastlePlus2.Contracts/Requests/Rdzen/UpdateLokalRequest.cs) — 18 wierszy; deklaracje: `UpdateLokalRequest:5`
+- [CastlePlus2.Contracts/Requests/Rdzen/UpdateNieruchomoscRequest.cs](CastlePlus2.Contracts/Requests/Rdzen/UpdateNieruchomoscRequest.cs) — 15 wierszy; deklaracje: `UpdateNieruchomoscRequest:5`
+- [CastlePlus2.Contracts/Requests/Rdzen/UpdatePomieszczenieRequest.cs](CastlePlus2.Contracts/Requests/Rdzen/UpdatePomieszczenieRequest.cs) — 18 wierszy; deklaracje: `UpdatePomieszczenieRequest:6`
+- [CastlePlus2.Contracts/Requests/Rdzen/UpdatePrzypisanieAdresuRequest.cs](CastlePlus2.Contracts/Requests/Rdzen/UpdatePrzypisanieAdresuRequest.cs) — 15 wierszy; deklaracje: `UpdatePrzypisanieAdresuRequest:5`
+- [CastlePlus2.Contracts/Requests/Slownik/CreateIndeksacjaRequest.cs](CastlePlus2.Contracts/Requests/Slownik/CreateIndeksacjaRequest.cs) — 9 wierszy; deklaracje: `CreateIndeksacjaRequest:3`
+- [CastlePlus2.Contracts/Requests/Slownik/CreateJednostkaMiaryRequest.cs](CastlePlus2.Contracts/Requests/Slownik/CreateJednostkaMiaryRequest.cs) — 8 wierszy; deklaracje: `CreateJednostkaMiaryRequest:3`
+- [CastlePlus2.Contracts/Requests/Slownik/CreateWalutaRequest.cs](CastlePlus2.Contracts/Requests/Slownik/CreateWalutaRequest.cs) — 15 wierszy; deklaracje: `CreateWalutaRequest:5`
+- [CastlePlus2.Contracts/Requests/Slownik/UpdateIndeksacjaRequest.cs](CastlePlus2.Contracts/Requests/Slownik/UpdateIndeksacjaRequest.cs) — 8 wierszy; deklaracje: `UpdateIndeksacjaRequest:3`
+- [CastlePlus2.Contracts/Requests/Slownik/UpdateJednostkaMiaryRequest.cs](CastlePlus2.Contracts/Requests/Slownik/UpdateJednostkaMiaryRequest.cs) — 7 wierszy; deklaracje: `UpdateJednostkaMiaryRequest:3`
+- [CastlePlus2.Contracts/Requests/Slownik/UpdateWalutaRequest.cs](CastlePlus2.Contracts/Requests/Slownik/UpdateWalutaRequest.cs) — 11 wierszy; deklaracje: `UpdateWalutaRequest:5`
+- [CastlePlus2.Contracts/Requests/Utrzymanie/CreatePowiazanieZleceniaRequest.cs](CastlePlus2.Contracts/Requests/Utrzymanie/CreatePowiazanieZleceniaRequest.cs) — 10 wierszy; deklaracje: `CreatePowiazanieZleceniaRequest:5`
+- [CastlePlus2.Contracts/Requests/Utrzymanie/CreateZleceniePracyRequest.cs](CastlePlus2.Contracts/Requests/Utrzymanie/CreateZleceniePracyRequest.cs) — 22 wierszy; deklaracje: `CreateZleceniePracyRequest:6`
+- [CastlePlus2.Contracts/Requests/Utrzymanie/UpdatePowiazanieZleceniaRequest.cs](CastlePlus2.Contracts/Requests/Utrzymanie/UpdatePowiazanieZleceniaRequest.cs) — 10 wierszy; deklaracje: `UpdatePowiazanieZleceniaRequest:5`
+- [CastlePlus2.Contracts/Requests/Utrzymanie/UpdateZleceniePracyRequest.cs](CastlePlus2.Contracts/Requests/Utrzymanie/UpdateZleceniePracyRequest.cs) — 22 wierszy; deklaracje: `UpdateZleceniePracyRequest:6`
+- [CastlePlus2.Contracts/Requests/Utrzymanie/ZglosUsterkeRequest.cs](CastlePlus2.Contracts/Requests/Utrzymanie/ZglosUsterkeRequest.cs) — 11 wierszy; deklaracje: `ZglosUsterkeRequest:5`
+- [CastlePlus2.Domain/CastlePlus2.Domain.csproj](CastlePlus2.Domain/CastlePlus2.Domain.csproj) — 21 wierszy
+- [CastlePlus2.Domain/Class1.cs](CastlePlus2.Domain/Class1.cs) — 7 wierszy; deklaracje: `Class1:3`
+- [CastlePlus2.Domain/Common/BaseEntity.cs](CastlePlus2.Domain/Common/BaseEntity.cs) — 26 wierszy; deklaracje: `BaseEntity:14`
+- [CastlePlus2.Domain/Common/GuidEntity.cs](CastlePlus2.Domain/Common/GuidEntity.cs) — 17 wierszy; deklaracje: `GuidEntity:13`
+- [CastlePlus2.Domain/Common/LongEntity.cs](CastlePlus2.Domain/Common/LongEntity.cs) — 16 wierszy; deklaracje: `LongEntity:13`
+- [CastlePlus2.Domain/Entities/Auth/ActivationToken.cs](CastlePlus2.Domain/Entities/Auth/ActivationToken.cs) — 12 wierszy; deklaracje: `ActivationToken:3`
+- [CastlePlus2.Domain/Entities/Auth/RefreshToken.cs](CastlePlus2.Domain/Entities/Auth/RefreshToken.cs) — 21 wierszy; deklaracje: `RefreshToken:8`
+- [CastlePlus2.Domain/Entities/Auth/RequestAccess.cs](CastlePlus2.Domain/Entities/Auth/RequestAccess.cs) — 32 wierszy; deklaracje: `RequestAccessStatus:3`, `RequestAccess:10`
+- [CastlePlus2.Domain/Entities/Auth/Rola.cs](CastlePlus2.Domain/Entities/Auth/Rola.cs) — 17 wierszy; deklaracje: `Rola:8`
+- [CastlePlus2.Domain/Entities/Auth/Uzytkownik.cs](CastlePlus2.Domain/Entities/Auth/Uzytkownik.cs) — 26 wierszy; deklaracje: `Uzytkownik:9`
+- [CastlePlus2.Domain/Entities/Auth/UzytkownikRola.cs](CastlePlus2.Domain/Entities/Auth/UzytkownikRola.cs) — 14 wierszy; deklaracje: `UzytkownikRola:6`
+- [CastlePlus2.Domain/Entities/Dokumenty/Dokument.cs](CastlePlus2.Domain/Entities/Dokumenty/Dokument.cs) — 25 wierszy; deklaracje: `Dokument:10`
+- [CastlePlus2.Domain/Entities/Dokumenty/PowiazanieDokumentu.cs](CastlePlus2.Domain/Entities/Dokumenty/PowiazanieDokumentu.cs) — 20 wierszy; deklaracje: `PowiazanieDokumentu:10`
+- [CastlePlus2.Domain/Entities/Finanse/AlokacjaKosztu.cs](CastlePlus2.Domain/Entities/Finanse/AlokacjaKosztu.cs) — 21 wierszy; deklaracje: `AlokacjaKosztu:9`
+- [CastlePlus2.Domain/Entities/Finanse/Faktura.cs](CastlePlus2.Domain/Entities/Finanse/Faktura.cs) — 28 wierszy; deklaracje: `Faktura:12`
+- [CastlePlus2.Domain/Entities/Finanse/KategoriaKosztu.cs](CastlePlus2.Domain/Entities/Finanse/KategoriaKosztu.cs) — 13 wierszy; deklaracje: `KategoriaKosztu:7`
+- [CastlePlus2.Domain/Entities/Finanse/Platnosc.cs](CastlePlus2.Domain/Entities/Finanse/Platnosc.cs) — 23 wierszy; deklaracje: `Platnosc:11`
+- [CastlePlus2.Domain/Entities/Finanse/PozycjaKosztu.cs](CastlePlus2.Domain/Entities/Finanse/PozycjaKosztu.cs) — 22 wierszy; deklaracje: `PozycjaKosztu:8`
+- [CastlePlus2.Domain/Entities/Finanse/RozliczeniePlatnosci.cs](CastlePlus2.Domain/Entities/Finanse/RozliczeniePlatnosci.cs) — 18 wierszy; deklaracje: `RozliczeniePlatnosci:7`
+- [CastlePlus2.Domain/Entities/Konfiguracja/ZasobUI.cs](CastlePlus2.Domain/Entities/Konfiguracja/ZasobUI.cs) — 29 wierszy; deklaracje: `ZasobUI:7`
+- [CastlePlus2.Domain/Entities/Konfiguracja/ZasobUITekst.cs](CastlePlus2.Domain/Entities/Konfiguracja/ZasobUITekst.cs) — 23 wierszy; deklaracje: `ZasobUITekst:5`
+- [CastlePlus2.Domain/Entities/Media/Licznik.cs](CastlePlus2.Domain/Entities/Media/Licznik.cs) — 25 wierszy; deklaracje: `Licznik:9`
+- [CastlePlus2.Domain/Entities/Media/Odczyt.cs](CastlePlus2.Domain/Entities/Media/Odczyt.cs) — 19 wierszy; deklaracje: `Odczyt:8`
+- [CastlePlus2.Domain/Entities/Media/Przylacze.cs](CastlePlus2.Domain/Entities/Media/Przylacze.cs) — 21 wierszy; deklaracje: `Przylacze:10`
+- [CastlePlus2.Domain/Entities/Media/RodzajMedium.cs](CastlePlus2.Domain/Entities/Media/RodzajMedium.cs) — 14 wierszy; deklaracje: `RodzajMedium:9`
+- [CastlePlus2.Domain/Entities/Najem/Kaucja.cs](CastlePlus2.Domain/Entities/Najem/Kaucja.cs) — 16 wierszy; deklaracje: `Kaucja:7`
+- [CastlePlus2.Domain/Entities/Najem/PrzedmiotNajmu.cs](CastlePlus2.Domain/Entities/Najem/PrzedmiotNajmu.cs) — 16 wierszy; deklaracje: `PrzedmiotNajmu:7`
+- [CastlePlus2.Domain/Entities/Najem/SkladnikCzynszu.cs](CastlePlus2.Domain/Entities/Najem/SkladnikCzynszu.cs) — 23 wierszy; deklaracje: `SkladnikCzynszu:7`
+- [CastlePlus2.Domain/Entities/Najem/UmowaNajmu.cs](CastlePlus2.Domain/Entities/Najem/UmowaNajmu.cs) — 22 wierszy; deklaracje: `UmowaNajmu:10`
+- [CastlePlus2.Domain/Entities/Podmioty/Kontakt.cs](CastlePlus2.Domain/Entities/Podmioty/Kontakt.cs) — 13 wierszy; deklaracje: `Kontakt:6`
+- [CastlePlus2.Domain/Entities/Podmioty/Podmiot.cs](CastlePlus2.Domain/Entities/Podmioty/Podmiot.cs) — 16 wierszy; deklaracje: `Podmiot:7`
+- [CastlePlus2.Domain/Entities/Podmioty/Wlasnosc.cs](CastlePlus2.Domain/Entities/Podmioty/Wlasnosc.cs) — 24 wierszy; deklaracje: `Wlasnosc:9`
+- [CastlePlus2.Domain/Entities/Rdzen/Adres.cs](CastlePlus2.Domain/Entities/Rdzen/Adres.cs) — 53 wierszy; deklaracje: `Adres:16`
+- [CastlePlus2.Domain/Entities/Rdzen/Budynek.cs](CastlePlus2.Domain/Entities/Rdzen/Budynek.cs) — 67 wierszy; deklaracje: `Budynek:12`
+- [CastlePlus2.Domain/Entities/Rdzen/Encja.cs](CastlePlus2.Domain/Entities/Rdzen/Encja.cs) — 32 wierszy; deklaracje: `Encja:7`
+- [CastlePlus2.Domain/Entities/Rdzen/Lokal.cs](CastlePlus2.Domain/Entities/Rdzen/Lokal.cs) — 46 wierszy; deklaracje: `Lokal:11`
+- [CastlePlus2.Domain/Entities/Rdzen/Nieruchomosc.cs](CastlePlus2.Domain/Entities/Rdzen/Nieruchomosc.cs) — 35 wierszy; deklaracje: `Nieruchomosc:8`
+- [CastlePlus2.Domain/Entities/Rdzen/Pomieszczenie.cs](CastlePlus2.Domain/Entities/Rdzen/Pomieszczenie.cs) — 49 wierszy; deklaracje: `Pomieszczenie:12`
+- [CastlePlus2.Domain/Entities/Rdzen/PrzypisanieAdresu.cs](CastlePlus2.Domain/Entities/Rdzen/PrzypisanieAdresu.cs) — 22 wierszy; deklaracje: `PrzypisanieAdresu:9`
+- [CastlePlus2.Domain/Entities/Slowniki/Indeksacja.cs](CastlePlus2.Domain/Entities/Slowniki/Indeksacja.cs) — 14 wierszy; deklaracje: `Indeksacja:8`
+- [CastlePlus2.Domain/Entities/Slowniki/JednostkaMiary.cs](CastlePlus2.Domain/Entities/Slowniki/JednostkaMiary.cs) — 20 wierszy; deklaracje: `JednostkaMiary:14`
+- [CastlePlus2.Domain/Entities/Slowniki/Waluta.cs](CastlePlus2.Domain/Entities/Slowniki/Waluta.cs) — 12 wierszy; deklaracje: `Waluta:7`
+- [CastlePlus2.Domain/Entities/Utrzymanie/PowiazanieZlecenia.cs](CastlePlus2.Domain/Entities/Utrzymanie/PowiazanieZlecenia.cs) — 20 wierszy; deklaracje: `PowiazanieZlecenia:10`
+- [CastlePlus2.Domain/Entities/Utrzymanie/ZleceniePracy.cs](CastlePlus2.Domain/Entities/Utrzymanie/ZleceniePracy.cs) — 27 wierszy; deklaracje: `ZleceniePracy:9`
+- [CastlePlus2.Infrastructure/CastlePlus2.Infrastructure.csproj](CastlePlus2.Infrastructure/CastlePlus2.Infrastructure.csproj) — 35 wierszy
+- [CastlePlus2.Infrastructure/Class1.cs](CastlePlus2.Infrastructure/Class1.cs) — 7 wierszy; deklaracje: `Class1:3`
+- [CastlePlus2.Infrastructure/Persistence/CastlePlus2DbContext.cs](CastlePlus2.Infrastructure/Persistence/CastlePlus2DbContext.cs) — 117 wierszy; deklaracje: `CastlePlus2DbContext:26`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Auth/ActivationTokenConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Auth/ActivationTokenConfiguration.cs) — 47 wierszy; deklaracje: `ActivationTokenConfiguration:7`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Auth/RefreshTokenConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Auth/RefreshTokenConfiguration.cs) — 66 wierszy; deklaracje: `RefreshTokenConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Auth/RequestAccessConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Auth/RequestAccessConfiguration.cs) — 114 wierszy; deklaracje: `RequestAccessConfiguration:7`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Auth/RolaConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Auth/RolaConfiguration.cs) — 41 wierszy; deklaracje: `RolaConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Auth/UzytkownikConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Auth/UzytkownikConfiguration.cs) — 78 wierszy; deklaracje: `UzytkownikConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Auth/UzytkownikRolaConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Auth/UzytkownikRolaConfiguration.cs) — 39 wierszy; deklaracje: `UzytkownikRolaConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Dokumenty/DokumentConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Dokumenty/DokumentConfiguration.cs) — 64 wierszy; deklaracje: `DokumentConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Dokumenty/PowiazanieDokumentuConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Dokumenty/PowiazanieDokumentuConfiguration.cs) — 53 wierszy; deklaracje: `PowiazanieDokumentuConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Finanse/AlokacjaKosztuConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Finanse/AlokacjaKosztuConfiguration.cs) — 56 wierszy; deklaracje: `AlokacjaKosztuConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Finanse/FakturaConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Finanse/FakturaConfiguration.cs) — 79 wierszy; deklaracje: `FakturaConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Finanse/KategoriaKosztuConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Finanse/KategoriaKosztuConfiguration.cs) — 39 wierszy; deklaracje: `KategoriaKosztuConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Finanse/PlatnoscConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Finanse/PlatnoscConfiguration.cs) — 61 wierszy; deklaracje: `PlatnoscConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Finanse/PozycjaKosztuConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Finanse/PozycjaKosztuConfiguration.cs) — 68 wierszy; deklaracje: `PozycjaKosztuConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Finanse/RozliczeniePlatnosciConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Finanse/RozliczeniePlatnosciConfiguration.cs) — 58 wierszy; deklaracje: `RozliczeniePlatnosciConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Konfiguracja/ZasobUIConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Konfiguracja/ZasobUIConfiguration.cs) — 92 wierszy; deklaracje: `ZasobUIConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Konfiguracja/ZasobUITekstConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Konfiguracja/ZasobUITekstConfiguration.cs) — 84 wierszy; deklaracje: `ZasobUITekstConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Media/LicznikConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Media/LicznikConfiguration.cs) — 67 wierszy; deklaracje: `LicznikConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Media/OdczytConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Media/OdczytConfiguration.cs) — 54 wierszy; deklaracje: `OdczytConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Media/PrzylaczeConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Media/PrzylaczeConfiguration.cs) — 53 wierszy; deklaracje: `PrzylaczeConfiguration:11`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Media/RodzajMediumConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Media/RodzajMediumConfiguration.cs) — 30 wierszy; deklaracje: `RodzajMediumConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Najem/KaucjaConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Najem/KaucjaConfiguration.cs) — 61 wierszy; deklaracje: `KaucjaConfiguration:11`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Najem/PrzedmiotNajmuConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Najem/PrzedmiotNajmuConfiguration.cs) — 61 wierszy; deklaracje: `PrzedmiotNajmuConfiguration:12`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Najem/SkladnikCzynszuConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Najem/SkladnikCzynszuConfiguration.cs) — 82 wierszy; deklaracje: `SkladnikCzynszuConfiguration:11`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Najem/UmowaNajmuConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Najem/UmowaNajmuConfiguration.cs) — 54 wierszy; deklaracje: `UmowaNajmuConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Podmioty/KontaktConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Podmioty/KontaktConfiguration.cs) — 44 wierszy; deklaracje: `KontaktConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Podmioty/PodmiotConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Podmioty/PodmiotConfiguration.cs) — 49 wierszy; deklaracje: `PodmiotConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Podmioty/WlasnoscConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Podmioty/WlasnoscConfiguration.cs) — 64 wierszy; deklaracje: `WlasnoscConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Rdzen/AdresConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Rdzen/AdresConfiguration.cs) — 59 wierszy; deklaracje: `AdresConfiguration:15`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Rdzen/BudynekConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Rdzen/BudynekConfiguration.cs) — 52 wierszy; deklaracje: `BudynekConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Rdzen/EncjaConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Rdzen/EncjaConfiguration.cs) — 36 wierszy; deklaracje: `EncjaConfiguration:7`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Rdzen/LokalConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Rdzen/LokalConfiguration.cs) — 48 wierszy; deklaracje: `LokalConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Rdzen/NieruchomoscConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Rdzen/NieruchomoscConfiguration.cs) — 38 wierszy; deklaracje: `NieruchomoscConfiguration:7`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Rdzen/PomieszczenieConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Rdzen/PomieszczenieConfiguration.cs) — 29 wierszy; deklaracje: `PomieszczenieConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Rdzen/PrzypisanieAdresuConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Rdzen/PrzypisanieAdresuConfiguration.cs) — 61 wierszy; deklaracje: `PrzypisanieAdresuConfiguration:11`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Slowniki/IndeksacjaConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Slowniki/IndeksacjaConfiguration.cs) — 35 wierszy; deklaracje: `IndeksacjaConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Slowniki/JednostkaMiaryConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Slowniki/JednostkaMiaryConfiguration.cs) — 30 wierszy; deklaracje: `JednostkaMiaryConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Slowniki/WalutaConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Slowniki/WalutaConfiguration.cs) — 30 wierszy; deklaracje: `WalutaConfiguration:10`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Utrzymanie/PowiazanieZleceniaConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Utrzymanie/PowiazanieZleceniaConfiguration.cs) — 53 wierszy; deklaracje: `PowiazanieZleceniaConfiguration:11`
+- [CastlePlus2.Infrastructure/Persistence/Configurations/Utrzymanie/ZleceniePracyConfiguration.cs](CastlePlus2.Infrastructure/Persistence/Configurations/Utrzymanie/ZleceniePracyConfiguration.cs) — 65 wierszy; deklaracje: `ZleceniePracyConfiguration:11`
+- [CastlePlus2.Infrastructure/Repositories/Auth/ActivationTokenRepository.cs](CastlePlus2.Infrastructure/Repositories/Auth/ActivationTokenRepository.cs) — 37 wierszy; deklaracje: `ActivationTokenRepository:9`
+- [CastlePlus2.Infrastructure/Repositories/Auth/RefreshTokenRepository.cs](CastlePlus2.Infrastructure/Repositories/Auth/RefreshTokenRepository.cs) — 71 wierszy; deklaracje: `RefreshTokenRepository:15`
+- [CastlePlus2.Infrastructure/Repositories/Auth/RequestAccessRepository.cs](CastlePlus2.Infrastructure/Repositories/Auth/RequestAccessRepository.cs) — 52 wierszy; deklaracje: `RequestAccessRepository:8`
+- [CastlePlus2.Infrastructure/Repositories/Auth/UzytkownikAuthRepository.cs](CastlePlus2.Infrastructure/Repositories/Auth/UzytkownikAuthRepository.cs) — 249 wierszy; deklaracje: `UzytkownikAuthRepository:13`
+- [CastlePlus2.Infrastructure/Repositories/Dokumenty/DokumentRepository.cs](CastlePlus2.Infrastructure/Repositories/Dokumenty/DokumentRepository.cs) — 67 wierszy; deklaracje: `DokumentRepository:8`
+- [CastlePlus2.Infrastructure/Repositories/Dokumenty/PowiazanieDokumentuRepository.cs](CastlePlus2.Infrastructure/Repositories/Dokumenty/PowiazanieDokumentuRepository.cs) — 150 wierszy; deklaracje: `PowiazanieDokumentuRepository:8`
+- [CastlePlus2.Infrastructure/Repositories/Finanse/AlokacjaKosztuRepository.cs](CastlePlus2.Infrastructure/Repositories/Finanse/AlokacjaKosztuRepository.cs) — 86 wierszy; deklaracje: `AlokacjaKosztuRepository:9`
+- [CastlePlus2.Infrastructure/Repositories/Finanse/FakturaRepository.cs](CastlePlus2.Infrastructure/Repositories/Finanse/FakturaRepository.cs) — 106 wierszy; deklaracje: `FakturaRepository:10`
+- [CastlePlus2.Infrastructure/Repositories/Finanse/KategoriaKosztuRepository.cs](CastlePlus2.Infrastructure/Repositories/Finanse/KategoriaKosztuRepository.cs) — 75 wierszy; deklaracje: `KategoriaKosztuRepository:8`
+- [CastlePlus2.Infrastructure/Repositories/Finanse/PlatnoscRepository.cs](CastlePlus2.Infrastructure/Repositories/Finanse/PlatnoscRepository.cs) — 74 wierszy; deklaracje: `PlatnoscRepository:12`
+- [CastlePlus2.Infrastructure/Repositories/Finanse/PozycjaKosztuRepository.cs](CastlePlus2.Infrastructure/Repositories/Finanse/PozycjaKosztuRepository.cs) — 54 wierszy; deklaracje: `PozycjaKosztuRepository:8`
+- [CastlePlus2.Infrastructure/Repositories/Finanse/RozliczeniePlatnosciRepository.cs](CastlePlus2.Infrastructure/Repositories/Finanse/RozliczeniePlatnosciRepository.cs) — 54 wierszy; deklaracje: `RozliczeniePlatnosciRepository:8`
+- [CastlePlus2.Infrastructure/Repositories/Konfiguracja/ZasobUIRepository.cs](CastlePlus2.Infrastructure/Repositories/Konfiguracja/ZasobUIRepository.cs) — 87 wierszy; deklaracje: `ZasobUIRepository:8`
